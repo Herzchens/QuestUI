@@ -1,0 +1,20 @@
+.quest-ui-enrollable [class*="iconBadge"] {
+    background-color: var(--status-danger) !important;
+}
+
+.quest-ui-enrolled [class*="iconBadge"] {
+    background-color: var(--status-warning) !important;
+}
+
+.quest-ui-claimable [class*="iconBadge"] {
+    background-color: var(--status-positive) !important;
+}
+
+.quest-ui-settings-button svg:has(> [mask^="url(#svg-mask-panel-button)"]) {
+    display: none;
+}
+
+.quest-ui-badges {
+    flex-shrink: 0;
+    margin-left: 6px;
+}
