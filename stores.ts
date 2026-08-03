@@ -1,3 +1,15 @@
-import { findStoreLazy } from "@webpack";
+import { findStore, proxyLazyWebpack } from "@webpack";
 
-export const QuestsStore = findStoreLazy("QuestStore") as any;
+const resolveQuestStore = Object.assign(
+    () => {
+        try {
+            const store = findStore("QuestStore");
+            if (store) return store;
+        } catch { }
+
+        return findStore("QuestsStore");
+    },
+    { $$vencordProps: ["QuestStore", "QuestsStore"] }
+);
+
+export const QuestsStore = proxyLazyWebpack(resolveQuestStore) as any;

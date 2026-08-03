@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 const REQUIRED_SECTIONS = ["Bad Patches", "Bad Webpack Finds", "Bad Starts"];
 const PATCH_PLUGINS = ["QuestUI", "GameActivityToggle"];
 const WEBPACK_FIND_SIGNATURES = [
-    'findStore("QuestStore")',
+    'proxyLazyWebpack("QuestStore", "QuestsStore")',
     'findByCode("\\"M7.5 21.7a8.95")',
     'findComponentByCode("badgePosition", "icon")',
     'findComponentByCode("keyboardShortcut", "positionKey")',
@@ -77,7 +77,7 @@ function runSelfTest() {
     assert.deepEqual(analyzeReport(completeReport()), { problems: [], warnings: [] });
     assert.match(analyzeReport(completeReport({ badPatches: "- QuestUI (had no effect)\n" }), "", 1).problems.join("\n"), /QuestUI appears in Bad Patches/);
     assert.match(analyzeReport(completeReport({ badPatches: "- GameActivityToggle (had no effect)\n" }), "", 1).problems.join("\n"), /GameActivityToggle appears in Bad Patches/);
-    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindStore("QuestStore")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nproxyLazyWebpack("QuestStore", "QuestsStore")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.deepEqual(analyzeReport(completeReport({ badPatches: "- SomeOtherPlugin (had no effect)\n" }), "", 1), {
         problems: [],
         warnings: ["reporter exited with 1, but only unrelated Vencord failures were found"]
