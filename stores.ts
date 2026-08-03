@@ -1,3 +1,3 @@
-import { findByPropsLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 
-export const QuestsStore = findByPropsLazy("getQuest") as any;
+export const QuestsStore = findStoreLazy("QuestStore") as any;
