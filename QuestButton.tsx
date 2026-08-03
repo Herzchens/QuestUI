@@ -62,9 +62,13 @@ function useQuestStatus(): QuestStatus {
         const update = () => setStatus(questsStatus());
 
         QuestsStore?.addChangeListener?.(update);
+        const interval = setInterval(update, 60_000);
         update();
 
-        return () => QuestsStore?.removeChangeListener?.(update);
+        return () => {
+            clearInterval(interval);
+            QuestsStore?.removeChangeListener?.(update);
+        };
     }, []);
 
     return status;

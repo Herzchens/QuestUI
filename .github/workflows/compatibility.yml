@@ -1,0 +1,149 @@
+name: QuestUI Compatibility
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and type-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout QuestUI
+        uses: actions/checkout@v7
+        with:
+          path: questui
+
+      - name: Checkout Vencord
+        uses: actions/checkout@v7
+        with:
+          repository: Vendicated/Vencord
+          path: vencord
+
+      - name: Install QuestUI in Vencord
+        run: |
+          mkdir -p vencord/src/userplugins/QuestUI
+          rsync -a --delete --exclude=.git questui/ vencord/src/userplugins/QuestUI/
+
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: vencord/package.json
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: vencord/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: vencord
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Vencord
+        working-directory: vencord
+        run: pnpm build
+
+      - name: Type-check Vencord
+        working-directory: vencord
+        run: pnpm testTsc
+
+      - name: Verify QuestUI bundle output
+        working-directory: vencord
+        run: |
+          set -euo pipefail
+          grep -Fq 'QuestUI' dist/renderer.js
+          grep -Fq 'Adds standalone Discord Quest shortcuts' dist/renderer.js
+          grep -Fq '/quest-home' dist/renderer.js
+
+      - name: Test reporter parser
+        run: node questui/scripts/checkQuestUIReporter.mjs --self-test
+
+  reporter:
+    name: Patch Reporter (${{ matrix.discord_branch }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        discord_branch: [stable, canary]
+    steps:
+      - name: Checkout QuestUI
+        uses: actions/checkout@v7
+        with:
+          path: questui
+
+      - name: Checkout Vencord
+        uses: actions/checkout@v7
+        with:
+          repository: Vendicated/Vencord
+          path: vencord
+
+      - name: Install QuestUI in Vencord
+        run: |
+          mkdir -p vencord/src/userplugins/QuestUI
+          rsync -a --delete --exclude=.git questui/ vencord/src/userplugins/QuestUI/
+
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: vencord/package.json
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: vencord/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: vencord
+        run: pnpm install --frozen-lockfile
+
+      - name: Build reporter
+        working-directory: vencord
+        run: pnpm buildReporter
+
+      - name: Run reporter and validate QuestUI
+        timeout-minutes: 10
+        working-directory: vencord
+        shell: bash
+        run: |
+          set -uo pipefail
+          export PATH="$PWD/node_modules/.bin:$PATH"
+          export CHROMIUM_BIN=/usr/bin/google-chrome
+
+          test -x "$CHROMIUM_BIN"
+          esbuild scripts/generateReport.ts > dist/report.mjs
+
+          report_file="$RUNNER_TEMP/questui-${{ matrix.discord_branch }}-report.md"
+          stderr_file="$RUNNER_TEMP/questui-${{ matrix.discord_branch }}-stderr.log"
+
+          set +e
+          if [ "${{ matrix.discord_branch }}" = "canary" ]; then
+            USE_CANARY=true node dist/report.mjs >"$report_file" 2>"$stderr_file"
+          else
+            node dist/report.mjs >"$report_file" 2>"$stderr_file"
+          fi
+          reporter_exit=$?
+          set -e
+
+          cat "$report_file" >> "$GITHUB_STEP_SUMMARY"
+          if [ -s "$stderr_file" ]; then
+            {
+              echo
+              echo '<details><summary>Reporter stderr</summary>'
+              echo
+              echo '```text'
+              cat "$stderr_file"
+              echo '```'
+              echo '</details>'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          node "$GITHUB_WORKSPACE/questui/scripts/checkQuestUIReporter.mjs" \
+            "$report_file" "$stderr_file" "$reporter_exit"
