@@ -16,15 +16,31 @@ QuestUI is designed to coexist with [OrionQuests](https://github.com/nyxxbit/dis
 
 ## Installation
 
-Copy the entire `QuestUI` folder to:
+### UserpluginInstaller
 
-```text
-Vencord/src/userplugins/QuestUI
+Install QuestUI through UserpluginInstaller using the repository URL:
+
+```
+https://github.com/Herzchens/QuestUI
 ```
 
-From the Vencord repository root, rebuild and inject Vencord:
+### Manual Vencord source installation
 
-```powershell
+Clone QuestUI into your Vencord userplugins directory:
+
+```bash
+cd Vencord/src/userplugins
+git clone https://github.com/Herzchens/QuestUI.git
+cd ../..
+pnpm build
+pnpm inject
+```
+
+To update QuestUI:
+
+```bash
+git -C Vencord/src/userplugins/QuestUI pull
+cd Vencord
 pnpm build
 pnpm inject
 ```
@@ -32,6 +48,53 @@ pnpm inject
 Restart Discord, open Vencord settings, and enable **QuestUI**.
 
 The colored counter patch is disabled by default because Discord UI matchers may change between client builds. First confirm that the top-bar button works correctly, then enable **Show colored quest counters** and restart Discord.
+
+### Using QuestUI with OrionQuests
+
+QuestUI and [OrionQuests](https://github.com/nyxxbit/discord-quest-completer) have been tested together successfully on current Vencord and Discord builds. Both projects depend on Discord internals, so future Discord updates may require compatibility fixes.
+
+**Orion prebuilt bundle** is a pre-compiled distribution. QuestUI cannot be installed by copying source files into a prebuilt bundle. Users who want QuestUI alongside OrionQuests should use the Orion devbuild installer or a Vencord source build.
+
+**Orion devbuild installer** — The Orion devbuild checkout is located at `%LOCALAPPDATA%\OrionVencord`. To install QuestUI:
+
+Command Prompt:
+
+```cmd
+git clone https://github.com/Herzchens/QuestUI.git "%LOCALAPPDATA%\OrionVencord\src\userplugins\QuestUI"
+```
+
+PowerShell:
+
+```powershell
+git clone https://github.com/Herzchens/QuestUI.git "$env:LOCALAPPDATA\OrionVencord\src\userplugins\QuestUI"
+```
+
+Then run `UPDATE.cmd` to rebuild.
+
+To update QuestUI:
+
+Command Prompt:
+
+```cmd
+git -C "%LOCALAPPDATA%\OrionVencord\src\userplugins\QuestUI" pull
+```
+
+PowerShell:
+
+```powershell
+git -C "$env:LOCALAPPDATA\OrionVencord\src\userplugins\QuestUI" pull
+```
+
+Then run `UPDATE.cmd` again. The Orion updater does not remove sibling folders like QuestUI, but it also does not run `git pull` for QuestUI automatically. QuestUI and OrionQuests are updated independently. There is no combined bundle.
+
+### Compatibility matrix
+
+| Installation method | QuestUI support | Method |
+|---|---|---|
+| UserpluginInstaller | Yes | Install using the repository URL |
+| Vencord source/dev build | Yes | Clone into `src/userplugins` |
+| Orion devbuild installer | Yes | Clone into OrionVencord and run `UPDATE.cmd` |
+| Orion prebuilt bundle | Not directly | Move to the devbuild installer |
 
 ## Settings
 
