@@ -24,10 +24,10 @@ export default definePlugin({
             }
         },
         {
-            find: "accountContainerRef:",
+            find: "#{intl::USER_PROFILE_ACCOUNT_POPOUT_BUTTON_A11Y_LABEL}",
             predicate: () => settings.store.showQuestsButtonSettingsBar,
             replacement: {
-                match: /className:\i\.Uo,style:\i,children:\[/,
+                match: /(?:GameActivityToggleButton\(arguments\[0\]\),(?=.{0,25}?accountContainerRef)|children:\[(?=.{0,25}?accountContainerRef))/,
                 replace: "$&$self.renderQuestButtonSettingsBar(),"
             }
         },
