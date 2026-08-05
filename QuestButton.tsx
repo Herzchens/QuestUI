@@ -8,7 +8,6 @@ import { QuestsStore } from "./stores";
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 const TopBarButton = findComponentByCodeLazy("badgePosition", "icon");
-const SettingsBarButton = findComponentByCodeLazy("keyboardShortcut", "positionKey");
 const CountBadge = findComponentByCodeLazy("renderBadgeCount", "disableColor");
 
 type QuestStatus = {
@@ -148,27 +147,29 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
         );
     }
 
+    // The settings-bar variant renders the same button, only with its own class so the
+    // stylesheet can tell the two apart. It used to be wrapped in a component resolved by
+    // findComponentByCodeLazy("keyboardShortcut", "positionKey"), which is Discord's generic
+    // Tooltip: it takes { children, text, position, align, positionKey } and none of
+    // tooltipText, className, onClick, icon or disabled. Every prop passed to it was
+    // discarded, so the wrapper contributed no tooltip, no accessible name and no class,
+    // which also left the .quest-ui-settings-button rule in styles.css unable to match.
+    // TopBarButton already renders its own tooltip and aria-label from the tooltip prop, so
+    // the wrapper is dropped rather than repaired, and one fragile lookup goes with it.
     return (
-        <SettingsBarButton
-            tooltipText={tooltip}
-            onContextMenu={undefined}
-            onClick={openQuestHome}
+        <TopBarButton
+            className={`quest-ui-settings-button ${className}`.trim()}
+            iconClassName={undefined}
             disabled={false}
-            icon={undefined}
-            className="quest-ui-settings-button"
-        >
-            <TopBarButton
-                className={className}
-                iconClassName={undefined}
-                disabled={false}
-                showBadge={state.enrollable > 0 || state.enrolled > 0 || state.claimable > 0}
-                badgePosition="bottom"
-                icon={QuestIcon}
-                iconSize={20}
-                onClick={openQuestHome}
-                onContextMenu={undefined}
-                hideOnClick={false}
-            />
-        </SettingsBarButton>
+            showBadge={state.enrollable > 0 || state.enrolled > 0 || state.claimable > 0}
+            badgePosition="bottom"
+            icon={QuestIcon}
+            iconSize={20}
+            onClick={openQuestHome}
+            onContextMenu={undefined}
+            tooltip={tooltip}
+            tooltipPosition="top"
+            hideOnClick={false}
+        />
     );
 }

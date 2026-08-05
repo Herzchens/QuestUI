@@ -3,11 +3,13 @@ import assert from "node:assert/strict";
 
 const REQUIRED_SECTIONS = ["Bad Patches", "Bad Webpack Finds", "Bad Starts"];
 const PATCH_PLUGINS = ["QuestUI", "GameActivityToggle"];
+// One entry per webpack lookup the plugin makes. These are the strings runReporter.ts builds
+// for a failed find, so a lookup missing from this list is a lookup whose failure the CI run
+// will not notice. Keep it in step with the lookups in QuestButton.tsx and stores.ts.
 const WEBPACK_FIND_SIGNATURES = [
     'proxyLazyWebpack("QuestStore", "QuestsStore")',
     'findByCode("\\"M7.5 21.7a8.95")',
     'findComponentByCode("badgePosition", "icon")',
-    'findComponentByCode("keyboardShortcut", "positionKey")',
     'findComponentByCode("renderBadgeCount", "disableColor")'
 ];
 
