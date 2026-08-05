@@ -138,6 +138,8 @@ The plugin is a standalone extraction and refactor of the Quest interface origin
 
 Credit goes to **nicola02nb** for the original Quest UI implementation and to the Vencord project and its contributors for the underlying plugin framework.
 
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for project contributors and acknowledgements.
+
 QuestUI is maintained independently and is not affiliated with or endorsed by `completeDiscordQuest`, [OrionQuests](https://github.com/nyxxbit/discord-quest-completer), Discord, or Vencord.
 
 ## License
