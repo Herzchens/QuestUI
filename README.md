@@ -130,6 +130,12 @@ QuestUI relies on Discord UI components and Vencord patches, so a Discord update
 
 If Discord fails to start correctly after an update, close Discord, move the `QuestUI` folder out of `Vencord/src/userplugins`, then rebuild and inject Vencord again. When reporting a compatibility problem, include your Discord channel and Vencord version.
 
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for project scope, development setup, testing requirements, and pull request guidance.
+
+Use the repository's issue forms to report bugs, request enhancements, or ask questions.
+
 ## Project history and credits
 
 QuestUI is maintained by [Herzchens](https://github.com/Herzchens).

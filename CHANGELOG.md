@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fixed the settings-bar Quest button losing its class, tooltip, and accessible name.
+- Removed the unnecessary settings-bar wrapper and its fragile Discord webpack lookup.
+- Documented the webpack lookup coverage requirement in the compatibility reporter.
 - Replaced the ambiguous quest store lookup with the exact Discord Flux store lookup.
 - Removed the hardcoded settings-panel CSS module key.
 - Added periodic quest status refresh for time-based expiry changes.

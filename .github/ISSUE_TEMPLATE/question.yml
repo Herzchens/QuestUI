@@ -1,0 +1,76 @@
+name: Question
+description: Ask about QuestUI behavior, installation, compatibility, or development
+title: "[Question] "
+labels:
+  - question
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for questions specifically about QuestUI.
+
+        For general Vencord problems, use the official Vencord support resources. For Quest completion or automation behavior, contact the project that provides those features.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: State the question clearly.
+      placeholder: Does QuestUI support the Orion devbuild installer after Orion updates?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Explain what you are trying to do and why the answer matters.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: Installation method
+      options:
+        - UserpluginInstaller
+        - Vencord source or dev checkout
+        - Orion devbuild installer
+        - Not installed yet
+        - Other
+    validations:
+      required: false
+
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What have you tried?
+      description: Include documentation, commands, settings, or troubleshooting steps you already checked.
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the Discord channel, Vencord version, and operating system when relevant.
+      placeholder: Discord Stable, current Vencord source checkout, Windows 11
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional information
+      description: Add screenshots, logs, or links that provide useful context.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched the README, contribution guide, and existing issues before asking.
+          required: true

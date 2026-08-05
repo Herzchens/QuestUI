@@ -1,0 +1,163 @@
+name: Bug report
+description: Report a reproducible problem with QuestUI
+title: "[Bug] "
+labels:
+  - bug
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a QuestUI problem.
+
+        This form is for issues caused by QuestUI itself. Quest completion, progress automation, and reward claiming belong to the plugin that provides those features.
+
+        Do not include Discord tokens, account credentials, private account data, or other sensitive information in logs or screenshots.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you observed.
+      placeholder: The settings-bar Quest button appears, but it has no tooltip when I hover over it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Provide the shortest sequence of steps that reliably reproduces the problem.
+      placeholder: |
+        1. Enable QuestUI.
+        2. Enable the settings-bar Quest button.
+        3. Restart Discord.
+        4. Hover over the Quest button beside the user controls.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Explain what you expected QuestUI to do.
+      placeholder: The button should display a tooltip containing the current Quest status.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected area
+      description: Select the part of QuestUI most closely related to the problem.
+      options:
+        - Top-bar button
+        - Settings-bar button
+        - Colored counters
+        - Quest status calculation
+        - Quest Home navigation
+        - Installation or update
+        - Build or compatibility
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: Installation method
+      options:
+        - UserpluginInstaller
+        - Vencord source or dev checkout
+        - Orion devbuild installer
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: discord-environment
+    attributes:
+      label: Discord environment
+      options:
+        - Stable
+        - PTB
+        - Canary
+        - Vesktop
+        - Browser
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: vencord-version
+    attributes:
+      label: Vencord version or commit
+      description: Provide the Vencord version or commit when available.
+      placeholder: v1.x.x or a commit SHA
+    validations:
+      required: false
+
+  - type: input
+    id: questui-version
+    attributes:
+      label: QuestUI commit
+      description: Provide the QuestUI commit SHA when you know it.
+      placeholder: e484cd8
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: enabled-settings
+    attributes:
+      label: Enabled QuestUI settings
+      description: Select every QuestUI setting that was enabled when the problem occurred.
+      options:
+        - label: Show Quests button in top bar
+        - label: Show Quests button in settings bar
+        - label: Show colored quest counters
+
+  - type: textarea
+    id: other-plugins
+    attributes:
+      label: Other relevant userplugins
+      description: List plugins that modify Quests, the top bar, the account panel, or nearby Discord UI.
+      placeholder: GameActivityToggle, OrionQuests, or none
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console errors or logs
+      description: Paste relevant console errors. Remove tokens and private account information.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or video
+      description: Add screenshots, recordings, or DOM information that help demonstrate the problem.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Include anything else that may help reproduce or diagnose the problem.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched the existing issues and did not find the same problem.
+          required: true
+        - label: I tested with the newest QuestUI version available through my installation method.
+          required: true
+        - label: I restarted Discord after changing any QuestUI setting that requires a restart, or the problem is unrelated to a settings change.
+          required: true
