@@ -1,0 +1,92 @@
+name: Enhancement request
+description: Suggest an improvement or new QuestUI feature
+title: "[Enhancement] "
+labels:
+  - enhancement
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to propose an improvement to QuestUI.
+
+        QuestUI is currently a read-only interface plugin. It displays Quest information and provides navigation, but it does not enroll in, complete, or claim Quests.
+
+        Requests that would change this scope may still be discussed, but the proposal should explain why the functionality belongs in QuestUI.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or limitation
+      description: Describe the current limitation or user problem that prompted this request.
+      placeholder: Users cannot distinguish between two Quest states from the current status indicator.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-behavior
+    attributes:
+      label: Proposed behavior
+      description: Explain what you would like QuestUI to display or do.
+      placeholder: Add a separate visual indicator for...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - User interface
+        - Accessibility
+        - Quest status display
+        - Discord or Vencord compatibility
+        - Installation or updates
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: project-fit
+    attributes:
+      label: Why does this belong in QuestUI?
+      description: Explain how the request fits QuestUI's purpose as a Quest interface and status plugin.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe other approaches, plugins, settings, or workarounds you considered.
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Mockups or examples
+      description: Add screenshots, mockups, or examples from another interface when useful.
+    validations:
+      required: false
+
+  - type: textarea
+    id: implementation-notes
+    attributes:
+      label: Implementation notes
+      description: Share technical ideas, possible Discord components, matchers, or compatibility concerns.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched the existing issues and did not find the same request.
+          required: true
+        - label: I understand that QuestUI is currently a read-only Quest interface plugin.
+          required: true
+        - label: If this request changes the current project scope, I explained why that change is appropriate.
+          required: true
