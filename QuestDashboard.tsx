@@ -1,5 +1,5 @@
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { NavigationRouter, Popout, ThemeStore, useRef, useState, useStateFromStores } from "@webpack/common";
+import { NavigationRouter, Popout, ThemeStore, UserStore, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import {
     attentionCounts,
@@ -199,6 +199,28 @@ function orbRewardTier(quantity: number): "standard" | "large" | "boosted" {
     return "standard";
 }
 
+const NITRO_ORB_MULTIPLIER_START = Date.UTC(2026, 4, 8);
+
+function hasEligibleNitroOrbMultiplier(): boolean {
+    const user = UserStore?.getCurrentUser?.();
+    if (!user || user.premiumType !== 2) return false;
+
+    // Nitro Basic is premiumType 3 and is already excluded above. Discord marks
+    // credit-only/fractional Nitro separately; those accounts are not multiplier-eligible.
+    if (user.isFractionalPremiumWithNoSubscription?.()) return false;
+    return true;
+}
+
+function effectiveOrbQuantity(quest: NormalizedQuest, hasNitroMultiplier: boolean): number {
+    const quantity = quest.reward.orbQuantity;
+    if (!hasNitroMultiplier || quest.reward.kind !== "orbs" || quantity <= 0) return quantity;
+
+    const startsAt = new Date(quest.rawQuest?.config?.startsAt ?? 0).getTime();
+    if (!Number.isFinite(startsAt) || startsAt < NITRO_ORB_MULTIPLIER_START) return quantity;
+
+    return Math.round(quantity * 1.2);
+}
+
 function statusLabel(status: NormalizedQuest["status"]): string {
     if (status === "in-progress") return "In progress";
     if (status === "claimable") return "Ready to claim";
@@ -214,7 +236,12 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
     const taskType = quest.primaryTask?.type ?? quest.tasks[0]?.type ?? "other";
     const progressCopy = formatQuestProgress(quest);
     const showProgressCopy = quest.status !== "claimable" && quest.status !== "claimed";
-    const rewardTier = quest.reward.kind === "orbs" ? orbRewardTier(quest.reward.orbQuantity) : null;
+    const hasNitroMultiplier = useStateFromStores([UserStore], hasEligibleNitroOrbMultiplier);
+    const orbQuantity = effectiveOrbQuantity(quest, hasNitroMultiplier);
+    const rewardTier = quest.reward.kind === "orbs" ? orbRewardTier(orbQuantity) : null;
+    const rewardLabel = quest.reward.kind === "orbs" && orbQuantity > 0
+        ? `${orbQuantity.toLocaleString()} Orbs`
+        : quest.reward.label;
 
     return (
         <article className={`quest-ui-card quest-ui-card-${quest.status}`}>
@@ -238,7 +265,7 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
                     <span className={`quest-ui-card-reward quest-ui-reward-${quest.reward.kind}${rewardTier ? ` quest-ui-orb-${rewardTier}` : ""}`}>
                         <span>Reward:</span>
                         {quest.reward.kind === "orbs" && <OrbGlyph />}
-                        <strong>{quest.reward.label}</strong>
+                        <strong>{rewardLabel}</strong>
                     </span>
                 </div>
             </div>

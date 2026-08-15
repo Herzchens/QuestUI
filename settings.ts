@@ -36,7 +36,7 @@ export default definePluginSettings({
 
     dashboardMode: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Dashboard Mode",
+        displayName: "Dashboard • Mode",
         description: "Open the live mini dashboard when clicking a QuestUI shortcut. Requires the Top Bar Button or Settings Bar Button.",
         default: false
     },
@@ -118,13 +118,13 @@ export default definePluginSettings({
 
     detailedStatus: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Detailed Status",
+        displayName: "Detailed Status • Enabled",
         description: "Replace the QuestUI shortcut attention dot with a numeric badge. Requires the Top Bar Button or Settings Bar Button.",
         default: false
     },
     detailedStatusScope: {
         type: OptionType.SELECT,
-        displayName: "   ↳ Count Scope",
+        displayName: "Detailed Status • Count Scope",
         description: "Use Dashboard filters or a separate Detailed Status filter set.",
         options: [
             { label: "Same as Dashboard filters", value: "dashboard", default: true },
@@ -133,61 +133,61 @@ export default definePluginSettings({
     },
     detailedShowAvailable: {
         type: OptionType.BOOLEAN,
-        displayName: "      ↳ Available",
+        displayName: "Detailed Status • Filter • Available",
         description: "Count available quests.",
         default: true
     },
     detailedShowInProgress: {
         type: OptionType.BOOLEAN,
-        displayName: "      ↳ In Progress",
+        displayName: "Detailed Status • Filter • In Progress",
         description: "Count in-progress quests.",
         default: true
     },
     detailedShowClaimable: {
         type: OptionType.BOOLEAN,
-        displayName: "      ↳ Ready to Claim",
+        displayName: "Detailed Status • Filter • Ready to Claim",
         description: "Count quests ready to claim.",
         default: true
     },
     detailedRewardFilter: {
         type: OptionType.SELECT,
-        displayName: "      ↳ Reward Filter",
+        displayName: "Detailed Status • Filter • Reward",
         description: "Choose which rewards can affect Detailed Status.",
         options: rewardOptions
     },
     detailedIncludeUnknownRewards: {
         type: OptionType.BOOLEAN,
-        displayName: "      ↳ Include Unknown Rewards",
+        displayName: "Detailed Status • Filter • Include Unknown Rewards",
         description: "Count unknown reward formats while a reward filter is active.",
         default: true
     },
     detailedShowPlay: {
         type: OptionType.BOOLEAN,
-        displayName: "      ↳ Play",
+        displayName: "Detailed Status • Filter • Play",
         description: "Allow play-game quests to affect Detailed Status.",
         default: true
     },
     detailedShowStream: {
         type: OptionType.BOOLEAN,
-        displayName: "      ↳ Stream",
+        displayName: "Detailed Status • Filter • Stream",
         description: "Allow stream quests to affect Detailed Status.",
         default: true
     },
     detailedShowVideo: {
         type: OptionType.BOOLEAN,
-        displayName: "      ↳ Video",
+        displayName: "Detailed Status • Filter • Video",
         description: "Allow video quests to affect Detailed Status.",
         default: true
     },
     detailedShowActivity: {
         type: OptionType.BOOLEAN,
-        displayName: "      ↳ Activity",
+        displayName: "Detailed Status • Filter • Activity",
         description: "Allow Activity quests to affect Detailed Status.",
         default: true
     },
     detailedShowOther: {
         type: OptionType.BOOLEAN,
-        displayName: "      ↳ Other / Unknown",
+        displayName: "Detailed Status • Filter • Other / Unknown",
         description: "Allow unknown Quest task types to affect Detailed Status.",
         default: true
     }

@@ -1,4 +1,5 @@
 import "./styles.css";
+import "./scrollbar.css";
 
 import { Flex } from "@components/Flex";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
