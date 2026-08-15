@@ -1,5 +1,5 @@
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { NavigationRouter, useState } from "@webpack/common";
+import { NavigationRouter, ThemeStore, useState, useStateFromStores } from "@webpack/common";
 
 import {
     attentionCounts,
@@ -20,6 +20,15 @@ interface DiscordQuestCompletion {
     completedRatioDisplay: string;
 }
 
+interface DiscordQuestAsset {
+    url: string;
+    mimetype?: string | null;
+    isAnimated: boolean;
+}
+
+type DiscordQuestAssetKind = "game_tile" | "quest_bar_hero_image" | "hero_image";
+type QuestTheme = "dark" | "light";
+
 // This is the native selector used by Discord Quest cards immediately before their
 // progress ring. It owns both the ratio and the displayed text/rounding, including
 // the achievement-specific progress/target representation.
@@ -29,9 +38,32 @@ const useDiscordQuestCompletion = findByCodeLazy(
     "completedRatio"
 ) as (quest: any, forcePercent?: boolean) => DiscordQuestCompletion;
 
+// Discord Quest asset values are asset keys, not ready-to-use URLs. This is Discord's
+// own resolver that turns GAME_TILE/HERO keys into the themed CDN URL used by Quest UI.
+const getDiscordQuestAsset = findByCodeLazy(
+    "\"game_tile\"",
+    "\"quest_bar_hero\"",
+    "\"video_player_thumbnail\""
+) as (quest: any, assetKind: DiscordQuestAssetKind, theme?: QuestTheme) => DiscordQuestAsset | null;
+
 // Discord's own Orb image component used in Quest reward copy. It selects the proper
 // themed Orb asset internally, so QuestUI does not maintain a copied/static Orb URL.
 const DiscordOrbIcon = findComponentByCodeLazy("shouldUseThemeColor", "customSize", "loading");
+
+const DASHBOARD_SETTING_KEYS = [
+    "dashboardShowAvailable",
+    "dashboardShowInProgress",
+    "dashboardShowClaimable",
+    "dashboardShowClaimed",
+    "dashboardShowExpired",
+    "dashboardRewardFilter",
+    "dashboardIncludeUnknownRewards",
+    "dashboardShowPlay",
+    "dashboardShowStream",
+    "dashboardShowVideo",
+    "dashboardShowActivity",
+    "dashboardShowOther"
+] as const;
 
 function openQuestHome(closePopout?: () => void): void {
     closePopout?.();
@@ -42,6 +74,14 @@ function ArrowUpRightIcon() {
     return (
         <svg className="quest-ui-arrow-icon" viewBox="0 0 20 20" aria-hidden="true">
             <path d="M6.25 4.5h9.25v9.25h-1.75V7.49l-8.63 8.63-1.24-1.24 8.63-8.63H6.25V4.5Z" />
+        </svg>
+    );
+}
+
+function FilterIcon() {
+    return (
+        <svg className="quest-ui-filter-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3.5 5.25A1.25 1.25 0 0 1 4.75 4h14.5a1.25 1.25 0 0 1 .96 2.05l-5.46 6.52v4.68a1.25 1.25 0 0 1-.58 1.05l-3 1.9A1.25 1.25 0 0 1 9.25 19v-6.43L3.79 6.05a1.25 1.25 0 0 1-.29-.8Zm2.2.25 5.05 6.03v6.1l2.5-1.58v-4.52L18.3 5.5H5.7Z" />
         </svg>
     );
 }
@@ -112,14 +152,28 @@ function TaskTypeGlyph({ type }: { type: QuestTaskType; }) {
     );
 }
 
+function resolveQuestArtwork(quest: NormalizedQuest, theme: QuestTheme): string | null {
+    const candidates: DiscordQuestAssetKind[] = ["game_tile", "quest_bar_hero_image", "hero_image"];
+    for (const assetKind of candidates) {
+        try {
+            const asset = getDiscordQuestAsset(quest.rawQuest, assetKind, theme);
+            if (asset?.url) return asset.url;
+        } catch { }
+    }
+    return null;
+}
+
 function QuestArtwork({ quest, type }: { quest: NormalizedQuest; type: QuestTaskType; }) {
+    const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
+    const imageUrl = resolveQuestArtwork(quest, theme);
+
     return (
         <div className="quest-ui-artwork" aria-hidden="true">
             <div className="quest-ui-artwork-fallback"><TaskTypeGlyph type={type} /></div>
-            {quest.imageUrl && (
+            {imageUrl && (
                 <img
                     className="quest-ui-artwork-image"
-                    src={quest.imageUrl}
+                    src={imageUrl}
                     alt=""
                     loading="lazy"
                     draggable={false}
@@ -135,6 +189,12 @@ function QuestArtwork({ quest, type }: { quest: NormalizedQuest; type: QuestTask
 
 function OrbGlyph() {
     return <DiscordOrbIcon shouldUseThemeColor customSize={15} className="quest-ui-orb-glyph" />;
+}
+
+function orbRewardTier(quantity: number): "standard" | "large" | "boosted" {
+    if (quantity >= 800) return "boosted";
+    if (quantity >= 500) return "large";
+    return "standard";
 }
 
 function statusLabel(status: NormalizedQuest["status"]): string {
@@ -154,6 +214,7 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
     const taskType = quest.primaryTask?.type ?? quest.tasks[0]?.type ?? "other";
     const progressCopy = formatQuestProgress(quest);
     const showProgressCopy = quest.status !== "claimable" && quest.status !== "claimed";
+    const rewardTier = quest.reward.kind === "orbs" ? orbRewardTier(quest.reward.orbQuantity) : null;
 
     return (
         <article className={`quest-ui-card quest-ui-card-${quest.status}`}>
@@ -174,20 +235,22 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
                 </div>
 
                 <div className="quest-ui-card-meta-row">
-                    <span className={`quest-ui-card-reward quest-ui-reward-${quest.reward.kind}`}>
+                    <span className={`quest-ui-card-reward quest-ui-reward-${quest.reward.kind}${rewardTier ? ` quest-ui-orb-${rewardTier}` : ""}`}>
                         <span>Reward:</span>
                         {quest.reward.kind === "orbs" && <OrbGlyph />}
                         <strong>{quest.reward.label}</strong>
                     </span>
-                    {expiry && (
-                        <span className={`quest-ui-card-expiry quest-ui-expiry-${urgency}`}>
-                            {expiry}
-                        </span>
-                    )}
                 </div>
             </div>
 
-            <ProgressRing quest={quest} completion={completion} />
+            <div className="quest-ui-card-side">
+                <ProgressRing quest={quest} completion={completion} />
+                {expiry && (
+                    <span className={`quest-ui-card-expiry quest-ui-expiry-${urgency}`} title={expiry}>
+                        {expiry}
+                    </span>
+                )}
+            </div>
         </article>
     );
 }
@@ -213,6 +276,132 @@ function DashboardSummary({ quests }: { quests: NormalizedQuest[]; }) {
     );
 }
 
+function FilterChip({ active, label, tone, onClick }: {
+    active: boolean;
+    label: string;
+    tone?: "danger" | "warning" | "positive" | "brand";
+    onClick: () => void;
+}) {
+    return (
+        <button
+            type="button"
+            className={`quest-ui-filter-chip${active ? " is-selected" : ""}${tone ? ` quest-ui-filter-chip-${tone}` : ""}`}
+            aria-pressed={active}
+            onClick={onClick}
+        >
+            <span className="quest-ui-filter-chip-check" aria-hidden="true">✓</span>
+            {label}
+        </button>
+    );
+}
+
+function dashboardFilterCount(store: any): number {
+    let count = 0;
+    if (store.dashboardShowAvailable === false) count++;
+    if (store.dashboardShowInProgress === false) count++;
+    if (store.dashboardShowClaimable === false) count++;
+    if (store.dashboardShowClaimed !== true) count++;
+    if (store.dashboardShowExpired !== true) count++;
+    if (store.dashboardRewardFilter !== "all") count++;
+    if (store.dashboardRewardFilter !== "all" && store.dashboardIncludeUnknownRewards === false) count++;
+    if (store.dashboardShowPlay === false) count++;
+    if (store.dashboardShowStream === false) count++;
+    if (store.dashboardShowVideo === false) count++;
+    if (store.dashboardShowActivity === false) count++;
+    if (store.dashboardShowOther === false) count++;
+    return count;
+}
+
+function showAllDashboardQuests(): void {
+    settings.store.dashboardShowAvailable = true;
+    settings.store.dashboardShowInProgress = true;
+    settings.store.dashboardShowClaimable = true;
+    settings.store.dashboardShowClaimed = true;
+    settings.store.dashboardShowExpired = true;
+    settings.store.dashboardRewardFilter = "all";
+    settings.store.dashboardIncludeUnknownRewards = true;
+    settings.store.dashboardShowPlay = true;
+    settings.store.dashboardShowStream = true;
+    settings.store.dashboardShowVideo = true;
+    settings.store.dashboardShowActivity = true;
+    settings.store.dashboardShowOther = true;
+}
+
+function restoreRecommendedFilters(): void {
+    settings.store.dashboardShowAvailable = true;
+    settings.store.dashboardShowInProgress = true;
+    settings.store.dashboardShowClaimable = true;
+    settings.store.dashboardShowClaimed = false;
+    settings.store.dashboardShowExpired = false;
+    settings.store.dashboardRewardFilter = "all";
+    settings.store.dashboardIncludeUnknownRewards = true;
+    settings.store.dashboardShowPlay = true;
+    settings.store.dashboardShowStream = true;
+    settings.store.dashboardShowVideo = true;
+    settings.store.dashboardShowActivity = true;
+    settings.store.dashboardShowOther = true;
+}
+
+function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
+    const store = settings.store;
+
+    return (
+        <div className="quest-ui-filter-panel">
+            <div className="quest-ui-filter-panel-heading">
+                <div>
+                    <strong>Filters</strong>
+                    <span>{hiddenCount > 0 ? `${hiddenCount} ${hiddenCount === 1 ? "quest" : "quests"} hidden` : "All matching quests are visible"}</span>
+                </div>
+                <button type="button" className="quest-ui-filter-reset" onClick={restoreRecommendedFilters}>Recommended</button>
+            </div>
+
+            <div className="quest-ui-filter-section">
+                <span className="quest-ui-filter-label">Status</span>
+                <div className="quest-ui-filter-chips">
+                    <FilterChip active={store.dashboardShowAvailable !== false} label="Available" tone="danger" onClick={() => { store.dashboardShowAvailable = store.dashboardShowAvailable === false; }} />
+                    <FilterChip active={store.dashboardShowInProgress !== false} label="In Progress" tone="warning" onClick={() => { store.dashboardShowInProgress = store.dashboardShowInProgress === false; }} />
+                    <FilterChip active={store.dashboardShowClaimable !== false} label="Ready" tone="positive" onClick={() => { store.dashboardShowClaimable = store.dashboardShowClaimable === false; }} />
+                    <FilterChip active={store.dashboardShowClaimed === true} label="Claimed" tone="brand" onClick={() => { store.dashboardShowClaimed = store.dashboardShowClaimed !== true; }} />
+                    <FilterChip active={store.dashboardShowExpired === true} label="Expired" onClick={() => { store.dashboardShowExpired = store.dashboardShowExpired !== true; }} />
+                </div>
+            </div>
+
+            <div className="quest-ui-filter-section quest-ui-filter-section-row">
+                <span className="quest-ui-filter-label">Reward</span>
+                <div className="quest-ui-filter-chips">
+                    <FilterChip active={store.dashboardRewardFilter === "all"} label="All" onClick={() => { store.dashboardRewardFilter = "all"; }} />
+                    <FilterChip active={store.dashboardRewardFilter === "orbs"} label="Orbs" tone="brand" onClick={() => { store.dashboardRewardFilter = "orbs"; }} />
+                    <FilterChip active={store.dashboardRewardFilter === "non-orbs"} label="Other" onClick={() => { store.dashboardRewardFilter = "non-orbs"; }} />
+                </div>
+            </div>
+
+            <div className="quest-ui-filter-section">
+                <span className="quest-ui-filter-label">Quest type</span>
+                <div className="quest-ui-filter-chips">
+                    <FilterChip active={store.dashboardShowPlay !== false} label="Play" onClick={() => { store.dashboardShowPlay = store.dashboardShowPlay === false; }} />
+                    <FilterChip active={store.dashboardShowStream !== false} label="Stream" onClick={() => { store.dashboardShowStream = store.dashboardShowStream === false; }} />
+                    <FilterChip active={store.dashboardShowVideo !== false} label="Video" onClick={() => { store.dashboardShowVideo = store.dashboardShowVideo === false; }} />
+                    <FilterChip active={store.dashboardShowActivity !== false} label="Activity" onClick={() => { store.dashboardShowActivity = store.dashboardShowActivity === false; }} />
+                    <FilterChip active={store.dashboardShowOther !== false} label="Other" onClick={() => { store.dashboardShowOther = store.dashboardShowOther === false; }} />
+                </div>
+            </div>
+
+            <div className="quest-ui-filter-panel-footer">
+                <label className={`quest-ui-filter-unknown${store.dashboardRewardFilter === "all" ? " is-disabled" : ""}`}>
+                    <input
+                        type="checkbox"
+                        checked={store.dashboardIncludeUnknownRewards !== false}
+                        disabled={store.dashboardRewardFilter === "all"}
+                        onChange={event => { store.dashboardIncludeUnknownRewards = event.currentTarget.checked; }}
+                    />
+                    Include unknown reward formats
+                </label>
+                <button type="button" className="quest-ui-filter-show-all" onClick={showAllDashboardQuests}>Show all</button>
+            </div>
+        </div>
+    );
+}
+
 function EmptyStateIllustration() {
     return (
         <div className="quest-ui-empty-illustration" aria-hidden="true">
@@ -227,77 +416,55 @@ function EmptyStateIllustration() {
 }
 
 export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
-    settings.use([
-        "dashboardShowAvailable",
-        "dashboardShowInProgress",
-        "dashboardShowClaimable",
-        "dashboardShowClaimed",
-        "dashboardShowExpired",
-        "dashboardRewardFilter",
-        "dashboardIncludeUnknownRewards",
-        "dashboardShowPlay",
-        "dashboardShowStream",
-        "dashboardShowVideo",
-        "dashboardShowActivity",
-        "dashboardShowOther"
-    ]);
-
+    const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
     const quests = useQuestSnapshot();
-    const [showAll, setShowAll] = useState(false);
-    const filtered = filterQuests(quests, dashboardScopeFromSettings(settings.store));
-    const visible = sortDashboardQuests(showAll ? quests : filtered);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const filtered = filterQuests(quests, dashboardScopeFromSettings(dashboardSettings));
+    const visible = sortDashboardQuests(filtered);
     const hiddenCount = Math.max(0, quests.length - filtered.length);
+    const activeFilterCount = dashboardFilterCount(dashboardSettings);
 
     return (
         <section className="quest-ui-dashboard" role="dialog" aria-label="Quest dashboard">
             <header className="quest-ui-dashboard-header">
-                <div className="quest-ui-dashboard-heading">
-                    <div className="quest-ui-dashboard-title-row">
-                        <strong className="quest-ui-dashboard-title">Quests</strong>
-                        {showAll && <span className="quest-ui-dashboard-mode-label">Showing all</span>}
+                <div className="quest-ui-dashboard-header-row">
+                    <div className="quest-ui-dashboard-heading">
+                        <div className="quest-ui-dashboard-title-row">
+                            <strong className="quest-ui-dashboard-title">Quests</strong>
+                        </div>
+                        <DashboardSummary quests={filtered} />
                     </div>
-                    <DashboardSummary quests={showAll ? quests : filtered} />
+
+                    <button
+                        type="button"
+                        className={`quest-ui-filter-button${filtersOpen ? " is-open" : ""}${activeFilterCount > 0 ? " is-active" : ""}`}
+                        onClick={() => setFiltersOpen(open => !open)}
+                        aria-label={activeFilterCount > 0 ? `Quest filters, ${activeFilterCount} active` : "Quest filters, off"}
+                        aria-expanded={filtersOpen}
+                        title={activeFilterCount > 0 ? `${activeFilterCount} active filters` : "Filters off"}
+                    >
+                        <FilterIcon />
+                        {activeFilterCount > 0 && <span className="quest-ui-filter-count" aria-hidden="true">{activeFilterCount > 9 ? "9+" : activeFilterCount}</span>}
+                    </button>
                 </div>
 
-                <button
-                    type="button"
-                    className="quest-ui-dashboard-icon-button"
-                    onClick={() => openQuestHome(closePopout)}
-                    aria-label="Open Discord Quest Home"
-                    title="Open Discord Quest Home"
-                >
-                    <ArrowUpRightIcon />
-                </button>
+                {filtersOpen && <DashboardFilters hiddenCount={hiddenCount} />}
             </header>
 
             <div className="quest-ui-dashboard-content">
                 {visible.length > 0 ? (
-                    <>
-                        {visible.map(quest => <QuestCard key={quest.id} quest={quest} />)}
-
-                        {!showAll && hiddenCount > 0 && (
-                            <button type="button" className="quest-ui-dashboard-secondary-action" onClick={() => setShowAll(true)}>
-                                Show {hiddenCount} filtered {hiddenCount === 1 ? "quest" : "quests"}
-                            </button>
-                        )}
-
-                        {showAll && hiddenCount > 0 && (
-                            <button type="button" className="quest-ui-dashboard-secondary-action" onClick={() => setShowAll(false)}>
-                                Use Dashboard filters
-                            </button>
-                        )}
-                    </>
+                    visible.map(quest => <QuestCard key={quest.id} quest={quest} />)
                 ) : (
                     <div className="quest-ui-dashboard-empty">
                         <EmptyStateIllustration />
                         <strong>No quests match your filters</strong>
                         {hiddenCount > 0
-                            ? <span>{hiddenCount} other available {hiddenCount === 1 ? "quest is" : "quests are"} hidden.</span>
+                            ? <span>{hiddenCount} other {hiddenCount === 1 ? "quest is" : "quests are"} currently hidden.</span>
                             : <span>No Quest data is currently available in Discord.</span>}
 
                         {hiddenCount > 0 && (
                             <div className="quest-ui-dashboard-empty-actions">
-                                <button type="button" className="quest-ui-dashboard-primary-action" onClick={() => setShowAll(true)}>
+                                <button type="button" className="quest-ui-dashboard-primary-action" onClick={showAllDashboardQuests}>
                                     Show All
                                 </button>
                                 <button type="button" className="quest-ui-dashboard-empty-home" onClick={() => openQuestHome(closePopout)}>

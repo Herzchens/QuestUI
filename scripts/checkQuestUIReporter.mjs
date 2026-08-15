@@ -14,6 +14,7 @@ const WEBPACK_FIND_SIGNATURES = [
     'findComponentByCode("renderBadgeCount", "disableColor")',
     'findByCode("heartbeat?.lastBeatAt", "updatedAt", "eventName", "includeTaskTypes")',
     'findByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")',
+    'findByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")',
     'findComponentByCode("shouldUseThemeColor", "customSize", "loading")'
 ];
 
@@ -86,6 +87,7 @@ function runSelfTest() {
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nproxyLazyWebpack("QuestStore", "QuestsStore")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("heartbeat?.lastBeatAt", "updatedAt", "eventName", "includeTaskTypes")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindComponentByCode("shouldUseThemeColor", "customSize", "loading")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.deepEqual(analyzeReport(completeReport({ badPatches: "- SomeOtherPlugin (had no effect)\n" }), "", 1), {
         problems: [],
