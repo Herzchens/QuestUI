@@ -1,6 +1,6 @@
 # QuestUI
 
-QuestUI is a standalone Vencord userplugin that adds quick access to Discord Quests and a compact overview of their current status.
+QuestUI is a standalone Vencord userplugin that adds quick access to Discord Quests and a compact, live overview of their current status.
 
 It does **not** complete, enroll in, claim, or modify quests. QuestUI only adds interface elements and reads quest status information already available in the Discord client. It can be used on its own or alongside [OrionQuests](https://github.com/nyxxbit/discord-quest-completer) and other quest-related plugins.
 
@@ -10,9 +10,14 @@ QuestUI is designed to coexist with [OrionQuests](https://github.com/nyxxbit/dis
 
 - Optional Quests shortcut in Discord's top bar.
 - Optional Quests shortcut beside the mute, deafen, and settings controls.
-- A status dot for quests that need attention.
-- Optional color-coded counters for available, active, claimable, and claimed quests.
-- Direct navigation to Discord's Quest Home page.
+- Optional **Dashboard Mode** that opens a live mini Quest dashboard instead of navigating immediately to Quest Home.
+- Quest cards with Discord-provided game artwork, task-type badges, status, reward, progress, and time remaining.
+- Dashboard filters for Quest status, reward category, and task type.
+- Optional **Detailed Status** numeric badge with configurable filtering.
+- A basic status dot for quests that need attention when Detailed Status is disabled.
+- Optional color-coded counters on Discord Quest Home links.
+- Direct navigation to Discord's Quest Home page at all times.
+- Live QuestStore synchronization using Discord's native Quest-card progress selectors rather than an independent QuestUI progress clock.
 
 ## Installation
 
@@ -47,7 +52,7 @@ pnpm inject
 
 Restart Discord, open Vencord settings, and enable **QuestUI**.
 
-The colored counter patch is disabled by default because Discord UI matchers may change between client builds. First confirm that the top-bar button works correctly, then enable **Show colored quest counters** and restart Discord.
+The colored Quest Home counter patch is disabled by default because Discord UI matchers may change between client builds. First confirm that the top-bar button works correctly, then enable **Show colored Quest Home counters** and restart Discord.
 
 ### Using QuestUI with OrionQuests
 
@@ -98,31 +103,80 @@ Then run `UPDATE.cmd` again. The Orion updater does not remove sibling folders l
 
 ## Settings
 
-- **Show Quests button in top bar** — Adds a shortcut to Discord's top bar and displays a status dot.
-- **Show Quests button in settings bar** — Adds a shortcut beside the mute, deafen, and settings controls.
-- **Show colored quest counters** — Adds numeric counters to Quest Home links.
+### Buttons and Quest Home counters
 
-Settings that change patches require a Discord restart.
+- **Show Quests button in top bar** — Adds the Quest shortcut to Discord's top bar. Requires a Discord restart.
+- **Show Quests button in settings bar** — Adds the Quest shortcut beside mute, deafen, and settings. Requires a Discord restart.
+- **Show colored Quest Home counters** — Adds numeric counters to Discord Quest Home links. Requires a Discord restart.
+
+### Dashboard Mode
+
+**Dashboard Mode** changes the Quest button click action at runtime:
+
+- Off — clicking the Quest button navigates directly to `/quest-home`.
+- On — clicking the Quest button opens QuestUI's mini dashboard.
+
+The dashboard always keeps **Open Quest Home** visible, so Discord's full Quest interface remains one click away.
+
+Dashboard filters are applied immediately and do not require a restart:
+
+- Status: Available, In Progress, Ready to Claim, Claimed, Expired.
+- Reward: All rewards, Orbs only, Non-Orb rewards.
+- Quest type: Play, Stream, Video, Activity, Other / Unknown.
+- Unknown reward formats can remain visible while using a specific reward filter. This is enabled by default for forward compatibility.
+
+Claimed and expired quests are hidden by default. Unknown Quest task types are shown by default so a new Discord task type is not silently lost after a client update.
+
+### Detailed Status
+
+**Detailed Status** replaces the basic attention dot with a compact numeric badge. The badge shows one state at a time using this priority:
+
+1. **Yellow — In Progress**
+2. **Green — Ready to Claim**
+3. **Red — Available**
+
+The number belongs to the displayed state, not to all quests. For example, if there is one Available quest, two In Progress quests, and one Ready to Claim quest, the button displays a yellow **2**.
+
+The tooltip reports the full attention breakdown with separate status colors, the attention total, and the nearest expiry.
+
+Detailed Status can either:
+
+- use the same filters as Dashboard Mode; or
+- use a separate custom scope for status, reward category, and Quest type.
+
+This allows, for example, an **Orbs only** status badge so an available Avatar Decoration quest does not keep the button red.
+
+Dashboard Mode and Detailed Status settings are runtime UI settings and do **not** require Discord to restart.
+
+## Live progress behavior
+
+QuestUI does not take a one-time progress snapshot when Dashboard Mode opens and does not run an independent progress engine.
+
+The Dashboard progress ring uses the same native completion selector Discord calls immediately before rendering its own Quest-card progress ring. QuestUI reads Discord's `completedRatio` for the ring and `completedRatioDisplay` for the text, so Discord's own optimistic progress, active desktop progress, achievement representation, and percentage rounding remain the source of truth.
+
+The secondary current/target line also follows Discord's native task selection first. For multi-option and multi-platform Quests, Discord selects the live task from its progress event name and heartbeat/update timestamps. `taskConfigV2` is preferred over the legacy task config rather than merging both schemas.
+
+QuestUI still listens to QuestStore changes for immediate state transitions. A short local interval only forces an already-open React dashboard to re-evaluate the same native Discord selectors; it never increments progress itself and never sends Quest network requests.
+
+This path is intentionally identical whether OrionQuests is installed or not: Orion may cause Discord's Quest state to change, but QuestUI reads the resulting Discord QuestStore/native selector output instead of maintaining or consuming a separate Orion progress counter.
 
 ## Status colors
 
-### Counters
+### Quest Home counters
 
 - **Red** — Available quests that can be enrolled in.
 - **Yellow** — Enrolled quests that are still in progress.
 - **Green** — Completed quests with rewards ready to claim.
 - **Blurple** — Claimed quests.
 
-### Status dot
+### Basic shortcut status dot
 
-The shortcut displays one status dot using this priority:
+When Detailed Status is disabled, the shortcut shows one attention dot using the same priority as Detailed Status:
 
-1. **Red** when at least one available quest has not been enrolled in.
-2. **Yellow** when no available quest remains, but at least one enrolled quest is unfinished.
-3. **Green** when no quest is available or unfinished, but at least one reward is ready to claim.
+1. **Yellow** when at least one Quest is in progress.
+2. **Green** when no Quest is in progress but at least one reward is ready to claim.
+3. **Red** when no higher-priority state exists but at least one Quest is available.
 4. **No dot** when nothing currently needs attention.
-
-Clicking either shortcut opens `/quest-home` through Vencord's `NavigationRouter`.
 
 ## Compatibility and recovery
 

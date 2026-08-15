@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Added optional Dashboard Mode with a live mini Quest dashboard, progress rings, rewards, expiry information, filtering, and an always-visible link to Discord Quest Home.
+- Added Dashboard filters for Quest status, Orb/non-Orb rewards, and Play/Stream/Video/Activity/unknown task types.
+- Added optional Detailed Status numeric badges with configurable filtering and priority: In Progress, Ready to Claim, then Available.
+- Added shared live QuestStore synchronization so buttons, tooltips, Quest Home counters, and an already-open Dashboard update together from Discord's local Quest state.
+- Changed Dashboard progress rings to use Discord's native Quest-card `completedRatio` and `completedRatioDisplay` selector, including Discord's own optimistic/desktop progress state and percent rounding, instead of maintaining a separate QuestUI progress clock.
+- Changed multi-option Quest task selection to use Discord's native task-details selector before the local compatibility fallback, keeping the secondary current/target text aligned with the task Discord selected.
+- Added Discord-provided Quest artwork with task-type micro badges to Dashboard cards, and reused Discord's own themed Orb component for Orb rewards.
+- Refined Dashboard Quest cards, progress state rings, custom scrolling, opaque surfaces, rich status tooltip, arrow alignment, Detailed Status badge placement, and the filtered empty state.
+- Added defensive normalization for legacy and `taskConfigV2` Quest task/progress shapes, including Map-backed progress and Orb reward metadata.
+- Added filtered empty states, hidden-Quest visibility, expiry urgency, and status/expiry sorting in Dashboard Mode.
+- Changed the shortcut attention priority to In Progress, then Ready to Claim, then Available.
 - Fixed the settings-bar Quest button losing its class, tooltip, and accessible name.
 - Removed the unnecessary settings-bar wrapper and its fragile Discord webpack lookup.
 - Documented the webpack lookup coverage requirement in the compatibility reporter.

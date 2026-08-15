@@ -2,83 +2,31 @@ import "./styles.css";
 
 import { Flex } from "@components/Flex";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { NavigationRouter, Tooltip, useEffect, useState } from "@webpack/common";
+import { NavigationRouter, Popout, Tooltip, useRef } from "@webpack/common";
 
-import { QuestsStore } from "./stores";
+import { QuestDashboard } from "./QuestDashboard";
+import {
+    attentionCounts,
+    detailedScopeFromSettings,
+    filterQuests,
+    formatExpiry,
+    prioritizedAttention,
+    questStatusCounts,
+    useQuestSnapshot
+} from "./questData";
+import type { AttentionCounts } from "./questData";
+import settings from "./settings";
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 const TopBarButton = findComponentByCodeLazy("badgePosition", "icon");
 const CountBadge = findComponentByCodeLazy("renderBadgeCount", "disableColor");
-
-type QuestStatus = {
-    enrollable: number;
-    enrolled: number;
-    claimable: number;
-    claimed: number;
-    expired: number;
-};
-
-const EMPTY_STATUS: QuestStatus = {
-    enrollable: 0,
-    enrolled: 0,
-    claimable: 0,
-    claimed: 0,
-    expired: 0
-};
-
-function getQuests(): any[] {
-    const quests = QuestsStore?.quests;
-    if (!quests) return [];
-    if (typeof quests.values === "function") return Array.from(quests.values());
-    if (Array.isArray(quests)) return quests;
-    return Object.values(quests);
-}
-
-function questsStatus(): QuestStatus {
-    return getQuests().reduce<QuestStatus>((acc, quest) => {
-        const expiresAt = new Date(quest?.config?.expiresAt ?? 0).getTime();
-
-        if (Number.isFinite(expiresAt) && expiresAt > 0 && expiresAt < Date.now()) {
-            acc.expired++;
-        } else if (quest?.userStatus?.claimedAt) {
-            acc.claimed++;
-        } else if (quest?.userStatus?.completedAt) {
-            acc.claimable++;
-        } else if (quest?.userStatus?.enrolledAt) {
-            acc.enrolled++;
-        } else {
-            acc.enrollable++;
-        }
-
-        return acc;
-    }, { ...EMPTY_STATUS });
-}
-
-function useQuestStatus(): QuestStatus {
-    const [status, setStatus] = useState(questsStatus);
-
-    useEffect(() => {
-        const update = () => setStatus(questsStatus());
-
-        QuestsStore?.addChangeListener?.(update);
-        const interval = setInterval(update, 60_000);
-        update();
-
-        return () => {
-            clearInterval(interval);
-            QuestsStore?.removeChangeListener?.(update);
-        };
-    }, []);
-
-    return status;
-}
 
 function StatusBadge({ count, label, color }: { count: number; label: string; color: string; }) {
     if (count <= 0) return null;
 
     return (
         <Tooltip text={label}>
-            {({ onMouseEnter, onMouseLeave }) => (
+            {({ onMouseEnter, onMouseLeave }: { onMouseEnter: () => void; onMouseLeave: () => void; }) => (
                 <CountBadge
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
@@ -92,13 +40,13 @@ function StatusBadge({ count, label, color }: { count: number; label: string; co
 }
 
 export function QuestsCount() {
-    const status = useQuestStatus();
+    const status = questStatusCounts(useQuestSnapshot());
 
     return (
         <Flex flexDirection="row" justifyContent="flex-end" className="quest-ui-badges" gap="5px">
-            <StatusBadge count={status.enrollable} label="Enrollable" color="var(--status-danger)" />
-            <StatusBadge count={status.enrolled} label="Enrolled" color="var(--status-warning)" />
-            <StatusBadge count={status.claimable} label="Claimable" color="var(--status-positive)" />
+            <StatusBadge count={status.available} label="Available" color="var(--status-danger)" />
+            <StatusBadge count={status.inProgress} label="In Progress" color="var(--status-warning)" />
+            <StatusBadge count={status.claimable} label="Ready to Claim" color="var(--status-positive)" />
             <StatusBadge count={status.claimed} label="Claimed" color="var(--blurple-50)" />
         </Flex>
     );
@@ -108,68 +56,151 @@ function openQuestHome(): void {
     NavigationRouter.transitionTo("/quest-home");
 }
 
-export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
-    const state = useQuestStatus();
+function statusClass(status: "available" | "in-progress" | "claimable" | undefined): string {
+    if (status === "in-progress") return "quest-ui-enrolled";
+    if (status === "claimable") return "quest-ui-claimable";
+    if (status === "available") return "quest-ui-enrollable";
+    return "";
+}
 
-    const className = state.enrollable
-        ? "quest-ui-enrollable"
-        : state.enrolled
-            ? "quest-ui-enrolled"
-            : state.claimable
-                ? "quest-ui-claimable"
-                : "";
+function detailClass(status: "available" | "in-progress" | "claimable"): string {
+    if (status === "in-progress") return "quest-ui-detail-in-progress";
+    if (status === "claimable") return "quest-ui-detail-claimable";
+    return "quest-ui-detail-available";
+}
 
-    const statusParts = [
-        state.enrollable > 0 ? `${state.enrollable} available` : null,
-        state.enrolled > 0 ? `${state.enrolled} in progress` : null,
-        state.claimable > 0 ? `${state.claimable} ready to claim` : null
-    ].filter(Boolean);
-    const tooltip = statusParts.length > 0
-        ? `Quests • ${statusParts.join(" • ")}`
-        : "Quests";
-
-    if (type === "top-bar") {
-        return (
-            <TopBarButton
-                className={className}
-                iconClassName={undefined}
-                disabled={false}
-                showBadge={state.enrollable > 0 || state.enrolled > 0 || state.claimable > 0}
-                badgePosition="bottom"
-                icon={QuestIcon}
-                iconSize={20}
-                onClick={openQuestHome}
-                onContextMenu={undefined}
-                tooltip={tooltip}
-                tooltipPosition="bottom"
-                hideOnClick={false}
-            />
-        );
-    }
-
-    // The settings-bar variant renders the same button, only with its own class so the
-    // stylesheet can tell the two apart. It used to be wrapped in a component resolved by
-    // findComponentByCodeLazy("keyboardShortcut", "positionKey"), which is Discord's generic
-    // Tooltip: it takes { children, text, position, align, positionKey } and none of
-    // tooltipText, className, onClick, icon or disabled. Every prop passed to it was
-    // discarded, so the wrapper contributed no tooltip, no accessible name and no class,
-    // which also left the .quest-ui-settings-button rule in styles.css unable to match.
-    // TopBarButton already renders its own tooltip and aria-label from the tooltip prop, so
-    // the wrapper is dropped rather than repaired, and one fragile lookup goes with it.
+function DetailedQuestIcon({ count, status, iconProps }: {
+    count: number;
+    status: "available" | "in-progress" | "claimable";
+    iconProps: any;
+}) {
     return (
+        <span className="quest-ui-icon-wrap">
+            <QuestIcon {...iconProps} />
+            <span className={`quest-ui-detailed-count ${detailClass(status)}`} aria-hidden="true">
+                {count > 99 ? "99+" : count}
+            </span>
+        </span>
+    );
+}
+
+function nearestExpiry(quests: ReturnType<typeof useQuestSnapshot>): string | null {
+    const now = Date.now();
+    const timestamp = quests.reduce<number | null>((nearest, quest) => {
+        if (quest.expiresAt == null || quest.expiresAt <= now) return nearest;
+        return nearest == null || quest.expiresAt < nearest ? quest.expiresAt : nearest;
+    }, null);
+
+    return timestamp == null ? null : formatExpiry(timestamp, now);
+}
+
+function QuestStatusTooltip({ counts, total, expiry }: {
+    counts: AttentionCounts;
+    total: number;
+    expiry: string | null;
+}) {
+    if (total === 0) return <span>Quests</span>;
+
+    return (
+        <div className="quest-ui-status-tooltip">
+            <strong>Quest Status</strong>
+            <div className="quest-ui-status-tooltip-grid">
+                {counts.inProgress > 0 && (
+                    <span className="quest-ui-tooltip-in-progress"><b>{counts.inProgress}</b> In Progress</span>
+                )}
+                {counts.claimable > 0 && (
+                    <span className="quest-ui-tooltip-claimable"><b>{counts.claimable}</b> Ready to Claim</span>
+                )}
+                {counts.available > 0 && (
+                    <span className="quest-ui-tooltip-available"><b>{counts.available}</b> Available</span>
+                )}
+            </div>
+            <span className="quest-ui-tooltip-total">{total} attention {total === 1 ? "quest" : "quests"}</span>
+            {expiry && <span className="quest-ui-tooltip-expiry">Nearest expiry · {expiry.replace(/^Expires in /, "")}</span>}
+        </div>
+    );
+}
+
+export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
+    settings.use([
+        "dashboardMode",
+        "dashboardShowAvailable",
+        "dashboardShowInProgress",
+        "dashboardShowClaimable",
+        "dashboardShowClaimed",
+        "dashboardShowExpired",
+        "dashboardRewardFilter",
+        "dashboardIncludeUnknownRewards",
+        "dashboardShowPlay",
+        "dashboardShowStream",
+        "dashboardShowVideo",
+        "dashboardShowActivity",
+        "dashboardShowOther",
+        "detailedStatus",
+        "detailedStatusScope",
+        "detailedShowAvailable",
+        "detailedShowInProgress",
+        "detailedShowClaimable",
+        "detailedRewardFilter",
+        "detailedIncludeUnknownRewards",
+        "detailedShowPlay",
+        "detailedShowStream",
+        "detailedShowVideo",
+        "detailedShowActivity",
+        "detailedShowOther"
+    ]);
+
+    const allQuests = useQuestSnapshot();
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
+    const detailed = settings.store.detailedStatus;
+    const statusQuests = detailed
+        ? filterQuests(allQuests, detailedScopeFromSettings(settings.store))
+        : allQuests;
+    const attentionQuests = statusQuests.filter(quest =>
+        quest.status === "in-progress" || quest.status === "claimable" || quest.status === "available"
+    );
+    const counts = attentionCounts(attentionQuests);
+    const priority = prioritizedAttention(counts);
+    const className = statusClass(priority?.status);
+    const expiry = nearestExpiry(attentionQuests);
+    const tooltip = <QuestStatusTooltip counts={counts} total={attentionQuests.length} expiry={expiry} />;
+
+    const icon = detailed && priority
+        ? (iconProps: any) => <DetailedQuestIcon count={priority.count} status={priority.status} iconProps={iconProps} />
+        : QuestIcon;
+
+    const buttonClassName = [type === "settings-bar" ? "quest-ui-settings-button" : "", className]
+        .filter(Boolean)
+        .join(" ");
+
+    const renderButton = (onClick: (...args: any[]) => void) => (
         <TopBarButton
-            className={`quest-ui-settings-button ${className}`.trim()}
+            ref={buttonRef}
+            className={buttonClassName}
             iconClassName={undefined}
             disabled={false}
-            showBadge={state.enrollable > 0 || state.enrolled > 0 || state.claimable > 0}
+            showBadge={!detailed && priority != null}
             badgePosition="bottom"
-            icon={QuestIcon}
+            icon={icon}
             iconSize={20}
-            onClick={openQuestHome}
+            onClick={onClick}
             onContextMenu={undefined}
             tooltip={tooltip}
-            tooltipPosition="top"
+            tooltipPosition={type === "top-bar" ? "bottom" : "top"}
             hideOnClick={false}
         />
+    );
+
+    if (!settings.store.dashboardMode) return renderButton(openQuestHome);
+
+    return (
+        <Popout
+            targetElementRef={buttonRef}
+            position={type === "top-bar" ? "bottom" : "top"}
+            align={type === "top-bar" ? "right" : "left"}
+            renderPopout={({ closePopout }) => <QuestDashboard closePopout={closePopout} />}
+        >
+            {popoutProps => renderButton(popoutProps.onClick)}
+        </Popout>
     );
 }
