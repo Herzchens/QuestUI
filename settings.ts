@@ -10,20 +10,22 @@ const rewardOptions = [
 export default definePluginSettings({
     showQuestsButtonTopBar: {
         type: OptionType.BOOLEAN,
-        description: "Show the Quests button in Discord's top bar.",
+        displayName: "Top Bar Button",
+        description: "Show the Quests shortcut in Discord's top bar.",
         default: true,
         restartNeeded: true
     },
     showQuestsButtonSettingsBar: {
         type: OptionType.BOOLEAN,
-        description: "Show the Quests button beside mute, deafen and settings.",
+        displayName: "Settings Bar Button",
+        description: "Show the Quests shortcut beside mute, deafen and settings.",
         default: false,
         restartNeeded: true
     },
     showQuestsButtonBadges: {
         type: OptionType.BOOLEAN,
-        displayName: "Show colored Quest Home counters",
-        description: "Show colored quest counters on Discord's Quest Home links: red = available, yellow = in progress, green = ready to claim, blurple = claimed.",
+        displayName: "Quest Home Counters",
+        description: "Show colored numeric counters on Discord's Quest Home links.",
         default: false,
         restartNeeded: true
     },
@@ -31,31 +33,34 @@ export default definePluginSettings({
     dashboardMode: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard Mode",
-        description: "Open QuestUI's live mini dashboard when clicking a Quest button instead of navigating directly to Discord Quest Home.",
+        description: "Open the live mini dashboard when clicking a Quest button. Configure Dashboard filters from the filter button inside the dashboard.",
         default: false
     },
+
+    // Dashboard filter values live in settings so they persist, but they are configured
+    // from the Dashboard's dedicated filter panel instead of flooding this settings page.
     dashboardShowAvailable: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Available",
-        description: "Show quests that can be enrolled in.",
+        description: "Show available quests.",
         default: true
     },
     dashboardShowInProgress: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • In Progress",
-        description: "Show enrolled quests that are still in progress.",
+        description: "Show in-progress quests.",
         default: true
     },
     dashboardShowClaimable: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Ready to Claim",
-        description: "Show completed quests whose rewards are ready to claim.",
+        description: "Show quests ready to claim.",
         default: true
     },
     dashboardShowClaimed: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Claimed",
-        description: "Show quests whose rewards have already been claimed.",
+        description: "Show claimed quests.",
         default: false
     },
     dashboardShowExpired: {
@@ -67,56 +72,56 @@ export default definePluginSettings({
     dashboardRewardFilter: {
         type: OptionType.SELECT,
         displayName: "Dashboard • Reward Filter",
-        description: "Choose which reward categories are shown in the dashboard.",
+        description: "Dashboard reward filter.",
         options: rewardOptions
     },
     dashboardIncludeUnknownRewards: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Include Unknown Rewards",
-        description: "When a specific reward filter is active, keep quests whose reward format QuestUI does not recognize yet.",
+        description: "Keep unknown reward formats while a reward filter is active.",
         default: true
     },
     dashboardShowPlay: {
         type: OptionType.BOOLEAN,
-        displayName: "Dashboard • Play Quests",
+        displayName: "Dashboard • Play",
         description: "Show play-game quests.",
         default: true
     },
     dashboardShowStream: {
         type: OptionType.BOOLEAN,
-        displayName: "Dashboard • Stream Quests",
+        displayName: "Dashboard • Stream",
         description: "Show stream quests.",
         default: true
     },
     dashboardShowVideo: {
         type: OptionType.BOOLEAN,
-        displayName: "Dashboard • Video Quests",
+        displayName: "Dashboard • Video",
         description: "Show video quests.",
         default: true
     },
     dashboardShowActivity: {
         type: OptionType.BOOLEAN,
-        displayName: "Dashboard • Activity Quests",
-        description: "Show Discord Activity and achievement-in-activity quests.",
+        displayName: "Dashboard • Activity",
+        description: "Show Activity and achievement quests.",
         default: true
     },
     dashboardShowOther: {
         type: OptionType.BOOLEAN,
-        displayName: "Dashboard • Other / Unknown Quests",
-        description: "Show quest task types QuestUI does not recognize. Keep this enabled for forward compatibility.",
+        displayName: "Dashboard • Other / Unknown",
+        description: "Show unknown Quest task types for forward compatibility.",
         default: true
     },
 
     detailedStatus: {
         type: OptionType.BOOLEAN,
         displayName: "Detailed Status",
-        description: "Replace the single attention dot with one compact numeric badge. Priority is In Progress, then Ready to Claim, then Available.",
+        description: "Replace the attention dot with a numeric badge. Priority: In Progress, Ready to Claim, Available.",
         default: false
     },
     detailedStatusScope: {
         type: OptionType.SELECT,
-        displayName: "Detailed Status • Count Scope",
-        description: "Use the Dashboard filters for the numeric badge, or configure a separate set of filters.",
+        displayName: "↳ Count Scope",
+        description: "Use Dashboard filters or a separate Detailed Status filter set.",
         options: [
             { label: "Same as Dashboard filters", value: "dashboard", default: true },
             { label: "Custom filters", value: "custom" }
@@ -124,81 +129,81 @@ export default definePluginSettings({
     },
     detailedShowAvailable: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status • Available",
-        description: "Count available quests in the custom status scope.",
+        displayName: "↳ Available",
+        description: "Count available quests.",
         default: true
     },
     detailedShowInProgress: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status • In Progress",
-        description: "Count in-progress quests in the custom status scope.",
+        displayName: "↳ In Progress",
+        description: "Count in-progress quests.",
         default: true
     },
     detailedShowClaimable: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status • Ready to Claim",
-        description: "Count completed quests that are ready to claim in the custom status scope.",
+        displayName: "↳ Ready to Claim",
+        description: "Count quests ready to claim.",
         default: true
     },
     detailedRewardFilter: {
         type: OptionType.SELECT,
-        displayName: "Detailed Status • Reward Filter",
-        description: "Choose which reward categories can affect the numeric status badge.",
+        displayName: "↳ Reward Filter",
+        description: "Choose which rewards can affect Detailed Status.",
         options: rewardOptions
     },
     detailedIncludeUnknownRewards: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status • Include Unknown Rewards",
-        description: "When a specific reward filter is active, count quests whose reward format QuestUI does not recognize yet.",
+        displayName: "↳ Include Unknown Rewards",
+        description: "Count unknown reward formats while a reward filter is active.",
         default: true
     },
     detailedShowPlay: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status • Play Quests",
+        displayName: "↳ Play",
         description: "Allow play-game quests to affect Detailed Status.",
         default: true
     },
     detailedShowStream: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status • Stream Quests",
+        displayName: "↳ Stream",
         description: "Allow stream quests to affect Detailed Status.",
         default: true
     },
     detailedShowVideo: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status • Video Quests",
+        displayName: "↳ Video",
         description: "Allow video quests to affect Detailed Status.",
         default: true
     },
     detailedShowActivity: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status • Activity Quests",
-        description: "Allow Discord Activity quests to affect Detailed Status.",
+        displayName: "↳ Activity",
+        description: "Allow Activity quests to affect Detailed Status.",
         default: true
     },
     detailedShowOther: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status • Other / Unknown Quests",
-        description: "Allow unknown quest task types to affect Detailed Status. Keep this enabled for forward compatibility.",
+        displayName: "↳ Other / Unknown",
+        description: "Allow unknown Quest task types to affect Detailed Status.",
         default: true
     }
 }, {
-    dashboardShowAvailable: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardShowInProgress: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardShowClaimable: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardShowClaimed: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardShowExpired: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardRewardFilter: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardIncludeUnknownRewards: { hidden() {
-        const scopeHidden = !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard");
-        return scopeHidden || this.store.dashboardRewardFilter === "all";
-    } },
-    dashboardShowPlay: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardShowStream: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardShowVideo: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardShowActivity: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
-    dashboardShowOther: { hidden() { return !this.store.dashboardMode && !(this.store.detailedStatus && this.store.detailedStatusScope === "dashboard"); } },
+    // Dashboard filters are edited in-context from the Dashboard filter button.
+    dashboardShowAvailable: { hidden: true },
+    dashboardShowInProgress: { hidden: true },
+    dashboardShowClaimable: { hidden: true },
+    dashboardShowClaimed: { hidden: true },
+    dashboardShowExpired: { hidden: true },
+    dashboardRewardFilter: { hidden: true },
+    dashboardIncludeUnknownRewards: { hidden: true },
+    dashboardShowPlay: { hidden: true },
+    dashboardShowStream: { hidden: true },
+    dashboardShowVideo: { hidden: true },
+    dashboardShowActivity: { hidden: true },
+    dashboardShowOther: { hidden: true },
 
+    // Detailed Status stays compact until Custom filters are selected. The Dashboard
+    // filter rows remain out of this modal and are edited in-context from the dashboard.
     detailedStatusScope: { hidden() { return !this.store.detailedStatus; } },
     detailedShowAvailable: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
     detailedShowInProgress: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },

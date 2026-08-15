@@ -12,6 +12,7 @@
 - Fixed Quest artwork loading by resolving Discord Quest asset keys through Discord's native themed Quest asset helper instead of treating asset keys as direct image URLs.
 - Added an in-dashboard Filter control with visible active state, status/reward/task-type filters, recommended defaults, and a Show All reset.
 - Refined Dashboard card layout with two-line Quest titles, expiry urgency colors below the progress ring, Orb reward tiers, and more reliable scrollbar-arrow suppression.
+- Reorganized plugin settings so Dashboard filters live in the Dashboard filter panel, Detailed Status children are indented and conditional, and disabled feature groups no longer flood the settings modal.
 - Refined Dashboard Quest cards, progress state rings, custom scrolling, opaque surfaces, rich status tooltip, arrow alignment, Detailed Status badge placement, and the filtered empty state.
 - Added defensive normalization for legacy and `taskConfigV2` Quest task/progress shapes, including Map-backed progress and Orb reward metadata.
 - Added filtered empty states, hidden-Quest visibility, expiry urgency, and status/expiry sorting in Dashboard Mode.
