@@ -15,11 +15,12 @@
 - Refined the Dashboard Filter button with theme-safe brand-tinted borders/shadows and strengthened native scrollbar-arrow suppression.
 - Fixed Windows/Electron Dashboard scrollbar arrows by leaving `scrollbar-width`/`scrollbar-color` on their automatic path and letting QuestUI's WebKit scrollbar styling own the controls.
 - Fixed the Dashboard scrollbar thumb becoming visually transparent while hovered or dragged by owning normal, hover, and active thumb states in the final scrollbar stylesheet.
-- Displayed the eligible Nitro 1.2x Orb Quest multiplier directly in Dashboard reward amounts while keeping Nitro Basic, Nitro Credits, and pre-May-8-2026 Quests at their base Orb reward.
+- Displayed the eligible Nitro 1.2x Orb Quest multiplier directly in Dashboard reward amounts while keeping Nitro Basic, fractional/credit-only Nitro, and older pre-multiplier Quests at their base Orb reward.
+- Fixed eligible full Nitro accounts being missed when `premiumState.subscriptionId` was not hydrated in `UserStore`; Nitro eligibility no longer depends on that optional field.
 - Clarified settings dependencies: Quest Home Counters remain fully independent, while Dashboard Mode and Detailed Status are visibly locked when both QuestUI shortcut buttons are disabled.
 - Clarified settings hierarchy with explicit parent-prefixed labels for Dashboard and Detailed Status options.
 - Refined Dashboard card layout with two-line Quest titles, expiry urgency colors below the progress ring, Orb reward tiers, and more reliable scrollbar-arrow suppression.
-- Reorganized plugin settings so Dashboard filters live in the Dashboard filter panel, Detailed Status children are indented and conditional, and disabled feature groups no longer flood the settings modal.
+- Reorganized plugin settings so Dashboard filters live in the Dashboard filter panel, Detailed Status children are conditional, and disabled feature groups no longer flood the settings modal.
 - Refined Dashboard Quest cards, progress state rings, custom scrolling, opaque surfaces, rich status tooltip, arrow alignment, Detailed Status badge placement, and the filtered empty state.
 - Added defensive normalization for legacy and `taskConfigV2` Quest task/progress shapes, including Map-backed progress and Orb reward metadata.
 - Added filtered empty states, hidden-Quest visibility, expiry urgency, and status/expiry sorting in Dashboard Mode.

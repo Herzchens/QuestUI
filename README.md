@@ -8,16 +8,17 @@ QuestUI is designed to coexist with [OrionQuests](https://github.com/nyxxbit/dis
 
 ## Features
 
-- Optional Quests shortcut in Discord's top bar.
-- Optional Quests shortcut beside the mute, deafen, and settings controls.
+- Optional Quest shortcut in Discord's top bar.
+- Optional Quest shortcut beside the mute, deafen, and settings controls.
 - Optional **Dashboard Mode** that opens a live mini Quest dashboard instead of navigating immediately to Quest Home.
-- Quest cards with Discord-provided game artwork, task-type badges, status, reward, progress, and time remaining.
-- Dashboard filters for Quest status, reward category, and task type.
+- Quest cards with Discord-provided Quest artwork, task-type badges, status, reward, native progress, and time remaining.
+- Floating Dashboard filters for Quest status, reward category, and task type, including **Recommended** and **Clear all** actions.
 - Optional **Detailed Status** numeric badge with configurable filtering.
 - A basic status dot for quests that need attention when Detailed Status is disabled.
-- Optional color-coded counters on Discord Quest Home links.
+- Optional color-coded counters on Discord Quest Home links, independent of the QuestUI shortcut buttons.
 - Direct navigation to Discord's Quest Home page at all times.
 - Live QuestStore synchronization using Discord's native Quest-card progress selectors rather than an independent QuestUI progress clock.
+- Eligible Nitro Orb rewards are displayed with Discord's 1.2x Orb multiplier while QuestUI keeps the underlying base reward data unchanged.
 
 ## Installation
 
@@ -52,7 +53,7 @@ pnpm inject
 
 Restart Discord, open Vencord settings, and enable **QuestUI**.
 
-The colored Quest Home counter patch is disabled by default because Discord UI matchers may change between client builds. First confirm that the top-bar button works correctly, then enable **Show colored Quest Home counters** and restart Discord.
+The Quest Home Counter patch is disabled by default because Discord UI matchers may change between client builds. It can be enabled independently of either QuestUI shortcut button; after changing this patch-related setting, restart Discord.
 
 ### Using QuestUI with OrionQuests
 
@@ -103,33 +104,40 @@ Then run `UPDATE.cmd` again. The Orion updater does not remove sibling folders l
 
 ## Settings
 
-### Buttons and Quest Home counters
+### Shortcuts and Quest Home Counters
 
-- **Show Quests button in top bar** — Adds the Quest shortcut to Discord's top bar. Requires a Discord restart.
-- **Show Quests button in settings bar** — Adds the Quest shortcut beside mute, deafen, and settings. Requires a Discord restart.
-- **Show colored Quest Home counters** — Adds numeric counters to Discord Quest Home links. Requires a Discord restart.
+- **Top Bar Button** — Adds the Quest shortcut to Discord's top bar. Requires a Discord restart.
+- **Settings Bar Button** — Adds the Quest shortcut beside mute, deafen, and settings. Requires a Discord restart.
+- **Quest Home Counters** — Adds numeric counters to Discord's official Quest Home links. Requires a Discord restart and works independently of both QuestUI shortcut buttons.
+
+If both shortcut buttons are disabled, **Dashboard Mode** and **Detailed Status** remain visible in settings but are locked because there is no QuestUI shortcut for those features to attach to. Quest Home Counters remain available.
 
 ### Dashboard Mode
 
-**Dashboard Mode** changes the Quest button click action at runtime:
+**Dashboard • Mode** changes the Quest shortcut click action at runtime:
 
-- Off — clicking the Quest button navigates directly to `/quest-home`.
-- On — clicking the Quest button opens QuestUI's mini dashboard.
+- Off — clicking a QuestUI shortcut navigates directly to `/quest-home`.
+- On — clicking a QuestUI shortcut opens QuestUI's mini dashboard.
 
 The dashboard always keeps **Open Quest Home** visible, so Discord's full Quest interface remains one click away.
 
-Dashboard filters are applied immediately and do not require a restart:
+The Dashboard Filter button opens a floating popout. Filters are applied immediately and do not require a restart:
 
 - Status: Available, In Progress, Ready to Claim, Claimed, Expired.
 - Reward: All rewards, Orbs only, Non-Orb rewards.
 - Quest type: Play, Stream, Video, Activity, Other / Unknown.
-- Unknown reward formats can remain visible while using a specific reward filter. This is enabled by default for forward compatibility.
+- Unknown reward formats can remain visible while using a specific reward filter.
 
-Claimed and expired quests are hidden by default. Unknown Quest task types are shown by default so a new Discord task type is not silently lost after a client update.
+The filter popout also provides:
+
+- **Recommended** — restores the default attention-focused view: Available, In Progress, and Ready to Claim are shown; Claimed and Expired are hidden.
+- **Clear all** — removes the Dashboard restrictions and shows all supported statuses, reward categories, and Quest types.
+
+The Filter button displays a small count while restrictions are active. Claimed and expired quests are hidden by default. Unknown Quest task types are shown by default so a new Discord task type is not silently lost after a client update.
 
 ### Detailed Status
 
-**Detailed Status** replaces the basic attention dot with a compact numeric badge. The badge shows one state at a time using this priority:
+**Detailed Status • Enabled** replaces the basic attention dot with a compact numeric badge. The badge shows one state at a time using this priority:
 
 1. **Yellow — In Progress**
 2. **Green — Ready to Claim**
@@ -141,12 +149,23 @@ The tooltip reports the full attention breakdown with separate status colors, th
 
 Detailed Status can either:
 
-- use the same filters as Dashboard Mode; or
+- use the same persisted filter scope as the Dashboard; or
 - use a separate custom scope for status, reward category, and Quest type.
 
 This allows, for example, an **Orbs only** status badge so an available Avatar Decoration quest does not keep the button red.
 
-Dashboard Mode and Detailed Status settings are runtime UI settings and do **not** require Discord to restart.
+Dashboard Mode, Detailed Status, and Dashboard filters are runtime UI settings and do **not** require Discord to restart.
+
+## Dashboard reward display
+
+Orb rewards use Discord's themed Orb component. QuestUI keeps Discord's base Quest reward value in its normalized data and adjusts only the amount displayed in Dashboard cards when the current account is eligible for Discord's Nitro Orb multiplier.
+
+For eligible full Nitro accounts and qualifying Orb Quests, QuestUI displays the 1.2x amount, for example:
+
+- `200 Orbs` → `240 Orbs`
+- `700 Orbs` → `840 Orbs`
+
+Nitro Basic and Discord's fractional/credit-only Nitro state are not treated as eligible. The multiplier is only applied to qualifying Quests from the current Discord multiplier period; older Quests keep their base Orb amount.
 
 ## Live progress behavior
 
@@ -162,7 +181,7 @@ This path is intentionally identical whether OrionQuests is installed or not: Or
 
 ## Status colors
 
-### Quest Home counters
+### Quest Home Counters
 
 - **Red** — Available quests that can be enrolled in.
 - **Yellow** — Enrolled quests that are still in progress.
@@ -180,7 +199,9 @@ When Detailed Status is disabled, the shortcut shows one attention dot using the
 
 ## Compatibility and recovery
 
-QuestUI relies on Discord UI components and Vencord patches, so a Discord update may occasionally break a matcher.
+QuestUI relies on Discord UI components and Vencord patches, so a Discord update may occasionally break a matcher or native Quest lookup.
+
+The repository's compatibility workflow checks a clean Vencord build/type-check plus Discord Stable and Canary patch-reporter output, including the native Quest progress, artwork, and Orb-component lookups used by the Dashboard.
 
 If Discord fails to start correctly after an update, close Discord, move the `QuestUI` folder out of `Vencord/src/userplugins`, then rebuild and inject Vencord again. When reporting a compatibility problem, include your Discord channel and Vencord version.
 
