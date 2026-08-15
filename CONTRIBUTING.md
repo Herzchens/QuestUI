@@ -2,14 +2,14 @@
 
 Thank you for considering a contribution to QuestUI.
 
-QuestUI is a standalone Vencord userplugin that provides read-only Discord Quest interface features, including Quest Home shortcuts, status indicators, and optional colored counters.
+QuestUI is a standalone Vencord userplugin that provides read-only Discord Quest interface features, including Quest shortcuts, a live mini Dashboard, status indicators, filtering, and optional Quest Home counters.
 
 ## Project scope
 
 Contributions that fit the current scope include:
 
 - Quest-related user interface improvements.
-- Accessibility improvements.
+- Dashboard, filtering, progress-display, reward-display, and accessibility improvements.
 - Quest Home navigation.
 - Quest status indicators and counters.
 - Discord and Vencord compatibility fixes.
@@ -106,40 +106,88 @@ When working with patches or webpack lookups:
 - Keep matchers narrow enough to avoid resolving unrelated Discord components.
 - Explain why a new matcher is expected to remain stable across Discord builds.
 
-When adding, replacing, or removing a webpack lookup in `QuestButton.tsx`, `stores.ts`, or another source file, review `scripts/checkQuestUIReporter.mjs`.
+When adding, replacing, or removing a webpack lookup in `QuestButton.tsx`, `QuestDashboard.tsx`, `stores.ts`, or another source file, review `scripts/checkQuestUIReporter.mjs`.
 
-Keep `WEBPACK_FIND_SIGNATURES` synchronized with the lookups that QuestUI actually performs. A stale signature cannot detect a failure for a lookup that no longer exists, while a missing signature leaves a current lookup without reporter coverage.
+Keep `WEBPACK_FIND_SIGNATURES` synchronized with the lookups that QuestUI actually performs. This includes Dashboard lookups for Discord's native Quest completion selector, themed Quest asset resolver, and Orb component. A stale signature cannot detect a failure for a lookup that no longer exists, while a missing signature leaves a current lookup without reporter coverage.
+
+## Progress and Quest data invariants
+
+QuestUI should mirror Discord's Quest state rather than inventing a second progress pipeline.
+
+When changing progress or task-selection logic:
+
+- Use Discord's native Quest completion selector for the Dashboard progress ring and displayed completion text when available.
+- Do not add an independent QuestUI heartbeat/progress clock or consume Orion's private dashboard counter as a second source of truth.
+- Keep the local refresh path read-only; it may trigger React re-evaluation but must not advance progress itself.
+- Prefer Discord's native active-task selection before a local compatibility fallback.
+- Prefer `taskConfigV2` over the legacy task config instead of merging both schemas into duplicate tasks.
+- Verify the same behavior with OrionQuests installed and absent where the change touches shared Quest state.
+
+When changing Quest artwork or reward presentation:
+
+- Treat Discord Quest asset fields as asset keys and resolve them through Discord's native Quest asset helper.
+- Reuse Discord's native Orb component rather than copying an Orb URL or image into QuestUI.
+- Keep normalized base reward data separate from presentation-only Nitro Orb adjustments.
 
 ## Manual testing
 
 Only test the areas affected by your change, but include enough evidence to show that the change works in a real Discord client.
 
-### Top-bar button changes
+### Top-bar shortcut changes
 
 Verify that:
 
 - The button appears in Discord's top bar.
-- Clicking the button opens `/quest-home`.
-- The tooltip contains the expected quest status.
-- The status dot appears only when attention is required.
+- With Dashboard Mode disabled, clicking reaches `/quest-home`.
+- With Dashboard Mode enabled, clicking opens the mini Dashboard.
+- The tooltip contains the expected Quest status.
+- Basic/Detailed Status appears only as configured.
 - The top-bar button does not receive settings-bar-only classes.
 
-### Settings-bar button changes
+### Settings-bar shortcut changes
 
 Verify that:
 
 - The button appears beside mute, deafen, and settings.
-- Clicking the button opens `/quest-home`.
+- With Dashboard Mode disabled, clicking reaches `/quest-home`.
+- With Dashboard Mode enabled, clicking opens the mini Dashboard.
 - The button has a tooltip.
 - The rendered element has an accessible name.
 - The `quest-ui-settings-button` class reaches the rendered element.
 - The button is not duplicated after a re-render.
 - QuestUI still coexists with Vencord's `GameActivityToggle` when that plugin is enabled.
 
-### Colored counter changes
+### Dashboard changes
+
+Verify the affected behavior, including where relevant:
+
+- An already-open Dashboard updates when Quest state changes.
+- Active Quest progress text matches Discord Quest Home at the same moment.
+- Multi-option/multi-platform Quests use the task Discord selected.
+- Quest artwork loads through Discord's asset resolver, with generic artwork only as a fallback.
+- The task-type micro badge remains visible over artwork.
+- The Filter button opens a floating popout and does not reflow the Dashboard.
+- Filter active-state count, Recommended, and Clear all behave as expected.
+- Expiry text remains visible below the progress ring and changes urgency color appropriately.
+- The scrollbar thumb remains visible during hover/drag and native arrow buttons do not appear.
+- `Open Quest Home` remains reachable.
+- Eligible Nitro Orb rewards display the adjusted amount, while ineligible/base rewards remain unchanged.
+
+### Detailed Status changes
 
 Verify that:
 
+- Priority remains In Progress, then Ready to Claim, then Available.
+- The numeric badge count belongs to the state whose color is displayed.
+- The tooltip still reports the full attention breakdown.
+- Same-as-Dashboard scope and Custom filters behave as configured.
+- Detailed Status is disabled when both QuestUI shortcut buttons are disabled.
+
+### Quest Home Counter changes
+
+Verify that:
+
+- Counters work even when both QuestUI shortcut buttons are disabled.
 - Counters are added only to the intended Quest Home interface.
 - Counters are not duplicated after navigation or re-rendering.
 - Enrollable quests use the danger color.
@@ -162,7 +210,13 @@ Also check time-based behavior if the change affects expiry or periodic status r
 
 ### Settings changes
 
-QuestUI settings that modify patches require a Discord restart. Restart Discord before concluding that a patch-related setting is not working.
+Only patch-related settings require a Discord restart:
+
+- Top Bar Button.
+- Settings Bar Button.
+- Quest Home Counters.
+
+Dashboard Mode, Detailed Status, and filter changes are runtime settings and should update without a Discord restart. If both shortcut buttons are disabled, Dashboard Mode and Detailed Status are intentionally locked while Quest Home Counters remain independent.
 
 ## Documentation and changelog
 
@@ -224,6 +278,8 @@ For visual, interaction, or accessibility changes, include appropriate evidence 
 - Relevant DOM output.
 - Accessible-name or tooltip verification.
 - Before-and-after behavior.
+
+For Dashboard/progress changes, also describe whether the implementation reuses Discord's native Quest selectors/helpers and identify any new webpack lookup added to reporter coverage.
 
 Keep pull requests focused. Avoid combining unrelated refactors, features, and documentation changes unless they are necessary parts of the same fix.
 

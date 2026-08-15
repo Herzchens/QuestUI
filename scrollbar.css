@@ -1,0 +1,61 @@
+.quest-ui-dashboard-content {
+    /* Keep Chromium/Electron on the WebKit scrollbar path below. Non-auto
+     * scrollbar-width/color can take precedence and re-enable native arrow
+     * buttons on some Windows builds. */
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+}
+
+/* Own the thumb states in the last-loaded stylesheet so Discord/theme hover rules
+ * cannot make the draggable thumb transparent while it is hovered or active. */
+.quest-ui-dashboard-content::-webkit-scrollbar-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: var(--interactive-muted, #4e5058) !important;
+    background-image: none !important;
+    background-clip: padding-box !important;
+    border: 2px solid transparent !important;
+    border-radius: 999px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.quest-ui-dashboard-content::-webkit-scrollbar-thumb:hover {
+    background: var(--interactive-normal, #b5bac1) !important;
+    background-image: none !important;
+    background-clip: padding-box !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.quest-ui-dashboard-content::-webkit-scrollbar-thumb:active {
+    background: var(--interactive-active, #dbdee1) !important;
+    background-image: none !important;
+    background-clip: padding-box !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.quest-ui-dashboard-content::-webkit-scrollbar-button,
+.quest-ui-dashboard-content::-webkit-scrollbar-button:single-button,
+.quest-ui-dashboard-content::-webkit-scrollbar-button:double-button,
+.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical,
+.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:start,
+.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:end,
+.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:start:decrement,
+.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:start:increment,
+.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:end:decrement,
+.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:end:increment {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: none !important;
+    background-image: none !important;
+    border: 0 !important;
+    display: none !important;
+    block-size: 0 !important;
+    inline-size: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    width: 0 !important;
+}

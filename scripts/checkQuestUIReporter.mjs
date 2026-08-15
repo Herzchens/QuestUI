@@ -5,12 +5,17 @@ const REQUIRED_SECTIONS = ["Bad Patches", "Bad Webpack Finds", "Bad Starts"];
 const PATCH_PLUGINS = ["QuestUI", "GameActivityToggle"];
 // One entry per webpack lookup the plugin makes. These are the strings runReporter.ts builds
 // for a failed find, so a lookup missing from this list is a lookup whose failure the CI run
-// will not notice. Keep it in step with the lookups in QuestButton.tsx and stores.ts.
+// will not notice. Keep it in step with the lookups in QuestButton.tsx, QuestDashboard.tsx,
+// questData.ts, and stores.ts.
 const WEBPACK_FIND_SIGNATURES = [
     'proxyLazyWebpack("QuestStore", "QuestsStore")',
     'findByCode("\\"M7.5 21.7a8.95")',
     'findComponentByCode("badgePosition", "icon")',
-    'findComponentByCode("renderBadgeCount", "disableColor")'
+    'findComponentByCode("renderBadgeCount", "disableColor")',
+    'findByCode("heartbeat?.lastBeatAt", "updatedAt", "eventName", "includeTaskTypes")',
+    'findByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")',
+    'findByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")',
+    'findComponentByCode("shouldUseThemeColor", "customSize", "loading")'
 ];
 
 function extractSection(report, name) {
@@ -80,6 +85,10 @@ function runSelfTest() {
     assert.match(analyzeReport(completeReport({ badPatches: "- QuestUI (had no effect)\n" }), "", 1).problems.join("\n"), /QuestUI appears in Bad Patches/);
     assert.match(analyzeReport(completeReport({ badPatches: "- GameActivityToggle (had no effect)\n" }), "", 1).problems.join("\n"), /GameActivityToggle appears in Bad Patches/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nproxyLazyWebpack("QuestStore", "QuestsStore")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("heartbeat?.lastBeatAt", "updatedAt", "eventName", "includeTaskTypes")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindComponentByCode("shouldUseThemeColor", "customSize", "loading")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.deepEqual(analyzeReport(completeReport({ badPatches: "- SomeOtherPlugin (had no effect)\n" }), "", 1), {
         problems: [],
         warnings: ["reporter exited with 1, but only unrelated Vencord failures were found"]

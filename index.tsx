@@ -5,7 +5,7 @@ import settings from "./settings";
 
 export default definePlugin({
     name: "QuestUI",
-    description: "Adds standalone Discord Quest shortcuts, status indicators, and color-coded counters.",
+    description: "Adds standalone Discord Quest shortcuts, live status indicators, and an optional mini dashboard.",
     authors: [
         {
             name: "Herzchens",
