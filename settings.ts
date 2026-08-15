@@ -7,6 +7,10 @@ const rewardOptions = [
     { label: "Non-Orb rewards", value: "non-orbs" }
 ] as const;
 
+function noShortcutButtons(this: any): boolean {
+    return !this.store.showQuestsButtonTopBar && !this.store.showQuestsButtonSettingsBar;
+}
+
 export default definePluginSettings({
     showQuestsButtonTopBar: {
         type: OptionType.BOOLEAN,
@@ -25,20 +29,20 @@ export default definePluginSettings({
     showQuestsButtonBadges: {
         type: OptionType.BOOLEAN,
         displayName: "Quest Home Counters",
-        description: "Show colored numeric counters on Discord's Quest Home links.",
+        description: "Show colored numeric counters on Discord's official Quest Home links. This works independently of QuestUI's shortcut buttons.",
         default: false,
         restartNeeded: true
     },
 
     dashboardMode: {
         type: OptionType.BOOLEAN,
-        displayName: "Dashboard Mode",
-        description: "Open the live mini dashboard when clicking a Quest button. Configure Dashboard filters from the filter button inside the dashboard.",
+        displayName: "↳ Dashboard Mode",
+        description: "Open the live mini dashboard when clicking a QuestUI shortcut. Requires the Top Bar Button or Settings Bar Button.",
         default: false
     },
 
     // Dashboard filter values live in settings so they persist, but they are configured
-    // from the Dashboard's dedicated filter panel instead of flooding this settings page.
+    // from the Dashboard's dedicated filter popout instead of flooding this settings page.
     dashboardShowAvailable: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Available",
@@ -114,13 +118,13 @@ export default definePluginSettings({
 
     detailedStatus: {
         type: OptionType.BOOLEAN,
-        displayName: "Detailed Status",
-        description: "Replace the attention dot with a numeric badge. Priority: In Progress, Ready to Claim, Available.",
+        displayName: "↳ Detailed Status",
+        description: "Replace the QuestUI shortcut attention dot with a numeric badge. Requires the Top Bar Button or Settings Bar Button.",
         default: false
     },
     detailedStatusScope: {
         type: OptionType.SELECT,
-        displayName: "↳ Count Scope",
+        displayName: "   ↳ Count Scope",
         description: "Use Dashboard filters or a separate Detailed Status filter set.",
         options: [
             { label: "Same as Dashboard filters", value: "dashboard", default: true },
@@ -129,66 +133,68 @@ export default definePluginSettings({
     },
     detailedShowAvailable: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Available",
+        displayName: "      ↳ Available",
         description: "Count available quests.",
         default: true
     },
     detailedShowInProgress: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ In Progress",
+        displayName: "      ↳ In Progress",
         description: "Count in-progress quests.",
         default: true
     },
     detailedShowClaimable: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Ready to Claim",
+        displayName: "      ↳ Ready to Claim",
         description: "Count quests ready to claim.",
         default: true
     },
     detailedRewardFilter: {
         type: OptionType.SELECT,
-        displayName: "↳ Reward Filter",
+        displayName: "      ↳ Reward Filter",
         description: "Choose which rewards can affect Detailed Status.",
         options: rewardOptions
     },
     detailedIncludeUnknownRewards: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Include Unknown Rewards",
+        displayName: "      ↳ Include Unknown Rewards",
         description: "Count unknown reward formats while a reward filter is active.",
         default: true
     },
     detailedShowPlay: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Play",
+        displayName: "      ↳ Play",
         description: "Allow play-game quests to affect Detailed Status.",
         default: true
     },
     detailedShowStream: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Stream",
+        displayName: "      ↳ Stream",
         description: "Allow stream quests to affect Detailed Status.",
         default: true
     },
     detailedShowVideo: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Video",
+        displayName: "      ↳ Video",
         description: "Allow video quests to affect Detailed Status.",
         default: true
     },
     detailedShowActivity: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Activity",
+        displayName: "      ↳ Activity",
         description: "Allow Activity quests to affect Detailed Status.",
         default: true
     },
     detailedShowOther: {
         type: OptionType.BOOLEAN,
-        displayName: "↳ Other / Unknown",
+        displayName: "      ↳ Other / Unknown",
         description: "Allow unknown Quest task types to affect Detailed Status.",
         default: true
     }
 }, {
-    // Dashboard filters are edited in-context from the Dashboard filter button.
+    dashboardMode: { disabled: noShortcutButtons },
+
+    // Dashboard filters are edited in-context from the Dashboard filter popout.
     dashboardShowAvailable: { hidden: true },
     dashboardShowInProgress: { hidden: true },
     dashboardShowClaimable: { hidden: true },
@@ -202,19 +208,23 @@ export default definePluginSettings({
     dashboardShowActivity: { hidden: true },
     dashboardShowOther: { hidden: true },
 
-    // Detailed Status stays compact until Custom filters are selected. The Dashboard
-    // filter rows remain out of this modal and are edited in-context from the dashboard.
-    detailedStatusScope: { hidden() { return !this.store.detailedStatus; } },
-    detailedShowAvailable: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
-    detailedShowInProgress: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
-    detailedShowClaimable: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
-    detailedRewardFilter: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
+    // Detailed Status only applies to QuestUI shortcut buttons. Keep the parent visible
+    // but locked when both shortcut injection points are disabled; hide its children.
+    detailedStatus: { disabled: noShortcutButtons },
+    detailedStatusScope: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus; } },
+    detailedShowAvailable: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
+    detailedShowInProgress: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
+    detailedShowClaimable: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
+    detailedRewardFilter: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
     detailedIncludeUnknownRewards: { hidden() {
-        return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom" || this.store.detailedRewardFilter === "all";
+        return noShortcutButtons.call(this)
+            || !this.store.detailedStatus
+            || this.store.detailedStatusScope !== "custom"
+            || this.store.detailedRewardFilter === "all";
     } },
-    detailedShowPlay: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
-    detailedShowStream: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
-    detailedShowVideo: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
-    detailedShowActivity: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
-    detailedShowOther: { hidden() { return !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } }
+    detailedShowPlay: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
+    detailedShowStream: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
+    detailedShowVideo: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
+    detailedShowActivity: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },
+    detailedShowOther: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } }
 });

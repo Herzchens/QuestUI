@@ -151,9 +151,6 @@
 .quest-ui-dashboard-header {
     background: var(--background-base-lowest, var(--background-primary, #111214));
     border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
     padding: 14px 15px 12px;
 }
 
@@ -226,7 +223,7 @@
 .quest-ui-filter-button,
 .quest-ui-filter-chip,
 .quest-ui-filter-reset,
-.quest-ui-filter-show-all,
+.quest-ui-filter-clear,
 .quest-ui-dashboard-primary-action,
 .quest-ui-dashboard-empty-home,
 .quest-ui-dashboard-open-home {
@@ -236,9 +233,12 @@
 
 .quest-ui-filter-button {
     align-items: center;
-    background: transparent;
-    border: 1px solid var(--border-normal, rgba(255, 255, 255, 0.16));
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 5%, var(--background-base-low, #1e1f22));
+    border: 1px solid color-mix(in srgb, var(--brand-500, #5865f2) 34%, transparent);
     border-radius: 8px;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.24),
+        inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 7%, transparent);
     color: var(--interactive-normal);
     display: inline-flex;
     flex: 0 0 34px;
@@ -246,24 +246,35 @@
     justify-content: center;
     padding: 0;
     position: relative;
-    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+    transition: background-color 120ms ease, box-shadow 120ms ease, color 120ms ease, transform 120ms ease;
     width: 34px;
 }
 
-.quest-ui-filter-button:hover,
-.quest-ui-filter-button.is-open {
-    background: var(--background-mod-subtle, rgba(255, 255, 255, 0.08));
-    border-color: var(--interactive-normal);
+.quest-ui-filter-button:hover {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 9%, var(--background-base-low, #1e1f22));
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.28),
+        inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 10%, transparent);
     color: var(--interactive-hover);
+    transform: translateY(-1px);
+}
+
+.quest-ui-filter-button.is-open {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 15%, var(--background-base-low, #1e1f22));
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.3),
+        0 0 0 2px color-mix(in srgb, var(--brand-500, #5865f2) 14%, transparent);
+    color: var(--brand-360, #949cf7);
 }
 
 .quest-ui-filter-button.is-active {
-    border-color: color-mix(in srgb, var(--brand-500, #5865f2) 72%, var(--border-normal, rgba(255, 255, 255, 0.16)));
+    box-shadow:
+        0 2px 7px rgba(0, 0, 0, 0.26),
+        inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 14%, transparent);
 }
 
 .quest-ui-filter-button.is-active.is-open {
-    background: color-mix(in srgb, var(--brand-500, #5865f2) 14%, transparent);
-    color: var(--brand-360, #949cf7);
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 18%, var(--background-base-low, #1e1f22));
 }
 
 .quest-ui-filter-icon {
@@ -292,13 +303,16 @@
 }
 
 .quest-ui-filter-panel {
-    background: var(--background-base-low, var(--background-secondary, #1e1f22));
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.09));
-    border-radius: 9px;
+    background: var(--background-floating, var(--background-base-low, #1e1f22));
+    border: 1px solid color-mix(in srgb, var(--brand-500, #5865f2) 18%, var(--border-subtle, transparent));
+    border-radius: 10px;
+    box-shadow: var(--shadow-high, 0 12px 34px rgba(0, 0, 0, 0.42));
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 11px;
+    max-width: calc(100vw - 32px);
+    padding: 12px;
+    width: 370px;
 }
 
 .quest-ui-filter-panel-heading {
@@ -308,10 +322,11 @@
     justify-content: space-between;
 }
 
-.quest-ui-filter-panel-heading > div {
+.quest-ui-filter-panel-heading > div:first-child {
     display: flex;
     flex-direction: column;
     gap: 1px;
+    min-width: 0;
 }
 
 .quest-ui-filter-panel-heading strong {
@@ -324,10 +339,17 @@
     font-size: 10.5px;
 }
 
+.quest-ui-filter-panel-actions {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
 .quest-ui-filter-reset,
-.quest-ui-filter-show-all {
-    background: transparent;
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+.quest-ui-filter-clear {
+    background: var(--background-mod-subtle, rgba(255, 255, 255, 0.05));
+    border: 0;
     border-radius: 6px;
     color: var(--text-muted);
     font-size: 10.5px;
@@ -336,9 +358,13 @@
 }
 
 .quest-ui-filter-reset:hover,
-.quest-ui-filter-show-all:hover {
-    background: var(--background-mod-subtle, rgba(255, 255, 255, 0.08));
+.quest-ui-filter-clear:hover {
+    background: var(--background-mod-strong, rgba(255, 255, 255, 0.1));
     color: var(--text-default, var(--header-primary));
+}
+
+.quest-ui-filter-clear {
+    color: var(--brand-360, #949cf7);
 }
 
 .quest-ui-filter-section {
@@ -460,7 +486,7 @@
     min-height: 0;
     overflow-y: auto;
     padding: 12px;
-    scrollbar-color: var(--interactive-muted) var(--background-base-lowest, #111214);
+    scrollbar-color: var(--interactive-muted) transparent;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
 }
@@ -470,31 +496,43 @@
 }
 
 .quest-ui-dashboard-content::-webkit-scrollbar-track {
-    background: var(--background-base-lowest, #111214);
-    border-radius: 999px;
+    background: transparent;
 }
 
 .quest-ui-dashboard-content::-webkit-scrollbar-thumb {
     background: var(--interactive-muted);
-    border: 2px solid var(--background-base-lowest, #111214);
+    background-clip: padding-box;
+    border: 2px solid transparent;
     border-radius: 999px;
     min-height: 34px;
 }
 
 .quest-ui-dashboard-content::-webkit-scrollbar-thumb:hover {
     background: var(--interactive-normal);
+    background-clip: padding-box;
 }
 
-.quest-ui-dashboard-content::-webkit-scrollbar-button,
+.quest-ui-dashboard::-webkit-scrollbar-button,
+.quest-ui-dashboard *::-webkit-scrollbar-button,
 .quest-ui-dashboard-content::-webkit-scrollbar-button:single-button,
 .quest-ui-dashboard-content::-webkit-scrollbar-button:vertical,
 .quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:start:decrement,
 .quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:end:increment {
-    background: transparent;
-    display: none;
-    height: 0;
-    min-height: 0;
-    width: 0;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    width: 0 !important;
+}
+
+.quest-ui-dashboard::-webkit-resizer,
+.quest-ui-dashboard *::-webkit-resizer {
+    display: none !important;
 }
 
 .quest-ui-card {
@@ -803,39 +841,30 @@
 }
 
 .quest-ui-empty-illustration {
-    height: 94px;
+    align-items: center;
+    display: flex;
+    height: 92px;
+    justify-content: center;
     margin-bottom: 10px;
-    opacity: 0.92;
-    width: 170px;
+    width: 160px;
 }
 
-.quest-ui-empty-illustration svg {
-    height: 100%;
-    overflow: visible;
-    width: 100%;
+.quest-ui-empty-quest-icon {
+    align-items: center;
+    background:
+        radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--brand-500, #5865f2) 22%, transparent), transparent 68%);
+    border-radius: 999px;
+    color: var(--brand-360, #949cf7);
+    display: flex;
+    height: 82px;
+    justify-content: center;
+    width: 82px;
 }
 
-.quest-ui-empty-cloud {
-    fill: var(--background-base-lower, #232428);
-    stroke: var(--border-subtle, rgba(255, 255, 255, 0.08));
-    stroke-width: 1.5;
-}
-
-.quest-ui-empty-orb {
-    fill: color-mix(in srgb, var(--brand-500, #5865f2) 34%, var(--background-base-lower, #232428));
-    stroke: var(--brand-500, #5865f2);
-    stroke-width: 2;
-}
-
-.quest-ui-empty-face {
-    fill: none;
-    stroke: var(--text-muted);
-    stroke-linecap: round;
-    stroke-width: 2;
-}
-
-.quest-ui-empty-spark {
-    fill: var(--brand-400, var(--brand-500, #5865f2));
+.quest-ui-empty-quest-icon > svg {
+    fill: currentColor;
+    height: 52px;
+    width: 52px;
 }
 
 .quest-ui-dashboard-empty strong {
@@ -922,6 +951,15 @@
 @media (max-width: 520px) {
     .quest-ui-dashboard {
         width: calc(100vw - 16px);
+    }
+
+    .quest-ui-filter-panel {
+        width: min(340px, calc(100vw - 24px));
+    }
+
+    .quest-ui-filter-panel-heading {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .quest-ui-filter-section {

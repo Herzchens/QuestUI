@@ -1,5 +1,5 @@
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { NavigationRouter, ThemeStore, useState, useStateFromStores } from "@webpack/common";
+import { NavigationRouter, Popout, ThemeStore, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import {
     attentionCounts,
@@ -28,6 +28,8 @@ interface DiscordQuestAsset {
 
 type DiscordQuestAssetKind = "game_tile" | "quest_bar_hero_image" | "hero_image";
 type QuestTheme = "dark" | "light";
+
+const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 
 // This is the native selector used by Discord Quest cards immediately before their
 // progress ring. It owns both the ratio and the displayed text/rounding, including
@@ -206,8 +208,6 @@ function statusLabel(status: NormalizedQuest["status"]): string {
 }
 
 function QuestCard({ quest }: { quest: NormalizedQuest; }) {
-    // This hook is deliberately called for every card and is the exact selector used
-    // by Discord's Quest card before rendering its progress ring and progress text.
     const completion = useDiscordQuestCompletion(quest.rawQuest);
     const expiry = formatExpiry(quest.expiresAt);
     const urgency = expiryUrgency(quest.expiresAt);
@@ -312,7 +312,7 @@ function dashboardFilterCount(store: any): number {
     return count;
 }
 
-function showAllDashboardQuests(): void {
+function clearDashboardFilters(): void {
     settings.store.dashboardShowAvailable = true;
     settings.store.dashboardShowInProgress = true;
     settings.store.dashboardShowClaimable = true;
@@ -346,13 +346,16 @@ function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
     const store = settings.store;
 
     return (
-        <div className="quest-ui-filter-panel">
+        <div className="quest-ui-filter-panel" role="group" aria-label="Quest filters">
             <div className="quest-ui-filter-panel-heading">
                 <div>
                     <strong>Filters</strong>
                     <span>{hiddenCount > 0 ? `${hiddenCount} ${hiddenCount === 1 ? "quest" : "quests"} hidden` : "All matching quests are visible"}</span>
                 </div>
-                <button type="button" className="quest-ui-filter-reset" onClick={restoreRecommendedFilters}>Recommended</button>
+                <div className="quest-ui-filter-panel-actions">
+                    <button type="button" className="quest-ui-filter-reset" onClick={restoreRecommendedFilters}>Recommended</button>
+                    <button type="button" className="quest-ui-filter-clear" onClick={clearDashboardFilters}>Clear all</button>
+                </div>
             </div>
 
             <div className="quest-ui-filter-section">
@@ -396,7 +399,6 @@ function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
                     />
                     Include unknown reward formats
                 </label>
-                <button type="button" className="quest-ui-filter-show-all" onClick={showAllDashboardQuests}>Show all</button>
             </div>
         </div>
     );
@@ -405,12 +407,9 @@ function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
 function EmptyStateIllustration() {
     return (
         <div className="quest-ui-empty-illustration" aria-hidden="true">
-            <svg viewBox="0 0 160 92">
-                <path className="quest-ui-empty-cloud" d="M27 68h106a15 15 0 0 0 0-30 24 24 0 0 0-44-10 31 31 0 0 0-55 17A12 12 0 0 0 27 68Z" />
-                <circle className="quest-ui-empty-orb" cx="79" cy="46" r="22" />
-                <path className="quest-ui-empty-face" d="M68 45h4v4h-4Zm18 0h4v4h-4Zm-17 11c6 5 15 5 21 0" />
-                <path className="quest-ui-empty-spark" d="m29 24 2 5 5 2-5 2-2 5-2-5-5-2 5-2Zm103-8 1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5Z" />
-            </svg>
+            <div className="quest-ui-empty-quest-icon">
+                <QuestIcon />
+            </div>
         </div>
     );
 }
@@ -418,6 +417,7 @@ function EmptyStateIllustration() {
 export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
     const quests = useQuestSnapshot();
+    const filterButtonRef = useRef<HTMLButtonElement | null>(null);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const filtered = filterQuests(quests, dashboardScopeFromSettings(dashboardSettings));
     const visible = sortDashboardQuests(filtered);
@@ -435,20 +435,31 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                         <DashboardSummary quests={filtered} />
                     </div>
 
-                    <button
-                        type="button"
-                        className={`quest-ui-filter-button${filtersOpen ? " is-open" : ""}${activeFilterCount > 0 ? " is-active" : ""}`}
-                        onClick={() => setFiltersOpen(open => !open)}
-                        aria-label={activeFilterCount > 0 ? `Quest filters, ${activeFilterCount} active` : "Quest filters, off"}
-                        aria-expanded={filtersOpen}
-                        title={activeFilterCount > 0 ? `${activeFilterCount} active filters` : "Filters off"}
+                    <Popout
+                        position="bottom"
+                        align="right"
+                        animation={Popout.Animation.NONE}
+                        shouldShow={filtersOpen}
+                        onRequestClose={() => setFiltersOpen(false)}
+                        targetElementRef={filterButtonRef}
+                        renderPopout={() => <DashboardFilters hiddenCount={hiddenCount} />}
                     >
-                        <FilterIcon />
-                        {activeFilterCount > 0 && <span className="quest-ui-filter-count" aria-hidden="true">{activeFilterCount > 9 ? "9+" : activeFilterCount}</span>}
-                    </button>
+                        {(_, { isShown }) => (
+                            <button
+                                ref={filterButtonRef}
+                                type="button"
+                                className={`quest-ui-filter-button${isShown ? " is-open" : ""}${activeFilterCount > 0 ? " is-active" : ""}`}
+                                onClick={() => setFiltersOpen(open => !open)}
+                                aria-label={activeFilterCount > 0 ? `Quest filters, ${activeFilterCount} active` : "Quest filters, off"}
+                                aria-expanded={isShown}
+                                title={activeFilterCount > 0 ? `${activeFilterCount} active filters` : "Filters off"}
+                            >
+                                <FilterIcon />
+                                {activeFilterCount > 0 && <span className="quest-ui-filter-count" aria-hidden="true">{activeFilterCount > 9 ? "9+" : activeFilterCount}</span>}
+                            </button>
+                        )}
+                    </Popout>
                 </div>
-
-                {filtersOpen && <DashboardFilters hiddenCount={hiddenCount} />}
             </header>
 
             <div className="quest-ui-dashboard-content">
@@ -464,8 +475,8 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
 
                         {hiddenCount > 0 && (
                             <div className="quest-ui-dashboard-empty-actions">
-                                <button type="button" className="quest-ui-dashboard-primary-action" onClick={showAllDashboardQuests}>
-                                    Show All
+                                <button type="button" className="quest-ui-dashboard-primary-action" onClick={clearDashboardFilters}>
+                                    Clear Filters
                                 </button>
                                 <button type="button" className="quest-ui-dashboard-empty-home" onClick={() => openQuestHome(closePopout)}>
                                     Open Quest Home <ArrowUpRightIcon />

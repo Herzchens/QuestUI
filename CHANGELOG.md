@@ -10,7 +10,10 @@
 - Changed multi-option Quest task selection to use Discord's native task-details selector before the local compatibility fallback, keeping the secondary current/target text aligned with the task Discord selected.
 - Added Discord-provided Quest artwork with task-type micro badges to Dashboard cards, and reused Discord's own themed Orb component for Orb rewards.
 - Fixed Quest artwork loading by resolving Discord Quest asset keys through Discord's native themed Quest asset helper instead of treating asset keys as direct image URLs.
-- Added an in-dashboard Filter control with visible active state, status/reward/task-type filters, recommended defaults, and a Show All reset.
+- Changed Dashboard filters into a floating Discord/Vencord popout with a persistent active-state badge, Recommended preset, and Clear all action.
+- Replaced the custom Dashboard empty-state drawing with Discord's native Quest icon.
+- Refined the Dashboard Filter button with theme-safe brand-tinted borders/shadows and strengthened native scrollbar-arrow suppression.
+- Clarified settings dependencies: Quest Home Counters remain fully independent, while Dashboard Mode and Detailed Status are visibly locked when both QuestUI shortcut buttons are disabled.
 - Refined Dashboard card layout with two-line Quest titles, expiry urgency colors below the progress ring, Orb reward tiers, and more reliable scrollbar-arrow suppression.
 - Reorganized plugin settings so Dashboard filters live in the Dashboard filter panel, Detailed Status children are indented and conditional, and disabled feature groups no longer flood the settings modal.
 - Refined Dashboard Quest cards, progress state rings, custom scrolling, opaque surfaces, rich status tooltip, arrow alignment, Detailed Status badge placement, and the filtered empty state.
