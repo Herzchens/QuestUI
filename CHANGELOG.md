@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.1
 
 - Added optional Dashboard Mode with a live mini Quest dashboard, progress rings, rewards, expiry information, filtering, and an always-visible link to Discord Quest Home.
 - Added Dashboard filters for Quest status, Orb/non-Orb rewards, and Play/Stream/Video/Activity/unknown task types.
