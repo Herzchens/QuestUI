@@ -6,7 +6,7 @@ const PATCH_PLUGINS = ["QuestUI", "GameActivityToggle"];
 // One entry per webpack lookup the plugin makes. These are the strings runReporter.ts builds
 // for a failed find, so a lookup missing from this list is a lookup whose failure the CI run
 // will not notice. Keep it in step with the lookups in QuestButton.tsx, QuestDashboard.tsx,
-// questData.ts, and stores.ts.
+// questActions.ts, questData.ts, and stores.ts.
 const WEBPACK_FIND_SIGNATURES = [
     'proxyLazyWebpack("QuestStore", "QuestsStore")',
     'findByCode("\\"M7.5 21.7a8.95")',
@@ -15,7 +15,8 @@ const WEBPACK_FIND_SIGNATURES = [
     'findByCode("heartbeat?.lastBeatAt", "updatedAt", "eventName", "includeTaskTypes")',
     'findByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")',
     'findByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")',
-    'findComponentByCode("shouldUseThemeColor", "customSize", "loading")'
+    'findComponentByCode("shouldUseThemeColor", "customSize", "loading")',
+    'findByCode("QUESTS_CLAIM_REWARD_BEGIN", "QUESTS_CLAIM_REWARD_SUCCESS", "QUESTS_CLAIM_REWARD_FAILURE", "traffic_metadata_sealed")'
 ];
 
 function extractSection(report, name) {
@@ -89,6 +90,7 @@ function runSelfTest() {
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindComponentByCode("shouldUseThemeColor", "customSize", "loading")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_CLAIM_REWARD_BEGIN", "QUESTS_CLAIM_REWARD_SUCCESS", "QUESTS_CLAIM_REWARD_FAILURE", "traffic_metadata_sealed")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.deepEqual(analyzeReport(completeReport({ badPatches: "- SomeOtherPlugin (had no effect)\n" }), "", 1), {
         problems: [],
         warnings: ["reporter exited with 1, but only unrelated Vencord failures were found"]

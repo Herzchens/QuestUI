@@ -1,0 +1,45 @@
+.quest-ui-card-actions {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.quest-ui-card-action {
+    align-items: center;
+    background: var(--button-filled-brand-background, var(--brand-500));
+    border: 0;
+    border-radius: 6px;
+    color: var(--button-filled-brand-text, #fff);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 600;
+    justify-content: center;
+    line-height: 16px;
+    min-height: 28px;
+    padding: 6px 10px;
+    white-space: nowrap;
+}
+
+.quest-ui-card-action:hover:not(:disabled) {
+    background: var(--button-filled-brand-background-hover, var(--brand-560));
+}
+
+.quest-ui-card-action:active:not(:disabled) {
+    background: var(--button-filled-brand-background-active, var(--brand-600));
+}
+
+.quest-ui-card-action:disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+
+.quest-ui-card-action-claim {
+    background: var(--status-positive, #23a55a);
+}
+
+.quest-ui-card-action-claim:hover:not(:disabled),
+.quest-ui-card-action-claim:active:not(:disabled) {
+    background: var(--status-positive-background, #1f8f4d);
+}

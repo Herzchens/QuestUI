@@ -46,6 +46,10 @@ jobs:
         working-directory: vencord
         run: pnpm install --frozen-lockfile
 
+      - name: Test Quest action logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
+
       - name: Build Vencord
         working-directory: vencord
         run: pnpm build

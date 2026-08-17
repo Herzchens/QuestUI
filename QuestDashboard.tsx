@@ -1,6 +1,7 @@
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, ThemeStore, UserStore, useRef, useState, useStateFromStores } from "@webpack/common";
 
+import { QuestCardActions } from "./QuestCardActions";
 import {
     attentionCounts,
     dashboardScopeFromSettings,
@@ -267,6 +268,7 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
                         {quest.reward.kind === "orbs" && <OrbGlyph />}
                         <strong>{rewardLabel}</strong>
                     </span>
+                    <QuestCardActions quest={quest} />
                 </div>
             </div>
 
