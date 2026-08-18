@@ -5,7 +5,7 @@ import { Flex } from "@components/Flex";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, Tooltip, useRef } from "@webpack/common";
 
-import { QuestDashboard } from "./QuestDashboard";
+import { QuestDashboardShell } from "./QuestDashboardShell";
 import {
     attentionCounts,
     detailedScopeFromSettings,
@@ -199,7 +199,7 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
             targetElementRef={buttonRef}
             position={type === "top-bar" ? "bottom" : "top"}
             align={type === "top-bar" ? "right" : "left"}
-            renderPopout={({ closePopout }) => <QuestDashboard closePopout={closePopout} />}
+            renderPopout={({ closePopout }) => <QuestDashboardShell closePopout={closePopout} />}
         >
             {popoutProps => renderButton(popoutProps.onClick)}
         </Popout>

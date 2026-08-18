@@ -1,0 +1,46 @@
+.quest-ui-dashboard-shell {
+    position: relative;
+    width: min(510px, calc(100vw - 24px));
+}
+
+.quest-ui-dashboard-shell > .quest-ui-dashboard {
+    width: 100%;
+}
+
+.quest-ui-dashboard-shell.has-orion-control .quest-ui-dashboard-heading {
+    box-sizing: border-box;
+    padding-right: 40px;
+}
+
+.quest-ui-orion-header-control {
+    position: absolute;
+    right: 55px;
+    top: 14px;
+    z-index: 3;
+}
+
+.quest-ui-orion-icon-button {
+    align-items: center;
+    background: var(--background-mod-strong, rgba(255, 255, 255, 0.12));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    display: inline-flex;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+    width: 34px;
+}
+
+.quest-ui-orion-icon-button svg {
+    fill: currentColor;
+    height: 17px;
+    width: 17px;
+}
+
+.quest-ui-orion-icon-button.is-start { color: var(--status-positive); }
+.quest-ui-orion-icon-button.is-stop { color: var(--status-danger); }
+.quest-ui-orion-icon-button:hover:not(:disabled) { background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18)); }
+.quest-ui-orion-icon-button:focus-visible { outline: 2px solid var(--focus-primary, var(--brand-500)); outline-offset: 2px; }
+.quest-ui-orion-icon-button:disabled { cursor: default; opacity: 0.45; }

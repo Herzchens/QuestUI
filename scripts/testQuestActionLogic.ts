@@ -1,6 +1,18 @@
 import assert from "node:assert/strict";
 
-import { assessClaimResponse, isQuestVerificationError, selectClaimTarget } from "../questActionLogic";
+import {
+    assessClaimResponse,
+    assessEnrollResponse,
+    isQuestVerificationError,
+    selectClaimTarget
+} from "../questActionLogic";
+
+assert.equal(assessEnrollResponse({ type: "success" }), "success");
+assert.equal(assessEnrollResponse({ type: "captcha_failed" }), "verification");
+assert.equal(assessEnrollResponse({ type: "previous_in_flight_request" }), "in-flight");
+assert.equal(assessEnrollResponse({ type: "unknown_error" }), "failure");
+assert.equal(assessEnrollResponse({ type: "future_result" }), "invalid");
+assert.equal(assessEnrollResponse(null), "invalid");
 
 assert.deepEqual(selectClaimTarget(undefined), { platform: 0, location: 25 });
 assert.deepEqual(selectClaimTarget({ rewards: [], platforms: [] }), { platform: 0, location: 25 });

@@ -3,6 +3,7 @@ export type ClaimTarget = {
     location: 11 | 25;
 };
 
+export type EnrollResponseAssessment = "success" | "verification" | "in-flight" | "failure" | "invalid";
 export type ClaimResponseAssessment = "success" | "pending" | "reward-errors" | "invalid";
 
 type RewardModalKind = "reward-code" | "in-game" | "collectible" | "virtual-currency" | "fractional-premium";
@@ -91,6 +92,16 @@ function rewardModalKind(rewards: unknown): RewardModalKind | null {
     if (types.includes(IN_GAME_REWARD)) return "in-game";
     if (types.includes(VIRTUAL_CURRENCY_REWARD)) return "virtual-currency";
     return "reward-code";
+}
+
+/** Classify Discord's native enroll action result. Unknown shapes fail closed. */
+export function assessEnrollResponse(response: unknown): EnrollResponseAssessment {
+    if (!isPlainRecord(response) || typeof response.type !== "string") return "invalid";
+    if (response.type === "success") return "success";
+    if (response.type === "captcha_failed") return "verification";
+    if (response.type === "previous_in_flight_request") return "in-flight";
+    if (response.type === "unknown_error") return "failure";
+    return "invalid";
 }
 
 /** Resolve the arguments Discord's native Quest claim action expects. Null means fail closed. */

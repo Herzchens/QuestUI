@@ -1,7 +1,18 @@
 import { findByCodeLazy } from "@webpack";
-import { RestAPI } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 
-import { assessClaimResponse, isQuestVerificationError, selectClaimTarget } from "./questActionLogic";
+import {
+    assessClaimResponse,
+    assessEnrollResponse,
+    isQuestVerificationError,
+    selectClaimTarget
+} from "./questActionLogic";
+import {
+    attachChangeListenerSafely,
+    classifyOptionalTimestamp,
+    questAccessSuspensionState,
+    storeWaitTimeoutResult
+} from "./questActionRuntimeLogic";
 import type { NormalizedQuest } from "./questData";
 import { QuestsStore } from "./stores";
 
@@ -9,11 +20,18 @@ const QUEST_HOME_DESKTOP_LOCATION = 11;
 const STORE_CONFIRM_TIMEOUT_MS = 5000;
 const SUBMITTED_ACTION_HOLD_MS = 15000;
 
+type NativeEnrollQuest = (questId: string, context: { questContent: number; }) => Promise<unknown>;
 type NativeClaimQuestReward = (questId: string, platform: number, location: number) => Promise<unknown>;
 type QuestActionKind = "enroll" | "claim";
+type StoreWaitResult = "confirmed" | "timeout" | "unavailable" | "account-changed";
 
-// Reuse Discord's own claim action creator rather than rebuilding the request. This keeps
-// current client-side metadata/challenge handling in Discord's normal action path.
+const nativeEnrollQuest = findByCodeLazy(
+    "QUESTS_ENROLL_BEGIN",
+    "QUESTS_ENROLL_SUCCESS",
+    "QUESTS_ENROLL_FAILURE",
+    "previous_in_flight_request"
+) as NativeEnrollQuest;
+
 const nativeClaimQuestReward = findByCodeLazy(
     "QUESTS_CLAIM_REWARD_BEGIN",
     "QUESTS_CLAIM_REWARD_SUCCESS",
@@ -21,64 +39,115 @@ const nativeClaimQuestReward = findByCodeLazy(
     "traffic_metadata_sealed"
 ) as NativeClaimQuestReward;
 
-// Component-local disabled state is not enough: multiple Dashboard instances or a quick
-// close/reopen can otherwise submit the same mutation while Discord is still updating its
-// store. The guard starts immediately before the network action and survives a successful but
-// not-yet-confirmed response for a short bounded window.
-const guardedActions = new Set<string>();
+const inFlightActions = new Set<string>();
+const submittedActions = new Set<string>();
 
 export interface QuestActionResult {
-    /** True when QuestStore itself advanced to the expected state before the short timeout. */
     storeConfirmed: boolean;
+    resubmitAfterMs: number | null;
 }
 
 export class QuestActionError extends Error {
-    constructor(message: string, public readonly cause?: unknown) {
+    constructor(
+        message: string,
+        public readonly cause?: unknown,
+        public readonly resubmitAfterMs: number | null = null
+    ) {
         super(message);
         this.name = "QuestActionError";
     }
 }
 
-function actionKey(kind: QuestActionKind, questId: string): string {
-    return `${kind}:${questId}`;
+function currentUserId(): string | null {
+    try {
+        const id = UserStore?.getCurrentUser?.()?.id;
+        return typeof id === "string" && id.length > 0 ? id : null;
+    } catch {
+        return null;
+    }
+}
+
+function requireCurrentUserId(): string {
+    const id = currentUserId();
+    if (!id) throw new QuestActionError("Discord account state is unavailable. Open Quest Home and try again.");
+    return id;
+}
+
+function actionKey(kind: QuestActionKind, userId: string, questId: string): string {
+    return `${kind}:${userId}:${questId}`;
+}
+
+function beginAction(kind: QuestActionKind, userId: string, questId: string): string {
+    const key = actionKey(kind, userId, questId);
+    if (inFlightActions.has(key)) throw new QuestActionError("This Quest action is already in progress.");
+    if (submittedActions.has(key)) {
+        throw new QuestActionError("Discord is still refreshing this Quest after the previous action. Please wait a moment.");
+    }
+    inFlightActions.add(key);
+    return key;
 }
 
 function currentQuest(questId: string): any | null {
     try {
-        // Manual mutations must be based on Discord's current store state. Falling back to the
-        // card snapshot here can submit an action after the Quest changed or disappeared.
         return QuestsStore?.getQuest?.(questId) ?? null;
     } catch {
         return null;
     }
 }
 
-function sealedMetadata(rawQuest: any) {
-    return {
-        metadata_sealed: rawQuest?.metadataSealed ?? rawQuest?.metadata_sealed ?? null,
-        traffic_metadata_sealed: rawQuest?.trafficMetadataSealed ?? rawQuest?.traffic_metadata_sealed ?? null
-    };
+function ensureCurrentQuestShape(rawQuest: any): void {
+    if (!rawQuest?.id || !rawQuest.config || typeof rawQuest.config !== "object" || Array.isArray(rawQuest.config)) {
+        throw new QuestActionError("Current Quest data is incomplete. Open Quest Home and try again.");
+    }
 }
 
-function asTime(value: unknown): number | null {
-    if (typeof value !== "string" && typeof value !== "number" && !(value instanceof Date)) return null;
-    const time = new Date(value).getTime();
-    return Number.isFinite(time) ? time : null;
+function requireReadableOptionalTimestamp(value: unknown, label: string) {
+    const parsed = classifyOptionalTimestamp(value);
+    if (parsed.kind === "invalid") {
+        throw new QuestActionError(`Discord returned an unreadable ${label}. Open Quest Home and try again.`);
+    }
+    return parsed;
+}
+
+function ensureQuestAccessAvailable(): void {
+    let isSuspended: unknown;
+    let suspendedUntil: unknown;
+    try {
+        isSuspended = QuestsStore?.isQuestAccessSuspended;
+        suspendedUntil = QuestsStore?.questAccessSuspendedUntil;
+    } catch {
+        throw new QuestActionError("Discord Quest access state is unavailable. Open Quest Home and try again.");
+    }
+
+    const state = questAccessSuspensionState(isSuspended, suspendedUntil);
+    if (state === "clear") return;
+    if (state === "invalid") {
+        throw new QuestActionError("Discord returned an unreadable Quest access-suspension state. Open Quest Home and try again.");
+    }
+
+    const parsed = classifyOptionalTimestamp(suspendedUntil);
+    if (parsed.kind === "valid" && parsed.time > Date.now()) {
+        throw new QuestActionError(`Discord has suspended Quest access until ${new Date(parsed.time).toLocaleString()}.`);
+    }
+    throw new QuestActionError("Discord has suspended Quest access on this account. Open Quest Home for the current account state.");
 }
 
 function ensureEnrollmentStillEligible(rawQuest: any): void {
-    if (rawQuest?.preview === true) throw new QuestActionError("This Quest is only a preview and cannot be accepted yet.");
+    if (rawQuest.preview === true) throw new QuestActionError("This Quest is only a preview and cannot be accepted yet.");
 
     const now = Date.now();
-    const startsAt = asTime(rawQuest?.config?.startsAt);
-    const expiresAt = asTime(rawQuest?.config?.expiresAt);
-    if (startsAt != null && startsAt > now) throw new QuestActionError("This Quest has not started yet.");
-    if (expiresAt != null && expiresAt <= now) throw new QuestActionError("This Quest has expired.");
+    const startsAt = requireReadableOptionalTimestamp(rawQuest.config.startsAt, "Quest start time");
+    const expiresAt = requireReadableOptionalTimestamp(rawQuest.config.expiresAt, "Quest expiry time");
+    if (startsAt.kind === "valid" && startsAt.time > now) throw new QuestActionError("This Quest has not started yet.");
+    if (expiresAt.kind === "valid" && expiresAt.time <= now) throw new QuestActionError("This Quest has expired.");
 }
 
 function ensureRewardStillClaimable(rawQuest: any): void {
-    const rewardsExpireAt = asTime(rawQuest?.config?.rewardsConfig?.rewardsExpireAt);
-    if (rewardsExpireAt != null && rewardsExpireAt <= Date.now()) {
+    const rewardsExpireAt = requireReadableOptionalTimestamp(
+        rawQuest.config?.rewardsConfig?.rewardsExpireAt,
+        "Quest reward expiry time"
+    );
+    if (rewardsExpireAt.kind === "valid" && rewardsExpireAt.time <= Date.now()) {
         throw new QuestActionError("This Quest reward has expired.");
     }
 }
@@ -90,12 +159,14 @@ function enrollmentBlockMessage(): string | null {
     } catch {
         throw new QuestActionError("Discord Quest enrollment state is unavailable. Open Quest Home and try again.");
     }
-    if (!raw) return null;
 
-    const blockedUntil = raw instanceof Date ? raw : new Date(raw as string | number);
-    if (!Number.isFinite(blockedUntil.getTime()) || blockedUntil.getTime() <= Date.now()) return null;
-
-    return `Discord has blocked Quest enrollment until ${blockedUntil.toLocaleString()}.`;
+    const blockedUntil = classifyOptionalTimestamp(raw);
+    if (blockedUntil.kind === "missing") return null;
+    if (blockedUntil.kind === "invalid") {
+        throw new QuestActionError("Discord returned an unreadable Quest enrollment block state. Open Quest Home and try again.");
+    }
+    if (blockedUntil.time <= Date.now()) return null;
+    return `Discord has blocked Quest enrollment until ${new Date(blockedUntil.time).toLocaleString()}.`;
 }
 
 function apiErrorMessage(error: any, fallback: string): string {
@@ -108,75 +179,80 @@ function apiErrorMessage(error: any, fallback: string): string {
     return fallback;
 }
 
-async function waitForStoreState(questId: string, predicate: (rawQuest: any) => boolean): Promise<boolean> {
+async function waitForStoreState(
+    questId: string,
+    expectedUserId: string,
+    predicate: (rawQuest: any) => boolean
+): Promise<StoreWaitResult> {
     const store = QuestsStore;
+    const sameAccount = () => currentUserId() === expectedUserId;
     const read = () => {
+        if (!sameAccount()) return null;
         try { return store?.getQuest?.(questId); }
         catch { return null; }
     };
 
-    if (predicate(read())) return true;
-    if (typeof store?.addChangeListener !== "function" || typeof store?.removeChangeListener !== "function") return false;
+    if (!sameAccount()) return "account-changed";
+    if (predicate(read())) return "confirmed";
+    if (typeof store?.addChangeListener !== "function" || typeof store?.removeChangeListener !== "function") return "unavailable";
 
-    return await new Promise<boolean>(resolve => {
+    return await new Promise<StoreWaitResult>(resolve => {
         let finished = false;
-        let listenerAttached = false;
         let timer: ReturnType<typeof setTimeout> | undefined;
+        let detach = () => { };
 
-        const finish = (confirmed: boolean) => {
+        const finish = (result: StoreWaitResult) => {
             if (finished) return;
             finished = true;
             if (timer !== undefined) clearTimeout(timer);
-            if (listenerAttached) {
-                try { store.removeChangeListener(check); } catch { }
-            }
-            resolve(confirmed);
+            detach();
+            resolve(result);
         };
         const check = () => {
-            if (predicate(read())) finish(true);
+            if (!sameAccount()) {
+                finish("account-changed");
+                return;
+            }
+            if (predicate(read())) finish("confirmed");
         };
 
-        timer = setTimeout(() => finish(false), STORE_CONFIRM_TIMEOUT_MS);
+        timer = setTimeout(
+            () => finish(storeWaitTimeoutResult(expectedUserId, currentUserId())),
+            STORE_CONFIRM_TIMEOUT_MS
+        );
         try {
-            store.addChangeListener(check);
-            listenerAttached = true;
+            detach = attachChangeListenerSafely(store, check, () => finished);
         } catch {
-            finish(false);
+            finish("unavailable");
             return;
         }
         check();
     });
 }
 
-function beginAction(kind: QuestActionKind, questId: string): string {
-    const key = actionKey(kind, questId);
-    if (guardedActions.has(key)) {
-        throw new QuestActionError("Discord is still processing the previous action for this Quest. Please wait a moment.");
-    }
-    guardedActions.add(key);
-    return key;
-}
+function holdSubmittedAction(
+    kind: QuestActionKind,
+    userId: string,
+    questId: string,
+    predicate: (rawQuest: any) => boolean
+): void {
+    const key = actionKey(kind, userId, questId);
+    submittedActions.add(key);
 
-function releaseAction(key: string): void {
-    guardedActions.delete(key);
-}
-
-function holdActionUntilStoreAdvances(key: string, questId: string, predicate: (rawQuest: any) => boolean): void {
     const store = QuestsStore;
     let finished = false;
-    let listenerAttached = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let detach = () => { };
 
     const finish = () => {
         if (finished) return;
         finished = true;
-        releaseAction(key);
+        submittedActions.delete(key);
         if (timer !== undefined) clearTimeout(timer);
-        if (listenerAttached) {
-            try { store?.removeChangeListener?.(check); } catch { }
-        }
+        detach();
     };
     const check = () => {
+        if (currentUserId() !== userId) return;
         let rawQuest: any = null;
         try { rawQuest = store?.getQuest?.(questId); } catch { }
         if (predicate(rawQuest)) finish();
@@ -185,96 +261,176 @@ function holdActionUntilStoreAdvances(key: string, questId: string, predicate: (
     timer = setTimeout(finish, SUBMITTED_ACTION_HOLD_MS);
     try {
         if (typeof store?.addChangeListener === "function" && typeof store?.removeChangeListener === "function") {
-            store.addChangeListener(check);
-            listenerAttached = true;
+            detach = attachChangeListenerSafely(store, check, () => finished);
         }
     } catch { }
     check();
 }
 
+function holdAfterPossiblySubmittedFailure(
+    kind: QuestActionKind,
+    userId: string,
+    questId: string,
+    predicate: (rawQuest: any) => boolean,
+    message: string,
+    cause?: unknown
+): QuestActionError {
+    holdSubmittedAction(kind, userId, questId, predicate);
+    return new QuestActionError(message, cause, SUBMITTED_ACTION_HOLD_MS);
+}
+
+function actionThrownError(
+    kind: QuestActionKind,
+    userId: string,
+    questId: string,
+    predicate: (rawQuest: any) => boolean,
+    error: unknown,
+    fallback: string
+): QuestActionError {
+    const message = apiErrorMessage(error, fallback);
+    // A recognized verification/captcha cancellation is an explicit failure state, not an
+    // ambiguous transport outcome. Do not display "Sent" or hold a duplicate guard for it.
+    if (isQuestVerificationError(error)) return new QuestActionError(message, error);
+    return holdAfterPossiblySubmittedFailure(kind, userId, questId, predicate, message, error);
+}
+
+function accountChangedError(
+    kind: QuestActionKind,
+    userId: string,
+    questId: string,
+    predicate: (rawQuest: any) => boolean
+): QuestActionError {
+    return holdAfterPossiblySubmittedFailure(
+        kind,
+        userId,
+        questId,
+        predicate,
+        `Discord account changed while the Quest ${kind === "enroll" ? "enrollment" : "claim"} was in progress. Open Quest Home to verify the result.`
+    );
+}
+
+function uncertainEnrollError(
+    assessment: "in-flight" | "failure" | "invalid",
+    userId: string,
+    questId: string,
+    predicate: (rawQuest: any) => boolean
+): QuestActionError {
+    const message = assessment === "in-flight"
+        ? "Discord is already processing an enrollment for this Quest. Please wait for Quest state to refresh."
+        : assessment === "failure"
+            ? "Discord could not confirm the Quest enrollment. Open Quest Home to verify the result."
+            : "Discord returned an unrecognized enrollment result. Open Quest Home to verify the Quest state.";
+    return holdAfterPossiblySubmittedFailure("enroll", userId, questId, predicate, message);
+}
+
 export async function enrollQuest(quest: NormalizedQuest): Promise<QuestActionResult> {
-    const rawQuest = currentQuest(quest.id);
-    if (!rawQuest?.id) throw new QuestActionError("Current Quest data is unavailable. Open Quest Home and try again.");
-    if (String(rawQuest.id) !== String(quest.id)) throw new QuestActionError("Quest state changed unexpectedly. Open Quest Home and try again.");
-    if (rawQuest.userStatus?.enrolledAt) throw new QuestActionError("This Quest is already accepted.");
-    if (rawQuest.userStatus?.completedAt || rawQuest.userStatus?.claimedAt) {
-        throw new QuestActionError("This Quest no longer needs to be accepted.");
-    }
+    const userId = requireCurrentUserId();
+    const key = beginAction("enroll", userId, quest.id);
 
-    ensureEnrollmentStillEligible(rawQuest);
-
-    const blockMessage = enrollmentBlockMessage();
-    if (blockMessage) throw new QuestActionError(blockMessage);
-
-    const guardKey = beginAction("enroll", quest.id);
     try {
-        // Discord has a native enrollment flow, but its callable signature is not stable/public
-        // enough to invoke safely here. Use the same client RestAPI endpoint and fail closed on
-        // challenge/error responses instead of guessing a private action-creator signature.
-        await RestAPI.post({
-            url: `/quests/${rawQuest.id}/enroll`,
-            body: {
-                location: QUEST_HOME_DESKTOP_LOCATION,
-                is_targeted: false,
-                ...sealedMetadata(rawQuest)
-            }
-        });
-    } catch (error) {
-        releaseAction(guardKey);
-        throw new QuestActionError(apiErrorMessage(error, "Discord rejected the Quest enrollment request."), error);
-    }
+        const rawQuest = currentQuest(quest.id);
+        ensureCurrentQuestShape(rawQuest);
+        if (String(rawQuest.id) !== String(quest.id)) throw new QuestActionError("Quest state changed unexpectedly. Open Quest Home and try again.");
+        ensureQuestAccessAvailable();
+        if (rawQuest.userStatus?.enrolledAt) throw new QuestActionError("This Quest is already accepted.");
+        if (rawQuest.userStatus?.completedAt || rawQuest.userStatus?.claimedAt) {
+            throw new QuestActionError("This Quest no longer needs to be accepted.");
+        }
 
-    const predicate = (current: any) => Boolean(current?.userStatus?.enrolledAt);
-    const storeConfirmed = await waitForStoreState(rawQuest.id, predicate);
-    if (storeConfirmed) releaseAction(guardKey);
-    else holdActionUntilStoreAdvances(guardKey, rawQuest.id, predicate);
-    return { storeConfirmed };
+        ensureEnrollmentStillEligible(rawQuest);
+        const blockMessage = enrollmentBlockMessage();
+        if (blockMessage) throw new QuestActionError(blockMessage);
+
+        const predicate = (current: any) => Boolean(current?.userStatus?.enrolledAt);
+        let response: unknown;
+        try {
+            response = await nativeEnrollQuest(rawQuest.id, { questContent: QUEST_HOME_DESKTOP_LOCATION });
+        } catch (error) {
+            throw actionThrownError(
+                "enroll",
+                userId,
+                rawQuest.id,
+                predicate,
+                error,
+                "Discord's native Quest enrollment action failed unexpectedly."
+            );
+        }
+
+        const assessment = assessEnrollResponse(response);
+        if (assessment === "verification") {
+            throw new QuestActionError("Discord verification was required or cancelled. Open Quest Home if you still need to accept the Quest.");
+        }
+
+        const storeResult = await waitForStoreState(rawQuest.id, userId, predicate);
+        if (storeResult === "account-changed") {
+            throw accountChangedError("enroll", userId, rawQuest.id, predicate);
+        }
+        if (storeResult === "confirmed") return { storeConfirmed: true, resubmitAfterMs: null };
+
+        if (assessment !== "success") throw uncertainEnrollError(assessment, userId, rawQuest.id, predicate);
+
+        holdSubmittedAction("enroll", userId, rawQuest.id, predicate);
+        return { storeConfirmed: false, resubmitAfterMs: SUBMITTED_ACTION_HOLD_MS };
+    } finally {
+        inFlightActions.delete(key);
+    }
 }
 
 export async function claimQuestReward(quest: NormalizedQuest): Promise<QuestActionResult> {
-    const rawQuest = currentQuest(quest.id);
-    if (!rawQuest?.id) throw new QuestActionError("Current Quest data is unavailable. Open Quest Home and try again.");
-    if (String(rawQuest.id) !== String(quest.id)) throw new QuestActionError("Quest state changed unexpectedly. Open Quest Home and try again.");
-    if (rawQuest.userStatus?.claimedAt) throw new QuestActionError("This Quest reward is already claimed.");
-    if (!rawQuest.userStatus?.completedAt) throw new QuestActionError("This Quest is not ready to claim yet.");
+    const userId = requireCurrentUserId();
+    const key = beginAction("claim", userId, quest.id);
 
-    ensureRewardStillClaimable(rawQuest);
-
-    const claimTarget = selectClaimTarget(rawQuest?.config?.rewardsConfig);
-    if (!claimTarget) {
-        throw new QuestActionError("Discord returned an ambiguous or unknown reward configuration. Open Quest Home to claim this reward safely.");
-    }
-
-    const guardKey = beginAction("claim", quest.id);
-    let response: unknown;
     try {
-        response = await nativeClaimQuestReward(rawQuest.id, claimTarget.platform, claimTarget.location);
-    } catch (error) {
-        releaseAction(guardKey);
-        throw new QuestActionError(apiErrorMessage(error, "Discord rejected the reward claim request."), error);
+        const rawQuest = currentQuest(quest.id);
+        ensureCurrentQuestShape(rawQuest);
+        if (String(rawQuest.id) !== String(quest.id)) throw new QuestActionError("Quest state changed unexpectedly. Open Quest Home and try again.");
+        ensureQuestAccessAvailable();
+        if (rawQuest.userStatus?.claimedAt) throw new QuestActionError("This Quest reward is already claimed.");
+        if (!rawQuest.userStatus?.completedAt) throw new QuestActionError("This Quest is not ready to claim yet.");
+
+        ensureRewardStillClaimable(rawQuest);
+        const claimTarget = selectClaimTarget(rawQuest.config.rewardsConfig);
+        if (!claimTarget) {
+            throw new QuestActionError("Discord returned an ambiguous or unknown reward configuration. Open Quest Home to claim this reward safely.");
+        }
+
+        const predicate = (current: any) => Boolean(current?.userStatus?.claimedAt);
+        let response: unknown;
+        try {
+            response = await nativeClaimQuestReward(rawQuest.id, claimTarget.platform, claimTarget.location);
+        } catch (error) {
+            throw actionThrownError(
+                "claim",
+                userId,
+                rawQuest.id,
+                predicate,
+                error,
+                "Discord rejected the reward claim request."
+            );
+        }
+
+        const assessment = assessClaimResponse(response);
+        const storeResult = await waitForStoreState(rawQuest.id, userId, predicate);
+        if (storeResult === "account-changed") {
+            throw accountChangedError("claim", userId, rawQuest.id, predicate);
+        }
+        if (storeResult === "confirmed") return { storeConfirmed: true, resubmitAfterMs: null };
+
+        if (assessment === "reward-errors") {
+            throw new QuestActionError("Discord returned reward errors and the claim was not confirmed. Open Quest Home for details.");
+        }
+
+        holdSubmittedAction("claim", userId, rawQuest.id, predicate);
+        if (assessment === "invalid") {
+            throw new QuestActionError(
+                "Discord did not return a recognizable claim result. Open Quest Home to verify the reward state.",
+                undefined,
+                SUBMITTED_ACTION_HOLD_MS
+            );
+        }
+
+        return { storeConfirmed: false, resubmitAfterMs: SUBMITTED_ACTION_HOLD_MS };
+    } finally {
+        inFlightActions.delete(key);
     }
-
-    const assessment = assessClaimResponse(response);
-    const predicate = (current: any) => Boolean(current?.userStatus?.claimedAt);
-    const storeConfirmed = await waitForStoreState(rawQuest.id, predicate);
-
-    if (storeConfirmed) {
-        releaseAction(guardKey);
-        return { storeConfirmed: true };
-    }
-
-    if (assessment === "reward-errors") {
-        releaseAction(guardKey);
-        throw new QuestActionError("Discord returned reward errors and the claim was not confirmed. Open Quest Home for details.");
-    }
-
-    if (assessment === "invalid") {
-        // The response shape is uncertain, so keep the short guard while Discord catches up.
-        // This avoids turning an unknown-but-possibly-accepted response into an immediate retry.
-        holdActionUntilStoreAdvances(guardKey, rawQuest.id, predicate);
-        throw new QuestActionError("Discord did not return a recognizable claim result. Open Quest Home to verify the reward state.");
-    }
-
-    holdActionUntilStoreAdvances(guardKey, rawQuest.id, predicate);
-    return { storeConfirmed: false };
 }

@@ -1,0 +1,12 @@
+/* Discord custom backgrounds can make the base-background token render as a dark halo.
+ * Detailed Status already uses a solid semantic status color, so keep the badge frameless
+ * and visibly subordinate to the 20px Quest icon. */
+.quest-ui-icon-wrap .quest-ui-detailed-count {
+    border: 0;
+    bottom: -4px;
+    font-size: 8px;
+    height: 12px;
+    min-width: 12px;
+    padding: 0 3px;
+    right: -6px;
+}

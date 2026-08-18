@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- Added explicit manual **Accept Quest** and **Claim Reward** actions to Dashboard cards, with fresh QuestStore validation, account-scoped duplicate guards, enrollment-block handling, and visible success/failure feedback.
+- Added Discord-native enrollment through the client's verified Quest enroll action. The native path owns Discord's duplicate guard, attribution/sealed metadata, Flux/QuestStore updates, and CAPTCHA result instead of QuestUI rebuilding the enroll request.
+- Added Discord-native reward claiming through the client's verified claim action and defensive reward-modal target rules. In-game rewards fail closed unless Discord supplies exactly one unambiguous configured platform; malformed/unknown/ambiguous reward data is never guessed.
+- Hardened manual actions against account-switch races by checking account identity on QuestStore updates and at the confirmation timeout boundary, and by scoping submitted UI state to the account that made the request.
+- Added fail-closed handling for malformed present Quest start/expiry/reward-expiry/enrollment-block timestamps plus bounded duplicate protection for successful or transport-ambiguous submissions not yet reflected in QuestStore.
+- Added challenge-safe action handling: QuestUI does not bypass Discord verification, CAPTCHA, age checks, or account safety and never auto-retries failed manual actions.
+- Added optional **Dashboard • Orion Integration** for a compatible OrionQuests companion surface. QuestUI verifies the installed/enabled Orion plugin and its registered command identity, reads Orion's real engine-running state, subscribes to Orion state changes, and delegates Start/Stop back to Orion's watcher-aware control path without importing farming internals.
+- Added one smart icon-only Orion control immediately left of Filter: **▶ Start All** while Orion is stopped and **■ Stop All** while Orion is running. The control updates from Orion's real state and does not require a selected chat channel. Pause, resume, and per-Quest controls are not implemented.
+- Reduced the Detailed Status numeric badge to a compact 12px indicator and removed its dark frame so it stays visually subordinate to the 20px Quest icon on custom backgrounds.
+- Added pure tests for native enroll result classification, manual-action runtime/listener safety, Orion command identity, and Orion companion-surface validation, plus CI build/type-check coverage with OrionQuests installed beside QuestUI.
+- Added Stable/Canary reporter coverage for both verified native Enroll and Claim finders; the Claim finder remains the narrow four-fragment lookup instead of a broadened matcher.
+- Updated project boundaries, contributor guidance, and user documentation for the manual Quest actions and narrow Orion companion-control bridge.
+
 ## v1.0.1
 
 - Added optional Dashboard Mode with a live mini Quest dashboard, progress rings, rewards, expiry information, filtering, and an always-visible link to Discord Quest Home.
