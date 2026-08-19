@@ -15,7 +15,8 @@ const WEBPACK_FIND_SIGNATURES = [
     'findByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")',
     'findComponentByCode("shouldUseThemeColor", "customSize", "loading")',
     'findByCode("QUESTS_ENROLL_BEGIN", "QUESTS_ENROLL_SUCCESS", "QUESTS_ENROLL_FAILURE", "previous_in_flight_request")',
-    'findByCode("QUESTS_CLAIM_REWARD_BEGIN", "QUESTS_CLAIM_REWARD_SUCCESS", "QUESTS_CLAIM_REWARD_FAILURE", "traffic_metadata_sealed")'
+    'findByCode("QUESTS_CLAIM_REWARD_BEGIN", "QUESTS_CLAIM_REWARD_SUCCESS", "QUESTS_CLAIM_REWARD_FAILURE", "traffic_metadata_sealed")',
+    'findByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")'
 ];
 
 function extractSection(report, name) {
@@ -91,6 +92,7 @@ function runSelfTest() {
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindComponentByCode("shouldUseThemeColor", "customSize", "loading")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_ENROLL_BEGIN", "QUESTS_ENROLL_SUCCESS", "QUESTS_ENROLL_FAILURE", "previous_in_flight_request")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_CLAIM_REWARD_BEGIN", "QUESTS_CLAIM_REWARD_SUCCESS", "QUESTS_CLAIM_REWARD_FAILURE", "traffic_metadata_sealed")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.deepEqual(analyzeReport(completeReport({ badPatches: "- SomeOtherPlugin (had no effect)\n" }), "", 1), {
         problems: [],
         warnings: ["reporter exited with 1, but only unrelated Vencord failures were found"]

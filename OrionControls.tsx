@@ -8,7 +8,6 @@ import {
     invokeOrionGlobalTaskControl,
     subscribeOrionControlState
 } from "./orionIntegration";
-import type { OrionControlSnapshot } from "./orionCommandLogic";
 import { useQuestSnapshot } from "./questData";
 
 function smartLabel(action: "start" | "pause" | "resume"): string {
@@ -31,22 +30,21 @@ function showControlFailure(error: unknown): void {
 
 export function OrionGlobalControls() {
     const quests = useQuestSnapshot();
-    const [snapshot, setSnapshot] = useState<OrionControlSnapshot | null>(() => getOrionControlSnapshot());
+    const [, setRevision] = useState(0);
     const [pending, setPending] = useState(false);
 
     useEffect(() => {
-        const refresh = () => setSnapshot(getOrionControlSnapshot());
-        refresh();
+        const refresh = () => setRevision(revision => revision + 1);
         const unsubscribe = subscribeOrionControlState(refresh);
         return () => unsubscribe?.();
     }, []);
 
-    // The Quest snapshot has a read-only fallback render clock. Re-read Orion here as well so a
-    // Dashboard that survives an Orion hot-reload cannot remain visually pinned to the old object.
-    const liveSnapshot = getOrionControlSnapshot() ?? snapshot;
-    if (!liveSnapshot) return null;
+    // The subscription only schedules a render. Every render re-reads Orion itself, so QuestUI
+    // never keeps a second engine/task snapshot that can outlive a plugin reload or disable.
+    const snapshot = getOrionControlSnapshot();
+    if (!snapshot) return null;
 
-    const control = deriveGlobalOrionControl(liveSnapshot, farmableQuestIds(quests));
+    const control = deriveGlobalOrionControl(snapshot, farmableQuestIds(quests));
     const smartTitle = smartLabel(control.action);
 
     const runSmart = async () => {
@@ -56,7 +54,6 @@ export function OrionGlobalControls() {
             const response = control.action === "start"
                 ? await invokeOrionEngineControl("start")
                 : await invokeOrionGlobalTaskControl(control.action);
-            setSnapshot(getOrionControlSnapshot());
             showControlSuccess(response);
         } catch (error) {
             showControlFailure(error);
@@ -70,7 +67,6 @@ export function OrionGlobalControls() {
         setPending(true);
         try {
             const response = await invokeOrionEngineControl("stop");
-            setSnapshot(getOrionControlSnapshot());
             showControlSuccess(response);
         } catch (error) {
             showControlFailure(error);

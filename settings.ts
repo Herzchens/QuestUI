@@ -49,7 +49,7 @@ export default definePluginSettings({
     orionIntegration: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Orion Integration",
-        description: "Show one smart ▶ Start All / ■ Stop All control from OrionQuests' real engine state. Requires Dashboard Mode and a compatible enabled OrionQuests plugin.",
+        description: "Show smart Start/Pause/Resume and Stop controls plus per-Quest controls from OrionQuests' live engine/task state. Requires Dashboard Mode and a compatible enabled OrionQuests plugin.",
         default: false
     },
 

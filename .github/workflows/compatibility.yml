@@ -62,6 +62,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
 
+      - name: Test Quest reload timing
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
+
       - name: Reject obsolete speculative Orion API leftovers
         run: |
           set -euo pipefail
@@ -90,6 +94,8 @@ jobs:
             '/quest-home'
             'QUESTS_ENROLL_BEGIN'
             'QUESTS_CLAIM_REWARD_BEGIN'
+            'QUESTS_FETCH_CURRENT_QUESTS_BEGIN'
+            'Quest list refreshed.'
             'OrionQuests'
           )
           for marker in "${required_markers[@]}"; do
@@ -105,6 +111,7 @@ jobs:
               exit 1
             fi
           done
+          grep -Fq 'Processing…' src/userplugins/QuestUI/QuestCardActions.tsx
 
       - name: Test reporter parser
         run: node questui/scripts/checkQuestUIReporter.mjs --self-test
@@ -170,6 +177,10 @@ jobs:
       - name: Test Orion control-state logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
+
+      - name: Test Quest reload timing
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
 
       - name: Verify companion fork source surface
         if: matrix.companion_surface == 'true'

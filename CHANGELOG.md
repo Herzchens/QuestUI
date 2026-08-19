@@ -8,12 +8,15 @@
 - Hardened manual actions against account-switch races by checking account identity on QuestStore updates and at the confirmation timeout boundary, and by scoping submitted UI state to the account that made the request.
 - Added fail-closed handling for malformed present Quest start/expiry/reward-expiry/enrollment-block timestamps plus bounded duplicate protection for successful or transport-ambiguous submissions not yet reflected in QuestStore.
 - Added challenge-safe action handling: QuestUI does not bypass Discord verification, CAPTCHA, age checks, or account safety and never auto-retries failed manual actions.
-- Added optional **Dashboard • Orion Integration** for a compatible OrionQuests companion surface. QuestUI verifies the installed/enabled Orion plugin and its registered command identity, reads Orion's real engine-running state, subscribes to Orion state changes, and delegates Start/Stop back to Orion's watcher-aware control path without importing farming internals.
-- Added one smart icon-only Orion control immediately left of Filter: **▶ Start All** while Orion is stopped and **■ Stop All** while Orion is running. The control updates from Orion's real state and does not require a selected chat channel. Pause, resume, and per-Quest controls are not implemented.
+- Expanded **Dashboard • Orion Integration** for the compatible Orion pause/resume companion surface. QuestUI validates the exact registered Orion command and companion object, re-reads Orion's live engine/task snapshot instead of maintaining a mirror, and delegates engine/global/per-Quest mutations back to Orion's own lifecycle-safe paths.
+- Added fixed global header controls in the order **Smart Start/Pause/Resume → Stop → Reload → Filter**. Start and Resume share the exact Play icon, Pause uses a real yellow pause glyph, Stop remains engine shutdown, and both engine controls are disabled once Discord has no Available or In-Progress Quest left.
+- Added compact per-Quest Orion controls in the former Accept action slot after enrollment: engine-wide Start while Orion is stopped, exact-ID Pause for RUNNING/QUEUE tasks, and exact-ID Resume for PAUSED tasks. Completion removes the control and exposes Claim Reward normally.
+- Changed manual action pending copy from **Working…** to **Processing…** and auto-start Orion only after Discord confirms an explicit QuestUI enrollment in QuestStore.
+- Added a native **Reload** button that invokes Discord's current-Quest fetch-and-dispatch action instead of reloading the client or mutating QuestStore manually. Its circular-arrow animation stays visible for at least two seconds while the request starts immediately, overlapping calls share the same in-flight request, and success/failure is surfaced explicitly.
 - Reduced the Detailed Status numeric badge to a compact 12px indicator and removed its dark frame so it stays visually subordinate to the 20px Quest icon on custom backgrounds.
-- Added pure tests for native enroll result classification, manual-action runtime/listener safety, Orion command identity, and Orion companion-surface validation, plus CI build/type-check coverage with OrionQuests installed beside QuestUI.
-- Added Stable/Canary reporter coverage for both verified native Enroll and Claim finders; the Claim finder remains the narrow four-fragment lookup instead of a broadened matcher.
-- Updated project boundaries, contributor guidance, and user documentation for the manual Quest actions and narrow Orion companion-control bridge.
+- Added pure tests for native enroll result classification, manual-action runtime/listener safety, Orion command/companion validation, Orion global/per-Quest state derivation, and Reload timing, plus combined Vencord build/type-check coverage with both upstream Orion and the compatible pause/resume companion fork.
+- Added Stable/Canary reporter coverage for the verified native Enroll, Claim, and current-Quest Reload finders.
+- Updated project boundaries, contributor guidance, and user documentation for manual Quest actions, Orion Pause/Resume/per-Quest controls, and native Quest-list refresh.
 
 ## v1.0.1
 

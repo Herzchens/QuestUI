@@ -7,12 +7,18 @@
     width: 100%;
 }
 
-.quest-ui-dashboard-shell.has-orion-control .quest-ui-dashboard-heading {
+.quest-ui-dashboard-shell.has-dashboard-tools .quest-ui-dashboard-heading {
     box-sizing: border-box;
-    padding-right: 80px;
+    padding-right: 40px;
 }
 
-.quest-ui-orion-header-control {
+.quest-ui-dashboard-shell.has-dashboard-tools.has-orion-control .quest-ui-dashboard-heading {
+    padding-right: 120px;
+}
+
+.quest-ui-dashboard-header-tools {
+    display: inline-flex;
+    gap: 6px;
     position: absolute;
     right: 55px;
     top: 14px;

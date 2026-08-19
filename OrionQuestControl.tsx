@@ -8,7 +8,6 @@ import {
     invokeOrionQuestTaskControl,
     subscribeOrionControlState
 } from "./orionIntegration";
-import type { OrionControlSnapshot } from "./orionCommandLogic";
 import type { NormalizedQuest } from "./questData";
 
 function titleFor(action: "start" | "pause" | "resume", questName: string, disabled: boolean): string {
@@ -19,20 +18,19 @@ function titleFor(action: "start" | "pause" | "resume", questName: string, disab
 }
 
 export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
-    const [snapshot, setSnapshot] = useState<OrionControlSnapshot | null>(() => getOrionControlSnapshot());
+    const [, setRevision] = useState(0);
     const [pending, setPending] = useState(false);
 
     useEffect(() => {
-        const refresh = () => setSnapshot(getOrionControlSnapshot());
-        refresh();
+        const refresh = () => setRevision(revision => revision + 1);
         const unsubscribe = subscribeOrionControlState(refresh);
         return () => unsubscribe?.();
     }, []);
 
-    const liveSnapshot = getOrionControlSnapshot() ?? snapshot;
-    if (!liveSnapshot) return null;
+    const snapshot = getOrionControlSnapshot();
+    if (!snapshot) return null;
 
-    const control = deriveQuestOrionControl(liveSnapshot, quest.id);
+    const control = deriveQuestOrionControl(snapshot, quest.id);
     const title = titleFor(control.action, quest.name, control.disabled);
 
     const run = async () => {
@@ -42,7 +40,6 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
             const response = control.action === "start"
                 ? await invokeOrionEngineControl("start")
                 : await invokeOrionQuestTaskControl(quest.id, control.action);
-            setSnapshot(getOrionControlSnapshot());
             showToast(`Orion: ${response}`, Toasts.Type.SUCCESS);
         } catch (error) {
             showToast(
