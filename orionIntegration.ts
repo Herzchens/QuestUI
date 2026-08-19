@@ -1,8 +1,17 @@
 import { ApplicationCommandOptionType, commands } from "@api/Commands";
 import { isPluginEnabled, plugins } from "@api/PluginManager";
 
-import { isCompatibleOrionCommand, isCompatibleOrionCompanion } from "./orionCommandLogic";
-import type { OrionCommandAction, OrionCompanionSurface } from "./orionCommandLogic";
+import {
+    isCompatibleOrionCommand,
+    isCompatibleOrionCompanion,
+    readCompatibleOrionSnapshot
+} from "./orionCommandLogic";
+import type {
+    OrionCompanionSurface,
+    OrionControlSnapshot,
+    OrionEngineAction,
+    OrionTaskAction
+} from "./orionCommandLogic";
 
 let controlPending = false;
 
@@ -47,21 +56,18 @@ function getRegisteredOrionCommand(current = plugin()): any | null {
     return isCompatibleOrionCommand(candidate, ApplicationCommandOptionType.STRING) ? candidate : null;
 }
 
-export function getOrionEngineRunning(): boolean | null {
+export function getOrionControlSnapshot(): OrionControlSnapshot | null {
     const current = plugin();
     if (!hasCompatibleCompanion(current)) return null;
-    try {
-        return current.getEngineRunning();
-    } catch {
-        return null;
-    }
+    return readCompatibleOrionSnapshot(current);
 }
 
-export function subscribeOrionEngineRunning(listener: () => void): (() => void) | null {
+export function subscribeOrionControlState(listener: () => void): (() => void) | null {
     const current = plugin();
     if (!hasCompatibleCompanion(current)) return null;
     try {
-        return current.subscribeEngineRunning(listener);
+        const unsubscribe = current.subscribeControlState(listener);
+        return typeof unsubscribe === "function" ? unsubscribe : null;
     } catch {
         return null;
     }
@@ -74,45 +80,103 @@ export function isOrionCommandReady(): boolean {
         && current.started === true
         && getRegisteredOrionCommand(current) !== null
         && hasCompatibleCompanion(current)
-        && getOrionEngineRunning() !== null;
+        && readCompatibleOrionSnapshot(current) !== null;
 }
 
-/**
- * Invoke Orion's narrow companion control surface rather than its slash-command callback.
- * The companion method delegates to the same watcher-aware ensureStart/ensureStop paths, but
- * does not require a Discord channel just to produce a local Clyde command response.
- */
-export async function invokeOrionControl(action: OrionCommandAction): Promise<void> {
-    if (controlPending) throw new OrionIntegrationError("Another Orion control action is already in progress.");
-
+function requireCompatibleControl(): {
+    current: CompatibleOrionPlugin;
+    command: any;
+} {
     const current = plugin();
     const command = getRegisteredOrionCommand(current);
     if (!current || !command || !isOrionCommandReady() || !hasCompatibleCompanion(current)) {
         throw new OrionIntegrationError("OrionQuests is no longer enabled, started, or exposing its compatible control surface.");
     }
+    return { current, command };
+}
 
-    const running = getOrionEngineRunning();
-    if (running === null) throw new OrionIntegrationError("OrionQuests engine state is unavailable.");
-    if ((action === "start") === running) return;
+function assertControlStillCurrent(current: CompatibleOrionPlugin, command: any): void {
+    if (plugin() !== current
+        || getRegisteredOrionCommand(current) !== command
+        || current.started !== true
+        || !isOrionEnabled()
+        || !hasCompatibleCompanion(current)) {
+        throw new OrionIntegrationError("OrionQuests changed while the control was being prepared. Reopen the Dashboard and try again.");
+    }
+}
 
-    const control = current.controlEngine;
+async function withControlLock<T>(work: () => Promise<T>): Promise<T> {
+    if (controlPending) throw new OrionIntegrationError("Another Orion control action is already in progress.");
     controlPending = true;
     try {
-        // Re-check identity immediately before invocation so a Dashboard opened before an
-        // Orion reload cannot call a stale plugin object or a replaced command registration.
-        if (plugin() !== current
-            || getRegisteredOrionCommand(current) !== command
-            || current.started !== true
-            || !isOrionEnabled()
-            || current.controlEngine !== control) {
-            throw new OrionIntegrationError("OrionQuests changed while the control was being prepared. Reopen the Dashboard and try again.");
-        }
-
-        await Promise.resolve(control.call(current, action));
-    } catch (error) {
-        if (error instanceof OrionIntegrationError) throw error;
-        throw new OrionIntegrationError("OrionQuests rejected the requested control action.", error);
+        return await work();
     } finally {
         controlPending = false;
     }
+}
+
+function wrapControlFailure(error: unknown): never {
+    if (error instanceof OrionIntegrationError) throw error;
+    throw new OrionIntegrationError("OrionQuests rejected the requested control action.", error);
+}
+
+/** Invoke Orion's watcher-aware engine lifecycle without fabricating a slash-command channel. */
+export async function invokeOrionEngineControl(action: OrionEngineAction): Promise<string> {
+    return withControlLock(async () => {
+        try {
+            const { current, command } = requireCompatibleControl();
+            const snapshot = readCompatibleOrionSnapshot(current);
+            if (!snapshot) throw new OrionIntegrationError("OrionQuests control state is unavailable.");
+            if ((action === "start") === snapshot.running) {
+                return action === "start" ? "Already running." : "Not running.";
+            }
+
+            const controlEngine = current.controlEngine;
+            assertControlStillCurrent(current, command);
+            if (current.controlEngine !== controlEngine) {
+                throw new OrionIntegrationError("OrionQuests engine control changed before invocation.");
+            }
+            return await Promise.resolve(controlEngine.call(current, action));
+        } catch (error) {
+            return wrapControlFailure(error);
+        }
+    });
+}
+
+/**
+ * Pause/resume Orion's current task set. Resume while the engine is stopped first starts the
+ * engine, then clears Orion's persisted pause intent so the same unfinished quests become
+ * eligible without resetting Discord progress.
+ */
+export async function invokeOrionGlobalTaskControl(action: OrionTaskAction): Promise<string> {
+    return withControlLock(async () => {
+        try {
+            const { current, command } = requireCompatibleControl();
+            const snapshot = readCompatibleOrionSnapshot(current);
+            if (!snapshot) throw new OrionIntegrationError("OrionQuests control state is unavailable.");
+
+            const controlEngine = current.controlEngine;
+            const controlAll = current.controlAll;
+            assertControlStillCurrent(current, command);
+            if (current.controlEngine !== controlEngine || current.controlAll !== controlAll) {
+                throw new OrionIntegrationError("OrionQuests task control changed before invocation.");
+            }
+
+            if (action === "pause") {
+                if (!snapshot.running) return "Engine is not running.";
+                return await Promise.resolve(controlAll.call(current, "pause"));
+            }
+
+            if (!snapshot.running) {
+                await Promise.resolve(controlEngine.call(current, "start"));
+                assertControlStillCurrent(current, command);
+                if (current.controlAll !== controlAll) {
+                    throw new OrionIntegrationError("OrionQuests task control changed while the engine was starting.");
+                }
+            }
+            return await Promise.resolve(controlAll.call(current, "resume"));
+        } catch (error) {
+            return wrapControlFailure(error);
+        }
+    });
 }

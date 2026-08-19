@@ -9,7 +9,7 @@
 
 .quest-ui-dashboard-shell.has-orion-control .quest-ui-dashboard-heading {
     box-sizing: border-box;
-    padding-right: 40px;
+    padding-right: 80px;
 }
 
 .quest-ui-orion-header-control {
@@ -17,6 +17,11 @@
     right: 55px;
     top: 14px;
     z-index: 3;
+}
+
+.quest-ui-orion-controls {
+    display: inline-flex;
+    gap: 6px;
 }
 
 .quest-ui-orion-icon-button {
@@ -39,7 +44,9 @@
     width: 17px;
 }
 
-.quest-ui-orion-icon-button.is-start { color: var(--status-positive); }
+.quest-ui-orion-icon-button.is-start,
+.quest-ui-orion-icon-button.is-resume { color: var(--status-positive); }
+.quest-ui-orion-icon-button.is-pause { color: var(--status-warning, #f0b232); }
 .quest-ui-orion-icon-button.is-stop { color: var(--status-danger); }
 .quest-ui-orion-icon-button:hover:not(:disabled) { background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18)); }
 .quest-ui-orion-icon-button:focus-visible { outline: 2px solid var(--focus-primary, var(--brand-500)); outline-offset: 2px; }

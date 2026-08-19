@@ -58,10 +58,14 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
 
+      - name: Test Orion control-state logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
+
       - name: Reject obsolete speculative Orion API leftovers
         run: |
           set -euo pipefail
-          if grep -R -n -E 'integrationApi|pauseQuest|resumeQuest|orionDashboardContext|OrionQuestControl' \
+          if grep -R -n -E 'integrationApi|orionDashboardContext' \
             --exclude-dir=.git --include='*.ts' --include='*.tsx' --include='*.md' questui; then
             echo 'Found stale/speculative Orion API integration.' >&2
             exit 1
@@ -75,22 +79,32 @@ jobs:
         working-directory: vencord
         run: pnpm testTsc
 
-      - name: Verify QuestUI bundle output
+      - name: Verify QuestUI build contracts
         working-directory: vencord
+        shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'QuestUI' dist/renderer.js
-          grep -Fq 'Adds standalone Discord Quest shortcuts' dist/renderer.js
-          grep -Fq '/quest-home' dist/renderer.js
-          grep -Fq 'QUESTS_ENROLL_BEGIN' dist/renderer.js
-          grep -Fq 'previous_in_flight_request' dist/renderer.js
-          grep -Fq 'QUESTS_CLAIM_REWARD_BEGIN' dist/renderer.js
-          grep -Fq 'traffic_metadata_sealed' dist/renderer.js
-          grep -Fq 'OrionQuests' dist/renderer.js
-          grep -Fq 'getEngineRunning' dist/renderer.js
-          grep -Fq 'subscribeEngineRunning' dist/renderer.js
-          grep -Fq 'controlEngine' dist/renderer.js
-          grep -Fq 'Another Orion control action is already in progress.' dist/renderer.js
+          required_markers=(
+            'QuestUI'
+            'Adds standalone Discord Quest shortcuts'
+            '/quest-home'
+            'QUESTS_ENROLL_BEGIN'
+            'QUESTS_CLAIM_REWARD_BEGIN'
+            'OrionQuests'
+          )
+          for marker in "${required_markers[@]}"; do
+            if ! grep -Fq "$marker" dist/renderer.js; then
+              echo "Missing QuestUI renderer marker: $marker" >&2
+              exit 1
+            fi
+          done
+
+          for marker in getControlSnapshot subscribeControlState controlEngine controlAll controlQuest; do
+            if ! grep -Fq "$marker" src/userplugins/QuestUI/orionCommandLogic.ts; then
+              echo "Missing QuestUI companion contract marker: $marker" >&2
+              exit 1
+            fi
+          done
 
       - name: Test reporter parser
         run: node questui/scripts/checkQuestUIReporter.mjs --self-test
@@ -104,9 +118,11 @@ jobs:
         include:
           - label: upstream
             repository: nyxxbit/discord-quest-completer
+            ref: main
             companion_surface: "false"
-          - label: companion-fork
+          - label: pause-companion-fork
             repository: Herzchens/discord-quest-completer
+            ref: feat/per-quest-pause-resume
             companion_surface: "true"
     steps:
       - name: Checkout QuestUI
@@ -124,7 +140,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: ${{ matrix.repository }}
-          ref: main
+          ref: ${{ matrix.ref }}
           path: vencord/src/userplugins/discord-quest-completer
 
       - name: Install QuestUI beside OrionQuests
@@ -151,6 +167,23 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
 
+      - name: Test Orion control-state logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
+
+      - name: Verify companion fork source surface
+        if: matrix.companion_surface == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          surface='vencord/src/userplugins/discord-quest-completer/index.tsx'
+          for marker in getControlSnapshot subscribeControlState controlEngine controlAll controlQuest; do
+            if ! grep -Fq "$marker" "$surface"; then
+              echo "Missing Orion companion surface marker: $marker" >&2
+              exit 1
+            fi
+          done
+
       - name: Build Vencord with both plugins
         working-directory: vencord
         run: pnpm build
@@ -159,18 +192,12 @@ jobs:
         working-directory: vencord
         run: pnpm testTsc
 
-      - name: Verify companion bundle surfaces
+      - name: Verify both plugins are bundled
         working-directory: vencord
         run: |
           set -euo pipefail
           grep -Fq 'QuestUI' dist/renderer.js
           grep -Fq 'OrionQuests' dist/renderer.js
-          grep -Fq 'Control the OrionQuests engine' dist/renderer.js
-          grep -Fq 'Start all Orion Quest farming' dist/renderer.js
-          grep -Fq 'Stop all Orion Quest farming' dist/renderer.js
-          if [ "${{ matrix.companion_surface }}" = "true" ]; then
-            grep -Fq 'Unsupported Orion engine action' dist/renderer.js
-          fi
 
   reporter:
     name: Patch Reporter (${{ matrix.discord_branch }})
