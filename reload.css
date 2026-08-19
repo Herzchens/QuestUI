@@ -2,35 +2,40 @@
     to { transform: rotate(360deg); }
 }
 
+/* Reuse quest-ui-filter-button for the same surface; keep the glyph explicitly theme-readable. */
 .quest-ui-reload-icon-button {
-    align-items: center;
-    background: var(--background-mod-strong, rgba(255, 255, 255, 0.12));
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
-    border-radius: 8px;
-    color: var(--interactive-normal);
-    cursor: pointer;
-    display: inline-flex;
-    height: 34px;
-    justify-content: center;
-    padding: 0;
-    width: 34px;
+    color: var(--interactive-active, var(--interactive-hover, #dbdee1));
+    flex: 0 0 34px;
 }
 
 .quest-ui-reload-icon-button svg {
     fill: currentColor;
     height: 17px;
+    transform-origin: 50% 50%;
     width: 17px;
+}
+
+.quest-ui-reload-icon-button:hover:not(:disabled) {
+    color: var(--interactive-hover, #dbdee1);
 }
 
 .quest-ui-reload-icon-button.is-spinning svg {
     animation: quest-ui-reload-spin 0.8s linear infinite;
-    transform-origin: 50% 50%;
 }
 
-.quest-ui-reload-icon-button:hover:not(:disabled) { background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18)); }
-.quest-ui-reload-icon-button:focus-visible { outline: 2px solid var(--focus-primary, var(--brand-500)); outline-offset: 2px; }
-.quest-ui-reload-icon-button:disabled { cursor: default; opacity: 0.7; }
+.quest-ui-reload-icon-button:disabled {
+    color: var(--interactive-active, var(--interactive-hover, #dbdee1));
+    cursor: default;
+    opacity: 1;
+    transform: none;
+}
+
+.quest-ui-reload-icon-button:disabled:hover {
+    transform: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
-    .quest-ui-reload-icon-button.is-spinning svg { animation-duration: 1.6s; }
+    .quest-ui-reload-icon-button.is-spinning svg {
+        animation-duration: 1.6s;
+    }
 }

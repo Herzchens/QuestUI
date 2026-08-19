@@ -12,11 +12,15 @@
 - Added fixed global header controls in the order **Smart Start/Pause/Resume → Stop → Reload → Filter**. Start and Resume share the exact Play icon, Pause uses a real yellow pause glyph, Stop remains engine shutdown, and both engine controls are disabled once Discord has no Available or In-Progress Quest left.
 - Added compact per-Quest Orion controls in the former Accept action slot after enrollment: engine-wide Start while Orion is stopped, exact-ID Pause for RUNNING/QUEUE tasks, and exact-ID Resume for PAUSED tasks. Completion removes the control and exposes Claim Reward normally.
 - Changed manual action pending copy from **Working…** to **Processing…** and auto-start Orion only after Discord confirms an explicit QuestUI enrollment in QuestStore.
-- Added a native **Reload** button that invokes Discord's current-Quest fetch-and-dispatch action instead of reloading the client or mutating QuestStore manually. Its circular-arrow animation stays visible for at least two seconds while the request starts immediately, overlapping calls share the same in-flight request, and success/failure is surfaced explicitly.
+- Refined the Dashboard heading to **Quest Dashboard** with Discord's native Quest icon, a premium-aware colored Nitro tag, a stronger seamless right-to-left title sweep, and a lower single-line status summary. The summary now always includes a blue **Claimed** count even when Claimed cards are filtered out.
+- Refined timed Quest progress copy to `mm:ss / mm:ss`; only the current elapsed value receives completion-stage color while the task label, separator, and target stay neutral. Dashboard expiry copy is hidden when the expiry is more than 15 days away (or more than 15 days in the past).
+- Refined the Nitro tag surface to remove the stray colored edge while preserving native Nitro badge artwork when Discord profile data provides it.
+- Refined Reload to reuse the Filter button's theme-safe visual skin while keeping its glyph explicitly readable on dark/light themes and during the disabled pending state. Its native request starts immediately, the icon completes at least three full rotations, and it always stops on a rotation boundary instead of snapping from a partial turn.
+- Kept Accept/Claim, Orion-control, auto-start failure, and Reload results on Vencord's native toast API rather than a Dashboard-owned feedback surface.
 - Reduced the Detailed Status numeric badge to a compact 12px indicator and removed its dark frame so it stays visually subordinate to the 20px Quest icon on custom backgrounds.
-- Added pure tests for native enroll result classification, manual-action runtime/listener safety, Orion command/companion validation, Orion global/per-Quest state derivation, and Reload timing, plus combined Vencord build/type-check coverage with both upstream Orion and the compatible pause/resume companion fork.
+- Added pure tests for native enroll result classification, manual-action runtime/listener safety, Orion command/companion validation, Orion global/per-Quest state derivation, and Reload rotation boundaries, plus combined Vencord build/type-check coverage with both upstream Orion and the compatible pause/resume companion fork.
 - Added Stable/Canary reporter coverage for the verified native Enroll, Claim, and current-Quest Reload finders.
-- Updated project boundaries, contributor guidance, and user documentation for manual Quest actions, Orion Pause/Resume/per-Quest controls, and native Quest-list refresh.
+- Updated project boundaries, contributor guidance, and user documentation for manual Quest actions, Orion Pause/Resume/per-Quest controls, native Quest-list refresh, Dashboard/Nitro/Reload polish, and Vencord-native action feedback.
 
 ## v1.0.1
 

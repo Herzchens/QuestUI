@@ -72,7 +72,7 @@ Discord internals are a compatibility boundary.
 - Explain why new anchors are expected to remain stable.
 - Keep `scripts/checkQuestUIReporter.mjs` synchronized with every QuestUI Discord webpack lookup.
 
-Current reporter coverage includes the QuestStore resolver, native task/completion selectors, Quest asset resolver, Orb component, native Enroll, native Claim, and native current-Quest Reload finder (`QUESTS_FETCH_CURRENT_QUESTS_BEGIN`). Vencord PluginManager/Commands imports are normal Vencord APIs rather than Discord webpack finders.
+Current reporter coverage includes the QuestStore resolver, native task/completion selectors, Quest asset resolver, Orb component, native Enroll, native Claim, and native current-Quest Reload finder (`QUESTS_FETCH_CURRENT_QUESTS_BEGIN`). Vencord PluginManager/Commands imports and current-user/profile access through `UserStore` / `UserProfileStore` are Vencord APIs rather than new Discord webpack finders. Reusing the already-reported native Quest-icon finder in another Dashboard presentation point does not require a duplicate reporter signature.
 
 ## Quest data and progress invariants
 
@@ -146,21 +146,36 @@ Per-Quest UI:
 - Claimable → Orion control disappears and Claim appears.
 - Never implement targeted Start; Orion owns scheduling and concurrency.
 
+Use Vencord's native toast API for explicit control success/failure feedback.
+
+## Dashboard header invariants
+
+- The visible title is **Quest Dashboard** followed by Discord's native Quest icon.
+- The title may use a subtle brand accent, but it must respect `prefers-reduced-motion` and remain legible on dark/light themes.
+- When the loaded current-user Discord profile exposes its native Nitro profile badge, render a compact colored **Nitro** tag using that badge icon. If the badge/profile is unavailable, omit the tag rather than guessing.
+- In Progress, Ready to Claim, and Available counters stay on one summary row at normal Dashboard width and sit clearly below the title/tool row.
+- Do not reserve Orion/Reload tool width on the summary row; tool-space reservation belongs to the title/tool row only.
+
 ## Quest Reload invariants
 
 - Use Discord's native current-Quest fetch-and-dispatch action found by `QUESTS_FETCH_CURRENT_QUESTS_BEGIN`.
 - Do not reload the whole Discord client or hand-mutate QuestStore.
 - Start the request immediately.
-- Keep the circular-arrow animation visible for at least 2000 ms; the visual minimum must not delay the actual request.
-- Coalesce overlapping calls to one native in-flight request.
+- Complete at least three full circular-arrow rotations before stopping.
+- If the request is still in flight after three rotations, keep spinning.
+- If the request settles mid-rotation, finish that rotation and stop on the next animation-iteration boundary rather than snapping back from a partial turn.
+- Coalesce overlapping native calls to one in-flight request and synchronously guard duplicate component clicks.
 - A successful request with no new Quest is still success.
-- Surface success/failure explicitly.
+- Surface success/failure through Vencord's native toast API.
 - Keep Reload usable without Orion integration.
+- Reuse the Filter button's theme-safe visual skin rather than maintaining a drifting Reload-only palette, while keeping the Reload glyph itself readable in dark/light and pending/disabled states.
 
 ## Manual testing
 
 Test the states relevant to the change in a real Discord client when possible. For the current Dashboard controls, cover at least:
 
+- Header reads **Quest Dashboard**, the native Quest icon is aligned with it, a Nitro tag appears only when the loaded current-user profile exposes the Nitro badge, and the title does not overlap controls.
+- In Progress, Ready to Claim, and Available stay on one line with the intended extra vertical separation.
 - Orion absent/disabled/incompatible → no callable Orion control; Reload and normal QuestUI still work.
 - Idle unfinished work → Start enabled / Stop disabled.
 - Running work → yellow Pause + enabled Stop.
@@ -171,7 +186,7 @@ Test the states relevant to the change in a real Discord client when possible. F
 - Concurrency pressure queues excess accepted Quests instead of using targeted Start.
 - Completion removes per-Quest control and exposes Claim.
 - All Quests complete → both Smart and Stop disabled.
-- Reload spins at least two seconds, fetches newly available Quests without Ctrl+R, and shows success/failure.
+- Reload glyph remains legible on dark/light themes, sends the native request immediately, completes at least three full rotations, waits for a whole-rotation boundary after slower requests, fetches newly available Quests without Ctrl+R, and shows success/failure through Vencord toast.
 - Plugin reload/disable/replacement while Dashboard is open fails safely rather than calling a stale object.
 
 Automated build/reporter output is not live Discord evidence. State exactly what was and was not tested.

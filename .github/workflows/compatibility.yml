@@ -62,7 +62,7 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
 
-      - name: Test Quest reload timing
+      - name: Test Quest reload rotation logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
 
@@ -91,6 +91,7 @@ jobs:
           required_markers=(
             'QuestUI'
             'Adds standalone Discord Quest shortcuts'
+            'Quest Dashboard'
             '/quest-home'
             'QUESTS_ENROLL_BEGIN'
             'QUESTS_CLAIM_REWARD_BEGIN'
@@ -178,7 +179,7 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
 
-      - name: Test Quest reload timing
+      - name: Test Quest reload rotation logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
 

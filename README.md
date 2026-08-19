@@ -11,10 +11,11 @@ Use it on its own or alongside [OrionQuests](https://github.com/nyxxbit/discord-
 - Optional Quest shortcut in Discord's top bar
 - Optional Quest shortcut next to mute, deafen, and settings
 - Optional **Dashboard Mode**, which opens a live mini Quest dashboard instead of jumping straight to Quest Home
+- **Quest Dashboard** heading paired with Discord's native Quest icon, an optional current-account Nitro tag sourced from Discord's profile badge data, and a single-line live attention summary
 - Quest cards with Discord's own artwork, task-type badges, status, reward, native progress, and time remaining
 - Explicit **Accept Quest** action on Available cards
 - Explicit **Claim Reward** action on Ready-to-Claim cards
-- Account-scoped duplicate-submission guards and visible action feedback
+- Account-scoped duplicate-submission guards and visible Vencord toast feedback
 - Floating dashboard filters for status, reward category, and task type, with **Recommended** and **Clear all** shortcuts
 - Optional numeric **Detailed Status** badge with its own filtering
 - A basic status dot for quests needing attention when Detailed Status is off
@@ -22,7 +23,7 @@ Use it on its own or alongside [OrionQuests](https://github.com/nyxxbit/discord-
 - Direct navigation to Discord's Quest Home page, always available
 - Live QuestStore sync via Discord's native Quest-card progress selectors — no separate QuestUI progress clock
 - Nitro Orb rewards shown with Discord's 1.2x multiplier where eligible, while the underlying base reward data stays unchanged
-- A native **Reload** button that asks Discord itself to fetch and dispatch the current Quest list, with visible success/failure feedback
+- A native **Reload** button that asks Discord itself to fetch and dispatch the current Quest list, styled with the same theme-safe skin as Filter and with a theme-readable glyph
 - Optional Orion controls in Dashboard Mode when a compatible OrionQuests build is installed:
   - Smart **Start / Pause / Resume** global control
   - Separate **Stop** control
@@ -132,6 +133,8 @@ If you turn off both shortcut buttons, Dashboard Mode and Detailed Status stay v
 
 Either way, **Open Quest Home** stays visible in the dashboard, so Discord's full Quest interface is always one click away.
 
+The Dashboard heading is **Quest Dashboard** followed by Discord's native Quest icon. If Discord's loaded profile data for the current account exposes its Nitro profile badge, QuestUI adds a compact colored **Nitro** tag using that native badge icon; if the profile/badge is unavailable, the tag is omitted rather than inferred. The subtle title accent respects `prefers-reduced-motion`. The In Progress, Ready to Claim, and Available counters sit together on one summary row with extra vertical separation below the title/tool row.
+
 The Filter button opens a floating popout, and filters apply immediately — no restart needed:
 
 - Status: Available, In Progress, Ready to Claim, Claimed, Expired
@@ -147,6 +150,8 @@ The popout also has:
 A small count on the Filter button shows when restrictions are active. Claimed and expired quests stay hidden by default, while unknown Quest task types stay visible by default, so a new Discord task type doesn't quietly disappear after a client update.
 
 The Dashboard header keeps the action order stable: **Smart Orion control → Stop → Reload → Filter**. Reload works even when Orion integration is unavailable.
+
+Accept/Claim, Orion controls, and Reload use Vencord's native toast API for visible success/failure feedback.
 
 ### Manual Accept and Claim
 
@@ -230,7 +235,7 @@ QuestUI calls Orion's companion methods rather than the slash-command callback, 
 
 Reload uses Discord's own current-Quest fetch-and-dispatch action located by `QUESTS_FETCH_CURRENT_QUESTS_BEGIN`. QuestUI does not reload the whole client, call a handcrafted Quest REST endpoint, or mutate QuestStore by hand.
 
-The request starts immediately. The circular-arrow icon spins for at least two seconds, but the visual minimum never delays the network request itself: a fast request keeps the spinner visible until two seconds have elapsed, while a slower request simply keeps spinning until the actual request finishes. Overlapping reload calls share the same in-flight native request. Success and failure are surfaced with toasts.
+The request starts immediately. The circular-arrow icon completes at least **three full rotations**. If the native request is still running after that, the spinner continues; once the request settles, QuestUI waits for the end of the current full rotation before stopping so the glyph never snaps back from a partial turn. Overlapping reload calls share the same in-flight native request. The Reload glyph keeps an explicit theme-readable interactive color even while the pending button is disabled, and success/failure is surfaced through Vencord's native toast API.
 
 Because QuestUI already subscribes to Discord's QuestStore, a successful native fetch causes the existing Dashboard snapshot to update naturally. A successful refresh with no new Quest is still reported as success.
 
@@ -301,16 +306,16 @@ The compatibility workflow runs:
 - pure manual mutation timestamp/account/listener safety tests;
 - pure Orion command/companion-surface tests;
 - pure Orion control-state matrix tests;
-- pure Reload minimum-spin timing tests;
+- pure Reload rotation-boundary tests;
 - a clean Vencord build/type-check and QuestUI bundle assertions;
 - a combined build/type-check with current upstream `nyxxbit/discord-quest-completer`;
 - a combined build/type-check with the compatible `Herzchens/discord-quest-completer` pause/resume companion branch;
 - reporter parser validation;
 - Discord Stable and Canary patch reporters.
 
-Reporter coverage includes the native progress, artwork, Orb-component, QuestStore, task-selection, native Enroll, native Claim, and native current-Quest Reload lookups. Orion discovery/control uses Vencord PluginManager/Commands API plus Orion's explicit companion surface rather than a Discord webpack finder.
+Reporter coverage includes the native progress, artwork, Orb-component, QuestStore, task-selection, native Enroll, native Claim, and native current-Quest Reload lookups. Orion discovery/control and current-user/profile data use Vencord APIs; the optional Nitro header tag does not add a new Discord webpack finder.
 
-Automated checks do not prove a live Discord Accept/Claim, native Reload, or a real Orion farming session. Those paths should still be exercised in a real client when suitable Quests are available, and build/reporter success must not be presented as live runtime evidence.
+Automated checks do not prove a live Discord Accept/Claim, native Reload, Nitro-tag presentation, or a real Orion farming session. Those paths should still be exercised in a real client when suitable Quests/profile state are available, and build/reporter success must not be presented as live runtime evidence.
 
 If Discord won't start after an update, close it, move the `QuestUI` folder out of `Vencord/src/userplugins`, then rebuild and inject Vencord again. When reporting a compatibility issue, include your Discord channel and Vencord version.
 

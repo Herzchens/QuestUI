@@ -1,10 +1,14 @@
-export const QUEST_RELOAD_MIN_SPIN_MS = 2000;
+export const QUEST_RELOAD_MIN_ROTATIONS = 3;
 
-export function remainingReloadSpinMs(
-    startedAt: number,
-    now: number,
-    minimumMs = QUEST_RELOAD_MIN_SPIN_MS
-): number {
-    if (!Number.isFinite(startedAt) || !Number.isFinite(now) || !Number.isFinite(minimumMs)) return 0;
-    return Math.max(0, Math.max(0, minimumMs) - Math.max(0, now - startedAt));
+export function shouldFinishReloadSpin(
+    completedRotations: number,
+    requestSettled: boolean,
+    minimumRotations = QUEST_RELOAD_MIN_ROTATIONS
+): boolean {
+    if (!requestSettled) return false;
+    if (!Number.isFinite(completedRotations) || !Number.isFinite(minimumRotations)) return false;
+
+    const completed = Math.max(0, Math.floor(completedRotations));
+    const minimum = Math.max(1, Math.ceil(minimumRotations));
+    return completed >= minimum;
 }
