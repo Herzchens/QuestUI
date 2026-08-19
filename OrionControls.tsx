@@ -1,6 +1,7 @@
 import { showToast, Toasts, useEffect, useState } from "@webpack/common";
 
 import { deriveGlobalOrionControl, farmableQuestIds } from "./orionControlLogic";
+import { OrionPauseIcon, OrionPlayIcon, OrionStopIcon } from "./orionIcons";
 import {
     getOrionControlSnapshot,
     invokeOrionEngineControl,
@@ -9,18 +10,6 @@ import {
 } from "./orionIntegration";
 import type { OrionControlSnapshot } from "./orionCommandLogic";
 import { useQuestSnapshot } from "./questData";
-
-function PlayIcon() {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13L18.5 12 8 5.5Z" /></svg>;
-}
-
-function PauseIcon() {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 5h4v14h-4V5Zm7 0h4v14h-4V5Z" /></svg>;
-}
-
-function StopIcon() {
-    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5h11v11h-11Z" /></svg>;
-}
 
 function smartLabel(action: "start" | "pause" | "resume"): string {
     if (action === "pause") return "Pause all Orion Quest farming";
@@ -101,7 +90,7 @@ export function OrionGlobalControls() {
                 title={smartTitle}
                 onClick={() => void runSmart()}
             >
-                {control.action === "pause" ? <PauseIcon /> : <PlayIcon />}
+                {control.action === "pause" ? <OrionPauseIcon /> : <OrionPlayIcon />}
             </button>
             <button
                 type="button"
@@ -112,7 +101,7 @@ export function OrionGlobalControls() {
                 title="Stop Orion Quest farming"
                 onClick={() => void runStop()}
             >
-                <StopIcon />
+                <OrionStopIcon />
             </button>
         </span>
     );

@@ -1,8 +1,15 @@
 import { showToast, Toasts, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
+import {
+    getOrionControlSnapshot,
+    invokeOrionEngineControl,
+    isOrionCommandReady
+} from "./orionIntegration";
+import { OrionQuestControl } from "./OrionQuestControl";
 import { claimQuestReward, enrollQuest, QuestActionError } from "./questActions";
 import type { QuestActionResult } from "./questActions";
 import type { NormalizedQuest } from "./questData";
+import settings from "./settings";
 
 import "./actions.css";
 
@@ -36,6 +43,7 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
             ? "claim"
             : null;
     const currentUserId = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.id ?? null);
+    const { orionIntegration } = settings.use(["orionIntegration"]);
     const [pending, setPending] = useState(false);
     const [submitted, setSubmitted] = useState<SubmittedState | null>(null);
 
@@ -66,6 +74,24 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
                 ? null
                 : submittedState(action, userIdAtClick, result.resubmitAfterMs));
             showToast(successMessage(action, quest, result), Toasts.Type.SUCCESS);
+
+            // QuestUI's explicit Accept should start farming even when Orion's independent
+            // watchForEnrollments setting is off. Only do this after Discord's store confirmed
+            // enrolledAt; a merely submitted/uncertain enrollment is not enough to start a run.
+            if (action === "enroll" && result.storeConfirmed && orionIntegration && isOrionCommandReady()) {
+                const snapshot = getOrionControlSnapshot();
+                if (snapshot && !snapshot.running) {
+                    try {
+                        await invokeOrionEngineControl("start");
+                    } catch (error) {
+                        showToast(
+                            `Quest was accepted, but Orion could not start automatically: ${error instanceof Error ? error.message : "unknown control error"}`,
+                            Toasts.Type.FAILURE,
+                            { duration: 6000 }
+                        );
+                    }
+                }
+            }
         } catch (error) {
             if (error instanceof QuestActionError && error.resubmitAfterMs != null) {
                 // The request may have reached Discord even though confirmation failed. Mirror
@@ -82,7 +108,12 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
         }
     };
 
-    if (!action) return null;
+    if (!action) {
+        if (quest.status === "in-progress" && orionIntegration && isOrionCommandReady()) {
+            return <span className="quest-ui-card-actions"><OrionQuestControl quest={quest} /></span>;
+        }
+        return null;
+    }
 
     const actionSubmitted = currentUserId != null
         && submitted?.action === action
@@ -97,7 +128,7 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
                 aria-busy={pending}
                 onClick={run}
             >
-                {pending ? "Working…" : actionSubmitted ? "Sent" : actionLabel(action)}
+                {pending ? "Processing…" : actionSubmitted ? "Sent" : actionLabel(action)}
             </button>
         </span>
     );

@@ -180,3 +180,40 @@ export async function invokeOrionGlobalTaskControl(action: OrionTaskAction): Pro
         }
     });
 }
+
+/** Target a single Orion task generation by exact Discord Quest id. */
+export async function invokeOrionQuestTaskControl(questId: string, action: OrionTaskAction): Promise<string> {
+    return withControlLock(async () => {
+        try {
+            const id = questId.trim();
+            if (!id) throw new OrionIntegrationError("Quest id is unavailable.");
+
+            const { current, command } = requireCompatibleControl();
+            const snapshot = readCompatibleOrionSnapshot(current);
+            if (!snapshot) throw new OrionIntegrationError("OrionQuests control state is unavailable.");
+
+            const controlEngine = current.controlEngine;
+            const controlQuest = current.controlQuest;
+            assertControlStillCurrent(current, command);
+            if (current.controlEngine !== controlEngine || current.controlQuest !== controlQuest) {
+                throw new OrionIntegrationError("OrionQuests per-Quest control changed before invocation.");
+            }
+
+            if (action === "pause") {
+                if (!snapshot.running) return "Engine is not running.";
+                return await Promise.resolve(controlQuest.call(current, id, "pause"));
+            }
+
+            if (!snapshot.running) {
+                await Promise.resolve(controlEngine.call(current, "start"));
+                assertControlStillCurrent(current, command);
+                if (current.controlQuest !== controlQuest) {
+                    throw new OrionIntegrationError("OrionQuests per-Quest control changed while the engine was starting.");
+                }
+            }
+            return await Promise.resolve(controlQuest.call(current, id, "resume"));
+        } catch (error) {
+            return wrapControlFailure(error);
+        }
+    });
+}
