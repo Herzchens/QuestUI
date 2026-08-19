@@ -1,53 +1,27 @@
 # Contributing to QuestUI
 
-Thank you for considering a contribution to QuestUI.
+Thanks for helping improve QuestUI. Keep changes focused, evidence-backed, and within the project boundaries below.
 
-QuestUI is a standalone Vencord userplugin for Discord Quest shortcuts, a live mini Dashboard, explicit user-click Accept/Claim actions, Discord-native Quest-list refresh, optional OrionQuests companion controls, status indicators, filtering, and Quest Home counters.
+Read `README.md`, `AGENTS.md`, `CHANGELOG.md`, and `docs/RELEASES.md` before changing behavior, compatibility contracts, or release metadata.
 
-## Project scope
+## Scope
 
-Contributions that fit the current scope include:
+QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-clicked native Accept/Claim actions, request Discord's native Quest-list refresh, and optionally delegate controls to a separately installed compatible OrionQuests companion.
 
-- Quest-related UI, accessibility, filtering, reward/progress presentation, and navigation.
-- Explicit user-click Quest enrollment and reward claiming through Discord's verified native actions.
-- Discord-native Quest-list refresh through the client's own fetch-and-dispatch action.
-- Optional Orion controls through a stable narrow companion surface while all farming logic remains owned by Orion.
-- Compatibility fixes, safer webpack lookups/patches, installation, tests, CI, and documentation.
-
-QuestUI does **not**:
-
-- Generate Quest progress, heartbeats, video/activity/achievement progress, game spoofing, or stream spoofing.
-- Automatically enroll or claim without the explicitly approved user-click path.
-- Bypass CAPTCHA/challenges or silently retry failed manual mutations.
-- Replace verified native Enroll/Claim/Quest-refresh actions with handcrafted REST fallbacks merely to make a compatibility failure disappear.
-- Import/reimplement Orion farming internals or mutate Orion settings.
-- Use plugin enable/disable as Orion Start/Stop.
-- Treat Stop as Pause or implement targeted `startQuest` behavior.
-
-The currently approved Orion companion scope includes engine Start/Stop, global Pause/Resume, exact-ID per-Quest Pause/Resume, and engine-wide Start from an enrolled card. Broader automation still requires maintainer approval.
-
-## Before starting
-
-Search existing issues and pull requests first. For substantial scope/architecture changes, discuss the behavior before writing a large implementation. Small bug fixes, compatibility fixes, accessibility work, and documentation corrections may be submitted directly when the problem and solution are clear.
+Do not turn QuestUI into a Quest farming engine. Do not add automatic enrollment/claim, progress spoofing, heartbeats, targeted quest execution, challenge bypasses, or private Orion farming imports.
 
 ## Development setup
 
-QuestUI has no standalone package manifest. Clone it into a Vencord source checkout:
+Place the repository at:
 
-```bash
-cd Vencord/src/userplugins
-git clone https://github.com/<username>/QuestUI.git
-cd ../..
-pnpm install --frozen-lockfile
+```text
+Vencord/src/userplugins/QuestUI
 ```
 
-Create a focused branch inside the userplugin checkout and run all commands from the Vencord repository root.
-
-## Automated validation
-
-Run:
+Run from the Vencord root:
 
 ```bash
+pnpm install --frozen-lockfile
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
@@ -58,151 +32,167 @@ pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
 ```
 
-CI additionally performs clean Vencord builds/type-checks, bundle assertions, a current-upstream Orion build, a compatible pause/resume companion-fork build, reporter parser validation, and Discord Stable/Canary patch reporters. Do not claim those checks are green without inspecting their actual jobs.
+Do not install packages inside QuestUI; it uses Vencord's toolchain.
 
-If an existing local checkout fails because of an unrelated userplugin, report the exact failure and verify whether any QuestUI file is involved rather than modifying unrelated code.
+## Change quality
 
-## Discord matchers and webpack lookups
+- Inspect the current implementation before editing.
+- Prove a bug or compatibility issue with source/runtime/test evidence before labelling it as confirmed.
+- Prefer root-cause fixes over timers, state mirrors, fabricated contexts, or broad fallbacks.
+- Keep source-of-truth state in Discord/Orion rather than duplicating it in QuestUI.
+- Preserve unrelated behavior.
+- Remove dead branches/adapters created by a refactor.
+- Keep final history logical; avoid `fix CI`, test-noise, or temporary commits when they can be cleaned before handoff.
+- Do not weaken CI assertions just to make a check green; correct false-positive/brittle assertions at the layer they actually verify.
 
-Discord internals are a compatibility boundary.
+## Discord Quest state
 
-- Prefer stable code fragments, meaningful properties, and identifiable behavior.
-- Avoid raw DOM manipulation when React/Vencord APIs solve the same problem.
-- Keep finders narrow; do not broaden them just to make a reporter pass.
-- Explain why new anchors are expected to remain stable.
-- Keep `scripts/checkQuestUIReporter.mjs` synchronized with every QuestUI Discord webpack lookup.
+Discord QuestStore/native selectors are authoritative for availability, enrollment, completion, claim state, progress, task selection, and native refresh results.
 
-Current reporter coverage includes the QuestStore resolver, native task/completion selectors, Quest asset resolver, Orb component, native Enroll, native Claim, and native current-Quest Reload finder (`QUESTS_FETCH_CURRENT_QUESTS_BEGIN`). Vencord PluginManager/Commands imports and current-user/profile access through `UserStore` / `UserProfileStore` are Vencord APIs rather than new Discord webpack finders. Reusing the already-reported native Quest-icon finder in another Dashboard presentation point does not require a duplicate reporter signature.
+The local 250 ms refresh is render-only. It may re-read Discord state but must never increment progress or send Quest farming traffic.
 
-## Quest data and progress invariants
+Prefer `taskConfigV2` over legacy `taskConfig`; do not merge both into duplicate tasks.
 
-- Discord QuestStore/native selectors are the source of truth.
-- Do not create a second QuestUI progress pipeline or consume Orion private counters as progress truth.
-- Local periodic refresh is render-only.
-- Prefer Discord's native active-task selection; prefer `taskConfigV2` over legacy `taskConfig` rather than merging duplicate schemas.
-- Artwork must use Discord's native Quest asset resolver; Orb display should reuse Discord's native Orb component.
-- Keep normalized base reward data separate from presentation-only Nitro multiplier display.
+## Manual Accept / Claim
 
-## Manual Accept / Claim invariants
-
-- Every mutation requires an explicit click.
-- Keep orchestration in `questActions.ts`.
-- Re-read current Quest state immediately before mutation and require complete config.
-- Scope duplicate guards to account + Quest and re-check account identity on events/timeouts.
-- Respect Quest access suspension, enrollment blocks, and valid start/expiry/reward-expiry timestamps; malformed present safety state fails closed.
+- Mutation requires an explicit QuestUI click.
+- Re-read the Quest from QuestStore immediately before mutation.
+- Fail closed on malformed present safety/config timestamps.
+- Scope duplicate guards to account + Quest.
 - Enrollment must reuse Discord's native action identified by `QUESTS_ENROLL_BEGIN`, `QUESTS_ENROLL_SUCCESS`, `QUESTS_ENROLL_FAILURE`, and `previous_in_flight_request`.
-- Claim must reuse the verified native claim action containing begin/success/failure plus `traffic_metadata_sealed`.
-- Never add a silent handcrafted REST fallback when a native finder breaks.
-- Never bypass or auto-retry CAPTCHA/challenges.
-- Never optimistically mutate QuestStore.
-- Keep bounded duplicate protection after successful or transport-ambiguous submissions not yet reflected by Discord.
-- Listener registration/teardown must remain leak-safe, including synchronous callback-on-registration cases.
-- Pending UI copy is `Processing…`.
-- Confirmed QuestUI enrollment may start compatible idle Orion. Submitted/unconfirmed enrollment must not.
+- Claim must reuse the verified native claim action including begin/success/failure and sealed traffic metadata.
+- Do not silently replace a broken finder with handcrafted REST.
+- Do not solve/bypass CAPTCHA or other challenges and do not auto-retry them.
+- Do not optimistically mutate QuestStore.
+- Confirmed enrollment may auto-start compatible idle Orion; submitted/uncertain enrollment may not.
+- Pending text is `Processing…`.
 
-## Orion companion-control invariants
+## Orion companion integration
 
-Orion integration is optional and must fail closed when the expected companion build is unavailable.
+QuestUI may consume only the explicit companion surface. It must not import Orion's TaskRunner, Traffic, Patcher, farming queues, settings internals, or checkout paths.
 
-Discovery/identity:
+A compatible Orion build owns the exact registered `orion` command and exposes `start`, `stop`, `pause`, `resume`, source-of-truth control snapshots/subscriptions, engine Start/Stop, global Pause/Resume, and exact-ID per-Quest Pause/Resume.
 
-- Discover `OrionQuests` through Vencord PluginManager, never folder assumptions.
-- Require the exact registered `orion` command object declared by Orion, owned by `OrionQuests`.
-- Require the action option and `start`, `stop`, `pause`, `resume` choices.
-- Re-check plugin, command, lifecycle, and method identity immediately before invocation.
-
-State/control:
-
-- Require source-of-truth companion snapshot/subscription and engine/global/per-Quest control methods.
-- Never keep a QuestUI copy of Orion running/task state as truth. React state may only trigger rerenders/pending UI; re-read the current companion snapshot on render.
-- Never fabricate a Discord channel or invoke the slash callback for UI control.
-- Keep a module-level cross-Dashboard lock plus component pending state.
-- Do not mutate Orion farming/settings internals.
-
-Global UI order and semantics:
+Global UI order:
 
 ```text
 Smart Start/Pause/Resume → Stop → Reload → Filter
 ```
 
-- No Available/In-Progress Quest → Smart and Stop disabled.
-- Engine stopped + unfinished work → Start enabled, Stop disabled.
-- Engine stopped + paused work → Resume enabled, Stop disabled.
-- Engine running + RUNNING/QUEUE → Pause enabled, Stop enabled.
-- Engine running + only PAUSED → Resume enabled, Stop enabled.
-- Engine running before a controllable row is published → Smart disabled, Stop enabled.
-- Start and Resume must use the exact same Play icon component.
-- Pause must use a real two-bar SVG glyph and warning/yellow color, not literal `||` text.
-- Stop remains real engine shutdown/cleanup, not Pause.
+State rules:
+
+- no Available/In-Progress Quest → Smart and Stop disabled;
+- engine stopped + unfinished work → Start enabled, Stop disabled;
+- engine stopped + paused work → Resume enabled, Stop disabled;
+- engine running + RUNNING/QUEUE → Pause enabled, Stop enabled;
+- engine running + only PAUSED → Resume enabled, Stop enabled;
+- engine running before a controllable row exists → Smart disabled, Stop enabled.
+
+Start and Resume use the exact same Play icon. Pause is a real two-bar yellow SVG, never literal `||`. Stop remains engine shutdown/cleanup.
 
 Per-Quest UI:
 
-- Available → large Accept.
-- Confirmed enrolled/In Progress → compact Orion control in the same slot.
-- Engine stopped → Start global engine.
-- RUNNING/QUEUE → exact-ID Pause.
-- PAUSED → exact-ID Resume.
-- Unknown/scanning while engine running → disabled control rather than guessed state.
-- Claimable → Orion control disappears and Claim appears.
-- Never implement targeted Start; Orion owns scheduling and concurrency.
+- Available → large Accept;
+- confirmed enrolled/In Progress → compact Orion control in the same slot;
+- engine stopped → Start global engine;
+- RUNNING/QUEUE → exact-ID Pause;
+- PAUSED → exact-ID Resume;
+- unknown/scanning while engine runs → disabled rather than guessed;
+- claimable → control disappears and Claim appears;
+- never implement targeted Start; Orion owns scheduling/concurrency.
 
-Use Vencord's native toast API for explicit control success/failure feedback.
+Use Vencord's native toast API for explicit control success/failure feedback. Never fabricate a Discord channel to invoke slash callbacks.
 
-## Dashboard header invariants
+## Dashboard presentation
 
-- The visible title is **Quest Dashboard** followed by Discord's native Quest icon.
-- The title may use a subtle brand accent, but it must respect `prefers-reduced-motion` and remain legible on dark/light themes.
-- When the loaded current-user Discord profile exposes its native Nitro profile badge, render a compact colored **Nitro** tag using that badge icon. If the badge/profile is unavailable, omit the tag rather than guessing.
-- In Progress, Ready to Claim, and Available counters stay on one summary row at normal Dashboard width and sit clearly below the title/tool row.
-- Do not reserve Orion/Reload tool width on the summary row; tool-space reservation belongs to the title/tool row only.
+Keep the current presentation contracts unless a change explicitly targets them:
 
-## Quest Reload invariants
+- visible title: **Quest Dashboard** + Discord native Quest icon;
+- eligible Nitro accounts are determined from the current user's `premiumType`;
+- use Discord Nitro profile-badge artwork when hydrated, otherwise keep the Nitro tag with the existing fallback glyph;
+- title color sweep is a seamless linear right-to-left loop with no reset frame;
+- summary remains one line below tools;
+- In Progress / Ready to Claim / Available follow the current card scope;
+- **Claimed is always shown** and counts the full live Quest snapshot even when Claimed cards are filtered out;
+- timed progress displays `mm:ss / mm:ss` and only the current elapsed value receives completion-stage color;
+- Dashboard expiry copy appears only inside the 15-day presentation window; underlying Quest status/expiry is never altered.
 
-- Use Discord's native current-Quest fetch-and-dispatch action found by `QUESTS_FETCH_CURRENT_QUESTS_BEGIN`.
-- Do not reload the whole Discord client or hand-mutate QuestStore.
+## Quest Reload
+
+- Use Discord's native current-Quest fetch/dispatch action found by `QUESTS_FETCH_CURRENT_QUESTS_BEGIN`.
+- Never reload the whole Discord client or hand-mutate QuestStore.
 - Start the request immediately.
-- Complete at least three full circular-arrow rotations before stopping.
-- If the request is still in flight after three rotations, keep spinning.
-- If the request settles mid-rotation, finish that rotation and stop on the next animation-iteration boundary rather than snapping back from a partial turn.
-- Coalesce overlapping native calls to one in-flight request and synchronously guard duplicate component clicks.
-- A successful request with no new Quest is still success.
-- Surface success/failure through Vencord's native toast API.
-- Keep Reload usable without Orion integration.
-- Reuse the Filter button's theme-safe visual skin rather than maintaining a drifting Reload-only palette, while keeping the Reload glyph itself readable in dark/light and pending/disabled states.
+- Complete at least three full rotations.
+- Keep spinning while the request is in flight.
+- If it settles mid-rotation, finish the current rotation and stop on `animationiteration`.
+- Coalesce overlapping native requests and synchronously guard duplicate clicks.
+- Success with no new Quest remains success.
+- Keep Reload independent of Orion, theme-readable, and on Vencord native toast feedback.
 
-## Manual testing
+## Webpack / patch compatibility
 
-Test the states relevant to the change in a real Discord client when possible. For the current Dashboard controls, cover at least:
+Discord internals are unstable. Treat every finder/patch as a compatibility boundary.
 
-- Header reads **Quest Dashboard**, the native Quest icon is aligned with it, a Nitro tag appears only when the loaded current-user profile exposes the Nitro badge, and the title does not overlap controls.
-- In Progress, Ready to Claim, and Available stay on one line with the intended extra vertical separation.
-- Orion absent/disabled/incompatible → no callable Orion control; Reload and normal QuestUI still work.
-- Idle unfinished work → Start enabled / Stop disabled.
-- Running work → yellow Pause + enabled Stop.
-- Explicit pause → Resume uses exactly the same Play glyph as Start.
-- Stop preserves Discord progress; later Start continues unfinished non-paused Quest progress from Discord state.
-- Per-Quest RUNNING/QUEUE ↔ PAUSED behavior targets the exact Quest ID.
-- Accept → `Processing…` → confirmed enrollment → compact Orion control; idle Orion auto-starts only after confirmation.
-- Concurrency pressure queues excess accepted Quests instead of using targeted Start.
-- Completion removes per-Quest control and exposes Claim.
-- All Quests complete → both Smart and Stop disabled.
-- Reload glyph remains legible on dark/light themes, sends the native request immediately, completes at least three full rotations, waits for a whole-rotation boundary after slower requests, fetches newly available Quests without Ctrl+R, and shows success/failure through Vencord toast.
-- Plugin reload/disable/replacement while Dashboard is open fails safely rather than calling a stale object.
+- Prefer identifiable code fragments and meaningful properties.
+- Avoid broad minified-key lookups when safer anchors exist.
+- Review `WEBPACK_FIND_SIGNATURES` whenever a Discord webpack lookup changes.
+- Keep `scripts/checkQuestUIReporter.mjs` synchronized with lookup coverage.
+- Vencord PluginManager/Commands and current-user/profile stores exposed through Vencord commons are not new Discord webpack finders.
 
-Automated build/reporter output is not live Discord evidence. State exactly what was and was not tested.
+## Testing
+
+Automated tests are necessary but not sufficient. For relevant changes, manual-test actual Discord states and report what was truly observed.
+
+Current beta manual coverage should include:
+
+- title/native Quest icon/Nitro tag without overlap;
+- always-visible Claimed summary count;
+- `mm:ss` elapsed/target formatting with current-only progress color;
+- 15-day expiry presentation boundary;
+- Accept → `Processing…` → confirmed enrollment;
+- Claim flow;
+- global Start/Pause/Resume/Stop state transitions;
+- per-Quest RUNNING/QUEUE ↔ PAUSED exact-ID transitions;
+- concurrency queue pressure;
+- all-Quest-finished disabled state;
+- Reload whole-rotation behavior and new Quest appearance without Ctrl+R;
+- Orion absent/disabled/replaced/reloaded safety;
+- dark/light/custom theme readability.
+
+Never describe CI/build output as proof of a live Discord mutation or farming session.
+
+## Release channels
+
+Stable source: `main`.
+
+Beta source: `feat/quest-actions-orion-controls`.
+
+The beta Orion-control feature set is supported with:
+
+```text
+Herzchens/discord-quest-completer
+branch: feat/per-quest-pause-resume
+known companion commit: a190386071f91af348068f3044ccd0ddb0fa52ab
+```
+
+Do not present current upstream `nyxxbit/discord-quest-completer` as exposing that pause/resume companion API until it actually does.
+
+Keep QuestUI and Orion packages/repositories/licenses separate. See `docs/RELEASES.md` before publication.
 
 ## Documentation and changelog
 
-Update user-facing documentation when behavior, settings, installation, or compatibility expectations change. Add user-visible features/fixes to `CHANGELOG.md` under `Unreleased`. Do not create a release version without maintainer approval.
+Update README and release notes when behavior, compatibility, installation, or release expectations change. Keep screenshots documentation-only.
 
-## Commit and PR discipline
+Do not invent a successful build, CI run, tag, release, or manual test. If a release action/tool is unavailable, prepare the release artifacts/commands and state that publication still requires the maintainer to execute them.
 
-Use clear, focused commits (commonly `feat:`, `fix:`, `docs:`, `ci:`, `chore:`). Avoid CI/fixup noise in final history when it can be cleaned before handoff.
+## Commits, issues, and PRs
 
-A PR should explain the problem, implementation, intentionally unchanged behavior, tests actually run, manual environment/evidence, and remaining risks. Keep it focused.
+Use clear focused commit messages such as `feat:`, `fix:`, `docs:`, `ci:`, or `chore:`. Avoid noisy fixup history when it can be cleaned.
 
-Do not create an issue or PR unless the user explicitly requests it. Before opening a PR, ask whether the final diff has been reviewed by a human. If the user explicitly proceeds without confirmed human review, add `AI_REVIEW_REQUIRED.txt` containing exactly:
+Do not create an issue or PR unless explicitly requested.
+
+Before opening a PR, ask whether the final diff was reviewed by a human. If proceeding without confirmed human review, add `AI_REVIEW_REQUIRED.txt` containing exactly:
 
 `This pull request was generated automatically by AI and has not been reviewed by a human.`
 
-Never claim human review unless the user explicitly confirmed it.
+Never claim human review unless explicitly confirmed.
