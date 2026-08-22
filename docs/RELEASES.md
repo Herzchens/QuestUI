@@ -12,9 +12,11 @@ QuestUI publishes Stable and Beta as separate source targets.
 ## Beta — v1.1.0-beta.1
 
 - Source: `Herzchens/QuestUI` branch `feat/quest-actions-orion-controls`
-- Adds manual Accept/Claim, native Quest-list Reload, the polished Quest Dashboard, and optional smart/per-Quest Orion controls.
+- Adds manual Accept/Claim, native Quest-list Reload, the polished Quest Dashboard, and smart/per-Quest Orion controls when a compatible Orion build is installed.
+- **Dashboard Mode** and **Dashboard • Orion Integration** are enabled by default in the Beta build; Orion controls still fail closed and stay unavailable when no compatible enabled OrionQuests plugin is present.
 - For the **beta Orion-control feature set**, pair it with `Herzchens/discord-quest-completer` branch `feat/per-quest-pause-resume`.
-- Known compatible Orion companion commit: `a190386071f91af348068f3044ccd0ddb0fa52ab`.
+- Known compatible Orion companion checkpoint: `39eef8603485be36afd18b813931e528a61728ab`.
+- This checkpoint includes the two Orion follow-up commits after `48e980861168afab56576ebb903b01d867e9f7c8`, including the account-identity hardening and lifecycle-test relocation.
 - Upstream `nyxxbit/discord-quest-completer` does not currently expose this pause/resume companion surface.
 
 QuestUI and OrionQuests remain separate Vencord userplugins. Do not merge their source trees into one plugin directory.
@@ -24,9 +26,10 @@ QuestUI and OrionQuests remain separate Vencord userplugins. Do not merge their 
 1. Confirm the proposed tags do not already exist.
 2. Confirm the Stable target still resolves to the intended `main` checkpoint.
 3. Confirm the Beta target is the intended feature-branch HEAD and that its CI/manual gates are acceptable.
-4. Publish Stable as a normal release.
-5. Publish Beta with GitHub's **pre-release** flag.
-6. In the Beta release notes, state the required Orion fork branch prominently.
-7. Keep both projects' own licenses and repository boundaries intact.
+4. Confirm the Beta compatibility note points to the current tested Orion `feat/per-quest-pause-resume` checkpoint.
+5. Publish Stable as a normal release.
+6. Publish Beta with GitHub's **pre-release** flag.
+7. In the Beta release notes, state the required Orion fork branch prominently.
+8. Keep both projects' own licenses and repository boundaries intact.
 
 The release notes in the release kit generated for this split are intended to be used verbatim or reviewed before publication.

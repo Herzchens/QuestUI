@@ -9,7 +9,7 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 > [!IMPORTANT]
 > **Stable** tracks `main` and is the recommended QuestUI build for normal use.
 >
-> **Beta** tracks `feat/quest-actions-orion-controls`. The beta Orion-control feature set must be paired with `Herzchens/discord-quest-completer` branch `feat/per-quest-pause-resume`. The companion integration is present at Orion commit `a190386071f91af348068f3044ccd0ddb0fa52ab` and later descendants of that branch.
+> **Beta** tracks `feat/quest-actions-orion-controls`. Dashboard Mode and Dashboard • Orion Integration are enabled by default in the Beta build. The beta Orion-control feature set must be paired with `Herzchens/discord-quest-completer` branch `feat/per-quest-pause-resume`. The current known-compatible Orion checkpoint is `39eef8603485be36afd18b813931e528a61728ab`.
 >
 > Upstream `nyxxbit/discord-quest-completer` does not currently expose the pause/resume companion surface required by the beta smart/per-Quest controls. QuestUI remains a separate plugin: without the compatible Orion branch, the Dashboard, filters, counters, native Reload, and manual Accept/Claim can still work, but the beta Orion controls are not available.
 

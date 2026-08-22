@@ -44,13 +44,13 @@ export default definePluginSettings({
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Mode",
         description: "Open the live mini dashboard when clicking a QuestUI shortcut. Requires the Top Bar Button or Settings Bar Button.",
-        default: false
+        default: true
     },
     orionIntegration: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Orion Integration",
         description: "Show smart Start/Pause/Resume and Stop controls plus per-Quest controls from OrionQuests' live engine/task state. Requires Dashboard Mode and a compatible enabled OrionQuests plugin.",
-        default: false
+        default: true
     },
 
     // Dashboard filter values live in settings so they persist, but they are configured
