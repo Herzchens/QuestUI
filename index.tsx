@@ -1,3 +1,5 @@
+import "./detailStatus.css";
+
 import definePlugin from "@utils/types";
 
 import { QuestButton, QuestsCount } from "./QuestButton";

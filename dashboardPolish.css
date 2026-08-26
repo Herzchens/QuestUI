@@ -1,0 +1,230 @@
+@keyframes quest-ui-dashboard-title-sweep {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: -320px 0;
+    }
+}
+
+.quest-ui-dashboard-display-title {
+    align-items: center;
+    display: inline-flex;
+    gap: 8px;
+    height: 34px;
+    left: 15px;
+    line-height: 34px;
+    max-width: calc(100% - 110px);
+    pointer-events: none;
+    position: absolute;
+    right: 95px;
+    top: 14px;
+    z-index: 2;
+}
+
+.quest-ui-dashboard-shell.has-orion-control .quest-ui-dashboard-display-title {
+    max-width: calc(100% - 190px);
+    right: 175px;
+}
+
+.quest-ui-dashboard-display-title > strong {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: quest-ui-dashboard-title-sweep 3.8s linear infinite;
+    background-clip: text;
+    background-image: repeating-linear-gradient(
+        90deg,
+        #7f86ff 0,
+        #7f86ff 64px,
+        #f4f5ff 104px,
+        #72e4ff 132px,
+        #f3a8ff 162px,
+        #9a8cff 208px,
+        #7f86ff 256px,
+        #7f86ff 320px
+    );
+    background-position: 0 0;
+    background-size: 320px 100%;
+    color: transparent;
+    flex: 0 1 auto;
+    font-family: var(--font-display, var(--font-primary));
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.15px;
+    line-height: 34px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-dashboard-display-title-icon {
+    align-items: center;
+    color: var(--brand-360, #949cf7);
+    display: inline-flex;
+    flex: 0 0 22px;
+    filter: drop-shadow(0 0 5px color-mix(in srgb, var(--brand-500, #5865f2) 42%, transparent));
+    height: 22px;
+    justify-content: center;
+    width: 22px;
+}
+
+.quest-ui-dashboard-display-title-icon > svg {
+    fill: currentColor;
+    height: 22px;
+    width: 22px;
+}
+
+.quest-ui-dashboard-nitro-tag {
+    align-items: center;
+    background-color: #7b6df6;
+    background-image: linear-gradient(120deg, #ef7cf7 0%, #ad63f5 46%, #6875f5 100%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    border: 0;
+    border-radius: 8px;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.13),
+        0 2px 6px rgba(0, 0, 0, 0.22),
+        0 0 10px rgba(142, 111, 255, 0.16);
+    box-sizing: border-box;
+    color: #fff;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+    height: 28px;
+    isolation: isolate;
+    line-height: 1;
+    overflow: hidden;
+    padding: 0 9px 0 6px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.quest-ui-dashboard-nitro-tag > img,
+.quest-ui-dashboard-nitro-fallback-icon {
+    display: block;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
+    height: 17px;
+    object-fit: contain;
+    width: 17px;
+}
+
+.quest-ui-dashboard-nitro-fallback-icon {
+    fill: currentColor;
+}
+
+.quest-ui-dashboard-nitro-wordmark {
+    font-family: var(--font-display, var(--font-primary));
+    font-size: 13px;
+    font-style: italic;
+    font-weight: 900;
+    letter-spacing: -0.35px;
+    line-height: 1;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 0 5px rgba(255, 255, 255, 0.12);
+}
+
+/* The visible title is rendered by QuestDashboardShell so header tools never steal summary width. */
+.quest-ui-dashboard-shell .quest-ui-dashboard-title-row {
+    display: none;
+}
+
+.quest-ui-dashboard-shell.has-dashboard-tools .quest-ui-dashboard-heading,
+.quest-ui-dashboard-shell.has-dashboard-tools.has-orion-control .quest-ui-dashboard-heading {
+    padding-right: 0;
+}
+
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin-top: 45px;
+    white-space: nowrap;
+}
+
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary > span {
+    flex: 0 0 auto;
+}
+
+.quest-ui-dashboard-shell .quest-ui-summary-empty {
+    margin-top: 45px;
+    white-space: nowrap;
+}
+
+.quest-ui-summary-claimed {
+    color: var(--blue-345, #00a8fc);
+}
+
+.quest-ui-card-progress-current {
+    display: inline;
+    font-variant-numeric: tabular-nums;
+    transition: color 160ms linear, text-shadow 160ms linear;
+}
+
+.quest-ui-card-progress-current.quest-ui-progress-tone-starting {
+    color: var(--text-muted, #949ba4);
+}
+
+.quest-ui-card-progress-current.quest-ui-progress-tone-building {
+    color: color-mix(in srgb, var(--brand-360, #949cf7) 58%, var(--text-muted, #949ba4));
+}
+
+.quest-ui-card-progress-current.quest-ui-progress-tone-mid {
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-card-progress-current.quest-ui-progress-tone-advanced {
+    color: color-mix(in srgb, var(--status-positive, #23a55a) 68%, var(--brand-360, #949cf7));
+}
+
+.quest-ui-card-progress-current.quest-ui-progress-tone-near-complete {
+    color: var(--status-positive, #23a55a);
+    font-weight: 650;
+    text-shadow: 0 0 8px color-mix(in srgb, var(--status-positive, #23a55a) 24%, transparent);
+}
+
+@media (max-width: 430px) {
+    .quest-ui-dashboard-display-title > strong {
+        font-size: 20px;
+    }
+
+    .quest-ui-dashboard-display-title-icon {
+        flex-basis: 20px;
+        height: 20px;
+        width: 20px;
+    }
+
+    .quest-ui-dashboard-display-title-icon > svg {
+        height: 20px;
+        width: 20px;
+    }
+
+    .quest-ui-dashboard-nitro-tag {
+        gap: 5px;
+        height: 26px;
+        padding: 0 7px 0 5px;
+    }
+
+    .quest-ui-dashboard-nitro-tag > img,
+    .quest-ui-dashboard-nitro-fallback-icon {
+        height: 15px;
+        width: 15px;
+    }
+
+    .quest-ui-dashboard-nitro-wordmark {
+        font-size: 12px;
+    }
+
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        font-size: 11px;
+        gap: 6px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-dashboard-display-title > strong {
+        -webkit-text-fill-color: currentColor;
+        animation: none;
+        background-image: none;
+        color: var(--text-strong, var(--header-primary));
+    }
+}

@@ -1,0 +1,41 @@
+@keyframes quest-ui-reload-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Reuse quest-ui-filter-button for the same surface; keep the glyph explicitly theme-readable. */
+.quest-ui-reload-icon-button {
+    color: var(--interactive-active, var(--interactive-hover, #dbdee1));
+    flex: 0 0 34px;
+}
+
+.quest-ui-reload-icon-button svg {
+    fill: currentColor;
+    height: 17px;
+    transform-origin: 50% 50%;
+    width: 17px;
+}
+
+.quest-ui-reload-icon-button:hover:not(:disabled) {
+    color: var(--interactive-hover, #dbdee1);
+}
+
+.quest-ui-reload-icon-button.is-spinning svg {
+    animation: quest-ui-reload-spin 0.8s linear infinite;
+}
+
+.quest-ui-reload-icon-button:disabled {
+    color: var(--interactive-active, var(--interactive-hover, #dbdee1));
+    cursor: default;
+    opacity: 1;
+    transform: none;
+}
+
+.quest-ui-reload-icon-button:disabled:hover {
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-reload-icon-button.is-spinning svg {
+        animation-duration: 1.6s;
+    }
+}

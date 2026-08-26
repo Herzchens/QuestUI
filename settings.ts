@@ -1,6 +1,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
+import { isOrionCommandReady, isOrionInstalled } from "./orionIntegration";
+
 const rewardOptions = [
     { label: "All rewards", value: "all", default: true },
     { label: "Orbs only", value: "orbs" },
@@ -9,6 +11,10 @@ const rewardOptions = [
 
 function noShortcutButtons(this: any): boolean {
     return !this.store.showQuestsButtonTopBar && !this.store.showQuestsButtonSettingsBar;
+}
+
+function orionIntegrationDisabled(this: any): boolean {
+    return !this.store.dashboardMode || !isOrionCommandReady();
 }
 
 export default definePluginSettings({
@@ -38,7 +44,13 @@ export default definePluginSettings({
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Mode",
         description: "Open the live mini dashboard when clicking a QuestUI shortcut. Requires the Top Bar Button or Settings Bar Button.",
-        default: false
+        default: true
+    },
+    orionIntegration: {
+        type: OptionType.BOOLEAN,
+        displayName: "Dashboard • Orion Integration",
+        description: "Show smart Start/Pause/Resume and Stop controls plus per-Quest controls from OrionQuests' live engine/task state. Requires Dashboard Mode and a compatible enabled OrionQuests plugin.",
+        default: true
     },
 
     // Dashboard filter values live in settings so they persist, but they are configured
@@ -193,8 +205,11 @@ export default definePluginSettings({
     }
 }, {
     dashboardMode: { disabled: noShortcutButtons },
+    orionIntegration: {
+        hidden: () => !isOrionInstalled(),
+        disabled: orionIntegrationDisabled
+    },
 
-    // Dashboard filters are edited in-context from the Dashboard filter popout.
     dashboardShowAvailable: { hidden: true },
     dashboardShowInProgress: { hidden: true },
     dashboardShowClaimable: { hidden: true },
@@ -208,8 +223,6 @@ export default definePluginSettings({
     dashboardShowActivity: { hidden: true },
     dashboardShowOther: { hidden: true },
 
-    // Detailed Status only applies to QuestUI shortcut buttons. Keep the parent visible
-    // but locked when both shortcut injection points are disabled; hide its children.
     detailedStatus: { disabled: noShortcutButtons },
     detailedStatusScope: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus; } },
     detailedShowAvailable: { hidden() { return noShortcutButtons.call(this) || !this.store.detailedStatus || this.store.detailedStatusScope !== "custom"; } },

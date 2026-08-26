@@ -1,219 +1,261 @@
 # QuestUI
 
-QuestUI is a standalone Vencord userplugin for quick access to Discord Quests and a compact, live view of where they stand.
+QuestUI is a standalone Vencord userplugin for quick access to Discord Quests and a compact, live view of their state.
 
-It won't complete, enroll in, claim, or otherwise touch quest progress — it just adds UI and reads status info Discord already exposes. Use it on its own or alongside [OrionQuests](https://github.com/nyxxbit/discord-quest-completer) and other quest plugins; since QuestUI never modifies quest state, it's built to coexist with them, though compatibility isn't guaranteed if another plugin patches the same Discord components.
+QuestUI is UI-focused rather than a Quest-completion engine. It can perform two narrowly scoped Quest mutations only when **you click them yourself** — **Accept Quest** and **Claim Reward**. It does not generate Quest progress, spoof games/streams, auto-claim, or bypass Discord challenges.
+
+## Release channels
+
+> [!IMPORTANT]
+> **Stable** tracks `main` and is the recommended QuestUI build for normal use.
+>
+> **Beta** tracks `feat/quest-actions-orion-controls`. Dashboard Mode and Dashboard • Orion Integration are enabled by default in the Beta build. The beta Orion-control feature set must be paired with `Herzchens/discord-quest-completer` branch `feat/per-quest-pause-resume`. The current known-compatible Orion checkpoint is `39eef8603485be36afd18b813931e528a61728ab`.
+>
+> Upstream `nyxxbit/discord-quest-completer` does not currently expose the pause/resume companion surface required by the beta smart/per-Quest controls. QuestUI remains a separate plugin: without the compatible Orion branch, the Dashboard, filters, counters, native Reload, and manual Accept/Claim can still work, but the beta Orion controls are not available.
+
+Planned release labels for this split are **v1.0.1** for Stable and **v1.1.0-beta.1** for the beta prerelease.
+
+## Preview
+
+<p align="center">
+  <img src="docs/images/dashboard-active.webp" width="48%" alt="QuestUI beta Dashboard with an active Quest, live progress, claimable Quests, and header controls" />
+  <img src="docs/images/dashboard-claimed.webp" width="48%" alt="QuestUI beta Dashboard showing claimed Quests and the Nitro header tag" />
+</p>
+
+<p align="center">
+  <img src="docs/images/quest-home-counters.webp" width="360" alt="QuestUI color-coded counters on Discord Quest Home" />
+</p>
+
+The captures above are real Discord runtime screenshots supplied by the maintainer. They are documentation assets only and are not bundled into the runtime UI.
 
 ## Features
 
 - Optional Quest shortcut in Discord's top bar
 - Optional Quest shortcut next to mute, deafen, and settings
-- Optional **Dashboard Mode**, which opens a live mini Quest dashboard instead of jumping straight to Quest Home
-- Quest cards with Discord's own artwork, task-type badges, status, reward, native progress, and time remaining
-- Floating dashboard filters for status, reward category, and task type, with **Recommended** and **Clear all** shortcuts
-- Optional numeric **Detailed Status** badge with its own filtering
-- A basic status dot for quests needing attention when Detailed Status is off
-- Optional color-coded counters on Discord's own Quest Home links, independent of the shortcut buttons
-- Direct navigation to Discord's Quest Home page, always available
-- Live QuestStore sync via Discord's native Quest-card progress selectors — no separate QuestUI progress clock
-- Nitro Orb rewards shown with Discord's 1.2x multiplier where eligible, while the underlying base reward data stays unchanged
+- Optional **Dashboard Mode** with a live mini Quest dashboard
+- Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
+- Explicit **Accept Quest** and **Claim Reward** actions
+- Account-scoped duplicate-submission guards and Vencord-native toast feedback
+- Floating filters for status, reward category, and Quest type
+- **Recommended** and **Clear all** filter shortcuts
+- Optional numeric **Detailed Status** badge and basic attention dot
+- Color-coded counters on Discord's own Quest Home links
+- Native **Reload** that asks Discord to refetch the current Quest list without Ctrl+R
+- Nitro Orb reward display using Discord's current 1.2x multiplier rules where eligible
+- Beta-only compatible Orion integration:
+  - Smart **Start / Pause / Resume** global control
+  - Separate **Stop** engine control
+  - Compact exact-ID per-Quest **Pause / Resume** control after enrollment
+  - Engine-wide Start when Orion is stopped
+
+QuestUI does not turn Stop into Pause, does not reset Quest progress, and does not implement a targeted `startQuest`. Orion's own scheduler and concurrency limits decide which enrolled Quests run or queue.
 
 ## Installation
 
-### UserpluginInstaller
+### Stable
 
-Install via UserpluginInstaller using the repo URL:
+For the stable channel, install the default `main` branch.
 
-```
+#### UserpluginInstaller
+
+Use the repository URL:
+
+```text
 https://github.com/Herzchens/QuestUI
 ```
 
-### Manual Vencord source installation
+#### Manual Vencord source install
 
 ```bash
 cd Vencord/src/userplugins
-git clone https://github.com/Herzchens/QuestUI.git
+git clone --branch main https://github.com/Herzchens/QuestUI.git QuestUI
 cd ../..
 pnpm build
 pnpm inject
 ```
 
-To update:
+### Beta + compatible Orion companion
+
+For the full beta feature set, install **both** branches below as separate Vencord userplugins:
 
 ```bash
-git -C Vencord/src/userplugins/QuestUI pull
-cd Vencord
+cd Vencord/src/userplugins
+
+git clone --branch feat/quest-actions-orion-controls https://github.com/Herzchens/QuestUI.git QuestUI
+git clone --branch feat/per-quest-pause-resume https://github.com/Herzchens/discord-quest-completer.git OrionQuests
+
+cd ../..
 pnpm build
+pnpm testTsc
 pnpm inject
 ```
 
-Restart Discord, open Vencord settings, and enable **QuestUI**.
+Do not copy one plugin into the other or build a combined source tree. QuestUI and OrionQuests remain separately maintained plugins.
 
-The Quest Home Counter patch ships disabled by default, since Discord's UI matchers can shift between client builds. You can turn it on independently of either shortcut button — just restart Discord afterward for it to take effect.
+After an amended/rebased beta update, prefer `git fetch` + an explicit reset after checking the worktree is clean rather than a blind `git pull`:
 
-### Using QuestUI with OrionQuests
+```bash
+git -C Vencord/src/userplugins/QuestUI fetch origin --prune
+git -C Vencord/src/userplugins/QuestUI reset --hard origin/feat/quest-actions-orion-controls
 
-QuestUI and [OrionQuests](https://github.com/nyxxbit/discord-quest-completer) have been tested together and work fine on current Vencord and Discord builds. Both rely on Discord internals, though, so a future Discord update could require fixes on either side.
-
-**Orion prebuilt bundle**: this is a pre-compiled distribution, so QuestUI can't just be dropped into it as source. If you want both, use the Orion devbuild installer or a Vencord source build instead.
-
-**Orion devbuild installer** — the Orion devbuild checkout lives at `%LOCALAPPDATA%\OrionVencord`. To add QuestUI:
-
-Command Prompt:
-
-```cmd
-git clone https://github.com/Herzchens/QuestUI.git "%LOCALAPPDATA%\OrionVencord\src\userplugins\QuestUI"
+git -C Vencord/src/userplugins/OrionQuests fetch origin --prune
+git -C Vencord/src/userplugins/OrionQuests reset --hard origin/feat/per-quest-pause-resume
 ```
 
-PowerShell:
+## Dashboard
 
-```powershell
-git clone https://github.com/Herzchens/QuestUI.git "$env:LOCALAPPDATA\OrionVencord\src\userplugins\QuestUI"
-```
+The visible heading is **Quest Dashboard** followed by Discord's native Quest icon.
 
-Then run `UPDATE.cmd` to rebuild.
+If the current Discord user has an active Nitro `premiumType`, QuestUI shows a colored **Nitro** tag. Discord profile badge artwork is used when available; if the artwork has not been hydrated, the tag stays visible with QuestUI's fallback glyph rather than incorrectly hiding Nitro status.
 
-To update QuestUI later:
+The title uses a seamless right-to-left color sweep. `prefers-reduced-motion` disables the motion and keeps the title readable.
 
-Command Prompt:
+The summary row is independent of card filters where appropriate:
 
-```cmd
-git -C "%LOCALAPPDATA%\OrionVencord\src\userplugins\QuestUI" pull
-```
+- **Yellow** — In Progress
+- **Green** — Ready to Claim
+- **Red** — Available
+- **Blue / Blurple** — Claimed
 
-PowerShell:
+The Claimed count is always shown and is calculated from the full live Quest snapshot, even when Claimed cards are hidden by the current filter.
 
-```powershell
-git -C "$env:LOCALAPPDATA\OrionVencord\src\userplugins\QuestUI" pull
-```
+### Filters
 
-Then run `UPDATE.cmd` again. Note that Orion's updater won't delete sibling folders like QuestUI, but it also won't pull QuestUI's updates for you — the two are updated separately, and there's no combined bundle.
-
-### Compatibility matrix
-
-| Installation method | QuestUI support | Method |
-|---|---|---|
-| UserpluginInstaller | Yes | Install using the repository URL |
-| Vencord source/dev build | Yes | Clone into `src/userplugins` |
-| Orion devbuild installer | Yes | Clone into OrionVencord and run `UPDATE.cmd` |
-| Orion prebuilt bundle | Not directly | Move to the devbuild installer |
-
-## Settings
-
-### Shortcuts and Quest Home Counters
-
-- **Top Bar Button** — adds the Quest shortcut to Discord's top bar. Needs a restart.
-- **Settings Bar Button** — adds the shortcut beside mute, deafen, and settings. Needs a restart.
-- **Quest Home Counters** — adds numeric counters to Discord's own Quest Home links. Needs a restart, and works whether or not either shortcut button is enabled.
-
-If you turn off both shortcut buttons, Dashboard Mode and Detailed Status stay visible in settings but get locked, since there's no shortcut left for them to attach to. Quest Home Counters keep working regardless.
-
-### Dashboard Mode
-
-**Dashboard • Mode** changes what clicking a QuestUI shortcut does:
-
-- Off — goes straight to `/quest-home`.
-- On — opens QuestUI's mini dashboard instead.
-
-Either way, **Open Quest Home** stays visible in the dashboard, so Discord's full Quest interface is always one click away.
-
-The Filter button opens a floating popout, and filters apply immediately — no restart needed:
+The Filter popout supports:
 
 - Status: Available, In Progress, Ready to Claim, Claimed, Expired
 - Reward: All rewards, Orbs only, Non-Orb rewards
 - Quest type: Play, Stream, Video, Activity, Other / Unknown
-- Quests with unknown reward formats can still show up under a specific reward filter
 
-The popout also has:
+**Recommended** shows Available, In Progress, and Ready to Claim while hiding Claimed and Expired cards. **Clear all** enables all supported statuses and categories.
 
-- **Recommended** — the default attention-focused view: Available, In Progress, and Ready to Claim shown; Claimed and Expired hidden
-- **Clear all** — drops all restrictions and shows every status, reward category, and Quest type
+### Live progress
 
-A small count on the Filter button shows when restrictions are active. Claimed and expired quests stay hidden by default, while unknown Quest task types stay visible by default, so a new Discord task type doesn't just quietly disappear after a client update.
+QuestUI reads Discord's native Quest selectors and QuestStore rather than running a separate progress engine.
 
-### Detailed Status
+For timed tasks, the secondary progress copy uses fixed `mm:ss / mm:ss` formatting, for example:
 
-**Detailed Status • Enabled** swaps the basic attention dot for a compact numeric badge. It shows one state at a time, in priority order:
+```text
+Play · 03:02 / 15:00
+```
 
-1. **Yellow** — In Progress
-2. **Green** — Ready to Claim
-3. **Red** — Available
+Only the **current elapsed value** (`03:02`) receives completion-stage color. The task label, separator, slash, and target remain neutral so progress color does not leak across the whole row.
 
-The number reflects only the displayed state, not every quest — one Available, two In Progress, and one Ready to Claim would show a yellow **2**.
+The color progression is semantic progress, not urgency: muted at the beginning, then Discord brand tones, then positive green as completion approaches.
 
-The tooltip breaks down the full picture: each status with its own color, the attention total, and the nearest expiry.
+Dashboard expiry copy is shown only when the Quest expiry is within **15 days** of the current time. This is presentation-only; the underlying expiry/status data is not changed.
 
-Detailed Status can either follow the same persisted filter scope as the Dashboard, or use its own separate scope for status, reward category, and Quest type — so you could, say, set an Orbs-only badge and stop an available Avatar Decoration quest from turning the button red.
+### Rewards
 
-Dashboard Mode, Detailed Status, and Dashboard filters are all runtime settings — none of them need a Discord restart.
+Orb rewards reuse Discord's themed Orb component. QuestUI keeps Discord's base reward value unchanged and adjusts only the displayed amount when the current account qualifies for Discord's Nitro Orb multiplier.
 
-## Dashboard reward display
-
-Orb rewards use Discord's own themed Orb component. QuestUI keeps Discord's base reward value in its normalized data untouched, and only adjusts what's *displayed* on Dashboard cards when the current account qualifies for Discord's Nitro Orb multiplier.
-
-For eligible full Nitro accounts on qualifying Orb Quests, QuestUI shows the 1.2x amount:
+Examples:
 
 - `200 Orbs` → `240 Orbs`
 - `700 Orbs` → `840 Orbs`
 
-Nitro Basic and Discord's fractional/credit-only Nitro state don't qualify. The multiplier only applies to quests from the current Discord multiplier period — older quests keep their base Orb amount.
+Nitro Basic and fractional/credit-only Nitro states are not treated as eligible for this reward multiplier.
 
-## Live progress behavior
+## Manual Accept and Claim
 
-QuestUI doesn't take a one-time snapshot when Dashboard Mode opens, and it doesn't run its own progress engine.
+Dashboard cards expose a mutation only when the normalized Quest state calls for it:
 
-The dashboard's progress ring uses the same native completion selector Discord calls right before rendering its own Quest-card ring. QuestUI reads Discord's `completedRatio` for the ring and `completedRatioDisplay` for the text, so Discord's optimistic progress, active desktop progress, achievement handling, and rounding all stay the source of truth.
+- **Available** → **Accept Quest**
+- **Ready to Claim** → **Claim Reward**
 
-The current/target line underneath follows Discord's native task selection too. For multi-option or multi-platform quests, Discord picks the live task based on its progress event name and heartbeat/update timestamps, and `taskConfigV2` is used over the legacy config rather than merging the two.
+Every mutation requires an explicit click. QuestUI re-reads the current Quest from Discord's QuestStore immediately before acting and does not optimistically mark the Quest accepted or claimed.
 
-QuestUI still listens for QuestStore changes so it can react to state transitions right away. A short local interval just forces an already-open dashboard to re-check the same native selectors — it never increments progress on its own and never sends quest-related network requests.
+Enrollment reuses Discord's native Quest enrollment action. While pending, the card shows **Processing…**. A compatible Orion beta build is auto-started only after Discord confirms `enrolledAt` in QuestStore.
 
-This behavior is the same whether OrionQuests is installed or not: Orion may change Discord's Quest state, but QuestUI just reads the resulting QuestStore/selector output rather than tracking a separate Orion counter.
+Reward claim likewise reuses Discord's native claim path. Unknown, malformed, or ambiguous reward targets fail closed instead of being guessed. QuestUI does not solve/bypass CAPTCHA or other Discord verification challenges and does not auto-retry them.
 
-## Status colors
+## Orion beta integration
 
-### Quest Home Counters
+The beta integration is intentionally narrow. QuestUI validates the registered `orion` command and the companion surface before showing callable controls.
 
-- **Red** — Available, can be enrolled in
-- **Yellow** — Enrolled, still in progress
-- **Green** — Completed, reward ready to claim
-- **Blurple** — Claimed
+The compatible fork exposes source-of-truth engine/task state plus:
 
-### Basic shortcut status dot
+- engine Start/Stop
+- global Pause/Resume
+- exact-ID per-Quest Pause/Resume
+- state-change subscriptions
 
-With Detailed Status off, the shortcut shows a single dot using the same priority order:
+Global header order:
 
-1. **Yellow** — at least one quest in progress
-2. **Green** — nothing in progress, but a reward's ready to claim
-3. **Red** — nothing higher-priority, but a quest is available
-4. **No dot** — nothing needs attention
+```text
+Smart Start/Pause/Resume → Stop → Reload → Filter
+```
 
-## Compatibility and recovery
+State rules:
 
-QuestUI depends on Discord's UI components and Vencord patches, so a Discord update can occasionally break a matcher or native lookup.
+- no Available/In-Progress Quest → Smart and Stop disabled
+- engine stopped + unfinished work → Start enabled, Stop disabled
+- engine stopped + explicit paused work → Resume enabled, Stop disabled
+- engine running + RUNNING/QUEUE → Pause enabled, Stop enabled
+- engine running + only PAUSED controllable work → Resume enabled, Stop enabled
+- short startup/scanning window without a published controllable row → Smart disabled, Stop enabled
 
-The repo's compatibility workflow runs a clean Vencord build/type-check plus Discord Stable and Canary patch-reporter output, covering the native progress, artwork, and Orb-component lookups the Dashboard relies on.
+Start and Resume deliberately use the **same Play icon**. Pause uses a real two-bar yellow Pause SVG. Stop remains engine shutdown/cleanup.
 
-If Discord won't start after an update, close it, move the `QuestUI` folder out of `Vencord/src/userplugins`, then rebuild and inject Vencord again. When reporting a compatibility issue, include your Discord channel and Vencord version.
+Per-Quest UI after confirmed enrollment:
 
-## Contributing
+- engine stopped → Start the global engine
+- RUNNING/QUEUE → exact-ID Pause
+- PAUSED → exact-ID Resume
+- unknown/scanning while engine runs → disabled control rather than guessed state
+- completed → Orion control disappears and Claim Reward becomes available
 
-Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for scope, dev setup, testing, and PR guidance.
+QuestUI does not import Orion farming internals and does not fabricate a Discord channel to invoke slash-command callbacks.
 
-Use the repo's issue forms for bugs, feature requests, or questions.
+## Native Quest Reload
+
+Reload uses Discord's own current-Quest fetch-and-dispatch action located by `QUESTS_FETCH_CURRENT_QUESTS_BEGIN`.
+
+- The native request starts immediately.
+- The icon completes at least **three full rotations**.
+- If the request is still running, the icon keeps spinning.
+- If the request settles mid-rotation, QuestUI waits for the next full rotation boundary before stopping, avoiding a visible snap/reset.
+- Overlapping native reload requests are coalesced.
+- A successful refresh with no new Quest is still success.
+- Success/failure uses Vencord's native toast API.
+
+## Detailed Status and Quest Home counters
+
+Detailed Status shows one attention state at a time with this priority:
+
+1. Yellow — In Progress
+2. Green — Ready to Claim
+3. Red — Available
+
+The numeric badge belongs to the displayed state, not the sum of all statuses.
+
+Quest Home counters use:
+
+- Red — Available
+- Yellow — In Progress
+- Green — Ready to Claim
+- Blurple — Claimed
+
+## Compatibility and verification
+
+QuestUI depends on Discord/Vencord internals, so future Discord updates can require matcher or native-lookup maintenance.
+
+The compatibility workflow covers pure manual-action logic, Orion companion/control state, Reload rotation boundaries, clean Vencord build/type-check, upstream Orion coexistence, the compatible pause/resume fork, and Stable/Canary patch reporters.
+
+Automated checks do **not** prove live Discord mutations or a real Orion farming session. Runtime claims should be based on actual client testing.
 
 ## Project history and credits
 
 QuestUI is maintained by [Herzchens](https://github.com/Herzchens).
 
-It's a standalone extraction and refactor of the Quest interface originally built for [nicola02nb/completeDiscordQuest](https://github.com/nicola02nb/completeDiscordQuest). The quest-completion logic was stripped out, and the interface was rebuilt as its own plugin with additional compatibility fixes, safer status handling, updated navigation, and ongoing maintenance.
+It is a standalone extraction/refactor of the Quest interface originally built for [nicola02nb/completeDiscordQuest](https://github.com/nicola02nb/completeDiscordQuest). The original completion engine was removed. Later QuestUI work added narrowly scoped manual actions and optional Orion companion controls without moving farming/progress generation back into QuestUI.
 
-Credit to **nicola02nb** for the original Quest UI implementation, and to the Vencord project and its contributors for the plugin framework underneath it all.
+Credit to **nicola02nb** for the original Quest UI implementation and to Vencord contributors for the plugin framework.
 
-See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list of contributors and acknowledgements.
+QuestUI is maintained independently and is not affiliated with or endorsed by `completeDiscordQuest`, OrionQuests, Discord, or Vencord.
 
-QuestUI is maintained independently and isn't affiliated with or endorsed by `completeDiscordQuest`, [OrionQuests](https://github.com/nyxxbit/discord-quest-completer), Discord, or Vencord.
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for acknowledgements.
 
 ## License
 
-QuestUI is free software released under the **GNU General Public License v3.0 or later**. See [LICENSE](LICENSE) for the full text.
+QuestUI is free software released under the **GNU General Public License v3.0 or later**. See [LICENSE](LICENSE).

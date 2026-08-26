@@ -46,6 +46,35 @@ jobs:
         working-directory: vencord
         run: pnpm install --frozen-lockfile
 
+      - name: Test Quest action logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
+
+      - name: Test Quest action runtime logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
+
+      - name: Test Orion command and companion logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
+
+      - name: Test Orion control-state logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
+
+      - name: Test Quest reload rotation logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
+
+      - name: Reject obsolete speculative Orion API leftovers
+        run: |
+          set -euo pipefail
+          if grep -R -n -E 'integrationApi|orionDashboardContext' \
+            --exclude-dir=.git --include='*.ts' --include='*.tsx' --include='*.md' questui; then
+            echo 'Found stale/speculative Orion API integration.' >&2
+            exit 1
+          fi
+
       - name: Build Vencord
         working-directory: vencord
         run: pnpm build
@@ -54,16 +83,133 @@ jobs:
         working-directory: vencord
         run: pnpm testTsc
 
-      - name: Verify QuestUI bundle output
+      - name: Verify QuestUI build contracts
+        working-directory: vencord
+        shell: bash
+        run: |
+          set -euo pipefail
+          required_markers=(
+            'QuestUI'
+            'Adds standalone Discord Quest shortcuts'
+            'Quest Dashboard'
+            '/quest-home'
+            'QUESTS_ENROLL_BEGIN'
+            'QUESTS_CLAIM_REWARD_BEGIN'
+            'QUESTS_FETCH_CURRENT_QUESTS_BEGIN'
+            'Quest list refreshed.'
+            'OrionQuests'
+          )
+          for marker in "${required_markers[@]}"; do
+            if ! grep -Fq "$marker" dist/renderer.js; then
+              echo "Missing QuestUI renderer marker: $marker" >&2
+              exit 1
+            fi
+          done
+
+          for marker in getControlSnapshot subscribeControlState controlEngine controlAll controlQuest; do
+            if ! grep -Fq "$marker" src/userplugins/QuestUI/orionCommandLogic.ts; then
+              echo "Missing QuestUI companion contract marker: $marker" >&2
+              exit 1
+            fi
+          done
+          grep -Fq 'Processing…' src/userplugins/QuestUI/QuestCardActions.tsx
+
+      - name: Test reporter parser
+        run: node questui/scripts/checkQuestUIReporter.mjs --self-test
+
+  orion-companion:
+    name: Build with OrionQuests (${{ matrix.label }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: upstream
+            repository: nyxxbit/discord-quest-completer
+            ref: main
+            companion_surface: "false"
+          - label: pause-companion-fork
+            repository: Herzchens/discord-quest-completer
+            ref: feat/per-quest-pause-resume
+            companion_surface: "true"
+    steps:
+      - name: Checkout QuestUI
+        uses: actions/checkout@v7
+        with:
+          path: questui
+
+      - name: Checkout Vencord
+        uses: actions/checkout@v7
+        with:
+          repository: Vendicated/Vencord
+          path: vencord
+
+      - name: Checkout OrionQuests
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ matrix.repository }}
+          ref: ${{ matrix.ref }}
+          path: vencord/src/userplugins/discord-quest-completer
+
+      - name: Install QuestUI beside OrionQuests
+        run: |
+          mkdir -p vencord/src/userplugins/QuestUI
+          rsync -a --delete --exclude=.git questui/ vencord/src/userplugins/QuestUI/
+
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: vencord/package.json
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: vencord/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: vencord
+        run: pnpm install --frozen-lockfile
+
+      - name: Test Orion command and companion logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
+
+      - name: Test Orion control-state logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
+
+      - name: Test Quest reload rotation logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
+
+      - name: Verify companion fork source surface
+        if: matrix.companion_surface == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          surface='vencord/src/userplugins/discord-quest-completer/index.tsx'
+          for marker in getControlSnapshot subscribeControlState controlEngine controlAll controlQuest; do
+            if ! grep -Fq "$marker" "$surface"; then
+              echo "Missing Orion companion surface marker: $marker" >&2
+              exit 1
+            fi
+          done
+
+      - name: Build Vencord with both plugins
+        working-directory: vencord
+        run: pnpm build
+
+      - name: Type-check Vencord with both plugins
+        working-directory: vencord
+        run: pnpm testTsc
+
+      - name: Verify both plugins are bundled
         working-directory: vencord
         run: |
           set -euo pipefail
           grep -Fq 'QuestUI' dist/renderer.js
-          grep -Fq 'Adds standalone Discord Quest shortcuts' dist/renderer.js
-          grep -Fq '/quest-home' dist/renderer.js
-
-      - name: Test reporter parser
-        run: node questui/scripts/checkQuestUIReporter.mjs --self-test
+          grep -Fq 'OrionQuests' dist/renderer.js
 
   reporter:
     name: Patch Reporter (${{ matrix.discord_branch }})

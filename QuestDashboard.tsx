@@ -1,6 +1,7 @@
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, ThemeStore, UserStore, useRef, useState, useStateFromStores } from "@webpack/common";
 
+import { QuestCardActions } from "./QuestCardActions";
 import {
     attentionCounts,
     dashboardScopeFromSettings,
@@ -28,8 +29,16 @@ interface DiscordQuestAsset {
 
 type DiscordQuestAssetKind = "game_tile" | "quest_bar_hero_image" | "hero_image";
 type QuestTheme = "dark" | "light";
+type QuestProgressTone = "starting" | "building" | "mid" | "advanced" | "near-complete";
+
+interface TimedProgressParts {
+    prefix: string;
+    current: string;
+    suffix: string;
+}
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
+const DASHBOARD_EXPIRY_WINDOW_MS = 15 * 24 * 60 * 60 * 1000;
 
 // This is the native selector used by Discord Quest cards immediately before their
 // progress ring. It owns both the ratio and the displayed text/rounding, including
@@ -136,7 +145,14 @@ function TaskTypeGlyph({ type }: { type: QuestTaskType; }) {
     return (
         <svg viewBox="0 0 24 24" aria-hidden="true">
             {type === "play" && (
-                <path d="M7.2 7.25h9.6c2.52 0 4.45 2.2 4.1 4.7l-.55 3.9a2.8 2.8 0 0 1-4.8 1.55l-1.15-1.25H9.6L8.45 17.4a2.8 2.8 0 0 1-4.8-1.55l-.55-3.9c-.35-2.5 1.58-4.7 4.1-4.7Zm.55 3H6.4v1.35H5.05v1.3H6.4v1.35h1.35V12.9H9.1v-1.3H7.75v-1.35Zm8.85.6a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Zm2.25 2.2a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z" />
+                <>
+                    <path d="M7.2 6.8h9.6a4.48 4.48 0 0 1 4.42 3.75l.72 4.42a2.86 2.86 0 0 1-4.68 2.7l-2.4-1.92H9.14l-2.4 1.92a2.86 2.86 0 0 1-4.68-2.7l.72-4.42A4.48 4.48 0 0 1 7.2 6.8Z" />
+                    <path className="quest-ui-task-icon-cutout" d="M7.1 9h1.45v1.45H10v1.45H8.55v1.45H7.1V11.9H5.65v-1.45H7.1V9Z" />
+                    <circle className="quest-ui-task-icon-cutout" cx="16" cy="9.7" r=".72" />
+                    <circle className="quest-ui-task-icon-cutout" cx="18.2" cy="11.9" r=".72" />
+                    <circle className="quest-ui-task-icon-cutout" cx="13.8" cy="11.9" r=".72" />
+                    <circle className="quest-ui-task-icon-cutout" cx="16" cy="14.1" r=".72" />
+                </>
             )}
             {type === "stream" && (
                 <path d="M4 4.75h16a1.75 1.75 0 0 1 1.75 1.75v10A1.75 1.75 0 0 1 20 18.25h-6.2v1.5h2.45v1.5h-8.5v-1.5h2.45v-1.5H4a1.75 1.75 0 0 1-1.75-1.75v-10A1.75 1.75 0 0 1 4 4.75Zm0 1.75v10h16v-10H4Z" />
@@ -229,12 +245,67 @@ function statusLabel(status: NormalizedQuest["status"]): string {
     return "Available";
 }
 
+function questProgressTone(completion: DiscordQuestCompletion, quest: NormalizedQuest): QuestProgressTone {
+    const ratio = Number.isFinite(completion?.completedRatio) ? completion.completedRatio : quest.progress / 100;
+    const progress = Math.max(0, Math.min(100, ratio * 100));
+
+    // This is progress, not urgency: move from neutral → brand → positive instead of
+    // reusing warning/danger colors that already carry different semantics in QuestUI.
+    if (progress >= 90) return "near-complete";
+    if (progress >= 75) return "advanced";
+    if (progress >= 50) return "mid";
+    if (progress >= 20) return "building";
+    return "starting";
+}
+
+function formatMmSs(seconds: number): string {
+    const safeSeconds = Math.max(0, Math.floor(seconds));
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainingSeconds = safeSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+}
+
+function taskTypeLabel(type: QuestTaskType): string {
+    if (type === "play") return "Play";
+    if (type === "stream") return "Stream";
+    if (type === "video") return "Video";
+    if (type === "activity") return "Activity";
+    return "Quest";
+}
+
+function timedProgressParts(quest: NormalizedQuest): TimedProgressParts | null {
+    const task = quest.primaryTask;
+    if (quest.status !== "in-progress" || !task || task.target <= 0) return null;
+
+    const timed = task.type === "play"
+        || task.type === "stream"
+        || task.type === "video"
+        || task.key === "PLAY_ACTIVITY";
+    if (!timed) return null;
+
+    const current = Math.min(task.current, task.target);
+    return {
+        prefix: `${taskTypeLabel(task.type)} · `,
+        current: formatMmSs(current),
+        suffix: ` / ${formatMmSs(task.target)}`
+    };
+}
+
+function dashboardExpiry(quest: NormalizedQuest, now = Date.now()): string | null {
+    if (quest.expiresAt == null) return null;
+    if (Math.abs(quest.expiresAt - now) > DASHBOARD_EXPIRY_WINDOW_MS) return null;
+    return formatExpiry(quest.expiresAt, now);
+}
+
 function QuestCard({ quest }: { quest: NormalizedQuest; }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
-    const expiry = formatExpiry(quest.expiresAt);
-    const urgency = expiryUrgency(quest.expiresAt);
+    const now = Date.now();
+    const expiry = dashboardExpiry(quest, now);
+    const urgency = expiryUrgency(quest.expiresAt, now);
     const taskType = quest.primaryTask?.type ?? quest.tasks[0]?.type ?? "other";
-    const progressCopy = formatQuestProgress(quest);
+    const timedProgress = timedProgressParts(quest);
+    const progressCopy = timedProgress == null ? formatQuestProgress(quest) : null;
+    const progressTone = questProgressTone(completion, quest);
     const showProgressCopy = quest.status !== "claimable" && quest.status !== "claimed";
     const hasNitroMultiplier = useStateFromStores([UserStore], hasEligibleNitroOrbMultiplier);
     const orbQuantity = effectiveOrbQuantity(quest, hasNitroMultiplier);
@@ -256,7 +327,17 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
                     {showProgressCopy && (
                         <>
                             <span className="quest-ui-card-separator" aria-hidden="true">•</span>
-                            <span className="quest-ui-card-progress-text">{progressCopy}</span>
+                            <span className="quest-ui-card-progress-text">
+                                {timedProgress != null ? (
+                                    <>
+                                        {timedProgress.prefix}
+                                        <span className={`quest-ui-card-progress-current quest-ui-progress-tone-${progressTone}`}>
+                                            {timedProgress.current}
+                                        </span>
+                                        {timedProgress.suffix}
+                                    </>
+                                ) : progressCopy}
+                            </span>
                         </>
                     )}
                 </div>
@@ -267,6 +348,7 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
                         {quest.reward.kind === "orbs" && <OrbGlyph />}
                         <strong>{rewardLabel}</strong>
                     </span>
+                    <QuestCardActions quest={quest} />
                 </div>
             </div>
 
@@ -282,23 +364,15 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
     );
 }
 
-function DashboardSummary({ quests }: { quests: NormalizedQuest[]; }) {
+function DashboardSummary({ quests, claimedCount }: { quests: NormalizedQuest[]; claimedCount: number; }) {
     const counts = attentionCounts(quests);
-    const attentionTotal = counts.inProgress + counts.claimable + counts.available;
-
-    if (attentionTotal === 0) {
-        return (
-            <span className="quest-ui-summary-empty">
-                {quests.length > 0 ? `${quests.length} visible ${quests.length === 1 ? "quest" : "quests"}` : "No quests need attention"}
-            </span>
-        );
-    }
 
     return (
         <div className="quest-ui-dashboard-summary">
             {counts.inProgress > 0 && <span className="quest-ui-summary-in-progress">{counts.inProgress} In Progress</span>}
             {counts.claimable > 0 && <span className="quest-ui-summary-claimable">{counts.claimable} Ready to Claim</span>}
             {counts.available > 0 && <span className="quest-ui-summary-available">{counts.available} Available</span>}
+            <span className="quest-ui-summary-claimed">{claimedCount} Claimed</span>
         </div>
     );
 }
@@ -450,6 +524,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const visible = sortDashboardQuests(filtered);
     const hiddenCount = Math.max(0, quests.length - filtered.length);
     const activeFilterCount = dashboardFilterCount(dashboardSettings);
+    const claimedCount = quests.reduce((total, quest) => total + (quest.status === "claimed" ? 1 : 0), 0);
 
     return (
         <section className="quest-ui-dashboard" role="dialog" aria-label="Quest dashboard">
@@ -459,7 +534,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                         <div className="quest-ui-dashboard-title-row">
                             <strong className="quest-ui-dashboard-title">Quests</strong>
                         </div>
-                        <DashboardSummary quests={filtered} />
+                        <DashboardSummary quests={filtered} claimedCount={claimedCount} />
                     </div>
 
                     <Popout
