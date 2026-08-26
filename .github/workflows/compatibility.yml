@@ -124,14 +124,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - label: upstream
+          - label: v4.10.7
+            repository: nyxxbit/discord-quest-completer
+            ref: v4.10.7
+          - label: upstream-main
             repository: nyxxbit/discord-quest-completer
             ref: main
-            companion_surface: "false"
-          - label: pause-companion-fork
-            repository: Herzchens/discord-quest-completer
-            ref: feat/per-quest-pause-resume
-            companion_surface: "true"
     steps:
       - name: Checkout QuestUI
         uses: actions/checkout@v7
@@ -183,8 +181,7 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
 
-      - name: Verify companion fork source surface
-        if: matrix.companion_surface == 'true'
+      - name: Verify Orion companion source surface
         shell: bash
         run: |
           set -euo pipefail
