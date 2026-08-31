@@ -7,11 +7,11 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 ## Release status
 
 > [!IMPORTANT]
-> `main` is the current QuestUI source target and contains the full Dashboard, manual Accept/Claim, native Reload, and Orion companion integration.
+> **v1.1.0 Stable** promotes the current `main` feature set: the full Dashboard, manual Accept/Claim, native Reload, and Orion companion integration.
 >
-> The Orion companion controls now target the upstream `nyxxbit/discord-quest-completer` contract released in **OrionQuests v4.10.7**. The old QuestUI integration branch and the old `Herzchens/discord-quest-completer` pause/resume fork are no longer required.
+> Orion companion controls target upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. The old QuestUI integration branch and the old `Herzchens/discord-quest-completer` pause/resume fork are no longer required.
 >
-> The latest published stable release is still **v1.0.1** while the current `main` revision is being held for a final live Orion integration pass before promotion to **v1.1.0 Stable**.
+> The final live integration pass used QuestUI `5f11470` with **OrionQuests v4.10.8** on Discord Canary. Both plugins built and type-checked cleanly, an already-open Dashboard tracked external `/orion` Start/Pause/Resume/Stop state changes, and a real Quest progressed while the Dashboard remained open.
 
 ## Preview
 
@@ -121,6 +121,9 @@ Do not copy one plugin into the other or merge their source trees into a single 
 ## Dashboard
 
 The visible heading is **Quest Dashboard** followed by Discord's native Quest icon.
+
+> [!NOTE]
+> **Dashboard Mode** defaults to enabled for fresh settings. Vencord preserves stored settings, so users who previously toggled `Dashboard • Mode` off keep that stored `false` value after upgrading and may need to enable it manually. This is expected persisted-setting behavior, not a regression.
 
 If the current Discord user has an active Nitro `premiumType`, QuestUI shows a colored **Nitro** tag. Discord profile badge artwork is used when available; if the artwork has not been hydrated, the tag stays visible with QuestUI's fallback glyph rather than incorrectly hiding Nitro status.
 
@@ -289,6 +292,8 @@ QuestUI depends on Discord/Vencord internals, so future Discord updates can requ
 The compatibility workflow covers pure manual-action logic, Orion companion/control state, Reload rotation boundaries, clean Vencord build/type-check, upstream Orion coexistence against both the released **v4.10.7** contract and upstream **main**, and Stable/Canary patch reporters.
 
 Automated checks do **not** prove live Discord mutations or a real Orion farming session. Runtime claims should be based on actual client testing.
+
+For the v1.1.0 Stable promotion, the implementation checkpoint `5f11470` was also exercised in a live Discord Canary run with OrionQuests `v4.10.8`: external `/orion` state changes propagated into an already-open Dashboard and a real video Quest progressed while the Dashboard stayed open.
 
 ## Project history and credits
 
