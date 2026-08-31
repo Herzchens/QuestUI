@@ -1,35 +1,38 @@
 # Release channels
 
-QuestUI publishes Stable and Beta as separate source targets.
+QuestUI publishes Stable from `main`. The old v1.1.0 beta branch remains historical only; the full companion feature set has since landed on `main` and now targets upstream OrionQuests.
 
-## Stable — v1.0.1
+## Stable — v1.1.0
 
 - Source: `Herzchens/QuestUI` branch `main`
-- Stable checkpoint used for this release plan: `08a91d1c49b32d5aaff86fa6ea787b14e297a07b`
-- Does not require the experimental Orion pause/resume companion API.
-- Recommended for users who want the currently established QuestUI feature set.
+- Live-tested implementation checkpoint: `5f114702aefaa8cce3a8c654fa1c97c5c278725c`
+- Includes the full Dashboard, explicit manual Accept/Claim, native Quest-list Reload, and Orion companion controls.
+- Orion integration targets upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**.
+- The final live integration pass was completed against **OrionQuests v4.10.8** on Discord Canary with QuestUI `5f11470`; build and `testTsc` were clean, external `/orion` state transitions propagated into an already-open Dashboard, and a real Quest progressed while the Dashboard remained open.
+- QuestUI and OrionQuests remain separate Vencord userplugins and separate repositories.
 
-## Beta — v1.1.0-beta.1
+### Upgrade note
 
-- Source: `Herzchens/QuestUI` branch `feat/quest-actions-orion-controls`
-- Adds manual Accept/Claim, native Quest-list Reload, the polished Quest Dashboard, and smart/per-Quest Orion controls when a compatible Orion build is installed.
-- **Dashboard Mode** and **Dashboard • Orion Integration** are enabled by default in the Beta build; Orion controls still fail closed and stay unavailable when no compatible enabled OrionQuests plugin is present.
-- For the **beta Orion-control feature set**, pair it with `Herzchens/discord-quest-completer` branch `feat/per-quest-pause-resume`.
-- Known compatible Orion companion checkpoint: `39eef8603485be36afd18b813931e528a61728ab`.
-- This checkpoint includes the two Orion follow-up commits after `48e980861168afab56576ebb903b01d867e9f7c8`, including the account-identity hardening and lifecycle-test relocation.
-- Upstream `nyxxbit/discord-quest-completer` does not currently expose this pause/resume companion surface.
+`Dashboard • Mode` defaults to enabled for fresh settings. Vencord correctly preserves an existing stored value, so users who previously toggled Dashboard Mode off may keep `false` after upgrading and will need to enable it manually. This is expected persisted-setting behavior, not a regression.
 
-QuestUI and OrionQuests remain separate Vencord userplugins. Do not merge their source trees into one plugin directory.
+## Previous releases
+
+### v1.1.0-beta.1 — historical prerelease
+
+The old beta paired QuestUI's experimental Orion controls with `Herzchens/discord-quest-completer:feat/per-quest-pause-resume`. That pairing is no longer required for Stable v1.1.0 because the companion contract is now available upstream.
+
+### v1.0.1 — previous Stable
+
+The previous Stable release contained the established Dashboard/read-only feature set before manual Accept/Claim, native Reload, and upstream Orion companion controls were promoted to Stable.
 
 ## Publishing checklist
 
-1. Confirm the proposed tags do not already exist.
-2. Confirm the Stable target still resolves to the intended `main` checkpoint.
-3. Confirm the Beta target is the intended feature-branch HEAD and that its CI/manual gates are acceptable.
-4. Confirm the Beta compatibility note points to the current tested Orion `feat/per-quest-pause-resume` checkpoint.
-5. Publish Stable as a normal release.
-6. Publish Beta with GitHub's **pre-release** flag.
-7. In the Beta release notes, state the required Orion fork branch prominently.
-8. Keep both projects' own licenses and repository boundaries intact.
+1. Confirm tag `v1.1.0` does not already exist.
+2. Confirm `main` contains the intended release-prep metadata and no runtime changes beyond the live-tested QuestUI `5f11470` implementation checkpoint.
+3. Confirm the latest QuestUI Compatibility workflow for the release target is green.
+4. Confirm release notes mention the persisted `Dashboard • Mode` upgrade caveat.
+5. Publish `v1.1.0` as a normal GitHub release, not a pre-release.
+6. State upstream Orion compatibility as **v4.10.7+**, with the live integration pass performed against **v4.10.8**.
+7. Keep QuestUI and Orion source/license boundaries separate.
 
-The release notes in the release kit generated for this split are intended to be used verbatim or reviewed before publication.
+The Stable release notes should describe only behavior actually present in `main` and testing that was actually performed.
