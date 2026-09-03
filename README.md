@@ -87,6 +87,20 @@ pnpm build
 pnpm inject
 ```
 
+#### Updating QuestUI
+
+If QuestUI is already installed in a normal Vencord source checkout, you do not need to clone it again.
+
+From the Vencord source root:
+
+```bash
+git -C src/userplugins/QuestUI pull --ff-only
+pnpm build
+pnpm inject
+```
+
+If the existing `src/userplugins/QuestUI` directory is not a Git checkout, check the installation before deleting or replacing it.
+
 ### QuestUI + OrionQuests
 
 QuestUI and OrionQuests remain separate Vencord userplugins. For Orion controls, use upstream **OrionQuests v4.10.7 or newer**.
@@ -106,17 +120,39 @@ pnpm testTsc
 pnpm inject
 ```
 
-If you use Orion's devbuild installer, it creates a normal Vencord checkout under `%LOCALAPPDATA%\OrionVencord\`. QuestUI can be installed beside Orion there and survives Orion updates because the updater only replaces Orion's own userplugin directory.
+### With Orion's devbuild installer
 
-PowerShell example:
+For the first installation:
 
 ```powershell
 git clone https://github.com/Herzchens/QuestUI.git "$env:LOCALAPPDATA\OrionVencord\src\userplugins\QuestUI"
 ```
 
-Then run Orion's `UPDATE.cmd` to rebuild and restart Discord.
+Then run Orion's `UPDATE.cmd` from the devbuild installer folder you originally extracted. This rebuilds Vencord with QuestUI included.
 
-Do not copy one plugin into the other or merge their source trees into a single plugin directory.
+#### Updating an existing QuestUI installation
+
+You do not need to delete and clone QuestUI again when a new version is released. `git clone` is only required for the initial installation.
+
+Newer Orion devbuild installer versions can update sibling Git userplugins automatically. If `UPDATE.cmd` prints:
+
+```text
+Updating other userplugins in this checkout...
+```
+
+just run `UPDATE.cmd` from the extracted devbuild installer folder. Orion fast-forwards QuestUI with `git pull --ff-only` before rebuilding Vencord.
+
+If your extracted Orion devbuild installer does not include that companion-update step, update QuestUI manually first:
+
+```powershell
+git -C "$env:LOCALAPPDATA\OrionVencord\src\userplugins\QuestUI" pull --ff-only
+```
+
+Then run Orion's `UPDATE.cmd` again from the extracted devbuild installer folder so Vencord is rebuilt with the updated QuestUI.
+
+The companion updater is fast-forward only. If QuestUI has local commits, diverged history, or cannot fast-forward, Orion reports the problem and leaves the checkout unchanged instead of resetting or deleting it.
+
+If the existing `QuestUI` directory is not a Git checkout, do not delete or replace it blindly. Check how it was installed first.
 
 ## Dashboard
 
@@ -221,7 +257,7 @@ Smart Start/Pause/Resume → Stop → Reload → Filter
 
 State rules:
 
-- no Available/In-Progress Quest → Smart and Stop disabled
+- no Available/In-Progress Quest → Start and Stop disabled
 
 - engine stopped + unfinished work → Start enabled, Stop disabled
 
