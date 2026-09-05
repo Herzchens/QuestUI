@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Hardened Quest shortcut button resolution against the September 2026 Discord header-bar regression reported in #9 by replacing the broad `badgePosition` / `icon` component lookup with the same `HEADER_BAR_BADGE_BOTTOM` + `position:"bottom"` header-button identity currently used by Vencord Toolbox, and synchronized reporter coverage with the new finder.
+
 ## v1.1.0 - 2026-09-01
 
 - Added explicit manual **Accept Quest** and **Claim Reward** actions to Dashboard cards, with fresh QuestStore validation, account-scoped duplicate guards, enrollment-block handling, and visible success/failure feedback.

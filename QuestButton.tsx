@@ -19,7 +19,10 @@ import type { AttentionCounts } from "./questData";
 import settings from "./settings";
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
-const TopBarButton = findComponentByCodeLazy("badgePosition", "icon");
+// Match the same Discord header-bar button component VencordToolbox uses. The old
+// generic "badgePosition"/"icon" lookup can resolve to an unrelated button after
+// Discord webpack changes while still looking successful to the patch reporter.
+const HeaderBarButton = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
 const CountBadge = findComponentByCodeLazy("renderBadgeCount", "disableColor");
 
 function StatusBadge({ count, label, color }: { count: number; label: string; color: string; }) {
@@ -175,7 +178,7 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
         .join(" ");
 
     const renderButton = (onClick: (...args: any[]) => void) => (
-        <TopBarButton
+        <HeaderBarButton
             ref={buttonRef}
             className={buttonClassName}
             iconClassName={undefined}
