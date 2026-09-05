@@ -8,7 +8,7 @@ const PATCH_PLUGINS = ["QuestUI", "GameActivityToggle"];
 const WEBPACK_FIND_SIGNATURES = [
     'proxyLazyWebpack("QuestStore", "QuestsStore")',
     'findByCode("\\"M7.5 21.7a8.95")',
-    'findComponentByCode("badgePosition", "icon")',
+    'findComponentByCode(".HEADER_BAR_BADGE_BOTTOM,", "position:\\"bottom\\"")',
     'findComponentByCode("renderBadgeCount", "disableColor")',
     'findByCode("heartbeat?.lastBeatAt", "updatedAt", "eventName", "includeTaskTypes")',
     'findByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")',
@@ -86,6 +86,7 @@ function runSelfTest() {
     assert.match(analyzeReport(completeReport({ badPatches: "- QuestUI (had no effect)\n" }), "", 1).problems.join("\n"), /QuestUI appears in Bad Patches/);
     assert.match(analyzeReport(completeReport({ badPatches: "- GameActivityToggle (had no effect)\n" }), "", 1).problems.join("\n"), /GameActivityToggle appears in Bad Patches/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nproxyLazyWebpack("QuestStore", "QuestsStore")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindComponentByCode(".HEADER_BAR_BADGE_BOTTOM,", "position:\\"bottom\\"")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("heartbeat?.lastBeatAt", "updatedAt", "eventName", "includeTaskTypes")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
