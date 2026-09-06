@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixed the Quest Dashboard shortcut sometimes needing a second click to open or close by making Header Bar popout visibility explicitly QuestUI-owned (`shouldShow` / `onRequestClose`), matching Vencord Toolbox's controlled Header Bar interaction pattern instead of delegating visibility to `popoutProps.onClick`. This applies to both the top-bar and settings-bar Quest shortcuts and addresses #11 without changing Quest state, Dashboard contents, navigation, or Orion behavior.
+- Removed the deprecated duplicate OrionQuests `v4.10.7` CI leg and kept the upstream `main` coexistence build/type-check as the maintained companion integration gate.
 - Hardened Quest shortcut button resolution against the September 2026 Discord header-bar regression reported in #9 by replacing the broad `badgePosition` / `icon` component lookup with the same `HEADER_BAR_BADGE_BOTTOM` + `position:"bottom"` header-button identity currently used by Vencord Toolbox, and synchronized reporter coverage with the new finder.
 
 ## v1.1.0 - 2026-09-01

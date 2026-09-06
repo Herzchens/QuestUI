@@ -114,22 +114,19 @@ jobs:
           done
           grep -Fq 'Processing…' src/userplugins/QuestUI/QuestCardActions.tsx
 
+          grep -Fq 'shouldShow={dashboardOpen}' src/userplugins/QuestUI/QuestButton.tsx
+          grep -Fq 'onRequestClose={closeDashboard}' src/userplugins/QuestUI/QuestButton.tsx
+          if grep -Fq 'popoutProps.onClick' src/userplugins/QuestUI/QuestButton.tsx; then
+            echo 'Quest shortcut must own HeaderBar popout visibility instead of delegating to popoutProps.onClick.' >&2
+            exit 1
+          fi
+
       - name: Test reporter parser
         run: node questui/scripts/checkQuestUIReporter.mjs --self-test
 
   orion-companion:
-    name: Build with OrionQuests (${{ matrix.label }})
+    name: Build with OrionQuests (upstream-main)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - label: v4.10.7
-            repository: nyxxbit/discord-quest-completer
-            ref: v4.10.7
-          - label: upstream-main
-            repository: nyxxbit/discord-quest-completer
-            ref: main
     steps:
       - name: Checkout QuestUI
         uses: actions/checkout@v7
@@ -145,8 +142,8 @@ jobs:
       - name: Checkout OrionQuests
         uses: actions/checkout@v7
         with:
-          repository: ${{ matrix.repository }}
-          ref: ${{ matrix.ref }}
+          repository: nyxxbit/discord-quest-completer
+          ref: main
           path: vencord/src/userplugins/discord-quest-completer
 
       - name: Install QuestUI beside OrionQuests
