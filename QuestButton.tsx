@@ -3,7 +3,7 @@ import "./scrollbar.css";
 
 import { Flex } from "@components/Flex";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { NavigationRouter, Popout, Tooltip, useRef } from "@webpack/common";
+import { NavigationRouter, Popout, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 
 import { QuestDashboardShell } from "./QuestDashboardShell";
 import {
@@ -156,7 +156,14 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
 
     const allQuests = useQuestSnapshot();
     const buttonRef = useRef<HTMLButtonElement | null>(null);
+    const dashboardMode = settings.store.dashboardMode;
+    const [dashboardOpen, setDashboardOpen] = useState(false);
     const detailed = settings.store.detailedStatus;
+
+    useEffect(() => {
+        if (!dashboardMode) setDashboardOpen(false);
+    }, [dashboardMode]);
+
     const statusQuests = detailed
         ? filterQuests(allQuests, detailedScopeFromSettings(settings.store))
         : allQuests;
@@ -195,16 +202,20 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
         />
     );
 
-    if (!settings.store.dashboardMode) return renderButton(openQuestHome);
+    if (!dashboardMode) return renderButton(openQuestHome);
+
+    const closeDashboard = () => setDashboardOpen(false);
 
     return (
         <Popout
             targetElementRef={buttonRef}
             position={type === "top-bar" ? "bottom" : "top"}
             align={type === "top-bar" ? "right" : "left"}
-            renderPopout={({ closePopout }) => <QuestDashboardShell closePopout={closePopout} />}
+            shouldShow={dashboardOpen}
+            onRequestClose={closeDashboard}
+            renderPopout={() => <QuestDashboardShell closePopout={closeDashboard} />}
         >
-            {popoutProps => renderButton(popoutProps.onClick)}
+            {() => renderButton(() => setDashboardOpen(open => !open))}
         </Popout>
     );
 }
