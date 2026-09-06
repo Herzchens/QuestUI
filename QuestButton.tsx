@@ -44,7 +44,7 @@ function StatusBadge({ count, label, color }: { count: number; label: string; co
 }
 
 export function QuestsCount() {
-    const status = questStatusCounts(useQuestSnapshot());
+    const status = questStatusCounts(useQuestSnapshot("shortcut"));
 
     return (
         <Flex flexDirection="row" justifyContent="flex-end" className="quest-ui-badges" gap="5px">
@@ -154,7 +154,7 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
         "detailedShowOther"
     ]);
 
-    const allQuests = useQuestSnapshot();
+    const allQuests = useQuestSnapshot("shortcut");
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const dashboardMode = settings.store.dashboardMode;
     const [dashboardOpen, setDashboardOpen] = useState(false);

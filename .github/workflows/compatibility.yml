@@ -66,6 +66,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
 
+      - name: Test Quest shortcut snapshot logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestShortcutLogic.ts
+
       - name: Reject obsolete speculative Orion API leftovers
         run: |
           set -euo pipefail
@@ -118,6 +122,15 @@ jobs:
           grep -Fq 'onRequestClose={closeDashboard}' src/userplugins/QuestUI/QuestButton.tsx
           if grep -Fq 'popoutProps.onClick' src/userplugins/QuestUI/QuestButton.tsx; then
             echo 'Quest shortcut must own HeaderBar popout visibility instead of delegating to popoutProps.onClick.' >&2
+            exit 1
+          fi
+
+          grep -Fq 'useQuestSnapshot("shortcut")' src/userplugins/QuestUI/QuestButton.tsx
+          grep -Fq 'SHORTCUT_REFRESH_FALLBACK_MS = 60_000' src/userplugins/QuestUI/questData.ts
+          grep -Fq 'sameQuestShortcutSnapshot' src/userplugins/QuestUI/questData.ts
+          grep -Fq 'const quests = useQuestSnapshot();' src/userplugins/QuestUI/QuestDashboard.tsx
+          if grep -Fq 'const allQuests = useQuestSnapshot();' src/userplugins/QuestUI/QuestButton.tsx; then
+            echo 'Quest shortcut must not subscribe to the 250ms live-progress render clock.' >&2
             exit 1
           fi
 

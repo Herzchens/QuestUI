@@ -1,6 +1,7 @@
 import { findByCodeLazy } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
 
+import { sameQuestShortcutSnapshot } from "./questShortcutLogic";
 import { QuestsStore } from "./stores";
 
 export type QuestStatus = "available" | "in-progress" | "claimable" | "claimed" | "expired";
@@ -8,6 +9,7 @@ export type AttentionStatus = "available" | "in-progress" | "claimable";
 export type QuestTaskType = "play" | "stream" | "video" | "activity" | "other";
 export type RewardKind = "orbs" | "non-orbs" | "unknown";
 export type RewardFilter = "all" | "orbs" | "non-orbs";
+export type QuestSnapshotMode = "live" | "shortcut";
 
 export interface NormalizedTask {
     key: string;
@@ -95,9 +97,11 @@ const getDiscordSelectedTaskDetails = findByCodeLazy(
     "includeTaskTypes"
 ) as (quest: any, includeTaskTypes?: Set<string>) => DiscordTaskDetails | null;
 
-// This is only a render clock. Each tick re-reads Discord state/native helpers; it
-// never increments progress and never performs a Quest network request.
+// This is only a Dashboard/live-progress render clock. Shortcut surfaces use a
+// store-driven subscription so their interactive Header Bar target is not forced
+// through a new render four times per second when only progress changes.
 const REFRESH_FALLBACK_MS = 250;
+const SHORTCUT_REFRESH_FALLBACK_MS = 60_000;
 
 type SnapshotListener = (quests: NormalizedQuest[]) => void;
 
@@ -436,9 +440,32 @@ function subscribeSnapshot(listener: SnapshotListener): () => void {
     };
 }
 
-export function useQuestSnapshot(): NormalizedQuest[] {
+export function useQuestSnapshot(mode: QuestSnapshotMode = "live"): NormalizedQuest[] {
     const [snapshot, setSnapshot] = useState<NormalizedQuest[]>(readSnapshot);
-    useEffect(() => subscribeSnapshot(setSnapshot), []);
+
+    useEffect(() => {
+        if (mode === "live") return subscribeSnapshot(setSnapshot);
+
+        const updateShortcutSnapshot = (force = false) => {
+            const next = readSnapshot();
+            setSnapshot(previous => !force && sameQuestShortcutSnapshot(previous, next) ? previous : next);
+        };
+
+        try {
+            QuestsStore?.addChangeListener?.(updateShortcutSnapshot);
+        } catch { }
+
+        const interval = setInterval(() => updateShortcutSnapshot(true), SHORTCUT_REFRESH_FALLBACK_MS);
+        updateShortcutSnapshot();
+
+        return () => {
+            clearInterval(interval);
+            try {
+                QuestsStore?.removeChangeListener?.(updateShortcutSnapshot);
+            } catch { }
+        };
+    }, [mode]);
+
     return snapshot;
 }
 
