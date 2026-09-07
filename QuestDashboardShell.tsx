@@ -5,12 +5,14 @@ import { UserProfileStore, UserStore, useEffect, useStateFromStores } from "@web
 
 import { isOrionCommandReady } from "./orionIntegration";
 import { OrionGlobalControls } from "./OrionControls";
-import { QuestDashboard } from "./QuestDashboard";
+import { QuestDashboard, QuestDashboardToolbar } from "./QuestDashboard";
 import { QuestReloadControl } from "./QuestReloadControl";
 import settings from "./settings";
 
 import "./orion.css";
 import "./dashboardPolish.css";
+import "./dashboardV12.css";
+import "./dashboardTuning.css";
 
 const NativeQuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 
@@ -98,10 +100,13 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
 
     return (
         <div className={`quest-ui-dashboard-shell has-dashboard-tools${showOrionControls ? " has-orion-control" : ""}`}>
-            <QuestDashboardDisplayTitle />
-            <div className="quest-ui-dashboard-header-tools">
-                {showOrionControls && <OrionGlobalControls />}
-                <QuestReloadControl />
+            <div className="quest-ui-dashboard-topbar">
+                <QuestDashboardDisplayTitle />
+                <div className="quest-ui-dashboard-header-tools">
+                    {showOrionControls && <OrionGlobalControls />}
+                    <QuestReloadControl />
+                    <QuestDashboardToolbar closePopout={closePopout} />
+                </div>
             </div>
             <QuestDashboard closePopout={closePopout} />
         </div>

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Refined the v1.2 Dashboard beta after live UI review: widened the Dashboard, added persistent sorting and a compact Home toolbar action, kept all five Quest status totals visible with a sixth live **Hidden** count distributed evenly across the header, enlarged Orion Quest / QuestUI runtime metadata and version chips to balance the Orb pill, removed provisional per-Quest Orion state badges, stabilized toolbar hover hitboxes, and redesigned the Filter surface with quieter active states and the supplied open-home glyph style.
+
 ## v1.1.2 - 2026-09-06
 
 - Fixed #11's remaining intermittent missed-click behavior by separating shortcut refreshes from the Dashboard's 250ms live-progress clock. The top-bar/settings-bar shortcuts and Quest Home counters now use a store-driven `shortcut` snapshot mode that suppresses progress-only/no-op updates and keeps a one-minute fallback for time-based expiry, while Dashboard/Orion live consumers retain the high-frequency source. The controlled Header Bar Popout ownership from the first fix remains in place.

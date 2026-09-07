@@ -1,6 +1,9 @@
+import { useSettings } from "@api/Settings";
 import { findByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, ThemeStore, UserStore, useRef, useState, useStateFromStores } from "@webpack/common";
 
+import { getOrionIntegrationHealth } from "./orionIntegration";
+import { OrionIntegrationStatus } from "./OrionStatus";
 import { QuestCardActions } from "./QuestCardActions";
 import { QuestOrbBalance } from "./QuestOrbBalance";
 import { QuestOrbIcon } from "./QuestOrbIcon";
@@ -11,10 +14,12 @@ import {
     filterQuests,
     formatExpiry,
     formatQuestProgress,
-    sortDashboardQuests,
+    questStatusCounts,
     useQuestSnapshot
 } from "./questData";
 import type { NormalizedQuest, QuestTaskType } from "./questData";
+import { normalizeDashboardSortMode, sortDashboardQuests, type DashboardSortMode } from "./dashboardSortLogic";
+import { QUESTUI_VERSION } from "./version";
 import settings from "./settings";
 
 interface DiscordQuestCompletion {
@@ -71,7 +76,8 @@ const DASHBOARD_SETTING_KEYS = [
     "dashboardShowStream",
     "dashboardShowVideo",
     "dashboardShowActivity",
-    "dashboardShowOther"
+    "dashboardShowOther",
+    "dashboardSortMode"
 ] as const;
 
 function openQuestHome(closePopout?: () => void): void {
@@ -81,12 +87,10 @@ function openQuestHome(closePopout?: () => void): void {
 
 function QuestHomeIcon() {
     return (
-        <span className="quest-ui-home-icon" aria-hidden="true">
-            <svg className="quest-ui-home-glyph" viewBox="0 0 24 24">
-                <path d="M3 10.7 12 3l9 7.7-1.3 1.5-1.2-1v8.3A1.5 1.5 0 0 1 17 21h-3v-5h-4v5H7a1.5 1.5 0 0 1-1.5-1.5v-8.3l-1.2 1L3 10.7Zm4.5-1.2v9.5H8v-5h8v5h.5V9.5L12 5.65 7.5 9.5Z" />
-            </svg>
-            <span className="quest-ui-home-quest-badge"><QuestIcon /></span>
-        </span>
+        <svg className="quest-ui-home-glyph" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3.2 10.6 12 2.8l8.8 7.8" />
+            <path d="M5.7 13.7v3.4A3.9 3.9 0 0 0 9.6 21h4.8a3.9 3.9 0 0 0 3.9-3.9v-3.4" />
+        </svg>
     );
 }
 
@@ -94,6 +98,14 @@ function FilterIcon() {
     return (
         <svg className="quest-ui-filter-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3.5 5.25A1.25 1.25 0 0 1 4.75 4h14.5a1.25 1.25 0 0 1 .96 2.05l-5.46 6.52v4.68a1.25 1.25 0 0 1-.58 1.05l-3 1.9A1.25 1.25 0 0 1 9.25 19v-6.43L3.79 6.05a1.25 1.25 0 0 1-.29-.8Zm2.2.25 5.05 6.03v6.1l2.5-1.58v-4.52L18.3 5.5H5.7Z" />
+        </svg>
+    );
+}
+
+function SortIcon() {
+    return (
+        <svg className="quest-ui-sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 4 3.5 7.5 5 9l1-1v9.5H8V8l1 1 1.5-1.5L7 4Zm10 16 3.5-3.5L19 15l-1 1V6.5h-2V16l-1-1-1.5 1.5L17 20Z" />
         </svg>
     );
 }
@@ -312,7 +324,7 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
     const orbQuantity = effectiveOrbQuantity(quest, hasNitroMultiplier);
     const rewardTier = quest.reward.kind === "orbs" ? orbRewardTier(orbQuantity) : null;
     const rewardLabel = quest.reward.kind === "orbs" && orbQuantity > 0
-        ? `${orbQuantity.toLocaleString()} Orbs`
+        ? `${orbQuantity} Orbs`
         : quest.reward.label;
 
     return (
@@ -367,15 +379,17 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
     );
 }
 
-function DashboardSummary({ quests, claimedCount }: { quests: NormalizedQuest[]; claimedCount: number; }) {
-    const counts = attentionCounts(quests);
+function DashboardSummary({ quests, hiddenCount }: { quests: NormalizedQuest[]; hiddenCount: number; }) {
+    const counts = questStatusCounts(quests);
 
     return (
-        <div className="quest-ui-dashboard-summary">
-            {counts.inProgress > 0 && <span className="quest-ui-summary-in-progress">{counts.inProgress} In Progress</span>}
-            {counts.claimable > 0 && <span className="quest-ui-summary-claimable">{counts.claimable} Ready to Claim</span>}
-            {counts.available > 0 && <span className="quest-ui-summary-available">{counts.available} Available</span>}
-            <span className="quest-ui-summary-claimed">{claimedCount} Claimed</span>
+        <div className="quest-ui-dashboard-summary" aria-label="Quest status summary">
+            <span className="quest-ui-summary-available">{counts.available} Available</span>
+            <span className="quest-ui-summary-claimable">{counts.claimable} Ready</span>
+            <span className="quest-ui-summary-in-progress">{counts.inProgress} In Progress</span>
+            <span className="quest-ui-summary-claimed">{counts.claimed} Claimed</span>
+            <span className="quest-ui-summary-expired">{counts.expired} Expired</span>
+            <span className="quest-ui-summary-hidden">{hiddenCount} Hidden</span>
         </div>
     );
 }
@@ -466,8 +480,8 @@ function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
                 <span className="quest-ui-filter-label">Status</span>
                 <div className="quest-ui-filter-chips">
                     <FilterChip active={store.dashboardShowAvailable !== false} label="Available" tone="danger" onClick={() => { store.dashboardShowAvailable = store.dashboardShowAvailable === false; }} />
-                    <FilterChip active={store.dashboardShowInProgress !== false} label="In Progress" tone="warning" onClick={() => { store.dashboardShowInProgress = store.dashboardShowInProgress === false; }} />
                     <FilterChip active={store.dashboardShowClaimable !== false} label="Ready" tone="positive" onClick={() => { store.dashboardShowClaimable = store.dashboardShowClaimable === false; }} />
+                    <FilterChip active={store.dashboardShowInProgress !== false} label="In Progress" tone="warning" onClick={() => { store.dashboardShowInProgress = store.dashboardShowInProgress === false; }} />
                     <FilterChip active={store.dashboardShowClaimed === true} label="Claimed" tone="brand" onClick={() => { store.dashboardShowClaimed = store.dashboardShowClaimed !== true; }} />
                     <FilterChip active={store.dashboardShowExpired === true} label="Expired" onClick={() => { store.dashboardShowExpired = store.dashboardShowExpired !== true; }} />
                 </div>
@@ -508,6 +522,127 @@ function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
     );
 }
 
+const DASHBOARD_SORT_OPTIONS: ReadonlyArray<{ value: DashboardSortMode; label: string; }> = [
+    { value: "recommended", label: "Recommended" },
+    { value: "expiring", label: "Expiring Soon" },
+    { value: "orb-reward", label: "Highest Orb Reward" },
+    { value: "name-asc", label: "Name A → Z" },
+    { value: "name-desc", label: "Name Z → A" }
+];
+
+function DashboardSorts({ mode, onChange }: { mode: DashboardSortMode; onChange: (mode: DashboardSortMode) => void; }) {
+    return (
+        <div className="quest-ui-sort-panel" role="menu" aria-label="Sort quests">
+            <div className="quest-ui-sort-panel-heading">
+                <strong>Sort Quests</strong>
+                <span>Choose how cards are ordered</span>
+            </div>
+            <div className="quest-ui-sort-options">
+                {DASHBOARD_SORT_OPTIONS.map(option => (
+                    <button
+                        key={option.value}
+                        type="button"
+                        className={option.value === mode ? "is-selected" : ""}
+                        role="menuitemradio"
+                        aria-checked={option.value === mode}
+                        onClick={() => onChange(option.value)}
+                    >
+                        <span>{option.label}</span>
+                        {option.value === mode && <span className="quest-ui-sort-check" aria-hidden="true">✓</span>}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => void; }) {
+    const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
+    const quests = useQuestSnapshot();
+    const filtered = filterQuests(quests, dashboardScopeFromSettings(dashboardSettings));
+    const hiddenCount = Math.max(0, quests.length - filtered.length);
+    const activeFilterCount = dashboardFilterCount(dashboardSettings);
+    const sortMode = normalizeDashboardSortMode(dashboardSettings.dashboardSortMode);
+    const filterButtonRef = useRef<HTMLButtonElement | null>(null);
+    const sortButtonRef = useRef<HTMLButtonElement | null>(null);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [sortOpen, setSortOpen] = useState(false);
+
+    const selectSort = (mode: DashboardSortMode) => {
+        settings.store.dashboardSortMode = mode;
+        setSortOpen(false);
+    };
+
+    return (
+        <div className="quest-ui-dashboard-local-tools">
+            <Popout
+                position="bottom"
+                align="right"
+                animation={Popout.Animation.NONE}
+                shouldShow={sortOpen}
+                onRequestClose={() => setSortOpen(false)}
+                targetElementRef={sortButtonRef}
+                renderPopout={() => <DashboardSorts mode={sortMode} onChange={selectSort} />}
+            >
+                {(_, { isShown }) => (
+                    <button
+                        ref={sortButtonRef}
+                        type="button"
+                        className={`quest-ui-toolbar-button quest-ui-sort-button${isShown ? " is-open" : ""}${sortMode !== "recommended" ? " is-active" : ""}`}
+                        onClick={() => {
+                            setFiltersOpen(false);
+                            setSortOpen(open => !open);
+                        }}
+                        aria-label={`Sort quests: ${DASHBOARD_SORT_OPTIONS.find(option => option.value === sortMode)?.label ?? "Recommended"}`}
+                        aria-expanded={isShown}
+                        title={`Sort: ${DASHBOARD_SORT_OPTIONS.find(option => option.value === sortMode)?.label ?? "Recommended"}`}
+                    >
+                        <SortIcon />
+                    </button>
+                )}
+            </Popout>
+
+            <Popout
+                position="bottom"
+                align="right"
+                animation={Popout.Animation.NONE}
+                shouldShow={filtersOpen}
+                onRequestClose={() => setFiltersOpen(false)}
+                targetElementRef={filterButtonRef}
+                renderPopout={() => <DashboardFilters hiddenCount={hiddenCount} />}
+            >
+                {(_, { isShown }) => (
+                    <button
+                        ref={filterButtonRef}
+                        type="button"
+                        className={`quest-ui-toolbar-button quest-ui-filter-button${isShown ? " is-open" : ""}${activeFilterCount > 0 ? " is-active" : ""}`}
+                        onClick={() => {
+                            setSortOpen(false);
+                            setFiltersOpen(open => !open);
+                        }}
+                        aria-label={activeFilterCount > 0 ? `Quest filters, ${activeFilterCount} active` : "Quest filters, off"}
+                        aria-expanded={isShown}
+                        title={activeFilterCount > 0 ? `${activeFilterCount} active filters` : "Filters off"}
+                    >
+                        <FilterIcon />
+                        {activeFilterCount > 0 && <span className="quest-ui-filter-count" aria-hidden="true">{activeFilterCount > 9 ? "9+" : activeFilterCount}</span>}
+                    </button>
+                )}
+            </Popout>
+
+            <button
+                type="button"
+                className="quest-ui-toolbar-button quest-ui-home-button"
+                onClick={() => openQuestHome(closePopout)}
+                aria-label="Open Quest Home"
+                title="Open Quest Home"
+            >
+                <QuestHomeIcon />
+            </button>
+        </div>
+    );
+}
+
 function EmptyStateIllustration() {
     return (
         <div className="quest-ui-empty-illustration" aria-hidden="true">
@@ -520,14 +655,19 @@ function EmptyStateIllustration() {
 
 export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
+    const { orionIntegration } = settings.use(["orionIntegration"]);
+    useSettings(["plugins.OrionQuests.enabled"]);
     const quests = useQuestSnapshot();
-    const filterButtonRef = useRef<HTMLButtonElement | null>(null);
-    const [filtersOpen, setFiltersOpen] = useState(false);
+    const orionHealth = getOrionIntegrationHealth(orionIntegration === true);
     const filtered = filterQuests(quests, dashboardScopeFromSettings(dashboardSettings));
-    const visible = sortDashboardQuests(filtered);
+    const hasNitroMultiplier = useStateFromStores([UserStore], hasEligibleNitroOrbMultiplier);
+    const sortMode = normalizeDashboardSortMode(dashboardSettings.dashboardSortMode);
+    const visible = sortDashboardQuests(
+        filtered,
+        sortMode,
+        quest => effectiveOrbQuantity(quest, hasNitroMultiplier)
+    );
     const hiddenCount = Math.max(0, quests.length - filtered.length);
-    const activeFilterCount = dashboardFilterCount(dashboardSettings);
-    const claimedCount = quests.reduce((total, quest) => total + (quest.status === "claimed" ? 1 : 0), 0);
 
     return (
         <section className="quest-ui-dashboard" role="dialog" aria-label="Quest dashboard">
@@ -537,42 +677,21 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                         <div className="quest-ui-dashboard-title-row">
                             <strong className="quest-ui-dashboard-title">Quests</strong>
                         </div>
-                        <DashboardSummary quests={filtered} claimedCount={claimedCount} />
+                        <DashboardSummary quests={quests} hiddenCount={hiddenCount} />
                     </div>
-
-                    <Popout
-                        position="bottom"
-                        align="right"
-                        animation={Popout.Animation.NONE}
-                        shouldShow={filtersOpen}
-                        onRequestClose={() => setFiltersOpen(false)}
-                        targetElementRef={filterButtonRef}
-                        renderPopout={() => <DashboardFilters hiddenCount={hiddenCount} />}
-                    >
-                        {(_, { isShown }) => (
-                            <button
-                                ref={filterButtonRef}
-                                type="button"
-                                className={`quest-ui-filter-button${isShown ? " is-open" : ""}${activeFilterCount > 0 ? " is-active" : ""}`}
-                                onClick={() => setFiltersOpen(open => !open)}
-                                aria-label={activeFilterCount > 0 ? `Quest filters, ${activeFilterCount} active` : "Quest filters, off"}
-                                aria-expanded={isShown}
-                                title={activeFilterCount > 0 ? `${activeFilterCount} active filters` : "Filters off"}
-                            >
-                                <FilterIcon />
-                                {activeFilterCount > 0 && <span className="quest-ui-filter-count" aria-hidden="true">{activeFilterCount > 9 ? "9+" : activeFilterCount}</span>}
-                            </button>
-                        )}
-                    </Popout>
                 </div>
                 <div className="quest-ui-dashboard-meta-row">
+                    <OrionIntegrationStatus health={orionHealth} />
+                    <span className="quest-ui-meta-product">QuestUI <span className="quest-ui-version-chip quest-ui-version-chip-questui">{QUESTUI_VERSION}</span></span>
                     <QuestOrbBalance />
                 </div>
             </header>
 
             <div className="quest-ui-dashboard-content">
                 {visible.length > 0 ? (
-                    visible.map(quest => <QuestCard key={quest.id} quest={quest} />)
+                    visible.map(quest => (
+                        <QuestCard key={quest.id} quest={quest} />
+                    ))
                 ) : (
                     <div className="quest-ui-dashboard-empty">
                         <EmptyStateIllustration />
@@ -586,22 +705,11 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                                 <button type="button" className="quest-ui-dashboard-primary-action" onClick={clearDashboardFilters}>
                                     Clear Filters
                                 </button>
-                                <button type="button" className="quest-ui-dashboard-empty-home" onClick={() => openQuestHome(closePopout)}>
-                                    <QuestHomeIcon /> Open Quest Home
-                                </button>
                             </div>
                         )}
                     </div>
                 )}
             </div>
-
-            {visible.length > 0 && (
-                <footer className="quest-ui-dashboard-footer">
-                    <button type="button" className="quest-ui-dashboard-open-home" onClick={() => openQuestHome(closePopout)}>
-                        <QuestHomeIcon /> Open Quest Home
-                    </button>
-                </footer>
-            )}
         </section>
     );
 }

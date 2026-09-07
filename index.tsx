@@ -3,11 +3,13 @@ import "./detailStatus.css";
 import definePlugin from "@utils/types";
 
 import { QuestButton, QuestsCount } from "./QuestButton";
+import { QUESTUI_VERSION } from "./version";
 import settings from "./settings";
 
 export default definePlugin({
     name: "QuestUI",
     description: "Adds standalone Discord Quest shortcuts, live status indicators, and an optional mini dashboard.",
+    version: QUESTUI_VERSION,
     authors: [
         {
             name: "Herzchens",

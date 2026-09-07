@@ -1,0 +1,815 @@
+/* QuestUI v1.2 Dashboard refinement. Loaded after the legacy polish layer. */
+.quest-ui-dashboard-topbar {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    left: 15px;
+    min-width: 0;
+    position: absolute;
+    right: 15px;
+    top: 14px;
+    z-index: 4;
+}
+
+.quest-ui-dashboard-topbar .quest-ui-dashboard-display-title {
+    flex: 1 1 auto;
+    height: 34px;
+    left: auto;
+    max-width: none;
+    min-width: 0;
+    position: static;
+    right: auto;
+    top: auto;
+}
+
+.quest-ui-dashboard-shell.has-orion-control .quest-ui-dashboard-display-title {
+    max-width: none;
+    right: auto;
+}
+
+.quest-ui-dashboard-topbar .quest-ui-dashboard-header-tools {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+    position: static;
+    right: auto;
+    top: auto;
+}
+
+.quest-ui-dashboard-local-tools,
+.quest-ui-orion-controls {
+    align-items: center;
+    display: inline-flex;
+    gap: 6px;
+}
+
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 45px;
+    width: 100%;
+}
+
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary > span {
+    flex: 0 0 auto;
+}
+
+.quest-ui-summary-expired {
+    color: var(--text-muted);
+}
+
+.quest-ui-dashboard-meta-row {
+    gap: 10px;
+    min-height: 38px;
+}
+
+.quest-ui-meta-product {
+    align-items: center;
+    color: var(--text-muted);
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 12px;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.quest-ui-version-chip {
+    align-items: center;
+    background: color-mix(in srgb, var(--background-mod-strong, rgba(255, 255, 255, 0.1)) 88%, transparent);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    border-radius: 6px;
+    box-sizing: border-box;
+    color: var(--text-default, var(--header-secondary));
+    display: inline-flex;
+    font-family: var(--font-code, ui-monospace, SFMono-Regular, Consolas, monospace);
+    font-size: 10.5px;
+    font-weight: 650;
+    letter-spacing: -0.15px;
+    line-height: 1;
+    min-height: 22px;
+    padding: 3px 6px;
+    white-space: nowrap;
+}
+
+.quest-ui-version-chip-orion {
+    background: color-mix(in srgb, var(--text-muted) 7%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+}
+
+.quest-ui-version-chip-questui {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 12%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border-color: color-mix(in srgb, var(--brand-500, #5865f2) 34%, var(--border-subtle, transparent));
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-orion-status {
+    gap: 6px;
+}
+
+.quest-ui-orion-status-copy {
+    white-space: nowrap;
+}
+
+.quest-ui-dashboard-orb-balance {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 18%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border: 1px solid color-mix(in srgb, var(--status-positive, #23a55a) 34%, var(--border-subtle, transparent));
+    border-radius: 9px;
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, white 8%, transparent),
+        0 2px 8px color-mix(in srgb, var(--status-positive, #23a55a) 8%, transparent);
+    box-sizing: border-box;
+    color: var(--text-default, var(--header-secondary));
+    flex: 0 0 auto;
+    font-size: 16px;
+    gap: 7px;
+    height: 38px;
+    margin-left: auto;
+    padding: 0 11px;
+}
+
+.quest-ui-dashboard-orb-balance > strong {
+    color: var(--text-strong, var(--header-primary));
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    letter-spacing: 0.15px;
+}
+
+.quest-ui-dashboard-orb-icon {
+    flex: 0 0 22px;
+    height: 22px;
+    width: 22px;
+}
+
+.quest-ui-dashboard-orb-balance.is-loading,
+.quest-ui-dashboard-orb-balance.is-unavailable {
+    min-width: 78px;
+    opacity: 1;
+}
+
+.quest-ui-dashboard-orb-balance.is-unavailable > strong {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.quest-ui-toolbar-button {
+    align-items: center;
+    background: var(--background-mod-strong, rgba(255, 255, 255, 0.12));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 34px;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+    position: relative;
+    transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease, transform 120ms ease;
+    width: 34px;
+}
+
+.quest-ui-toolbar-button:hover {
+    background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18));
+    color: var(--interactive-hover);
+    transform: translateY(-1px);
+}
+
+.quest-ui-toolbar-button:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-500));
+    outline-offset: 2px;
+}
+
+.quest-ui-toolbar-button.quest-ui-filter-button {
+    flex-basis: 34px;
+    height: 34px;
+    width: 34px;
+}
+
+.quest-ui-sort-button {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 4%, var(--background-mod-strong, rgba(255, 255, 255, 0.12)));
+}
+
+.quest-ui-sort-button.is-active,
+.quest-ui-sort-button.is-open {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 13%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--brand-500, #5865f2) 42%, transparent);
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-sort-icon,
+.quest-ui-home-glyph {
+    fill: currentColor;
+    height: 18px;
+    width: 18px;
+}
+
+.quest-ui-home-button {
+    background: color-mix(in srgb, var(--blue-345, #00a8fc) 9%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--blue-345, #00a8fc) 42%, transparent);
+    color: var(--blue-345, #00a8fc);
+}
+
+.quest-ui-home-button:hover {
+    background: color-mix(in srgb, var(--blue-345, #00a8fc) 16%, var(--background-base-low, #1e1f22));
+    color: color-mix(in srgb, var(--blue-345, #00a8fc) 76%, white);
+}
+
+.quest-ui-sort-panel {
+    background: var(--background-floating, var(--background-base-low, #1e1f22));
+    border: 1px solid color-mix(in srgb, var(--brand-500, #5865f2) 18%, var(--border-subtle, transparent));
+    border-radius: 10px;
+    box-shadow: var(--shadow-high, 0 12px 34px rgba(0, 0, 0, 0.42));
+    box-sizing: border-box;
+    max-width: calc(100vw - 32px);
+    padding: 11px;
+    width: 230px;
+}
+
+.quest-ui-sort-panel-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 1px 3px 8px;
+}
+
+.quest-ui-sort-panel-heading strong {
+    color: var(--text-strong, var(--header-primary));
+    font-size: 12px;
+}
+
+.quest-ui-sort-panel-heading span {
+    color: var(--text-muted);
+    font-size: 10.5px;
+}
+
+.quest-ui-sort-options {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.quest-ui-sort-options > button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: var(--text-default, var(--header-secondary));
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-size: 11.5px;
+    justify-content: space-between;
+    min-height: 31px;
+    padding: 6px 8px;
+    text-align: left;
+}
+
+.quest-ui-sort-options > button:hover {
+    background: var(--background-mod-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.quest-ui-sort-options > button.is-selected {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 12%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-sort-check {
+    color: var(--status-positive, #23a55a);
+    font-weight: 800;
+}
+
+/* v1.2 deliberately defers per-Quest Orion badges until Orion exposes meaningful queue positions. */
+.quest-ui-orion-task-badge,
+.quest-ui-dashboard-footer,
+.quest-ui-dashboard-empty-home,
+.quest-ui-home-quest-badge {
+    display: none !important;
+}
+
+@media (max-width: 520px) {
+    .quest-ui-dashboard-topbar {
+        gap: 7px;
+        left: 12px;
+        right: 12px;
+    }
+
+    .quest-ui-dashboard-topbar .quest-ui-dashboard-header-tools,
+    .quest-ui-dashboard-local-tools,
+    .quest-ui-orion-controls {
+        gap: 4px;
+    }
+
+    .quest-ui-toolbar-button,
+    .quest-ui-orion-icon-button,
+    .quest-ui-toolbar-button.quest-ui-filter-button {
+        flex-basis: 32px;
+        height: 32px;
+        width: 32px;
+    }
+
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        font-size: 10.5px;
+        gap: 6px;
+    }
+
+    .quest-ui-dashboard-meta-row {
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px 9px;
+    }
+
+    .quest-ui-dashboard-orb-balance {
+        height: 34px;
+        padding: 0 9px;
+    }
+
+    .quest-ui-dashboard-orb-balance > strong {
+        font-size: 14px;
+    }
+
+    .quest-ui-dashboard-orb-icon {
+        flex-basis: 20px;
+        height: 20px;
+        width: 20px;
+    }
+}
+
+@media (max-width: 430px) {
+    .quest-ui-dashboard-nitro-wordmark {
+        display: none;
+    }
+
+    .quest-ui-dashboard-nitro-tag {
+        padding-right: 5px;
+    }
+
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .quest-ui-dashboard-meta-row {
+        align-items: flex-start;
+    }
+}
+
+/* v1.2 runtime polish after live dashboard review. */
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+    display: grid;
+    gap: 0 8px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    justify-content: stretch;
+    width: 100%;
+}
+
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary > span {
+    justify-content: center;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.quest-ui-summary-hidden {
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-dashboard-meta-row {
+    align-items: center;
+    gap: 14px;
+    min-height: 42px;
+}
+
+.quest-ui-dashboard-meta-row .quest-ui-orion-status {
+    align-items: center;
+    font-size: 13.5px;
+    font-weight: 600;
+    gap: 8px;
+    line-height: 18px;
+    min-height: 38px;
+}
+
+.quest-ui-dashboard-meta-row .quest-ui-orion-status-copy {
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.quest-ui-meta-product {
+    font-size: 13.5px;
+    font-weight: 600;
+    gap: 7px;
+    line-height: 18px;
+    min-height: 38px;
+}
+
+.quest-ui-version-chip {
+    font-size: 11.5px;
+    min-height: 25px;
+    padding: 4px 7px;
+}
+
+.quest-ui-toolbar-button,
+.quest-ui-toolbar-button.quest-ui-filter-button {
+    background: color-mix(in srgb, var(--background-mod-strong, #2b2d31) 82%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--interactive-normal, #b5bac1) 15%, transparent);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
+    color: var(--interactive-normal);
+    transform: none;
+    transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease;
+}
+
+.quest-ui-toolbar-button:hover,
+.quest-ui-toolbar-button.quest-ui-filter-button:hover {
+    background: color-mix(in srgb, var(--background-mod-stronger, #34363c) 88%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--interactive-hover, #dbdee1) 24%, transparent);
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, white 7%, transparent),
+        0 2px 7px rgba(0, 0, 0, 0.2);
+    color: var(--interactive-hover);
+    transform: none;
+}
+
+.quest-ui-sort-button.is-active,
+.quest-ui-sort-button.is-open {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 10%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 34%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 5%, transparent);
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-filter-button.is-active {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 6%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 25%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 4%, transparent);
+}
+
+.quest-ui-filter-button.is-open,
+.quest-ui-filter-button.is-active.is-open {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 11%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 38%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 6%, transparent);
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-filter-count {
+    border-width: 1px;
+    font-size: 7.5px;
+    height: 13px;
+    min-width: 13px;
+    padding: 0 2px;
+    pointer-events: none;
+    right: 2px;
+    top: 2px;
+}
+
+.quest-ui-home-button {
+    background: color-mix(in srgb, var(--background-mod-strong, #2b2d31) 82%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--blue-345, #00a8fc) 22%, transparent);
+    color: color-mix(in srgb, var(--blue-345, #00a8fc) 78%, var(--interactive-normal, #b5bac1));
+}
+
+.quest-ui-home-button:hover {
+    background: color-mix(in srgb, var(--blue-345, #00a8fc) 8%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--blue-345, #00a8fc) 34%, transparent);
+    color: color-mix(in srgb, var(--blue-345, #00a8fc) 82%, white);
+    transform: none;
+}
+
+.quest-ui-home-glyph {
+    fill: none;
+    height: 19px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.35;
+    width: 19px;
+}
+
+.quest-ui-home-glyph path {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+}
+
+.quest-ui-filter-panel {
+    background: color-mix(in srgb, var(--background-floating, #111214) 96%, var(--brand-500, #5865f2) 4%);
+    border-color: color-mix(in srgb, var(--interactive-normal, #b5bac1) 12%, transparent);
+    border-radius: 12px;
+    box-sizing: border-box;
+    gap: 12px;
+    padding: 14px;
+    width: 430px;
+}
+
+.quest-ui-filter-panel-heading {
+    border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    padding: 0 1px 11px;
+}
+
+.quest-ui-filter-panel-heading strong {
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.quest-ui-filter-panel-heading span {
+    font-size: 11px;
+    line-height: 14px;
+}
+
+.quest-ui-filter-panel-actions {
+    gap: 7px;
+}
+
+.quest-ui-filter-reset,
+.quest-ui-filter-clear {
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: 7px;
+    font-size: 10.5px;
+    min-height: 28px;
+    padding: 5px 9px;
+}
+
+.quest-ui-filter-reset {
+    background: var(--background-mod-subtle, rgba(255, 255, 255, 0.05));
+}
+
+.quest-ui-filter-clear {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 7%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border-color: color-mix(in srgb, var(--brand-500, #5865f2) 20%, transparent);
+}
+
+.quest-ui-filter-section,
+.quest-ui-filter-section.quest-ui-filter-section-row {
+    background: color-mix(in srgb, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)) 78%, transparent);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 11px;
+}
+
+.quest-ui-filter-label {
+    font-size: 10px;
+    letter-spacing: 0.45px;
+    line-height: 12px;
+    padding-left: 1px;
+}
+
+.quest-ui-filter-chips {
+    gap: 6px;
+}
+
+.quest-ui-filter-chip {
+    background: color-mix(in srgb, var(--background-mod-strong, rgba(255, 255, 255, 0.1)) 54%, transparent);
+    border-color: color-mix(in srgb, var(--interactive-normal, #b5bac1) 11%, transparent);
+    border-radius: 7px;
+    color: var(--text-muted);
+    font-size: 11px;
+    gap: 5px;
+    min-height: 28px;
+    padding: 6px 9px;
+    transition: background-color 100ms ease, border-color 100ms ease, color 100ms ease;
+}
+
+.quest-ui-filter-chip:hover {
+    background: color-mix(in srgb, var(--background-mod-stronger, rgba(255, 255, 255, 0.14)) 72%, transparent);
+    border-color: color-mix(in srgb, var(--interactive-hover, #dbdee1) 18%, transparent);
+}
+
+.quest-ui-filter-chip.is-selected {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 9%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 30%, transparent);
+    color: var(--text-default, var(--header-primary));
+}
+
+.quest-ui-filter-chip-danger.is-selected {
+    background: color-mix(in srgb, var(--status-danger) 7%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border-color: color-mix(in srgb, var(--status-danger) 30%, transparent);
+}
+
+.quest-ui-filter-chip-warning.is-selected {
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 7%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 30%, transparent);
+}
+
+.quest-ui-filter-chip-positive.is-selected {
+    background: color-mix(in srgb, var(--status-positive) 7%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border-color: color-mix(in srgb, var(--status-positive) 30%, transparent);
+}
+
+.quest-ui-filter-chip-brand.is-selected {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 9%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 30%, transparent);
+}
+
+.quest-ui-filter-chip-check,
+.quest-ui-filter-chip.is-selected .quest-ui-filter-chip-check {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 11px;
+    font-size: 9px;
+    justify-content: center;
+    opacity: 0;
+    width: 11px;
+}
+
+.quest-ui-filter-chip.is-selected .quest-ui-filter-chip-check {
+    opacity: 1;
+}
+
+.quest-ui-filter-chip-danger .quest-ui-filter-chip-check {
+    color: var(--status-danger);
+}
+
+.quest-ui-filter-chip-warning .quest-ui-filter-chip-check {
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-filter-chip-positive .quest-ui-filter-chip-check {
+    color: var(--status-positive);
+}
+
+.quest-ui-filter-chip-brand .quest-ui-filter-chip-check {
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-filter-panel-footer {
+    background: color-mix(in srgb, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)) 72%, transparent);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
+    padding: 9px 10px;
+}
+
+.quest-ui-filter-unknown {
+    font-size: 10.5px;
+}
+
+@media (max-width: 520px) {
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        gap: 7px 4px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .quest-ui-dashboard-meta-row .quest-ui-orion-status,
+    .quest-ui-meta-product {
+        font-size: 12px;
+        min-height: 34px;
+    }
+
+    .quest-ui-dashboard-meta-row .quest-ui-orion-status-copy {
+        font-size: 12px;
+    }
+
+    .quest-ui-version-chip {
+        font-size: 10.5px;
+        min-height: 22px;
+        padding: 3px 6px;
+    }
+
+    .quest-ui-filter-panel {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 430px) {
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* v1.2 locked live-review UI polish. */
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+    column-gap: 0;
+    grid-template-columns: repeat(6, max-content);
+    justify-content: space-evenly;
+    row-gap: 0;
+}
+
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary > span {
+    justify-content: center;
+}
+
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary > span::before {
+    border-radius: 50%;
+    flex: 0 0 6px;
+    height: 6px;
+    width: 6px;
+}
+
+.quest-ui-toolbar-button,
+.quest-ui-toolbar-button.quest-ui-filter-button,
+.quest-ui-reload-icon-button {
+    background: color-mix(in srgb, var(--background-base-lowest, #111214) 35%, #202225 65%);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    color: #fff;
+    transform: none;
+}
+
+.quest-ui-toolbar-button:hover,
+.quest-ui-toolbar-button.quest-ui-filter-button:hover,
+.quest-ui-reload-icon-button:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--background-base-lowest, #111214) 28%, #35383d 72%);
+    border-color: rgba(255, 255, 255, 0.24);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 2px 7px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    transform: none;
+}
+
+.quest-ui-sort-button.is-active,
+.quest-ui-sort-button.is-open,
+.quest-ui-filter-button.is-active,
+.quest-ui-filter-button.is-open,
+.quest-ui-filter-button.is-active.is-open {
+    background: color-mix(in srgb, var(--background-base-lowest, #111214) 24%, #42454b 76%);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.045),
+        0 2px 7px rgba(0, 0, 0, 0.18);
+    color: #fff;
+}
+
+.quest-ui-home-button,
+.quest-ui-home-button:hover {
+    background: color-mix(in srgb, var(--background-base-lowest, #111214) 35%, #202225 65%);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    transform: none;
+}
+
+.quest-ui-home-button:hover {
+    background: color-mix(in srgb, var(--background-base-lowest, #111214) 28%, #35383d 72%);
+    border-color: rgba(255, 255, 255, 0.24);
+}
+
+.quest-ui-sort-icon,
+.quest-ui-filter-icon,
+.quest-ui-home-glyph,
+.quest-ui-reload-icon-button svg {
+    color: #fff;
+}
+
+.quest-ui-filter-count {
+    align-items: center;
+    border: 1.5px solid var(--background-base-lowest, #111214);
+    border-radius: 50%;
+    box-sizing: border-box;
+    display: inline-flex;
+    font-size: 8px;
+    font-weight: 800;
+    height: 14px;
+    justify-content: center;
+    line-height: 1;
+    min-width: 14px;
+    padding: 0 2px;
+    pointer-events: none;
+    right: 1px;
+    top: 1px;
+    width: auto;
+    z-index: 2;
+}
+
+.quest-ui-filter-chip-check {
+    display: none;
+    flex: 0 0 auto;
+    width: auto;
+}
+
+.quest-ui-filter-chip.is-selected .quest-ui-filter-chip-check {
+    display: inline-flex;
+    flex: 0 0 auto;
+    opacity: 1;
+    width: auto;
+}
+
+.quest-ui-filter-chip.is-selected,
+.quest-ui-filter-chip-danger.is-selected,
+.quest-ui-filter-chip-warning.is-selected,
+.quest-ui-filter-chip-positive.is-selected,
+.quest-ui-filter-chip-brand.is-selected {
+    background: color-mix(in srgb, var(--background-mod-strong, rgba(255, 255, 255, 0.1)) 72%, transparent);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: var(--text-strong, #fff);
+}
+
+.quest-ui-filter-panel-footer {
+    display: none !important;
+}
+
+@media (max-width: 520px) {
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        column-gap: 0;
+        grid-template-columns: repeat(3, max-content);
+        justify-content: space-evenly;
+        row-gap: 7px;
+    }
+}
+
+@media (max-width: 430px) {
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        grid-template-columns: repeat(2, max-content);
+    }
+}

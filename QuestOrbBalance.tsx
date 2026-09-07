@@ -87,18 +87,19 @@ export function QuestOrbBalance() {
         : deriveOrbBalanceDisplayState(balance, isFetching, relevantFetchError, invocationFailed);
 
     const copy = state.kind === "ready"
-        ? `${state.balance.toLocaleString()} Orbs`
+        ? String(state.balance)
         : state.kind === "loading"
-            ? "Loading Orbs…"
-            : "Orbs unavailable";
+            ? "•••"
+            : "—";
 
     return (
         <span
             className={`quest-ui-dashboard-orb-balance is-${state.kind}`}
             aria-busy={state.kind === "loading"}
-            title={state.kind === "unavailable" ? "Discord Orb balance is currently unavailable." : copy}
+            title={state.kind === "ready" ? `${state.balance} Orbs` : state.kind === "loading" ? "Loading Orb balance" : "Discord Orb balance is currently unavailable."}
+            aria-label={state.kind === "ready" ? `${state.balance} Orbs` : state.kind === "loading" ? "Loading Orb balance" : "Orb balance unavailable"}
         >
-            <QuestOrbIcon size={16} className="quest-ui-dashboard-orb-icon" />
+            <QuestOrbIcon size={22} className="quest-ui-dashboard-orb-icon" />
             <strong>{copy}</strong>
         </span>
     );
