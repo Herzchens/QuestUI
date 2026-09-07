@@ -81,11 +81,14 @@ function openQuestHome(closePopout?: () => void): void {
     NavigationRouter.transitionTo("/quest-home");
 }
 
-function ArrowUpRightIcon() {
+function QuestHomeIcon() {
     return (
-        <svg className="quest-ui-arrow-icon" viewBox="0 0 20 20" aria-hidden="true">
-            <path d="M6.25 4.5h9.25v9.25h-1.75V7.49l-8.63 8.63-1.24-1.24 8.63-8.63H6.25V4.5Z" />
-        </svg>
+        <span className="quest-ui-home-icon" aria-hidden="true">
+            <svg className="quest-ui-home-glyph" viewBox="0 0 24 24">
+                <path d="M3 10.7 12 3l9 7.7-1.3 1.5-1.2-1v8.3A1.5 1.5 0 0 1 17 21h-3v-5h-4v5H7a1.5 1.5 0 0 1-1.5-1.5v-8.3l-1.2 1L3 10.7Zm4.5-1.2v9.5H8v-5h8v5h.5V9.5L12 5.65 7.5 9.5Z" />
+            </svg>
+            <span className="quest-ui-home-quest-badge"><QuestIcon /></span>
+        </span>
     );
 }
 
@@ -319,7 +322,9 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
             <QuestArtwork quest={quest} type={taskType} />
 
             <div className="quest-ui-card-main">
-                <strong className="quest-ui-card-title" title={quest.name}>{quest.name}</strong>
+                <div className="quest-ui-card-title-cluster">
+                    <strong className="quest-ui-card-title" title={quest.name}>{quest.name}</strong>
+                </div>
 
                 <div className="quest-ui-card-status-line">
                     <span className="quest-ui-card-status-dot" aria-hidden="true" />
@@ -581,7 +586,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                                     Clear Filters
                                 </button>
                                 <button type="button" className="quest-ui-dashboard-empty-home" onClick={() => openQuestHome(closePopout)}>
-                                    Open Quest Home <ArrowUpRightIcon />
+                                    <QuestHomeIcon /> Open Quest Home
                                 </button>
                             </div>
                         )}
@@ -592,7 +597,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
             {visible.length > 0 && (
                 <footer className="quest-ui-dashboard-footer">
                     <button type="button" className="quest-ui-dashboard-open-home" onClick={() => openQuestHome(closePopout)}>
-                        Open Quest Home <ArrowUpRightIcon />
+                        <QuestHomeIcon /> Open Quest Home
                     </button>
                 </footer>
             )}

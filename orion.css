@@ -1,6 +1,6 @@
 .quest-ui-dashboard-shell {
     position: relative;
-    width: min(510px, calc(100vw - 24px));
+    width: min(640px, calc(100vw - 24px));
 }
 
 .quest-ui-dashboard-shell > .quest-ui-dashboard {
