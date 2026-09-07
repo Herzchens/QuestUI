@@ -2,15 +2,17 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable — v1.1.2
+## Stable — v1.2.0
 
 - Source: `Herzchens/QuestUI` branch `main`.
-- Latest published release: **v1.1.2** (2026-09-06).
-- v1.1.1 fixed the Discord header-button compatibility regression reported in #9.
-- v1.1.2 fixed the remaining intermittent shortcut activation issue reported in #11 and removed the deprecated duplicate OrionQuests `v4.10.7` CI leg.
-- The maintained Orion coexistence build/type-check now tracks upstream `nyxxbit/discord-quest-completer` `main`.
-- Runtime Orion integration still targets the companion contract available in **OrionQuests v4.10.7 or newer**.
-- The most recent full live Orion integration evidence remains the v1.1.0 implementation checkpoint `5f114702aefaa8cce3a8c654fa1c97c5c278725c`, exercised with **OrionQuests v4.10.8** on Discord Canary. Do not relabel that historical evidence as a v1.1.1/v1.1.2 live pass.
+- Latest published release: **v1.2.0** (2026-09-07).
+- v1.2.0 expands the Dashboard, adds persistent sorting and expired-history age controls, native Orb balance/runtime metadata, and the Event Log **Preview Feature** with persistent sanitized diagnostics.
+- The Dashboard always shows Available, Ready, In Progress, Claimed, Expired, and Hidden counts, including zeros. Accepted active Quests remain pinned above available/history cards under every sort mode.
+- Valid expiry copy is no longer limited to a 15-day presentation window; the separate expired-age filter defaults to 15 days and can be set to 7/30/90/custom/All.
+- Event Log persists one `events.jsonl` file up to 10 MiB and compacts oldest complete records back to about 5 MiB. It captures QuestUI and recognized Orion output only, supports Source/Level/Category/search/sort/day grouping, detail views, and sanitized diagnostic-report copy.
+- Runtime Orion integration still targets **OrionQuests v4.10.7 or newer**. Known versions below v4.10.7 are hard-incompatible; future optional capabilities are feature-detected so compatible older builds keep fallback behavior.
+- The maintained Orion coexistence build/type-check tracks upstream `nyxxbit/discord-quest-completer` `main`.
+- v1.2.0 received maintainer live UI/runtime review for the Dashboard, filters/sorting, metadata and Event Log surfaces. The most recent separately documented full Orion farming/integration pass remains v1.1.0 checkpoint `5f114702aefaa8cce3a8c654fa1c97c5c278725c` with OrionQuests v4.10.8 on Discord Canary.
 - QuestUI and OrionQuests remain separate Vencord userplugins and separate repositories.
 
 ### Upgrade note
@@ -18,6 +20,11 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 `Dashboard • Mode` defaults to enabled for fresh settings. Vencord correctly preserves an existing stored value, so users who previously toggled Dashboard Mode off may keep `false` after upgrading and will need to enable Dashboard Mode manually. This is expected persisted-setting behavior, not a regression.
 
 ## Previous releases
+
+### v1.1.2 — previous hotfix
+
+Fixed the remaining intermittent shortcut activation issue reported in #11 and removed the deprecated duplicate OrionQuests v4.10.7 CI leg while retaining upstream-main coexistence coverage.
+
 
 ### v1.1.1 — previous hotfix
 
