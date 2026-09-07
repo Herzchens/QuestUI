@@ -13,6 +13,8 @@ const dashboardSortOptions = [
     { label: "Recommended", value: "recommended", default: true },
     { label: "Expiring Soon", value: "expiring" },
     { label: "Highest Orb Reward", value: "orb-reward" },
+    { label: "Shortest Required Time", value: "required-time-asc" },
+    { label: "Longest Required Time", value: "required-time-desc" },
     { label: "Name A → Z", value: "name-asc" },
     { label: "Name Z → A", value: "name-desc" }
 ] as const;
@@ -98,6 +100,12 @@ export default definePluginSettings({
         displayName: "Dashboard • Expired",
         description: "Show expired quests.",
         default: false
+    },
+    dashboardExpiredAgeDays: {
+        type: OptionType.NUMBER,
+        displayName: "Dashboard • Expired Age",
+        description: "Only show expired quests from the last N days. Zero means all history.",
+        default: 15
     },
     dashboardRewardFilter: {
         type: OptionType.SELECT,
@@ -230,6 +238,7 @@ export default definePluginSettings({
     dashboardShowClaimable: { hidden: true },
     dashboardShowClaimed: { hidden: true },
     dashboardShowExpired: { hidden: true },
+    dashboardExpiredAgeDays: { hidden: true },
     dashboardRewardFilter: { hidden: true },
     dashboardIncludeUnknownRewards: { hidden: true },
     dashboardShowPlay: { hidden: true },

@@ -45,7 +45,6 @@ interface TimedProgressParts {
 }
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
-const DASHBOARD_EXPIRY_WINDOW_MS = 15 * 24 * 60 * 60 * 1000;
 
 // This is the native selector used by Discord Quest cards immediately before their
 // progress ring. It owns both the ratio and the displayed text/rounding, including
@@ -70,6 +69,7 @@ const DASHBOARD_SETTING_KEYS = [
     "dashboardShowClaimable",
     "dashboardShowClaimed",
     "dashboardShowExpired",
+    "dashboardExpiredAgeDays",
     "dashboardRewardFilter",
     "dashboardIncludeUnknownRewards",
     "dashboardShowPlay",
@@ -306,7 +306,6 @@ function timedProgressParts(quest: NormalizedQuest): TimedProgressParts | null {
 
 function dashboardExpiry(quest: NormalizedQuest, now = Date.now()): string | null {
     if (quest.expiresAt == null) return null;
-    if (Math.abs(quest.expiresAt - now) > DASHBOARD_EXPIRY_WINDOW_MS) return null;
     return formatExpiry(quest.expiresAt, now);
 }
 
@@ -421,7 +420,7 @@ function dashboardFilterCount(store: any): number {
     if (store.dashboardShowClaimed !== true) count++;
     if (store.dashboardShowExpired !== true) count++;
     if (store.dashboardRewardFilter !== "all") count++;
-    if (store.dashboardRewardFilter !== "all" && store.dashboardIncludeUnknownRewards === false) count++;
+    if (store.dashboardShowExpired === true && Math.floor(Number(store.dashboardExpiredAgeDays ?? 15)) !== 15) count++;
     if (store.dashboardShowPlay === false) count++;
     if (store.dashboardShowStream === false) count++;
     if (store.dashboardShowVideo === false) count++;
@@ -436,6 +435,7 @@ function clearDashboardFilters(): void {
     settings.store.dashboardShowClaimable = true;
     settings.store.dashboardShowClaimed = true;
     settings.store.dashboardShowExpired = true;
+    settings.store.dashboardExpiredAgeDays = 0;
     settings.store.dashboardRewardFilter = "all";
     settings.store.dashboardIncludeUnknownRewards = true;
     settings.store.dashboardShowPlay = true;
@@ -451,6 +451,7 @@ function restoreRecommendedFilters(): void {
     settings.store.dashboardShowClaimable = true;
     settings.store.dashboardShowClaimed = false;
     settings.store.dashboardShowExpired = false;
+    settings.store.dashboardExpiredAgeDays = 15;
     settings.store.dashboardRewardFilter = "all";
     settings.store.dashboardIncludeUnknownRewards = true;
     settings.store.dashboardShowPlay = true;
@@ -462,6 +463,11 @@ function restoreRecommendedFilters(): void {
 
 function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
     const store = settings.store;
+    const expiredAgeDays = Math.max(0, Math.floor(Number(store.dashboardExpiredAgeDays ?? 15)) || 0);
+    const expiredAgePresets = [7, 15, 30, 90, 0] as const;
+    const customExpiredAge = expiredAgeDays > 0 && !expiredAgePresets.includes(expiredAgeDays as any)
+        ? String(expiredAgeDays)
+        : "";
 
     return (
         <div className="quest-ui-filter-panel" role="group" aria-label="Quest filters">
@@ -487,6 +493,35 @@ function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
                 </div>
             </div>
 
+            {store.dashboardShowExpired === true && (
+                <div className="quest-ui-filter-section quest-ui-expired-age-section">
+                    <span className="quest-ui-filter-label">Expired age</span>
+                    <div className="quest-ui-filter-chips quest-ui-expired-age-chips">
+                        <FilterChip active={expiredAgeDays === 7} label="7d" onClick={() => { store.dashboardExpiredAgeDays = 7; }} />
+                        <FilterChip active={expiredAgeDays === 15} label="15d" onClick={() => { store.dashboardExpiredAgeDays = 15; }} />
+                        <FilterChip active={expiredAgeDays === 30} label="30d" onClick={() => { store.dashboardExpiredAgeDays = 30; }} />
+                        <FilterChip active={expiredAgeDays === 90} label="90d" onClick={() => { store.dashboardExpiredAgeDays = 90; }} />
+                        <FilterChip active={expiredAgeDays === 0} label="All" onClick={() => { store.dashboardExpiredAgeDays = 0; }} />
+                        <label className={`quest-ui-expired-age-custom${customExpiredAge ? " is-selected" : ""}`}>
+                            <span>Custom</span>
+                            <input
+                                type="number"
+                                min={1}
+                                step={1}
+                                inputMode="numeric"
+                                placeholder="days"
+                                value={customExpiredAge}
+                                onChange={event => {
+                                    const days = Math.floor(Number(event.currentTarget.value));
+                                    if (Number.isFinite(days) && days > 0) store.dashboardExpiredAgeDays = days;
+                                }}
+                                aria-label="Custom expired Quest age in days"
+                            />
+                        </label>
+                    </div>
+                </div>
+            )}
+
             <div className="quest-ui-filter-section quest-ui-filter-section-row">
                 <span className="quest-ui-filter-label">Reward</span>
                 <div className="quest-ui-filter-chips">
@@ -507,17 +542,6 @@ function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
                 </div>
             </div>
 
-            <div className="quest-ui-filter-panel-footer">
-                <label className={`quest-ui-filter-unknown${store.dashboardRewardFilter === "all" ? " is-disabled" : ""}`}>
-                    <input
-                        type="checkbox"
-                        checked={store.dashboardIncludeUnknownRewards !== false}
-                        disabled={store.dashboardRewardFilter === "all"}
-                        onChange={event => { store.dashboardIncludeUnknownRewards = event.currentTarget.checked; }}
-                    />
-                    Include unknown reward formats
-                </label>
-            </div>
         </div>
     );
 }
@@ -526,6 +550,8 @@ const DASHBOARD_SORT_OPTIONS: ReadonlyArray<{ value: DashboardSortMode; label: s
     { value: "recommended", label: "Recommended" },
     { value: "expiring", label: "Expiring Soon" },
     { value: "orb-reward", label: "Highest Orb Reward" },
+    { value: "required-time-asc", label: "Shortest Required Time" },
+    { value: "required-time-desc", label: "Longest Required Time" },
     { value: "name-asc", label: "Name A → Z" },
     { value: "name-desc", label: "Name Z → A" }
 ];

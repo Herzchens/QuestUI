@@ -813,3 +813,41 @@
         grid-template-columns: repeat(2, max-content);
     }
 }
+
+
+/* v1.2 beta2 history filter */
+.quest-ui-expired-age-chips {
+    align-items: center;
+}
+
+.quest-ui-expired-age-custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 3px 5px 3px 9px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 12px;
+    transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.quest-ui-expired-age-custom:focus-within,
+.quest-ui-expired-age-custom.is-selected {
+    border-color: var(--brand-500);
+    background: color-mix(in srgb, var(--brand-500) 10%, transparent);
+    color: var(--text-normal);
+}
+
+.quest-ui-expired-age-custom input {
+    width: 54px;
+    min-width: 0;
+    padding: 3px 5px;
+    border: 0;
+    border-radius: 5px;
+    outline: none;
+    background: var(--input-background, var(--background-secondary));
+    color: var(--text-normal);
+    font: inherit;
+}
