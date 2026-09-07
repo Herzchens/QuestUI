@@ -3,6 +3,7 @@ import { fetchUserProfile } from "@utils/discord";
 import { findByCodeLazy } from "@webpack";
 import { UserProfileStore, UserStore, useEffect, useStateFromStores } from "@webpack/common";
 
+import { EventLogButton } from "./EventLogViewer";
 import { isOrionCommandReady } from "./orionIntegration";
 import { OrionGlobalControls } from "./OrionControls";
 import { QuestDashboard, QuestDashboardToolbar } from "./QuestDashboard";
@@ -105,6 +106,7 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
                 <div className="quest-ui-dashboard-header-tools">
                     {showOrionControls && <OrionGlobalControls />}
                     <QuestReloadControl />
+                    <EventLogButton />
                     <QuestDashboardToolbar closePopout={closePopout} />
                 </div>
             </div>
