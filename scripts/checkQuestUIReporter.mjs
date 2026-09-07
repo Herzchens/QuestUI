@@ -7,6 +7,7 @@ const PATCH_PLUGINS = ["QuestUI", "GameActivityToggle"];
 // lookups are normal imports and do not belong in this reporter list.
 const WEBPACK_FIND_SIGNATURES = [
     'proxyLazyWebpack("QuestStore", "QuestsStore")',
+    'findStore("VirtualCurrencyStore")',
     'findByCode("\\"M7.5 21.7a8.95")',
     'findComponentByCode(".HEADER_BAR_BADGE_BOTTOM,", "position:\\"bottom\\"")',
     'findComponentByCode("renderBadgeCount", "disableColor")',
@@ -14,6 +15,7 @@ const WEBPACK_FIND_SIGNATURES = [
     'findByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")',
     'findByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")',
     'findComponentByCode("shouldUseThemeColor", "customSize", "loading")',
+    'findByCode("VIRTUAL_CURRENCY_BALANCE_FETCH", "VIRTUAL_CURRENCY_BALANCE_FETCH_SUCCESS", "VIRTUAL_CURRENCY_USER_BALANCE")',
     'findByCode("QUESTS_ENROLL_BEGIN", "QUESTS_ENROLL_SUCCESS", "QUESTS_ENROLL_FAILURE", "previous_in_flight_request")',
     'findByCode("QUESTS_CLAIM_REWARD_BEGIN", "QUESTS_CLAIM_REWARD_SUCCESS", "QUESTS_CLAIM_REWARD_FAILURE", "traffic_metadata_sealed")',
     'findByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")'
@@ -86,11 +88,13 @@ function runSelfTest() {
     assert.match(analyzeReport(completeReport({ badPatches: "- QuestUI (had no effect)\n" }), "", 1).problems.join("\n"), /QuestUI appears in Bad Patches/);
     assert.match(analyzeReport(completeReport({ badPatches: "- GameActivityToggle (had no effect)\n" }), "", 1).problems.join("\n"), /GameActivityToggle appears in Bad Patches/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nproxyLazyWebpack("QuestStore", "QuestsStore")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindStore("VirtualCurrencyStore")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindComponentByCode(".HEADER_BAR_BADGE_BOTTOM,", "position:\\"bottom\\"")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("heartbeat?.lastBeatAt", "updatedAt", "eventName", "includeTaskTypes")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("completedRatioDisplay", "roundingMode:\\"floor\\"", "completedRatio")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("\\"game_tile\\"", "\\"quest_bar_hero\\"", "\\"video_player_thumbnail\\"")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindComponentByCode("shouldUseThemeColor", "customSize", "loading")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("VIRTUAL_CURRENCY_BALANCE_FETCH", "VIRTUAL_CURRENCY_BALANCE_FETCH_SUCCESS", "VIRTUAL_CURRENCY_USER_BALANCE")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_ENROLL_BEGIN", "QUESTS_ENROLL_SUCCESS", "QUESTS_ENROLL_FAILURE", "previous_in_flight_request")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_CLAIM_REWARD_BEGIN", "QUESTS_CLAIM_REWARD_SUCCESS", "QUESTS_CLAIM_REWARD_FAILURE", "traffic_metadata_sealed")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);

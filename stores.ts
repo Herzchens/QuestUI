@@ -1,4 +1,4 @@
-import { findStore, proxyLazyWebpack } from "@webpack";
+import { findStore, findStoreLazy, proxyLazyWebpack } from "@webpack";
 
 const resolveQuestStore = Object.assign(
     () => {
@@ -13,3 +13,4 @@ const resolveQuestStore = Object.assign(
 );
 
 export const QuestsStore = proxyLazyWebpack(resolveQuestStore) as any;
+export const VirtualCurrencyStore = findStoreLazy("VirtualCurrencyStore") as any;

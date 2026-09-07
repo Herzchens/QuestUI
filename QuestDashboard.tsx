@@ -1,7 +1,9 @@
-import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, ThemeStore, UserStore, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { QuestCardActions } from "./QuestCardActions";
+import { QuestOrbBalance } from "./QuestOrbBalance";
+import { QuestOrbIcon } from "./QuestOrbIcon";
 import {
     attentionCounts,
     dashboardScopeFromSettings,
@@ -56,10 +58,6 @@ const getDiscordQuestAsset = findByCodeLazy(
     "\"quest_bar_hero\"",
     "\"video_player_thumbnail\""
 ) as (quest: any, assetKind: DiscordQuestAssetKind, theme?: QuestTheme) => DiscordQuestAsset | null;
-
-// Discord's own Orb image component used in Quest reward copy. It selects the proper
-// themed Orb asset internally, so QuestUI does not maintain a copied/static Orb URL.
-const DiscordOrbIcon = findComponentByCodeLazy("shouldUseThemeColor", "customSize", "loading");
 
 const DASHBOARD_SETTING_KEYS = [
     "dashboardShowAvailable",
@@ -209,7 +207,7 @@ function QuestArtwork({ quest, type }: { quest: NormalizedQuest; type: QuestTask
 }
 
 function OrbGlyph() {
-    return <DiscordOrbIcon shouldUseThemeColor customSize={15} className="quest-ui-orb-glyph" />;
+    return <QuestOrbIcon size={15} className="quest-ui-orb-glyph" />;
 }
 
 function orbRewardTier(quantity: number): "standard" | "large" | "boosted" {
@@ -566,6 +564,9 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                             </button>
                         )}
                     </Popout>
+                </div>
+                <div className="quest-ui-dashboard-meta-row">
+                    <QuestOrbBalance />
                 </div>
             </header>
 
