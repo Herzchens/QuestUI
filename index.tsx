@@ -1,13 +1,18 @@
 import "./detailStatus.css";
+import "./eventLogPolish.css";
+import "./eventLogRuntimeFix.css";
 
 import definePlugin from "@utils/types";
 
+import { startEventLogCapture, stopEventLogCapture } from "./eventLog";
 import { QuestButton, QuestsCount } from "./QuestButton";
+import { QUESTUI_VERSION } from "./version";
 import settings from "./settings";
 
 export default definePlugin({
     name: "QuestUI",
-    description: "Adds standalone Discord Quest shortcuts, live status indicators, and an optional mini dashboard.",
+    description: "Adds Discord Quest shortcuts, a live dashboard, native Quest actions, diagnostics, and optional Orion controls.",
+    version: QUESTUI_VERSION,
     authors: [
         {
             name: "Herzchens",
@@ -15,6 +20,14 @@ export default definePlugin({
         }
     ],
     settings,
+
+    start() {
+        startEventLogCapture();
+    },
+
+    stop() {
+        stopEventLogCapture();
+    },
 
     patches: [
         {

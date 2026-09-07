@@ -9,6 +9,16 @@ const rewardOptions = [
     { label: "Non-Orb rewards", value: "non-orbs" }
 ] as const;
 
+const dashboardSortOptions = [
+    { label: "Recommended", value: "recommended", default: true },
+    { label: "Expiring Soon", value: "expiring" },
+    { label: "Highest Orb Reward", value: "orb-reward" },
+    { label: "Shortest Required Time", value: "required-time-asc" },
+    { label: "Longest Required Time", value: "required-time-desc" },
+    { label: "Name A → Z", value: "name-asc" },
+    { label: "Name Z → A", value: "name-desc" }
+] as const;
+
 function noShortcutButtons(this: any): boolean {
     return !this.store.showQuestsButtonTopBar && !this.store.showQuestsButtonSettingsBar;
 }
@@ -55,6 +65,12 @@ export default definePluginSettings({
 
     // Dashboard filter values live in settings so they persist, but they are configured
     // from the Dashboard's dedicated filter popout instead of flooding this settings page.
+    dashboardSortMode: {
+        type: OptionType.SELECT,
+        displayName: "Dashboard • Sort",
+        description: "Choose how Quest cards are ordered.",
+        options: dashboardSortOptions
+    },
     dashboardShowAvailable: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Available",
@@ -84,6 +100,12 @@ export default definePluginSettings({
         displayName: "Dashboard • Expired",
         description: "Show expired quests.",
         default: false
+    },
+    dashboardExpiredAgeDays: {
+        type: OptionType.NUMBER,
+        displayName: "Dashboard • Expired Age",
+        description: "Only show expired quests from the last N days. Zero means all history.",
+        default: 15
     },
     dashboardRewardFilter: {
         type: OptionType.SELECT,
@@ -210,11 +232,13 @@ export default definePluginSettings({
         disabled: orionIntegrationDisabled
     },
 
+    dashboardSortMode: { hidden: true },
     dashboardShowAvailable: { hidden: true },
     dashboardShowInProgress: { hidden: true },
     dashboardShowClaimable: { hidden: true },
     dashboardShowClaimed: { hidden: true },
     dashboardShowExpired: { hidden: true },
+    dashboardExpiredAgeDays: { hidden: true },
     dashboardRewardFilter: { hidden: true },
     dashboardIncludeUnknownRewards: { hidden: true },
     dashboardShowPlay: { hidden: true },

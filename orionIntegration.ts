@@ -12,12 +12,18 @@ import type {
     OrionEngineAction,
     OrionTaskAction
 } from "./orionCommandLogic";
+import {
+    deriveOrionIntegrationHealth,
+    isKnownOrionVersionIncompatible
+} from "./orionStatusLogic";
+import type { OrionIntegrationHealth } from "./orionStatusLogic";
 
 let controlPending = false;
 
 type OrionPlugin = Partial<OrionCompanionSurface> & {
     started?: boolean;
     commands?: unknown[];
+    version?: unknown;
 };
 
 type CompatibleOrionPlugin = OrionPlugin & OrionCompanionSurface;
@@ -73,10 +79,42 @@ export function subscribeOrionControlState(listener: () => void): (() => void) |
     }
 }
 
+export function getOrionIntegrationHealth(integrationEnabled: boolean): OrionIntegrationHealth {
+    const current = plugin();
+    const installed = current !== null;
+    const enabled = installed && isPluginEnabled("OrionQuests");
+    const versionIncompatible = installed && isKnownOrionVersionIncompatible(current.version);
+    const started = current?.started === true;
+
+    // Avoid invoking plugin-owned code while Orion is absent, disabled, explicitly detached from
+    // QuestUI, known-too-old, or not yet started. Only the final compatibility stage reads the
+    // companion snapshot.
+    const shouldValidateSurface = installed
+        && enabled
+        && integrationEnabled
+        && !versionIncompatible
+        && started;
+    const commandCompatible = shouldValidateSurface && getRegisteredOrionCommand(current) !== null;
+    const companionCompatible = shouldValidateSurface && hasCompatibleCompanion(current);
+    const snapshotCompatible = companionCompatible && readCompatibleOrionSnapshot(current) !== null;
+
+    return deriveOrionIntegrationHealth({
+        installed,
+        enabled,
+        integrationEnabled,
+        started,
+        version: current?.version,
+        commandCompatible,
+        companionCompatible,
+        snapshotCompatible
+    });
+}
+
 export function isOrionCommandReady(): boolean {
     const current = plugin();
     return current !== null
         && isOrionEnabled()
+        && !isKnownOrionVersionIncompatible(current.version)
         && current.started === true
         && getRegisteredOrionCommand(current) !== null
         && hasCompatibleCompanion(current)
@@ -100,6 +138,7 @@ function assertControlStillCurrent(current: CompatibleOrionPlugin, command: any)
         || getRegisteredOrionCommand(current) !== command
         || current.started !== true
         || !isOrionEnabled()
+        || isKnownOrionVersionIncompatible(current.version)
         || !hasCompatibleCompanion(current)) {
         throw new OrionIntegrationError("OrionQuests changed while the control was being prepared. Reopen the Dashboard and try again.");
     }

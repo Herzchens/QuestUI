@@ -4,7 +4,7 @@ QuestUI is maintained by [Herzchens](https://github.com/Herzchens).
 
 ## Project contributors
 
-- [Herzchens](https://github.com/Herzchens) — Project maintainer; extracted and refactored the Quest UI into a standalone read-only plugin and maintains compatibility, navigation, status handling, documentation, and releases.
+- [Herzchens](https://github.com/Herzchens) — Project maintainer; extracted and refactored the Quest UI into a standalone UI-focused plugin and maintains compatibility, navigation, manual Quest actions, status handling, documentation, and releases.
 - [nyxxbit](https://github.com/nyxxbit) — Contributed the settings-bar accessibility and tooltip fix in [pull request #3](https://github.com/Herzchens/QuestUI/pull/3), compatibility analysis, and maintenance guidance.
 
 ## Upstream credit

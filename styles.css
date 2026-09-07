@@ -143,9 +143,9 @@
     color: var(--text-default, var(--header-primary));
     display: flex;
     flex-direction: column;
-    max-height: min(680px, calc(100vh - 72px));
+    max-height: min(760px, calc(100vh - 72px));
     overflow: hidden;
-    width: min(510px, calc(100vw - 24px));
+    width: min(640px, calc(100vw - 24px));
 }
 
 .quest-ui-dashboard-header {
@@ -218,6 +218,47 @@
 
 .quest-ui-summary-available {
     color: var(--status-danger);
+}
+
+.quest-ui-dashboard-meta-row {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    min-height: 20px;
+    min-width: 0;
+}
+
+.quest-ui-dashboard-orb-balance {
+    align-items: center;
+    color: var(--text-muted);
+    display: inline-flex;
+    font-size: 12px;
+    gap: 6px;
+    margin-left: auto;
+    min-width: 0;
+}
+
+.quest-ui-dashboard-orb-balance > strong {
+    color: var(--text-default, var(--header-secondary));
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.quest-ui-dashboard-orb-balance.is-loading {
+    opacity: 0.72;
+}
+
+.quest-ui-dashboard-orb-balance.is-unavailable > strong {
+    color: var(--text-muted);
+    font-weight: 550;
+}
+
+.quest-ui-dashboard-orb-icon {
+    flex: 0 0 16px;
+    height: 16px;
+    width: 16px;
 }
 
 .quest-ui-filter-button,
@@ -469,12 +510,39 @@
     width: 13px;
 }
 
-.quest-ui-arrow-icon {
-    display: block;
+.quest-ui-home-icon {
+    display: inline-flex;
+    flex: 0 0 17px;
+    height: 17px;
+    position: relative;
+    width: 17px;
+}
+
+.quest-ui-home-glyph {
     fill: currentColor;
-    flex: 0 0 auto;
     height: 17px;
     width: 17px;
+}
+
+.quest-ui-home-quest-badge {
+    align-items: center;
+    background: var(--background-base-lowest, #111214);
+    border: 1px solid color-mix(in srgb, var(--brand-360, #949cf7) 58%, transparent);
+    border-radius: 4px;
+    bottom: -3px;
+    color: var(--brand-360, #949cf7);
+    display: inline-flex;
+    height: 9px;
+    justify-content: center;
+    position: absolute;
+    right: -4px;
+    width: 9px;
+}
+
+.quest-ui-home-quest-badge > svg {
+    fill: currentColor;
+    height: 7px;
+    width: 7px;
 }
 
 .quest-ui-dashboard-content {
@@ -645,15 +713,26 @@
     min-width: 0;
 }
 
+.quest-ui-card-title-cluster {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 7px;
+    min-width: 0;
+}
+
 .quest-ui-card-title {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     color: var(--text-strong, var(--header-primary));
     display: -webkit-box;
+    flex: 0 1 auto;
     font-size: 14px;
     font-weight: 700;
     line-height: 18px;
     max-height: 36px;
+    max-width: 100%;
+    min-width: 0;
     overflow: hidden;
     overflow-wrap: anywhere;
 }
@@ -942,13 +1021,34 @@
     width: 100%;
 }
 
-.quest-ui-dashboard-open-home .quest-ui-arrow-icon,
-.quest-ui-dashboard-empty-home .quest-ui-arrow-icon {
-    height: 14px;
-    width: 14px;
+.quest-ui-dashboard-open-home .quest-ui-home-icon,
+.quest-ui-dashboard-empty-home .quest-ui-home-icon {
+    flex-basis: 16px;
+    height: 16px;
+    margin-right: 2px;
+    width: 16px;
+}
+
+.quest-ui-dashboard-open-home .quest-ui-home-glyph,
+.quest-ui-dashboard-empty-home .quest-ui-home-glyph {
+    height: 16px;
+    width: 16px;
 }
 
 @media (max-width: 520px) {
+    .quest-ui-dashboard-meta-row {
+        flex-wrap: wrap;
+        gap: 6px 10px;
+    }
+
+    .quest-ui-card-title-cluster {
+        align-items: flex-start;
+    }
+
+    .quest-ui-card-title {
+        flex-basis: 100%;
+    }
+
     .quest-ui-dashboard {
         width: calc(100vw - 16px);
     }

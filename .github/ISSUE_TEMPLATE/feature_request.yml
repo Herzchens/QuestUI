@@ -10,9 +10,9 @@ body:
       value: |
         Use this form to propose an improvement to QuestUI.
 
-        QuestUI is currently a read-only interface plugin. It displays Quest information and provides navigation, but it does not enroll in, complete, or claim Quests.
+        QuestUI is UI-focused. It may display Discord Quest state, provide navigation, perform explicit user-clicked native Accept/Claim actions, request Discord's native Quest-list refresh, and optionally delegate controls to a separately installed compatible OrionQuests plugin.
 
-        Requests that would change this scope may still be discussed, but the proposal should explain why the functionality belongs in QuestUI.
+        QuestUI does not generate Quest progress, spoof games/streams, auto-enroll, auto-claim, bypass Discord challenges, or duplicate Orion's farming engine. Requests that would change those boundaries should explain why the functionality belongs in QuestUI.
 
   - type: textarea
     id: problem
@@ -39,7 +39,12 @@ body:
       options:
         - User interface
         - Accessibility
+        - Dashboard filters or sorting
         - Quest status display
+        - Orb balance or runtime metadata
+        - Manual Quest actions
+        - Orion integration
+        - Event Log or diagnostics
         - Discord or Vencord compatibility
         - Installation or updates
         - Documentation
@@ -51,7 +56,7 @@ body:
     id: project-fit
     attributes:
       label: Why does this belong in QuestUI?
-      description: Explain how the request fits QuestUI's purpose as a Quest interface and status plugin.
+      description: Explain how the request fits QuestUI's UI-focused scope and source-of-truth boundaries.
     validations:
       required: true
 
@@ -86,7 +91,7 @@ body:
       options:
         - label: I searched the existing issues and did not find the same request.
           required: true
-        - label: I understand that QuestUI is currently a read-only Quest interface plugin.
+        - label: I understand that QuestUI supports explicit user-clicked Accept/Claim but does not itself generate Quest progress or become a farming engine.
           required: true
         - label: If this request changes the current project scope, I explained why that change is appropriate.
           required: true

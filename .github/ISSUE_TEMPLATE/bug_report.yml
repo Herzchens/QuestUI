@@ -10,7 +10,7 @@ body:
       value: |
         Thank you for reporting a QuestUI problem.
 
-        This form is for issues caused by QuestUI itself. Quest completion, progress automation, and reward claiming belong to the plugin that provides those features.
+        This form is for issues caused by QuestUI itself, including the Dashboard, native Accept/Claim, Reload, Orb/runtime metadata, Orion controls, and Event Log diagnostics. Quest completion/progress automation itself belongs to the completion engine.
 
         Do not include Discord tokens, account credentials, private account data, or other sensitive information in logs or screenshots.
 
@@ -51,11 +51,17 @@ body:
       label: Affected area
       description: Select the part of QuestUI most closely related to the problem.
       options:
+        - Dashboard or Quest cards
+        - Dashboard filters or sorting
+        - Orb balance or rewards
+        - Manual Accept or Claim
+        - Orion status or controls
+        - Event Log or diagnostic report
+        - Native Reload
+        - Quest Home navigation
         - Top-bar button
         - Settings-bar button
-        - Colored counters
-        - Quest status calculation
-        - Quest Home navigation
+        - Quest Home counters
         - Installation or update
         - Build or compatibility
         - Other
@@ -100,9 +106,9 @@ body:
   - type: input
     id: questui-version
     attributes:
-      label: QuestUI commit
-      description: Provide the QuestUI commit SHA when you know it.
-      placeholder: e484cd8
+      label: QuestUI version or commit
+      description: Provide the QuestUI version and commit SHA when available.
+      placeholder: v1.2.0 / abc1234
     validations:
       required: false
 
@@ -114,7 +120,10 @@ body:
       options:
         - label: Show Quests button in top bar
         - label: Show Quests button in settings bar
-        - label: Show colored quest counters
+        - label: Show Quest Home counters
+        - label: Dashboard Mode
+        - label: Dashboard Orion Integration
+        - label: Detailed Status
 
   - type: textarea
     id: other-plugins
@@ -128,8 +137,8 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Console errors or logs
-      description: Paste relevant console errors. Remove tokens and private account information.
+      label: QuestUI diagnostic report or relevant logs
+      description: Prefer the sanitized report copied from Event Log → View details / bug button. If Event Log is unavailable, paste only the relevant console lines. Review the text before sharing and remove any private information.
       render: text
     validations:
       required: false

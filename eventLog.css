@@ -1,0 +1,343 @@
+.quest-ui-event-log-icon {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.65;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.quest-ui-event-log-panel,
+.quest-ui-event-detail {
+    width: min(540px, calc(100vw - 24px));
+    max-height: min(680px, calc(100vh - 96px));
+    overflow: auto;
+    padding: 14px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 12px;
+    background: var(--background-floating);
+    color: var(--text-normal);
+    box-shadow: var(--elevation-high);
+}
+
+.quest-ui-event-log-header,
+.quest-ui-event-detail-header,
+.quest-ui-event-log-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.quest-ui-event-log-header > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quest-ui-event-log-header > span {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.quest-ui-event-preview-chip {
+    padding: 2px 5px;
+    border: 1px solid color-mix(in srgb, var(--yellow-300) 45%, transparent);
+    border-radius: 5px;
+    color: var(--yellow-300);
+    font: 600 9px/1.2 var(--font-code);
+}
+
+.quest-ui-event-search {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 12px 0 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+    outline: none;
+    background: var(--input-background, var(--background-secondary));
+    color: var(--text-normal);
+}
+
+.quest-ui-event-search:focus {
+    border-color: var(--brand-500);
+}
+
+.quest-ui-event-filter-row {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.quest-ui-event-filter-row > span {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.quest-ui-event-filter-row > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.quest-ui-event-filter-row button,
+.quest-ui-event-log-actions button,
+.quest-ui-event-detail-header button,
+.quest-ui-event-load-more {
+    padding: 5px 8px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 7px;
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.quest-ui-event-filter-row button.is-selected {
+    border-color: color-mix(in srgb, var(--brand-500) 60%, var(--background-modifier-accent));
+    background: color-mix(in srgb, var(--brand-500) 12%, var(--background-secondary));
+    color: var(--text-normal);
+}
+
+.quest-ui-event-log-actions {
+    margin: 12px 0 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--background-modifier-accent);
+}
+
+.quest-ui-event-log-actions label {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.quest-ui-event-log-actions select {
+    margin-left: 5px;
+    padding: 4px 6px;
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 6px;
+    background: var(--background-secondary);
+    color: var(--text-normal);
+}
+
+.quest-ui-event-log-actions > div {
+    display: flex;
+    gap: 5px;
+}
+
+.quest-ui-event-log-actions button.is-danger {
+    border-color: var(--status-danger);
+    color: var(--status-danger);
+}
+
+.quest-ui-event-day {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 5px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.quest-ui-event-day::before,
+.quest-ui-event-day::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: var(--background-modifier-accent);
+}
+
+.quest-ui-event-row {
+    display: grid;
+    grid-template-columns: 58px 20px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 7px;
+    border-radius: 8px;
+}
+
+.quest-ui-event-row:hover {
+    background: var(--background-modifier-hover);
+}
+
+.quest-ui-event-time {
+    color: var(--text-muted);
+    font: 10px/1.2 var(--font-code);
+}
+
+.quest-ui-event-severity {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.quest-ui-event-row.is-error .quest-ui-event-severity { color: var(--status-danger); background: color-mix(in srgb, var(--status-danger) 12%, transparent); }
+.quest-ui-event-row.is-warning .quest-ui-event-severity { color: var(--status-warning); background: color-mix(in srgb, var(--status-warning) 12%, transparent); }
+.quest-ui-event-row.is-success .quest-ui-event-severity { color: var(--status-positive); background: color-mix(in srgb, var(--status-positive) 12%, transparent); }
+.quest-ui-event-row.is-info .quest-ui-event-severity { color: var(--text-muted); background: var(--background-modifier-hover); }
+
+.quest-ui-event-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 12px;
+}
+
+.quest-ui-event-copy > div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.quest-ui-event-copy strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+}
+
+.quest-ui-event-copy > span {
+    color: var(--text-muted);
+}
+
+.quest-ui-event-source {
+    padding: 1px 4px;
+    border-radius: 4px;
+    font: 700 9px/1.4 var(--font-code);
+}
+
+.quest-ui-event-source.is-orion { background: color-mix(in srgb, var(--status-positive) 10%, transparent); color: var(--status-positive); }
+.quest-ui-event-source.is-questui { background: color-mix(in srgb, var(--brand-500) 12%, transparent); color: var(--brand-360); }
+
+.quest-ui-event-view-detail {
+    border: 0;
+    background: transparent;
+    color: var(--text-link);
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.quest-ui-event-empty {
+    padding: 30px 12px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.quest-ui-event-load-more {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.quest-ui-event-detail h3 {
+    margin: 14px 0 12px;
+    font-size: 16px;
+}
+
+.quest-ui-event-level {
+    font: 700 10px/1.3 var(--font-code);
+}
+
+.quest-ui-event-level.is-error { color: var(--status-danger); }
+.quest-ui-event-level.is-warning { color: var(--status-warning); }
+.quest-ui-event-level.is-success { color: var(--status-positive); }
+.quest-ui-event-level.is-info { color: var(--text-muted); }
+
+.quest-ui-event-detail-grid {
+    display: grid;
+    grid-template-columns: 105px minmax(0, 1fr);
+    gap: 7px 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--background-secondary);
+    font-size: 11px;
+}
+
+.quest-ui-event-detail-grid > span,
+.quest-ui-event-detail-label {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.quest-ui-event-detail code {
+    overflow-wrap: anywhere;
+    font-family: var(--font-code);
+}
+
+.quest-ui-event-detail section {
+    margin-top: 12px;
+}
+
+.quest-ui-event-detail p {
+    margin: 5px 0 0;
+    color: var(--text-normal);
+    font-size: 12px;
+}
+
+.quest-ui-event-detail pre {
+    max-height: 220px;
+    overflow: auto;
+    margin: 5px 0 0;
+    padding: 9px;
+    border-radius: 7px;
+    background: var(--background-secondary-alt, var(--background-secondary));
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: 10px/1.45 var(--font-code);
+}
+
+
+/* diagnostic report actions */
+.quest-ui-event-detail-header-actions,
+.quest-ui-event-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.quest-ui-event-copy-report {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.quest-ui-event-copy-report .quest-ui-event-log-icon,
+.quest-ui-event-row-bug .quest-ui-event-log-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.quest-ui-event-row-bug {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.quest-ui-event-row-bug:hover {
+    background: color-mix(in srgb, var(--status-danger) 10%, transparent);
+    color: var(--status-danger);
+}

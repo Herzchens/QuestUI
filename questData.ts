@@ -57,6 +57,7 @@ export interface AttentionCounts {
 
 export interface QuestScope {
     statuses: Record<QuestStatus, boolean>;
+    expiredAgeDays: number | null;
     rewards: RewardFilter;
     includeUnknownRewards: boolean;
     taskTypes: Record<QuestTaskType, boolean>;
@@ -470,8 +471,14 @@ export function useQuestSnapshot(mode: QuestSnapshotMode = "live"): NormalizedQu
 }
 
 export function filterQuests(quests: NormalizedQuest[], scope: QuestScope): NormalizedQuest[] {
+    const now = Date.now();
     return quests.filter(quest => {
         if (!scope.statuses[quest.status]) return false;
+
+        if (quest.status === "expired" && scope.expiredAgeDays != null && quest.expiresAt != null) {
+            const ageMs = Math.max(0, now - quest.expiresAt);
+            if (ageMs > scope.expiredAgeDays * 86_400_000) return false;
+        }
 
         if (scope.rewards !== "all") {
             if (quest.reward.kind === "unknown") {
@@ -493,6 +500,11 @@ function normalizeRewardFilter(value: any): RewardFilter {
     return value === "orbs" || value === "non-orbs" ? value : "all";
 }
 
+function normalizeExpiredAgeDays(value: any): number | null {
+    const days = Math.floor(Number(value));
+    return Number.isFinite(days) && days > 0 ? days : null;
+}
+
 export function dashboardScopeFromSettings(store: any): QuestScope {
     return {
         statuses: {
@@ -502,8 +514,11 @@ export function dashboardScopeFromSettings(store: any): QuestScope {
             claimed: store.dashboardShowClaimed === true,
             expired: store.dashboardShowExpired === true
         },
+        expiredAgeDays: normalizeExpiredAgeDays(store.dashboardExpiredAgeDays),
         rewards: normalizeRewardFilter(store.dashboardRewardFilter),
-        includeUnknownRewards: store.dashboardIncludeUnknownRewards !== false,
+        // The old toggle is intentionally no longer a Dashboard control. Unknown future reward
+        // formats stay visible instead of being silently affected by stale persisted state.
+        includeUnknownRewards: true,
         taskTypes: {
             play: store.dashboardShowPlay !== false,
             stream: store.dashboardShowStream !== false,
@@ -525,6 +540,7 @@ export function detailedScopeFromSettings(store: any): QuestScope {
             claimed: false,
             expired: false
         },
+        expiredAgeDays: null,
         rewards: normalizeRewardFilter(store.detailedRewardFilter),
         includeUnknownRewards: store.detailedIncludeUnknownRewards !== false,
         taskTypes: {

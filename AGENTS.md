@@ -14,6 +14,8 @@ QuestUI may:
 - enroll only after an explicit QuestUI click through Discord's verified native enrollment action;
 - claim only after an explicit QuestUI click through Discord's verified native claim action;
 - invoke Discord's native current-Quest refresh after an explicit Reload click;
+- display Discord's native Orb balance and runtime version metadata;
+- capture, sanitize, persist, filter, and display QuestUI/recognized Orion diagnostic events;
 - read an explicit Orion companion state surface and delegate Start/Stop/Pause/Resume through it;
 - auto-start compatible Orion only after Discord confirms a QuestUI enrollment in QuestStore;
 - improve accessibility, compatibility, tests, CI, documentation, and release packaging.
@@ -31,7 +33,8 @@ QuestUI must not:
 - mutate Orion settings or enable/disable the plugin as a Start/Stop substitute;
 - treat Stop as Pause;
 - implement targeted `startQuest`;
-- become a combined QuestUI + Orion farming implementation.
+- become a combined QuestUI + Orion farming implementation;
+- ingest unrelated Discord/plugin console traffic into the Event Log or persist credentials/tokens.
 
 The maintainer approved the current companion surface: global Start/Pause/Resume + Stop, exact-ID per-Quest Pause/Resume, and engine-wide Start from an enrolled card. Anything broader requires explicit approval.
 
@@ -41,6 +44,10 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `QuestButton.tsx` — shortcuts, status indicators, counters, dashboard/open-home behavior.
 - `QuestDashboard.tsx` — Dashboard cards, filters, artwork/rewards, native progress, summary, and expiry presentation.
 - `QuestDashboardShell.tsx` — visible **Quest Dashboard** title/native Quest icon, premium-aware Nitro tag, and fixed header tools.
+- `dashboardSortLogic.ts` — persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
+- `QuestOrbBalance.tsx`, `orbBalance.ts`, `orbBalanceLogic.ts` — native VirtualCurrencyStore Orb balance and display state.
+- `OrionStatus.tsx`, `orionStatusLogic.ts`, `version.ts`, `versionChannel.ts` — runtime health/version metadata and release-channel styling.
+- `EventLogViewer.tsx`, `eventLog.ts`, `eventLogTypes.ts`, `eventLogLogic.ts`, `native.ts`, `diagnosticReport.ts` — Event Log Preview capture, normalization, persistence/querying, detail UI, and sanitized reports.
 - `dashboardPolish.css` — title sweep, Nitro surface, summary layout, and elapsed-progress tones.
 - `QuestCardActions.tsx` — explicit Accept/Claim, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
 - `questActions.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
@@ -51,7 +58,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `actions.css`, `orion.css`, `reload.css` — action/control styling.
 - `scripts/` — pure regression tests and Stable/Canary reporter checks.
 - `.github/workflows/compatibility.yml` — build/type-check, pure tests, Orion matrix, bundle checks, reporters.
-- `docs/RELEASES.md` — Stable/Beta source pairing and publishing checklist.
+- `docs/RELEASES.md` — release history, current Stable guidance, and publishing checklist.
 
 ## Development environment
 
@@ -70,6 +77,11 @@ pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestShortcutLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testOrbBalanceLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testDashboardSortLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
 pnpm build
 pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
@@ -125,7 +137,7 @@ Compatible Orion must own the exact registered `orion` command, expose `start`, 
 Header order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Filter
+Smart Start/Pause/Resume → Stop → Reload → Event Log → Sort → Filter → Home
 ```
 
 Global state rules:
@@ -175,11 +187,24 @@ Use Vencord's native toast API for explicit success/failure feedback.
 - Nitro eligibility comes from the current user's Discord `premiumType`; the tag must remain visible for an eligible account even if profile badge artwork is not hydrated.
 - Use Discord's native Nitro profile-badge artwork when available and the existing fallback glyph otherwise. Do not add a new Discord webpack finder for Nitro.
 - Title sweep is a seamless linear right-to-left loop with an exact repeat period; no reset/transition frame.
-- Summary stays on one row and visually below the tool row.
-- In Progress, Ready to Claim, and Available follow the current Dashboard card scope.
-- **Claimed is always present** and its count comes from the full live Quest snapshot, even when Claimed cards are filtered out.
+- Summary stays on one row and always renders Available, Ready, In Progress, Claimed, Expired, and Hidden, including zero values.
+- The five status counts come from the full live Quest snapshot; Hidden is the number of cards removed by Dashboard filters.
+- In Progress and Ready are the accepted-active bucket and remain above Available/Claimed/Expired under every sort mode.
+- Required-time sorting compares normalized timed-task seconds; achievement/count targets are never interpreted as durations.
 - Timed progress uses `mm:ss / mm:ss`; only the current elapsed value is stage-colored. Prefix/target remain neutral.
-- Dashboard expiry copy is presentation-only and appears only within the 15-day window; never mutate underlying expiry/status to achieve this.
+- If Discord supplies a valid expiry, Dashboard expiry copy remains visible. Expired-history visibility is a separate filter with a 15-day recommended default and an unlimited All mode; never mutate underlying expiry/status to achieve either behavior.
+
+## Event Log Preview invariants
+
+- Capture only QuestUI output and confidently recognized Orion output; never ingest Discord/general plugin console spam.
+- Preserve original console calls. On unload, restore a console method only if QuestUI still owns that wrapper.
+- Sanitize credentials/tokens/OAuth material before persistence and before diagnostic-report generation.
+- Desktop persistence uses one `events.jsonl` file. Crossing 10 MiB compacts oldest complete records away until about 5 MiB remains; do not split JSONL records.
+- The user must be able to reveal the file and clear saved history.
+- Viewer filtering supports Source, Level, Category and search; sorting supports newest, oldest, and errors first; day separators remain chronological for the selected sort.
+- Keep list summaries concise and put technical console/error context behind **View details**. Warning/error rows and details may copy a sanitized diagnostic report.
+- Orion event semantics must be namespace/context aware. Do not classify every string containing `failed` as terminal: retries, fallbacks and recoveries remain non-terminal when Orion treats them that way.
+- Orion **v4.10.7** is the only hard minimum. Future structured diagnostics/queue capabilities are optional capability checks; compatible builds without them keep the current fallback rather than losing existing integration.
 
 ## Discord patch / webpack rules
 
@@ -193,17 +218,17 @@ Use Vencord's native toast API for explicit success/failure feedback.
 
 Run the full local gate for source changes. For companion changes, also run Orion pause/resume regression tests and build/type-check both plugins together.
 
-Manual checks should cover the affected states. For the current beta this includes header/Nitro layout, one-line summary including always-visible Claimed, `mm:ss` current-only progress coloring, 15-day expiry display, Accept/Claim, global/per-Quest Orion transitions, concurrency, Reload whole rotations, dark/light themes, and plugin replacement/reload safety.
+Manual checks should cover the affected states. For the current Stable surface this includes header/Nitro layout; the six-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; Accept/Claim; global/per-Quest Orion transitions; concurrency; Reload whole rotations; dark/light/custom themes; and plugin replacement/reload safety.
 
 Automated checks do not substitute for live Discord evidence. State exactly what was and was not tested.
 
 ## Release discipline
 
 - Stable release source is `main`.
-- Beta source is `feat/quest-actions-orion-controls`.
-- The beta Orion-control feature set must be paired with `Herzchens/discord-quest-completer:feat/per-quest-pause-resume`; do not imply current upstream nyxxbit exposes the same companion API.
+- The old `feat/quest-actions-orion-controls` QuestUI beta and `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` companion fork are historical only; do not target them for current release work.
+- Current Orion integration targets upstream `nyxxbit/discord-quest-completer` v4.10.7+; the maintained coexistence CI gate tracks upstream `main`. Future companion capabilities are feature-detected and must not silently raise the hard minimum.
 - Keep QuestUI and Orion source/license boundaries separate in packages.
-- Git tags/releases require maintainer approval. The maintainer has explicitly requested the current Stable/Beta release preparation; still verify target SHAs/tag availability before publishing.
+- Git tags/releases require maintainer approval. Verify the intended target SHA, tag availability, CI evidence, and actual runtime evidence before publishing.
 
 ## Issue / PR safety
 
