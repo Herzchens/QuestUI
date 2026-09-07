@@ -302,3 +302,42 @@
     overflow-wrap: anywhere;
     font: 10px/1.45 var(--font-code);
 }
+
+
+/* diagnostic report actions */
+.quest-ui-event-detail-header-actions,
+.quest-ui-event-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.quest-ui-event-copy-report {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.quest-ui-event-copy-report .quest-ui-event-log-icon,
+.quest-ui-event-row-bug .quest-ui-event-log-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.quest-ui-event-row-bug {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.quest-ui-event-row-bug:hover {
+    background: color-mix(in srgb, var(--status-danger) 10%, transparent);
+    color: var(--status-danger);
+}

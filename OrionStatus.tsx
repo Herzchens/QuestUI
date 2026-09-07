@@ -1,5 +1,6 @@
 import type { OrionIntegrationHealth } from "./orionStatusLogic";
 import { ORION_MIN_COMPANION_VERSION } from "./orionStatusLogic";
+import { versionChannelClass } from "./versionChannel";
 
 const HEALTH_COPY: Record<OrionIntegrationHealth["kind"], string> = {
     "not-installed": "Orion Quest Not Installed",
@@ -42,7 +43,7 @@ export function OrionIntegrationStatus({ health }: { health: OrionIntegrationHea
                     : <span className="quest-ui-orion-status-dot" aria-hidden="true" />}
             <span className="quest-ui-orion-status-copy">{HEALTH_COPY[health.kind]}</span>
             {health.installedVersion && (
-                <span className="quest-ui-version-chip quest-ui-version-chip-orion">{health.installedVersion}</span>
+                <span className={`quest-ui-version-chip quest-ui-version-chip-orion ${versionChannelClass(health.installedVersion)}`}>{health.installedVersion}</span>
             )}
         </span>
     );

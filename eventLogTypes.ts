@@ -1,5 +1,6 @@
 export type EventLogSource = "orion" | "questui";
 export type EventLogSeverity = "info" | "success" | "warning" | "error";
+export type EventLogCategory = "quest" | "runtime" | "network" | "diagnostic";
 export type EventLogCaptureSource = "questui" | "console-preview" | "orion-api";
 export type EventLogSort = "newest" | "oldest" | "severity";
 
@@ -27,6 +28,7 @@ export interface EventLogEvent {
     timestamp: number;
     source: EventLogSource;
     severity: EventLogSeverity;
+    category?: EventLogCategory;
     captureSource: EventLogCaptureSource;
     eventCode: string;
     summary: string;
@@ -38,6 +40,7 @@ export interface EventLogQuery {
     query?: string;
     source?: "all" | EventLogSource;
     severity?: "all" | EventLogSeverity;
+    category?: "all" | EventLogCategory;
     sort?: EventLogSort;
     limit?: number;
 }

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Prepared **v1.2.0-beta.2** with expired-history age filtering, accepted-Quest pinning across every sort mode, required-time sorting, persistent Orion/QuestUI Event Log preview storage with a 10 MiB cap compacted back to about 5 MiB, searchable/filterable/day-grouped diagnostics, detailed console context, one-click sanitized bug reports, and stable/pre-release/unknown version-channel styling. Compatible Orion builds that lack future structured event APIs keep the console-preview fallback; only known versions below v4.10.7 remain hard-incompatible.
+
 - Refined the v1.2 Dashboard beta after live UI review: widened the Dashboard, added persistent sorting and a compact Home toolbar action, kept all five Quest status totals visible with a sixth live **Hidden** count distributed evenly across the header, enlarged Orion Quest / QuestUI runtime metadata and version chips to balance the Orb pill, removed provisional per-Quest Orion state badges, stabilized toolbar hover hitboxes, and redesigned the Filter surface with quieter active states and the supplied open-home glyph style.
 
 ## v1.1.2 - 2026-09-06
