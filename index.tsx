@@ -2,6 +2,7 @@ import "./detailStatus.css";
 
 import definePlugin from "@utils/types";
 
+import { startEventLogCapture, stopEventLogCapture } from "./eventLog";
 import { QuestButton, QuestsCount } from "./QuestButton";
 import { QUESTUI_VERSION } from "./version";
 import settings from "./settings";
@@ -17,6 +18,14 @@ export default definePlugin({
         }
     ],
     settings,
+
+    start() {
+        startEventLogCapture();
+    },
+
+    stop() {
+        stopEventLogCapture();
+    },
 
     patches: [
         {

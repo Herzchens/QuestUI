@@ -1,5 +1,6 @@
 import { showToast, Toasts, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
+import { recordQuestUIEvent } from "./eventLog";
 import {
     getOrionControlSnapshot,
     invokeOrionEngineControl,
@@ -61,6 +62,12 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
         if (!action || !userIdAtClick || pending) return;
         if (submitted?.action === action && submitted.userId === userIdAtClick) return;
         setPending(true);
+        void recordQuestUIEvent({
+            severity: "info",
+            eventCode: action === "enroll" ? "QUEST_ACCEPT_REQUESTED" : "QUEST_CLAIM_REQUESTED",
+            summary: action === "enroll" ? "Quest acceptance requested" : "Quest reward claim requested",
+            quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null }
+        });
 
         try {
             const result = action === "enroll"
@@ -74,6 +81,13 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
                 ? null
                 : submittedState(action, userIdAtClick, result.resubmitAfterMs));
             showToast(successMessage(action, quest, result), Toasts.Type.SUCCESS);
+            void recordQuestUIEvent({
+                severity: "success",
+                eventCode: action === "enroll" ? "QUEST_ACCEPT_SUCCEEDED" : "QUEST_CLAIM_SUCCEEDED",
+                summary: action === "enroll" ? "Quest accepted" : "Quest reward claimed",
+                quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
+                detail: { storeConfirmed: result.storeConfirmed, resubmitAfterMs: result.resubmitAfterMs }
+            });
 
             // QuestUI's explicit Accept should start farming even when Orion's independent
             // watchForEnrollments setting is off. Only do this after Discord's store confirmed
@@ -84,6 +98,13 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
                     try {
                         await invokeOrionEngineControl("start");
                     } catch (error) {
+                        void recordQuestUIEvent({
+                            severity: "warning",
+                            eventCode: "ORION_AUTO_START_FAILED",
+                            summary: "Quest accepted, but Orion auto-start failed",
+                            quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
+                            detail: { message: error instanceof Error ? error.message : String(error) }
+                        });
                         showToast(
                             `Quest was accepted, but Orion could not start automatically: ${error instanceof Error ? error.message : "unknown control error"}`,
                             Toasts.Type.FAILURE,
@@ -102,6 +123,17 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
             const message = error instanceof QuestActionError
                 ? error.message
                 : "The Quest action failed unexpectedly.";
+            void recordQuestUIEvent({
+                severity: "error",
+                eventCode: action === "enroll" ? "QUEST_ACCEPT_FAILED" : "QUEST_CLAIM_FAILED",
+                summary: action === "enroll" ? "Quest acceptance failed" : "Quest reward claim failed",
+                quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
+                detail: {
+                    message,
+                    reason: error instanceof QuestActionError && error.cause instanceof Error ? error.cause.message : null,
+                    stack: error instanceof Error ? error.stack ?? null : null
+                }
+            });
             showToast(message, Toasts.Type.FAILURE, { duration: 6000 });
         } finally {
             setPending(false);
