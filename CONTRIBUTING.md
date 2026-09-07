@@ -143,7 +143,7 @@ Discord internals are unstable. Treat every finder/patch as a compatibility boun
 
 Automated tests are necessary but not sufficient. For relevant changes, manual-test actual Discord states and report what was truly observed.
 
-Current beta manual coverage should include:
+Current manual coverage should include:
 
 - title/native Quest icon/Nitro tag without overlap;
 - always-visible Claimed summary count;
@@ -165,17 +165,7 @@ Never describe CI/build output as proof of a live Discord mutation or farming se
 
 Stable source: `main`.
 
-Beta source: `feat/quest-actions-orion-controls`.
-
-The beta Orion-control feature set is supported with:
-
-```text
-Herzchens/discord-quest-completer
-branch: feat/per-quest-pause-resume
-known companion commit: a190386071f91af348068f3044ccd0ddb0fa52ab
-```
-
-Do not present current upstream `nyxxbit/discord-quest-completer` as exposing that pause/resume companion API until it actually does.
+The old `feat/quest-actions-orion-controls` beta branch and the old `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` pairing are historical only. Current Orion integration targets upstream `nyxxbit/discord-quest-completer` **v4.10.7+**, and the maintained coexistence CI gate tracks upstream `main`.
 
 Keep QuestUI and Orion packages/repositories/licenses separate. See `docs/RELEASES.md` before publication.
 

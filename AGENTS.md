@@ -51,7 +51,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `actions.css`, `orion.css`, `reload.css` — action/control styling.
 - `scripts/` — pure regression tests and Stable/Canary reporter checks.
 - `.github/workflows/compatibility.yml` — build/type-check, pure tests, Orion matrix, bundle checks, reporters.
-- `docs/RELEASES.md` — Stable/Beta source pairing and publishing checklist.
+- `docs/RELEASES.md` — release history, current Stable guidance, and publishing checklist.
 
 ## Development environment
 
@@ -193,17 +193,17 @@ Use Vencord's native toast API for explicit success/failure feedback.
 
 Run the full local gate for source changes. For companion changes, also run Orion pause/resume regression tests and build/type-check both plugins together.
 
-Manual checks should cover the affected states. For the current beta this includes header/Nitro layout, one-line summary including always-visible Claimed, `mm:ss` current-only progress coloring, 15-day expiry display, Accept/Claim, global/per-Quest Orion transitions, concurrency, Reload whole rotations, dark/light themes, and plugin replacement/reload safety.
+Manual checks should cover the affected states. For the current Stable surface this includes header/Nitro layout, one-line summary including always-visible Claimed, `mm:ss` current-only progress coloring, 15-day expiry display, Accept/Claim, global/per-Quest Orion transitions, concurrency, Reload whole rotations, dark/light themes, and plugin replacement/reload safety.
 
 Automated checks do not substitute for live Discord evidence. State exactly what was and was not tested.
 
 ## Release discipline
 
 - Stable release source is `main`.
-- Beta source is `feat/quest-actions-orion-controls`.
-- The beta Orion-control feature set must be paired with `Herzchens/discord-quest-completer:feat/per-quest-pause-resume`; do not imply current upstream nyxxbit exposes the same companion API.
+- The old `feat/quest-actions-orion-controls` QuestUI beta and `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` companion fork are historical only; do not target them for current release work.
+- Current Orion integration targets upstream `nyxxbit/discord-quest-completer` v4.10.7+; the maintained coexistence CI gate tracks upstream `main`.
 - Keep QuestUI and Orion source/license boundaries separate in packages.
-- Git tags/releases require maintainer approval. The maintainer has explicitly requested the current Stable/Beta release preparation; still verify target SHAs/tag availability before publishing.
+- Git tags/releases require maintainer approval. Verify the intended target SHA, tag availability, CI evidence, and actual runtime evidence before publishing.
 
 ## Issue / PR safety
 

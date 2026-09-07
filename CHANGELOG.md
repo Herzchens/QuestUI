@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+## v1.1.2 - 2026-09-06
+
 - Fixed #11's remaining intermittent missed-click behavior by separating shortcut refreshes from the Dashboard's 250ms live-progress clock. The top-bar/settings-bar shortcuts and Quest Home counters now use a store-driven `shortcut` snapshot mode that suppresses progress-only/no-op updates and keeps a one-minute fallback for time-based expiry, while Dashboard/Orion live consumers retain the high-frequency source. The controlled Header Bar Popout ownership from the first fix remains in place.
 - Removed the deprecated duplicate OrionQuests `v4.10.7` CI leg and kept the upstream `main` coexistence build/type-check as the maintained companion integration gate.
+
+## v1.1.1 - 2026-09-05
+
 - Hardened Quest shortcut button resolution against the September 2026 Discord header-bar regression reported in #9 by replacing the broad `badgePosition` / `icon` component lookup with the same `HEADER_BAR_BADGE_BOTTOM` + `position:"bottom"` header-button identity currently used by Vencord Toolbox, and synchronized reporter coverage with the new finder.
 
 ## v1.1.0 - 2026-09-01

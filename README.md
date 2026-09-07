@@ -7,11 +7,11 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 ## Release status
 
 > [!IMPORTANT]
-> **v1.1.0 Stable** promotes the current `main` feature set: the full Dashboard, manual Accept/Claim, native Reload, and Orion companion integration.
+> **v1.1.2** is the latest published Stable release. It includes the full v1.1.0 Dashboard/manual-action/Orion feature set plus the v1.1.1 Discord header compatibility fix and the v1.1.2 shortcut interaction hotfix.
 >
-> Orion companion controls target upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. The old QuestUI integration branch and the old `Herzchens/discord-quest-completer` pause/resume fork are no longer required.
+> Orion companion controls target upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. The old QuestUI integration branch and the old `Herzchens/discord-quest-completer` pause/resume fork are historical only.
 >
-> The final live integration pass used QuestUI `5f11470` with **OrionQuests v4.10.8** on Discord Canary. Both plugins built and type-checked cleanly, an already-open Dashboard tracked external `/orion` Start/Pause/Resume/Stop state changes, and a real Quest progressed while the Dashboard remained open.
+> The most recent full live Orion integration evidence remains the v1.1.0 implementation checkpoint `5f11470`, tested with **OrionQuests v4.10.8** on Discord Canary. The v1.1.1/v1.1.2 releases were focused shortcut compatibility hotfixes and do not replace that historical live-test record.
 
 ## Preview
 
@@ -325,7 +325,7 @@ Quest Home counters use:
 
 QuestUI depends on Discord/Vencord internals, so future Discord updates can require matcher or native-lookup maintenance.
 
-The compatibility workflow covers pure manual-action logic, Orion companion/control state, Reload rotation boundaries, clean Vencord build/type-check, upstream Orion coexistence against both the released **v4.10.7** contract and upstream **main**, and Stable/Canary patch reporters.
+The compatibility workflow covers pure manual-action logic, Orion companion/control state, Reload rotation boundaries, clean Vencord build/type-check, the maintained upstream Orion `main` coexistence build/type-check, and Stable/Canary patch reporters.
 
 Automated checks do **not** prove live Discord mutations or a real Orion farming session. Runtime claims should be based on actual client testing.
 
