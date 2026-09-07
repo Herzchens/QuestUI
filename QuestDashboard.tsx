@@ -20,6 +20,7 @@ import {
 import type { NormalizedQuest, QuestTaskType } from "./questData";
 import { normalizeDashboardSortMode, sortDashboardQuests, type DashboardSortMode } from "./dashboardSortLogic";
 import { QUESTUI_VERSION } from "./version";
+import { versionChannelClass } from "./versionChannel";
 import settings from "./settings";
 
 interface DiscordQuestCompletion {
@@ -708,7 +709,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                 </div>
                 <div className="quest-ui-dashboard-meta-row">
                     <OrionIntegrationStatus health={orionHealth} />
-                    <span className="quest-ui-meta-product">QuestUI <span className="quest-ui-version-chip quest-ui-version-chip-questui">{QUESTUI_VERSION}</span></span>
+                    <span className="quest-ui-meta-product">QuestUI <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>{QUESTUI_VERSION}</span></span>
                     <QuestOrbBalance />
                 </div>
             </header>

@@ -1,0 +1,187 @@
+/* Live beta.2 fixes after Discord runtime review. Loaded after eventLogPolish.css. */
+
+/* The outer Event Log is already hosted by Discord's Popout layer. Giving the
+ * panel its own high z-index/isolation hides nested Popouts (notably Sort)
+ * behind the opaque panel, so keep the surface opaque but do not create a
+ * competing stacking context. */
+.quest-ui-event-log-panel.quest-ui-event-log-panel,
+.quest-ui-event-detail.quest-ui-event-detail {
+    isolation: auto !important;
+    z-index: auto !important;
+}
+
+/* Some custom themes restyle generic <strong> elements aggressively. Keep the
+ * Event Log title explicit so it cannot disappear next to the preview chip. */
+.quest-ui-event-log-panel .quest-ui-event-log-header > div > strong {
+    color: #f2f3f5 !important;
+    display: inline-block !important;
+    font-size: 15px;
+    font-weight: 750;
+    line-height: 20px;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Nested Sort Popout: explicit surface/stacking once it is in Discord's layer. */
+.quest-ui-event-sort-menu {
+    position: relative;
+    z-index: 2;
+}
+
+/* Every severity uses the same circular status language. */
+.quest-ui-event-log-panel .quest-ui-event-severity {
+    border: 1px solid transparent;
+    border-radius: 50% !important;
+    box-sizing: border-box;
+    flex: 0 0 18px;
+    height: 18px;
+    line-height: 1;
+    width: 18px;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-info .quest-ui-event-severity {
+    background: color-mix(in srgb, var(--blue-345, #00a8fc) 13%, transparent);
+    border-color: color-mix(in srgb, var(--blue-345, #00a8fc) 56%, transparent);
+    color: var(--blue-345, #00a8fc);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-error .quest-ui-event-severity {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 13%, transparent);
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 58%, transparent);
+    color: var(--status-danger, #f23f42);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-warning .quest-ui-event-severity {
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 13%, transparent);
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 58%, transparent);
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-success .quest-ui-event-severity {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 13%, transparent);
+    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 58%, transparent);
+    color: var(--status-positive, #23a55a);
+}
+
+/* The full scrollbar implementation is shared with Dashboard in scrollbar.css.
+ * Do not add Event Log-specific scrollbar-width/color here: non-auto values can
+ * re-enable native arrow buttons in Windows Chromium/Electron. */
+
+/* Preview wording is intentionally explicit: this surface is still beta. */
+.quest-ui-event-log-panel .quest-ui-event-preview-chip {
+    align-items: center;
+    display: inline-flex;
+    gap: 4px;
+    padding: 3px 6px;
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 48%, transparent);
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 7%, transparent);
+    color: var(--status-warning, #f0b232);
+    font: 650 9px/1.2 var(--font-primary);
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.quest-ui-event-preview-icon {
+    width: 11px;
+    height: 11px;
+    flex: 0 0 11px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.55;
+}
+
+/* Category is a first-class filter and remains readable on narrow Event Log panels. */
+.quest-ui-event-log-panel .quest-ui-event-filter-row {
+    grid-template-columns: 66px minmax(0, 1fr);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-choice.tone-quest.is-selected {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 68%, rgba(255, 255, 255, 0.18));
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 15%, #24262b);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-choice.tone-runtime.is-selected {
+    border-color: color-mix(in srgb, var(--blue-345, #00a8fc) 68%, rgba(255, 255, 255, 0.18));
+    background: color-mix(in srgb, var(--blue-345, #00a8fc) 13%, #24262b);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-choice.tone-network.is-selected {
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 68%, rgba(255, 255, 255, 0.16));
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 12%, #24262b);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-choice.tone-diagnostic.is-selected {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 48%, var(--status-danger, #f23f42));
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 10%, #24262b);
+}
+
+/* Compact row-level category label: useful for older log rows too, because the
+ * renderer infers a category when the persisted event predates this field. */
+.quest-ui-event-category {
+    padding: 1px 4px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font: 700 8.5px/1.4 var(--font-code);
+    letter-spacing: .015em;
+    white-space: nowrap;
+}
+
+.quest-ui-event-category.is-quest {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 36%, transparent);
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 8%, transparent);
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-event-category.is-runtime {
+    border-color: color-mix(in srgb, var(--blue-345, #00a8fc) 36%, transparent);
+    background: color-mix(in srgb, var(--blue-345, #00a8fc) 7%, transparent);
+    color: var(--blue-345, #00a8fc);
+}
+
+.quest-ui-event-category.is-network {
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 38%, transparent);
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 7%, transparent);
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-event-category.is-diagnostic {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 30%, transparent);
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 6%, transparent);
+    color: color-mix(in srgb, var(--brand-360, #949cf7) 72%, #f2f3f5);
+}
+
+/* Semantic highlighting is text-only; no raw HTML injection is used. */
+.quest-ui-event-semantic {
+    font-weight: 650;
+}
+
+.quest-ui-event-semantic.is-network {
+    color: var(--blue-345, #00a8fc);
+}
+
+.quest-ui-event-semantic.is-runtime {
+    color: color-mix(in srgb, var(--blue-345, #00a8fc) 70%, #f2f3f5);
+}
+
+.quest-ui-event-semantic.is-quest {
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-event-semantic.is-diagnostic {
+    color: color-mix(in srgb, var(--brand-360, #949cf7) 70%, #f2f3f5);
+}
+
+.quest-ui-event-semantic.is-danger {
+    color: var(--status-danger, #f23f42);
+}
+
+.quest-ui-event-semantic.is-warning {
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-event-semantic.is-success {
+    color: var(--status-positive, #23a55a);
+}

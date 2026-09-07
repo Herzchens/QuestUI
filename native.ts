@@ -2,6 +2,8 @@ import { app, IpcMainInvokeEvent, shell } from "electron";
 import { appendFile, mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
 import { join } from "path";
 
+import { inferEventCategory } from "./eventLogLogic";
+
 const MAX_LOG_BYTES = 10 * 1024 * 1024;
 const COMPACT_TO_BYTES = 5 * 1024 * 1024;
 const MAX_EVENT_BYTES = 256 * 1024;
@@ -78,16 +80,20 @@ export async function queryEvents(_: IpcMainInvokeEvent, options: any = {}): Pro
     const query = typeof options.query === "string" ? options.query.trim().toLowerCase() : "";
     const source = options.source === "orion" || options.source === "questui" ? options.source : "all";
     const severity = ["info", "success", "warning", "error"].includes(options.severity) ? options.severity : "all";
+    const category = ["quest", "runtime", "network", "diagnostic"].includes(options.category) ? options.category : "all";
     const sort = options.sort === "oldest" || options.sort === "severity" ? options.sort : "newest";
     const limit = Math.max(1, Math.min(5000, Number(options.limit) || 200));
 
     let events = text.split(/\r?\n/).filter(Boolean).map(safeParse).filter(Boolean);
+    events = events.map(event => ({ ...event, category: inferEventCategory(event) }));
     if (source !== "all") events = events.filter(event => event.source === source);
     if (severity !== "all") events = events.filter(event => event.severity === severity);
+    if (category !== "all") events = events.filter(event => event.category === category);
     if (query) {
         events = events.filter(event => JSON.stringify({
             source: event.source,
             severity: event.severity,
+            category: event.category,
             eventCode: event.eventCode,
             summary: event.summary,
             quest: event.quest,

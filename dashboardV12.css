@@ -851,3 +851,23 @@
     color: var(--text-normal);
     font: inherit;
 }
+
+
+/* version channel semantics */
+.quest-ui-version-chip.is-stable {
+    border-color: color-mix(in srgb, var(--blue-345, #5c9ded) 55%, transparent);
+    background: color-mix(in srgb, var(--blue-345, #5c9ded) 12%, transparent);
+    color: var(--blue-330, #79b5f8);
+}
+
+.quest-ui-version-chip.is-prerelease {
+    border-color: color-mix(in srgb, var(--status-warning) 55%, transparent);
+    background: color-mix(in srgb, var(--status-warning) 11%, transparent);
+    color: var(--status-warning);
+}
+
+.quest-ui-version-chip.is-unknown {
+    border-color: var(--background-modifier-accent);
+    background: var(--background-modifier-hover);
+    color: var(--text-muted);
+}

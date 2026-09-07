@@ -1,4 +1,6 @@
 import "./detailStatus.css";
+import "./eventLogPolish.css";
+import "./eventLogRuntimeFix.css";
 
 import definePlugin from "@utils/types";
 

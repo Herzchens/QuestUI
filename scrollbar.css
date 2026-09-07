@@ -1,14 +1,45 @@
-.quest-ui-dashboard-content {
-    /* Keep Chromium/Electron on the WebKit scrollbar path below. Non-auto
-     * scrollbar-width/color can take precedence and re-enable native arrow
-     * buttons on some Windows builds. */
-    scrollbar-color: auto;
-    scrollbar-width: auto;
+/* Canonical QuestUI scrollbar surface.
+ *
+ * Dashboard and Event Log intentionally share this exact rule set. Chromium/Electron
+ * can re-enable native arrow buttons when scrollbar-width/color are non-auto on
+ * Windows, so keep those properties on the WebKit path and own every WebKit state.
+ */
+
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+) {
+    scrollbar-color: auto !important;
+    scrollbar-width: auto !important;
 }
 
-/* Own the thumb states in the last-loaded stylesheet so Discord/theme hover rules
- * cannot make the draggable thumb transparent while it is hovered or active. */
-.quest-ui-dashboard-content::-webkit-scrollbar-thumb {
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-thumb {
     -webkit-appearance: none !important;
     appearance: none !important;
     background: var(--interactive-muted, #4e5058) !important;
@@ -16,11 +47,17 @@
     background-clip: padding-box !important;
     border: 2px solid transparent !important;
     border-radius: 999px !important;
+    min-height: 34px !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
 
-.quest-ui-dashboard-content::-webkit-scrollbar-thumb:hover {
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-thumb:hover {
     background: var(--interactive-normal, #b5bac1) !important;
     background-image: none !important;
     background-clip: padding-box !important;
@@ -28,7 +65,12 @@
     visibility: visible !important;
 }
 
-.quest-ui-dashboard-content::-webkit-scrollbar-thumb:active {
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-thumb:active {
     background: var(--interactive-active, #dbdee1) !important;
     background-image: none !important;
     background-clip: padding-box !important;
@@ -36,16 +78,117 @@
     visibility: visible !important;
 }
 
-.quest-ui-dashboard-content::-webkit-scrollbar-button,
-.quest-ui-dashboard-content::-webkit-scrollbar-button:single-button,
-.quest-ui-dashboard-content::-webkit-scrollbar-button:double-button,
-.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical,
-.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:start,
-.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:end,
-.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:start:decrement,
-.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:start:increment,
-.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:end:decrement,
-.quest-ui-dashboard-content::-webkit-scrollbar-button:vertical:end:increment {
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
+
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:single-button,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:double-button,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:vertical,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:horizontal,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:vertical:start,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:vertical:end,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:horizontal:start,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:horizontal:end,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:vertical:start:decrement,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:vertical:start:increment,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:vertical:end:decrement,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:vertical:end:increment,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:horizontal:start:decrement,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:horizontal:start:increment,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:horizontal:end:decrement,
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-scrollbar-button:horizontal:end:increment {
     -webkit-appearance: none !important;
     appearance: none !important;
     background: none !important;
@@ -55,7 +198,18 @@
     block-size: 0 !important;
     inline-size: 0 !important;
     height: 0 !important;
+    max-height: 0 !important;
+    max-width: 0 !important;
     min-height: 0 !important;
     min-width: 0 !important;
     width: 0 !important;
+}
+
+:is(
+    .quest-ui-dashboard-content,
+    .quest-ui-event-log-panel.quest-ui-event-log-panel .quest-ui-event-list,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-detail.quest-ui-event-detail pre
+)::-webkit-resizer {
+    display: none !important;
 }

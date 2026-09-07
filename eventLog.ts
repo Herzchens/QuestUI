@@ -1,7 +1,22 @@
 import type { PluginNative } from "@utils/types";
 
-import { classifyConsoleEvent, consoleArgsToText, consoleEventSource, sanitizeEventText, severityRank } from "./eventLogLogic";
-import type { EventLogEvent, EventLogQuery, EventLogQueryResult, EventLogSource, EventLogSeverity } from "./eventLogTypes";
+import {
+    classifyConsoleEvent,
+    consoleArgsToText,
+    consoleEventSource,
+    inferEventCategory,
+    sanitizeEventText,
+    severityRank
+} from "./eventLogLogic";
+import type {
+    EventLogCategory,
+    EventLogEvent,
+    EventLogQuery,
+    EventLogQueryResult,
+    EventLogSource,
+    EventLogSeverity
+} from "./eventLogTypes";
+import { getOrionIntegrationHealth } from "./orionIntegration";
 
 const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>
@@ -10,7 +25,10 @@ const Native = !IS_WEB
 const memoryEvents: EventLogEvent[] = [];
 const listeners = new Set<() => void>();
 const consoleLevels = ["log", "info", "warn", "error", "debug"] as const;
-const originals = new Map<typeof consoleLevels[number], (...args: any[]) => void>();
+type ConsoleLevel = typeof consoleLevels[number];
+type ConsoleMethod = (...args: any[]) => void;
+const originals = new Map<ConsoleLevel, ConsoleMethod>();
+const wrappers = new Map<ConsoleLevel, ConsoleMethod>();
 let captureStarted = false;
 
 function eventId(): string {
@@ -35,21 +53,26 @@ function sanitizeDetail(detail: Record<string, unknown> | null | undefined): Rec
 export async function recordQuestUIEvent(input: {
     source?: EventLogSource;
     severity: EventLogSeverity;
+    category?: EventLogCategory;
     eventCode: string;
     summary: string;
     quest?: { id?: string | null; name?: string | null; taskType?: string | null; } | null;
     detail?: Record<string, unknown> | null;
     captureSource?: EventLogEvent["captureSource"];
 }): Promise<EventLogEvent> {
+    const source = input.source ?? "questui";
+    const eventCode = sanitizeEventText(input.eventCode, 120);
+    const summary = sanitizeEventText(input.summary, 240);
     const event: EventLogEvent = {
         schemaVersion: 1,
         id: eventId(),
         timestamp: Date.now(),
-        source: input.source ?? "questui",
+        source,
         severity: input.severity,
+        category: input.category ?? inferEventCategory({ source, eventCode, summary }),
         captureSource: input.captureSource ?? "questui",
-        eventCode: sanitizeEventText(input.eventCode, 120),
-        summary: sanitizeEventText(input.summary, 240),
+        eventCode,
+        summary,
         quest: input.quest ? {
             id: input.quest.id ? sanitizeEventText(input.quest.id, 120) : null,
             name: input.quest.name ? sanitizeEventText(input.quest.name, 240) : null,
@@ -72,12 +95,22 @@ function memoryQuery(options: EventLogQuery): EventLogQueryResult {
     const query = options.query?.trim().toLowerCase() ?? "";
     const source = options.source ?? "all";
     const severity = options.severity ?? "all";
+    const category = options.category ?? "all";
     const sort = options.sort ?? "newest";
     const limit = Math.max(1, Math.min(5000, options.limit ?? 200));
     let events = [...memoryEvents];
     if (source !== "all") events = events.filter(event => event.source === source);
     if (severity !== "all") events = events.filter(event => event.severity === severity);
-    if (query) events = events.filter(event => JSON.stringify(event).toLowerCase().includes(query));
+    if (category !== "all") events = events.filter(event => inferEventCategory(event) === category);
+    if (query) events = events.filter(event => JSON.stringify({
+        source: event.source,
+        severity: event.severity,
+        category: inferEventCategory(event),
+        eventCode: event.eventCode,
+        summary: event.summary,
+        quest: event.quest,
+        detail: event.detail
+    }).toLowerCase().includes(query));
     if (sort === "oldest") events.sort((a, b) => a.timestamp - b.timestamp);
     else if (sort === "severity") events.sort((a, b) => severityRank(a.severity) - severityRank(b.severity) || b.timestamp - a.timestamp);
     else events.sort((a, b) => b.timestamp - a.timestamp);
@@ -114,14 +147,21 @@ export function subscribeEventLog(listener: () => void): () => void {
     return () => listeners.delete(listener);
 }
 
-function captureConsole(level: typeof consoleLevels[number], args: unknown[]): void {
+function captureConsole(level: ConsoleLevel, args: unknown[]): void {
     const source = consoleEventSource(args);
     if (!source) return;
+    // v4.10.7 remains the only hard floor. Future structured APIs are capabilities, not a new
+    // minimum: compatible older Orion builds keep this console-preview fallback.
+    if (source === "orion") {
+        const health = getOrionIntegrationHealth(true);
+        if (health.kind === "version-incompatible" || health.kind === "not-installed" || health.kind === "disabled") return;
+    }
     const text = consoleArgsToText(args);
     const classified = classifyConsoleEvent(source, level, text);
     void recordQuestUIEvent({
         source,
         severity: classified.severity,
+        category: classified.category,
         eventCode: classified.eventCode,
         summary: classified.summary,
         quest: classified.questName ? { name: classified.questName } : null,
@@ -135,15 +175,22 @@ export function startEventLogCapture(): void {
     captureStarted = true;
 
     for (const level of consoleLevels) {
-        const original = console[level].bind(console) as (...args: any[]) => void;
-        originals.set(level, original);
-        (console as any)[level] = (...args: any[]) => {
-            original(...args);
+        const original = console[level] as ConsoleMethod;
+        const wrapper: ConsoleMethod = (...args: any[]) => {
+            original.apply(console, args);
             try { captureConsole(level, args); } catch { }
         };
+        originals.set(level, original);
+        wrappers.set(level, wrapper);
+        (console as any)[level] = wrapper;
     }
 
-    void recordQuestUIEvent({ severity: "info", eventCode: "QUESTUI_EVENT_LOG_STARTED", summary: "Event Log preview started" });
+    void recordQuestUIEvent({
+        severity: "info",
+        category: "diagnostic",
+        eventCode: "QUESTUI_EVENT_LOG_STARTED",
+        summary: "Event Log preview started"
+    });
 }
 
 export function stopEventLogCapture(): void {
@@ -151,7 +198,10 @@ export function stopEventLogCapture(): void {
     captureStarted = false;
     for (const level of consoleLevels) {
         const original = originals.get(level);
-        if (original) (console as any)[level] = original;
+        const wrapper = wrappers.get(level);
+        // Do not clobber a console wrapper installed by another plugin after QuestUI started.
+        if (original && wrapper && (console as any)[level] === wrapper) (console as any)[level] = original;
     }
     originals.clear();
+    wrappers.clear();
 }
