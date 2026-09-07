@@ -7,11 +7,11 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 ## Release status
 
 > [!IMPORTANT]
-> **v1.1.2** is the latest published Stable release. It includes the full v1.1.0 Dashboard/manual-action/Orion feature set plus the v1.1.1 Discord header compatibility fix and the v1.1.2 shortcut interaction hotfix.
+> **v1.2.0** is the current Stable release. It expands the Dashboard, adds persistent sorting and expired-history controls, native Orb balance/runtime metadata, and the Event Log **Preview Feature** while preserving QuestUI's explicit-click/manual-action boundary.
 >
-> Orion companion controls target upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. The old QuestUI integration branch and the old `Herzchens/discord-quest-completer` pause/resume fork are historical only.
+> Orion companion controls require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Known versions below v4.10.7 are incompatible. Future optional Orion capabilities are detected independently: compatible builds that do not expose a newer structured-event API keep the Event Log console-preview fallback instead of losing existing integration.
 >
-> The most recent full live Orion integration evidence remains the v1.1.0 implementation checkpoint `5f11470`, tested with **OrionQuests v4.10.8** on Discord Canary. The v1.1.1/v1.1.2 releases were focused shortcut compatibility hotfixes and do not replace that historical live-test record.
+> v1.2.0 received maintainer live UI/runtime review for the Dashboard, filters/sorting, runtime metadata and Event Log surfaces. The most recent separately documented full Orion farming/integration pass remains the v1.1.0 implementation checkpoint `5f11470` with **OrionQuests v4.10.8** on Discord Canary; automated CI is not presented as a replacement for that historical live session.
 
 ## Preview
 
@@ -23,7 +23,7 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 
 </p>
 
-The captures above are real Discord runtime screenshots supplied by the maintainer. They are documentation assets only and are not bundled into the runtime UI.
+The captures above are real Discord runtime screenshots supplied by the maintainer. They document the earlier Dashboard surface and remain documentation assets only; v1.2.0 adds the wider metadata/toolbar layout and Event Log described below.
 
 ## Features
 
@@ -31,7 +31,15 @@ The captures above are real Discord runtime screenshots supplied by the maintain
 
 - Optional Quest shortcut next to mute, deafen, and settings
 
-- **Dashboard Mode** with a live mini Quest dashboard, enabled by default
+- **Dashboard Mode** with a wider live Quest dashboard, enabled by default
+
+- Six always-visible status totals: Available, Ready, In Progress, Claimed, Expired, and Hidden
+
+- Persistent Dashboard sorting, expired-history age filtering, and a compact Home action
+
+- Native current Orb balance plus Orion Quest / QuestUI runtime version metadata
+
+- Persistent **Event Log — Preview Feature** with searchable/filterable diagnostics, per-event details, and sanitized one-click bug reports
 
 - Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
 
@@ -165,29 +173,37 @@ If the current Discord user has an active Nitro `premiumType`, QuestUI shows a c
 
 The title uses a seamless right-to-left color sweep. `prefers-reduced-motion` disables the motion and keeps the title readable.
 
-The summary row is independent of card filters where appropriate:
-
-- **Yellow** — In Progress
-
-- **Green** — Ready to Claim
+The summary row always renders all six counters, including zero values:
 
 - **Red** — Available
 
+- **Green** — Ready
+
+- **Yellow** — In Progress
+
 - **Blue / Blurple** — Claimed
 
-The Claimed count is always shown and is calculated from the full live Quest snapshot, even when Claimed cards are hidden by the current filter.
+- **Gray** — Expired
 
-### Filters
+- **Purple** — Hidden
+
+The five Quest-status counts come from the full live Discord Quest snapshot. **Hidden** is the number of Quest cards currently removed by Dashboard filters, including expired-age filtering.
+
+### Filters and sorting
 
 The Filter popout supports:
 
-- Status: Available, In Progress, Ready to Claim, Claimed, Expired
+- Status: Available, Ready, In Progress, Claimed, Expired
+
+- Expired age (when Expired is enabled): 7d, 15d, 30d, 90d, All, or a custom number of days
 
 - Reward: All rewards, Orbs only, Non-Orb rewards
 
 - Quest type: Play, Stream, Video, Activity, Other / Unknown
 
-**Recommended** shows Available, In Progress, and Ready to Claim while hiding Claimed and Expired cards. **Clear all** enables all supported statuses and categories.
+**Recommended** shows Available, In Progress, and Ready while hiding Claimed and Expired cards and restores the 15-day expired-history default. **Clear all** enables every supported status/category and removes the expired-history age limit.
+
+The Sort popout supports **Recommended**, **Expiring Soon**, **Highest Orb Reward**, **Shortest Required Time**, **Longest Required Time**, **Name A → Z**, and **Name Z → A**. In Progress and Ready Quests are an active accepted bucket and stay above Available, Claimed, and Expired history under every sort mode. Required-time sorting compares normalized timed-task seconds; achievement/count objectives are not misread as durations.
 
 ### Live progress
 
@@ -203,7 +219,13 @@ Only the **current elapsed value** (`03:02`) receives completion-stage color. Th
 
 The color progression is semantic progress, not urgency: muted at the beginning, then Discord brand tones, then positive green as completion approaches.
 
-Dashboard expiry copy is shown only when the Quest expiry is within **15 days** of the current time. This is presentation-only; the underlying expiry/status data is not changed.
+Dashboard expiry copy is shown whenever Discord provides a valid Quest expiry. The separate **Expired Age** filter controls how much expired history is visible; the recommended/default history window is 15 days and **All** removes that limit.
+
+### Runtime metadata and Orb balance
+
+The metadata row shows Orion integration health/version, the current QuestUI version, and the current native Orb balance. Stable releases, prerelease/dev builds, and unknown version strings use different version-chip treatments so build channel and integration health are not conflated.
+
+Orb balance comes from Discord's `VirtualCurrencyStore`; QuestUI does not derive the balance from Quest rewards, poll a custom endpoint, or optimistically increment it. A real zero balance remains visible as `0`.
 
 ### Rewards
 
@@ -252,7 +274,7 @@ QuestUI treats Orion's snapshot/subscription surface as the source of truth rath
 Global header order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Filter
+Smart Start/Pause/Resume → Stop → Reload → Event Log → Sort → Filter → Home
 ```
 
 State rules:
@@ -284,6 +306,18 @@ Per-Quest UI after confirmed enrollment:
 - completed → Orion control disappears and Claim Reward becomes available
 
 QuestUI does not import Orion farming internals and does not fabricate a Discord channel to invoke slash-command callbacks.
+
+## Event Log — Preview Feature
+
+The flask-labelled Event Log is a diagnostic preview for **QuestUI and Orion only**; it does not ingest Discord's general console spam. Events are grouped by day and can be searched, filtered by Source / Level / Category, and sorted by newest, oldest, or errors first. Every row has **View details**, while warning/error rows also expose the bug-report shortcut.
+
+On desktop Vencord builds, QuestUI persists one sanitized `QuestUI/events.jsonl` file in Vencord's data directory. The file may grow to 10 MiB; after crossing that threshold QuestUI discards the oldest complete records and compacts the file back to about 5 MiB. **Open file** reveals it and **Clear log** deletes its saved history.
+
+The current Orion adapter is best-effort console capture. It recognizes Orion/QuestUI output, preserves the original DevTools console call, sanitizes sensitive values before persistence, and normalizes known Orion families such as Cycle, Task, Enroll, Claim, Network/heartbeat, Achievement/Bypass, Startup/System, and Patcher diagnostics. Transient retry/fallback messages are not automatically presented as terminal failures.
+
+**Copy report** produces a sanitized diagnostic report with the selected event, related context, Quest identifiers when available, QuestUI/Orion versions, Orion health/capture source, Discord release channel/client version, Vencord version/commit, platform, and runtime information. Review a copied report before posting it publicly.
+
+Future Orion structured-event APIs are capability-detected. A compatible Orion build that does not expose those future APIs continues using the console-preview fallback; only known Orion versions below v4.10.7 are hard-incompatible.
 
 ## Native Quest Reload
 
@@ -325,7 +359,7 @@ Quest Home counters use:
 
 QuestUI depends on Discord/Vencord internals, so future Discord updates can require matcher or native-lookup maintenance.
 
-The compatibility workflow covers pure manual-action logic, Orion companion/control state, Reload rotation boundaries, clean Vencord build/type-check, the maintained upstream Orion `main` coexistence build/type-check, and Stable/Canary patch reporters.
+The compatibility workflow covers manual-action logic, Orion companion/control and health/version state, Reload rotation boundaries, shortcut snapshot behavior, Orb balance, Dashboard sorting, Event Log classification/query logic, version-channel classification, clean Vencord build/type-check, the maintained upstream Orion `main` coexistence build/type-check, and Stable/Canary patch reporters.
 
 Automated checks do **not** prove live Discord mutations or a real Orion farming session. Runtime claims should be based on actual client testing.
 

@@ -114,7 +114,7 @@ jobs:
           set -euo pipefail
           required_markers=(
             'QuestUI'
-            'Adds standalone Discord Quest shortcuts'
+            'Adds Discord Quest shortcuts'
             'Quest Dashboard'
             '/quest-home'
             'QUESTS_ENROLL_BEGIN'
@@ -125,7 +125,7 @@ jobs:
             'Quest list refreshed.'
             'OrionQuests'
             'Orion Quest Version Incompatible'
-            'v1.2.0-beta.2'
+            'v1.2.0'
             'Highest Orb Reward'
             'Shortest Required Time'
             'Event Log'

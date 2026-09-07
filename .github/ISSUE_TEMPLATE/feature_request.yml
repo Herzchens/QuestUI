@@ -39,9 +39,12 @@ body:
       options:
         - User interface
         - Accessibility
+        - Dashboard filters or sorting
         - Quest status display
+        - Orb balance or runtime metadata
         - Manual Quest actions
         - Orion integration
+        - Event Log or diagnostics
         - Discord or Vencord compatibility
         - Installation or updates
         - Documentation

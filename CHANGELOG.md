@@ -2,9 +2,18 @@
 
 ## Unreleased
 
-- Prepared **v1.2.0-beta.2** with expired-history age filtering, accepted-Quest pinning across every sort mode, required-time sorting, persistent Orion/QuestUI Event Log preview storage with a 10 MiB cap compacted back to about 5 MiB, searchable/filterable/day-grouped diagnostics, detailed console context, one-click sanitized bug reports, and stable/pre-release/unknown version-channel styling. Compatible Orion builds that lack future structured event APIs keep the console-preview fallback; only known versions below v4.10.7 remain hard-incompatible.
+## v1.2.0 - 2026-09-07
 
-- Refined the v1.2 Dashboard beta after live UI review: widened the Dashboard, added persistent sorting and a compact Home toolbar action, kept all five Quest status totals visible with a sixth live **Hidden** count distributed evenly across the header, enlarged Orion Quest / QuestUI runtime metadata and version chips to balance the Orb pill, removed provisional per-Quest Orion state badges, stabilized toolbar hover hitboxes, and redesigned the Filter surface with quieter active states and the supplied open-home glyph style.
+- Expanded the Quest Dashboard for the wider v1.2 layout, added the compact Home action, persistent Sort and Filter controls, stable hover hitboxes, and a six-item one-line summary that always shows **Available**, **Ready**, **In Progress**, **Claimed**, **Expired**, and the live **Hidden** count, including zero values.
+- Added Dashboard sorting by **Recommended**, **Expiring Soon**, **Highest Orb Reward**, **Shortest Required Time**, **Longest Required Time**, and name A→Z / Z→A. Accepted active Quests (In Progress and Ready) remain pinned above available/history cards regardless of the selected sort mode. Timed sorts compare normalized required seconds and do not treat achievement/count targets as durations.
+- Reworked expired-history handling: Quest expiry text now remains visible whenever Discord provides a valid expiry, while the **Expired Age** filter controls which expired cards are shown with 7d, 15d, 30d, 90d, All, and custom-day choices. The recommended filter keeps the 15-day history default.
+- Added the current native **Orb balance** to the Dashboard metadata row without polling, optimistic increments, or reward summation; zero remains a real visible balance and Discord's VirtualCurrencyStore remains authoritative.
+- Added Orion Quest and QuestUI runtime version metadata with separate Stable / prerelease / unknown channel styling, plus explicit Orion health states. Known Orion versions below **v4.10.7** remain hard-incompatible; compatible older builds continue using available legacy surfaces when future optional capabilities are absent.
+- Added the persistent **Event Log — Preview Feature** for QuestUI and Orion diagnostics. It stores one sanitized `events.jsonl` file, caps it at 10 MiB, compacts old history back to about 5 MiB, groups events by day, supports Search plus Source / Level / Category filters and Newest / Oldest / Errors-first sorting, and provides per-event **View details**.
+- Added semantic Orion console classification for runtime cycles, task/enrollment/claim lifecycle, heartbeat/network retries, achievement/bypass fallback, startup/system and patcher diagnostics. The Viewer highlights meaningful status tokens without treating every transient failure/retry as terminal.
+- Added one-click sanitized diagnostic reports from warning/error events and detail view, including relevant Quest/error context plus QuestUI, Orion, Discord channel/client, Vencord, platform and runtime information. The Preview console adapter only captures recognized QuestUI/Orion output and preserves normal DevTools logging.
+- Unified Event Log scrolling with the Dashboard's canonical Electron/WebKit scrollbar implementation, including identical thumb states and complete scrollbar-arrow suppression.
+- Expanded compatibility coverage with Orb, Dashboard sort, Event Log and version-channel logic tests while retaining Vencord build/type-check, upstream Orion `main` coexistence, and Stable/Canary reporter gates.
 
 ## v1.1.2 - 2026-09-06
 

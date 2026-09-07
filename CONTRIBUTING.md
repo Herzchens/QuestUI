@@ -6,7 +6,7 @@ Read `README.md`, `AGENTS.md`, `CHANGELOG.md`, and `docs/RELEASES.md` before cha
 
 ## Scope
 
-QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-clicked native Accept/Claim actions, request Discord's native Quest-list refresh, and optionally delegate controls to a separately installed compatible OrionQuests companion.
+QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-clicked native Accept/Claim actions, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide sanitized QuestUI/Orion diagnostics, and optionally delegate controls to a separately installed compatible OrionQuests companion.
 
 Do not turn QuestUI into a Quest farming engine. Do not add automatic enrollment/claim, progress spoofing, heartbeats, targeted quest execution, challenge bypasses, or private Orion farming imports.
 
@@ -27,6 +27,11 @@ pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestShortcutLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testOrbBalanceLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testDashboardSortLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
 pnpm build
 pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
@@ -76,7 +81,7 @@ A compatible Orion build owns the exact registered `orion` command and exposes `
 Global UI order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Filter
+Smart Start/Pause/Resume → Stop → Reload → Event Log → Sort → Filter → Home
 ```
 
 State rules:
@@ -111,11 +116,22 @@ Keep the current presentation contracts unless a change explicitly targets them:
 - eligible Nitro accounts are determined from the current user's `premiumType`;
 - use Discord Nitro profile-badge artwork when hydrated, otherwise keep the Nitro tag with the existing fallback glyph;
 - title color sweep is a seamless linear right-to-left loop with no reset frame;
-- summary remains one line below tools;
-- In Progress / Ready to Claim / Available follow the current card scope;
-- **Claimed is always shown** and counts the full live Quest snapshot even when Claimed cards are filtered out;
+- summary remains one line below tools and always renders Available / Ready / In Progress / Claimed / Expired / Hidden, including zero values;
+- the five status counts come from the full live Quest snapshot and Hidden reflects Dashboard filtering;
+- In Progress / Ready are the accepted-active bucket and stay above Available/Claimed/Expired under every sort mode;
+- required-time sorting compares normalized timed-task seconds and excludes achievement/count targets;
 - timed progress displays `mm:ss / mm:ss` and only the current elapsed value receives completion-stage color;
-- Dashboard expiry copy appears only inside the 15-day presentation window; underlying Quest status/expiry is never altered.
+- valid expiry copy stays visible; expired-history visibility is controlled separately by the age filter (15-day recommended default, All for unlimited history).
+
+## Event Log Preview
+
+- Capture only QuestUI and confidently recognized Orion console output; never collect Discord/general plugin console spam.
+- Preserve the original console call and do not clobber wrappers installed by another plugin after QuestUI starts.
+- Sanitize secrets before writing to disk or copying a diagnostic report.
+- Persist one `events.jsonl` file; compact from over 10 MiB to about 5 MiB by dropping oldest complete records.
+- Keep Source / Level / Category filtering, search, day grouping, newest/oldest/errors-first sorting, **View details**, Open file and Clear log behavior testable.
+- Classify Orion messages by namespace/context rather than naive keywords so retry/fallback/recovery logs are not mislabeled as terminal failures.
+- Orion v4.10.7 remains the hard minimum. Future structured-event/queue APIs are optional capabilities; compatible older builds keep fallback behavior.
 
 ## Quest Reload
 
@@ -146,9 +162,13 @@ Automated tests are necessary but not sufficient. For relevant changes, manual-t
 Current manual coverage should include:
 
 - title/native Quest icon/Nitro tag without overlap;
-- always-visible Claimed summary count;
+- six-item summary including zero/Hidden counts and even spacing;
+- Sort/Filter/Home controls and custom popouts;
+- expired-age 7/15/30/90/All/custom filtering plus expiry copy outside 15 days;
+- accepted-Quest pinning and required-time sorting;
+- native Orb balance including zero and runtime version/health chips;
+- Event Log persistence/search/source/level/category/sort/day grouping/detail/report/open/clear flows and scrollbar behavior;
 - `mm:ss` elapsed/target formatting with current-only progress color;
-- 15-day expiry presentation boundary;
 - Accept → `Processing…` → confirmed enrollment;
 - Claim flow;
 - global Start/Pause/Resume/Stop state transitions;
@@ -156,7 +176,7 @@ Current manual coverage should include:
 - concurrency queue pressure;
 - all-Quest-finished disabled state;
 - Reload whole-rotation behavior and new Quest appearance without Ctrl+R;
-- Orion absent/disabled/replaced/reloaded safety;
+- Orion absent/disabled/replaced/reloaded safety and fallback compatibility;
 - dark/light/custom theme readability.
 
 Never describe CI/build output as proof of a live Discord mutation or farming session.
@@ -165,7 +185,7 @@ Never describe CI/build output as proof of a live Discord mutation or farming se
 
 Stable source: `main`.
 
-The old `feat/quest-actions-orion-controls` beta branch and the old `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` pairing are historical only. Current Orion integration targets upstream `nyxxbit/discord-quest-completer` **v4.10.7+**, and the maintained coexistence CI gate tracks upstream `main`.
+The old `feat/quest-actions-orion-controls` beta branch and the old `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` pairing are historical only. Current Orion integration targets upstream `nyxxbit/discord-quest-completer` **v4.10.7+**, and the maintained coexistence CI gate tracks upstream `main`. Optional future companion capabilities must be feature-detected rather than silently raising the minimum supported version.
 
 Keep QuestUI and Orion packages/repositories/licenses separate. See `docs/RELEASES.md` before publication.
 
