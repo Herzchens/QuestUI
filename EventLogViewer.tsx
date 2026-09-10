@@ -42,15 +42,6 @@ function BugLogIcon() {
     );
 }
 
-function FlaskIcon() {
-    return (
-        <svg className="quest-ui-event-preview-icon" viewBox="0 0 20 20" aria-hidden="true">
-            <path d="M7 2.8h6M8.2 2.8v4.1l-4.4 7.3A1.7 1.7 0 0 0 5.25 16.8h9.5a1.7 1.7 0 0 0 1.45-2.6l-4.4-7.3V2.8" />
-            <path d="M6.2 12h7.6" />
-        </svg>
-    );
-}
-
 function dayLabel(timestamp: number): string {
     const date = new Date(timestamp);
     const today = new Date();
@@ -87,6 +78,12 @@ function severityGlyph(severity: EventLogSeverity): string {
     if (severity === "warning") return "!";
     if (severity === "success") return "✓";
     return "i";
+}
+
+function captureSourceLabel(event: EventLogEvent): string {
+    if (event.captureSource === "console-preview") return "Console fallback";
+    if (event.captureSource === "orion-api") return "Orion structured API";
+    return "QuestUI";
 }
 
 function formatStorageBytes(bytes: number): string {
@@ -197,7 +194,7 @@ function EventDetail({ event, availableEvents, onBack }: { event: EventLogEvent;
                 <span>Event code</span><code>{event.eventCode}</code>
                 <span>Category</span><strong>{categoryLabel(category)}</strong>
                 <span>Time</span><strong>{new Date(event.timestamp).toLocaleString()}</strong>
-                <span>Capture</span><strong>{event.captureSource}</strong>
+                <span>Capture</span><strong>{captureSourceLabel(event)}</strong>
                 <span>Account</span><strong>{legacy ? "Legacy · unscoped" : "Current account"}</strong>
                 {event.quest?.name && <><span>Quest</span><strong>{event.quest.name}</strong></>}
                 {event.quest?.id && <><span>Quest ID</span><code>{event.quest.id}</code></>}
@@ -479,11 +476,10 @@ function EventLogPanel() {
     };
 
     return (
-        <div className="quest-ui-event-log-panel" role="dialog" aria-label="QuestUI Event Log preview">
+        <div className="quest-ui-event-log-panel" role="dialog" aria-label="QuestUI Event Log">
             <div className="quest-ui-event-log-header">
                 <div>
                     <strong>Event Log</strong>
-                    <span className="quest-ui-event-preview-chip"><FlaskIcon /><span>Preview Feature</span></span>
                 </div>
                 <div className="quest-ui-event-log-header-meta">
                     {newEventsAvailable && <button type="button" className="quest-ui-event-new-events" onClick={() => setRefreshNonce(value => value + 1)}>New events</button>}
@@ -576,7 +572,7 @@ export function EventLogButton() {
     return (
         <Popout position="bottom" align="right" animation={Popout.Animation.NONE} shouldShow={open} onRequestClose={() => setOpen(false)} targetElementRef={buttonRef} renderPopout={() => <EventLogPanel />}>
             {(_, { isShown }) => (
-                <button ref={buttonRef} type="button" className={`quest-ui-toolbar-button quest-ui-event-log-button${isShown ? " is-open" : ""}`} onClick={() => setOpen(value => !value)} aria-label="Open QuestUI Event Log preview" aria-expanded={isShown} title="Event Log (Preview)">
+                <button ref={buttonRef} type="button" className={`quest-ui-toolbar-button quest-ui-event-log-button${isShown ? " is-open" : ""}`} onClick={() => setOpen(value => !value)} aria-label="Open QuestUI Event Log" aria-expanded={isShown} title="Event Log">
                     <BugLogIcon />
                 </button>
             )}

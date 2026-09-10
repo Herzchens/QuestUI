@@ -376,7 +376,7 @@ function captureConsole(level: ConsoleLevel, args: unknown[]): void {
     const source = consoleEventSource(args);
     if (!source) return;
     // Structured diagnostics are optional companion capabilities, not a raised hard minimum:
-    // compatible older Orion builds keep this console-preview fallback.
+    // compatible older Orion builds keep this console fallback.
     if (source === "orion") {
         const health = getOrionIntegrationHealth(true);
         if (health.kind === "version-incompatible" || health.kind === "not-installed" || health.kind === "disabled") return;
@@ -429,7 +429,7 @@ export function startEventLogCapture(): void {
         severity: "info",
         category: "diagnostic",
         eventCode: "QUESTUI_EVENT_LOG_STARTED",
-        summary: "Event Log preview started"
+        summary: "Event Log started"
     });
 }
 

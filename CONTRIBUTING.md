@@ -26,6 +26,8 @@ pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionEventLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionSchedulerLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestShortcutLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrbBalanceLogic.ts
@@ -78,6 +80,12 @@ QuestUI may consume only the explicit companion surface. It must not import Orio
 
 A compatible Orion build owns the exact registered `orion` command and exposes `start`, `stop`, `pause`, `resume`, source-of-truth control snapshots/subscriptions, engine Start/Stop, global Pause/Resume, and exact-ID per-Quest Pause/Resume.
 
+Optional additive capabilities are feature-detected independently:
+
+- `subscribeEvents()` supplies structured Orion diagnostic events. Validate the payload at QuestUI's boundary; structured code/category/level/failure fields are authoritative and the human message is detail only.
+- `getSchedulerSnapshot()` + `subscribeSchedulerState()` supply live scheduler metadata. Treat the current batch as unordered and never infer queue position or future execution order.
+- Absence of either capability must not disable the core v4.10.7+ Orion control integration.
+
 Global UI order:
 
 ```text
@@ -123,15 +131,20 @@ Keep the current presentation contracts unless a change explicitly targets them:
 - timed progress displays `mm:ss / mm:ss` and only the current elapsed value receives completion-stage color;
 - valid expiry copy stays visible; expired-history visibility is controlled separately by the age filter (15-day recommended default, All for unlimited history).
 
-## Event Log Preview
+## Event Log
 
-- Capture only QuestUI and confidently recognized Orion console output; never collect Discord/general plugin console spam.
+- Capture only QuestUI and confidently recognized Orion output; never collect Discord/general plugin console spam.
 - Preserve the original console call and do not clobber wrappers installed by another plugin after QuestUI starts.
 - Sanitize secrets before writing to disk or copying a diagnostic report.
-- Persist one `events.jsonl` file; compact from over 10 MiB to about 5 MiB by dropping oldest complete records.
-- Keep Source / Level / Category filtering, search, day grouping, newest/oldest/errors-first sorting, **View details**, Open file and Clear log behavior testable.
-- Classify Orion messages by namespace/context rather than naive keywords so retry/fallback/recovery logs are not mislabeled as terminal failures.
-- Orion v4.10.7 remains the hard minimum. Future structured-event/queue APIs are optional capabilities; compatible older builds keep fallback behavior.
+- New records are account-scoped at capture time. Keep pre-account records visibly **LEGACY** and unscoped when their original owner cannot be proven; never migrate them by guess.
+- Persist one `events.jsonl` file; compact from over 10 MiB toward about 5 MiB by dropping oldest complete records without splitting JSONL records.
+- Reject malformed persisted core records before sort/render logic; valid legacy rows that merely lack newer account/category fields must remain readable.
+- Keep Source / Level / Category filtering, search, day grouping, newest/oldest/errors-first sorting, **View details**, Open file and confirmation-gated Clear log behavior testable.
+- Large desktop histories use stable snapshot/cursor pagination in pages of 250 events plus QuestUI-owned windowed rendering. Do not reintroduce a hidden 5,000-row fallback or mix pages from different query generations/sessions.
+- Auto-pagination should fire only after genuine user scrolling reaches the bottom margin; cancel stale pagination/live-refresh timers across search/filter/sort/account resets.
+- Classify fallback Orion console messages by namespace/context rather than naive keywords so retry/fallback/recovery logs are not mislabeled as terminal failures.
+- When structured events are available, reconcile their short-lived console shadows rather than persisting duplicate twins.
+- Orion v4.10.7 remains the hard core-control minimum. Structured-event and scheduler APIs are additive capabilities; compatible builds without them keep safe fallback behavior.
 
 ## Quest Reload
 
@@ -168,6 +181,9 @@ Current manual coverage should include:
 - accepted-Quest pinning and required-time sorting;
 - native Orb balance including zero and runtime version/health chips;
 - Event Log persistence/search/source/level/category/sort/day grouping/detail/report/open/clear flows and scrollbar behavior;
+- large Event Log pagination/windowing on a 10k+ persisted history when that path changes;
+- Event Log account switching and legacy-row visibility;
+- Orion structured-event fallback/reconciliation and scheduler metadata when supported;
 - `mm:ss` elapsed/target formatting with current-only progress color;
 - Accept → `Processing…` → confirmed enrollment;
 - Claim flow;
@@ -185,7 +201,7 @@ Never describe CI/build output as proof of a live Discord mutation or farming se
 
 Stable source: `main`.
 
-The old `feat/quest-actions-orion-controls` beta branch and the old `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` pairing are historical only. Current Orion integration targets upstream `nyxxbit/discord-quest-completer` **v4.10.7+**, and the maintained coexistence CI gate tracks upstream `main`. Optional future companion capabilities must be feature-detected rather than silently raising the minimum supported version.
+The old `feat/quest-actions-orion-controls` beta branch and the old `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` pairing are historical only. Current Orion integration targets upstream `nyxxbit/discord-quest-completer` **v4.10.7+**, and the maintained coexistence CI gate tracks upstream `main`. Structured-event and scheduler capabilities are optional and must not silently raise the minimum supported core-control version.
 
 Keep QuestUI and Orion packages/repositories/licenses separate. See `docs/RELEASES.md` before publication.
 

@@ -1,10 +1,9 @@
 /*
- * Event Log preview surface polish.
+ * Event Log surface polish.
  *
- * Keep this layer separate from the initial preview stylesheet while beta.2 is
- * being runtime-tested. The selectors intentionally outrank eventLog.css so a
- * custom Discord theme cannot make the viewer translucent and visually merge
- * it with Quest cards behind the Popout.
+ * Keep this layer separate from the base Event Log stylesheet. The selectors
+ * intentionally outrank eventLog.css so a custom Discord theme cannot make the
+ * viewer translucent and visually merge it with Quest cards behind the Popout.
  */
 
 .quest-ui-event-log-panel.quest-ui-event-log-panel,
@@ -210,7 +209,7 @@
 }
 
 
-/* beta.2 runtime pass: unify controls, custom dropdown, and Dashboard-identical scrollbar behavior. */
+/* Runtime-polished controls, custom dropdown, and Dashboard-identical scrollbar behavior. */
 .quest-ui-event-log-panel {
     --quest-ui-event-control-bg: color-mix(in srgb, var(--background-base-lowest, #111214) 38%, #24262b 62%);
     --quest-ui-event-control-hover: color-mix(in srgb, var(--background-base-lowest, #111214) 28%, #34373d 72%);

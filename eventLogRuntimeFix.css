@@ -1,4 +1,4 @@
-/* Live beta.2 fixes after Discord runtime review. Loaded after eventLogPolish.css. */
+/* Stable Event Log runtime fixes after Discord runtime review. Loaded after eventLogPolish.css. */
 
 /* The outer Event Log is already hosted by Discord's Popout layer. Giving the
  * panel its own high z-index/isolation hides nested Popouts (notably Sort)
@@ -11,7 +11,7 @@
 }
 
 /* Some custom themes restyle generic <strong> elements aggressively. Keep the
- * Event Log title explicit so it cannot disappear next to the preview chip. */
+ * Event Log title explicit so it cannot disappear next to adjacent header metadata. */
 .quest-ui-event-log-panel .quest-ui-event-log-header > div > strong {
     color: #f2f3f5 !important;
     display: inline-block !important;
@@ -304,32 +304,6 @@
 /* The full scrollbar implementation is shared with Dashboard in scrollbar.css.
  * Do not add Event Log-specific scrollbar-width/color here: non-auto values can
  * re-enable native arrow buttons in Windows Chromium/Electron. */
-
-/* Preview wording is intentionally explicit: this surface is still beta. */
-.quest-ui-event-log-panel .quest-ui-event-preview-chip {
-    align-items: center;
-    display: inline-flex;
-    gap: 4px;
-    padding: 3px 6px;
-    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 48%, transparent);
-    background: color-mix(in srgb, var(--status-warning, #f0b232) 7%, transparent);
-    color: var(--status-warning, #f0b232);
-    font: 650 9px/1.2 var(--font-primary);
-    letter-spacing: 0;
-    text-transform: none;
-    white-space: nowrap;
-}
-
-.quest-ui-event-preview-icon {
-    width: 11px;
-    height: 11px;
-    flex: 0 0 11px;
-    fill: none;
-    stroke: currentColor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.55;
-}
 
 /* Category is a first-class filter and remains readable on narrow Event Log panels. */
 .quest-ui-event-log-panel .quest-ui-event-filter-row {
