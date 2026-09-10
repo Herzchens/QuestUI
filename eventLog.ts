@@ -4,6 +4,7 @@ import {
     classifyConsoleEvent,
     consoleArgsToText,
     consoleEventSource,
+    eventSearchText,
     inferEventCategory,
     sanitizeEventText,
     severityRank
@@ -128,15 +129,7 @@ function memoryQuery(options: EventLogQuery): EventLogQueryResult {
     if (source !== "all") events = events.filter(event => event.source === source);
     if (severity !== "all") events = events.filter(event => event.severity === severity);
     if (category !== "all") events = events.filter(event => inferEventCategory(event) === category);
-    if (query) events = events.filter(event => JSON.stringify({
-        source: event.source,
-        severity: event.severity,
-        category: inferEventCategory(event),
-        eventCode: event.eventCode,
-        summary: event.summary,
-        quest: event.quest,
-        detail: event.detail
-    }).toLowerCase().includes(query));
+    if (query) events = events.filter(event => eventSearchText(event).includes(query));
     if (sort === "oldest") events.sort((a, b) => a.timestamp - b.timestamp);
     else if (sort === "severity") events.sort((a, b) => severityRank(a.severity) - severityRank(b.severity) || b.timestamp - a.timestamp);
     else events.sort((a, b) => b.timestamp - a.timestamp);
@@ -150,6 +143,9 @@ export async function queryEventLog(options: EventLogQuery): Promise<EventLogQue
 }
 
 export async function clearEventLog(): Promise<void> {
+    // Do not let an already-captured console shadow repopulate the log after the user clears it.
+    // Structured events emitted after this boundary are new events and remain eligible for capture.
+    clearPendingOrionConsole(false);
     memoryEvents.length = 0;
     if (Native) {
         try { await Native.clearEvents(); } catch { }
