@@ -108,7 +108,7 @@ body:
     attributes:
       label: QuestUI version or commit
       description: Provide the QuestUI version and commit SHA when available.
-      placeholder: v1.2.0 / abc1234
+      placeholder: v1.3.0 / abc1234
     validations:
       required: false
 

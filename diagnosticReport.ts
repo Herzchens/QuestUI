@@ -1,5 +1,6 @@
 import gitHash from "~git-hash";
 
+import { isLegacyUnscopedEvent, sameEventAccountScope } from "./eventLogAccountLogic";
 import { inferEventCategory, sanitizeEventText } from "./eventLogLogic";
 import type { EventLogCategory, EventLogEvent } from "./eventLogTypes";
 import { getOrionIntegrationHealth } from "./orionIntegration";
@@ -24,13 +25,19 @@ function categoryLabel(category: EventLogCategory): string {
     return "Diagnostic";
 }
 
+function captureSourceLabel(event: EventLogEvent): string {
+    if (event.captureSource === "console-preview") return "Console fallback";
+    if (event.captureSource === "orion-api") return "Orion structured API";
+    return "QuestUI";
+}
+
 function environmentLines(event: EventLogEvent): string[] {
     const health = getOrionIntegrationHealth(true);
     return [
         `QuestUI:        ${QUESTUI_VERSION}`,
         `OrionQuests:    ${health.installedVersion ?? "Unknown"}`,
         `Orion health:   ${health.kind}`,
-        `Capture source: ${event.captureSource}`,
+        `Capture source: ${captureSourceLabel(event)}`,
         `Discord:        ${discordChannel()} ${discordVersion()}`,
         `Vencord:        v${VERSION} (${gitHash})`,
         `Platform:       ${navigator.platform || "Unknown"}`,
@@ -43,6 +50,8 @@ function detailLines(event: EventLogEvent): string[] {
     const lines: string[] = [];
     if (detail.httpStatus != null) lines.push(`HTTP Status:    ${String(detail.httpStatus)}`);
     if (detail.upstreamCode != null) lines.push(`Upstream Code:  ${String(detail.upstreamCode)}`);
+    if (typeof detail.terminal === "boolean") lines.push(`Terminal:       ${detail.terminal ? "Yes" : "No"}`);
+    if (typeof detail.retryable === "boolean") lines.push(`Retryable:      ${detail.retryable ? "Yes" : "No"}`);
     if (detail.attempt != null) lines.push(`Attempt:        ${String(detail.attempt)}${detail.maxAttempts != null ? ` / ${String(detail.maxAttempts)}` : ""}`);
     if (detail.reason) lines.push(`Reason:         ${sanitizeEventText(detail.reason)}`);
     if (detail.message) lines.push(`Message:        ${sanitizeEventText(detail.message)}`);
@@ -52,6 +61,7 @@ function detailLines(event: EventLogEvent): string[] {
 export function buildDiagnosticReport(event: EventLogEvent, availableEvents: EventLogEvent[] = []): string {
     const related = availableEvents
         .filter(candidate => candidate.id !== event.id
+            && sameEventAccountScope(candidate, event)
             && candidate.source === event.source
             && (event.quest?.id ? candidate.quest?.id === event.quest.id : event.quest?.name ? candidate.quest?.name === event.quest.name : true))
         .sort((a, b) => b.timestamp - a.timestamp)
@@ -69,6 +79,7 @@ export function buildDiagnosticReport(event: EventLogEvent, availableEvents: Eve
         `Category:       ${categoryLabel(inferEventCategory(event))}`,
         `Timestamp:      ${new Date(event.timestamp).toISOString()}`,
         `Source:         ${event.source === "orion" ? "OrionQuests" : "QuestUI"}`,
+        `Account scope:  ${isLegacyUnscopedEvent(event) ? "Legacy / unscoped" : "Account-scoped"}`,
         `Summary:        ${sanitizeEventText(event.summary)}`
     ];
 

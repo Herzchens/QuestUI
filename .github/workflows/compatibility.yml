@@ -82,9 +82,17 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testDashboardSortLogic.ts
 
-      - name: Test Event Log preview logic
+      - name: Test Event Log logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
+
+      - name: Test Orion structured Event Log logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionEventLogic.ts
+
+      - name: Test Orion scheduler metadata logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionSchedulerLogic.ts
 
       - name: Test version channel logic
         working-directory: vencord
@@ -125,10 +133,11 @@ jobs:
             'Quest list refreshed.'
             'OrionQuests'
             'Orion Quest Version Incompatible'
-            'v1.2.1'
+            'v1.3.0'
             'Highest Orb Reward'
             'Shortest Required Time'
             'Event Log'
+            'Orion Scheduler'
           )
           for marker in "${required_markers[@]}"; do
             if ! grep -Fq "$marker" dist/renderer.js; then
@@ -137,6 +146,7 @@ jobs:
             fi
           done
 
+          grep -Fq 'Live batch · unordered' src/userplugins/QuestUI/OrionSchedulerPanel.tsx
           for marker in getControlSnapshot subscribeControlState controlEngine controlAll controlQuest; do
             if ! grep -Fq "$marker" src/userplugins/QuestUI/orionCommandLogic.ts; then
               echo "Missing QuestUI companion contract marker: $marker" >&2
@@ -220,6 +230,14 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionStatusLogic.ts
 
+      - name: Test Orion structured Event Log logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionEventLogic.ts
+
+      - name: Test Orion scheduler metadata logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionSchedulerLogic.ts
+
       - name: Test Quest reload rotation logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
@@ -232,6 +250,12 @@ jobs:
           for marker in getControlSnapshot subscribeControlState controlEngine controlAll controlQuest; do
             if ! grep -Fq "$marker" "$surface"; then
               echo "Missing Orion companion surface marker: $marker" >&2
+              exit 1
+            fi
+          done
+          for marker in subscribeEvents getSchedulerSnapshot subscribeSchedulerState; do
+            if ! grep -Fq "$marker" "$surface"; then
+              echo "Missing Orion optional v1.3 companion capability marker: $marker" >&2
               exit 1
             fi
           done

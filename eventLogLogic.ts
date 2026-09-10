@@ -14,6 +14,7 @@ const ORION_TAGS = [
     "Network",
     "Task",
     "Cycle",
+    "Quest",
     "Enroll",
     "Claim",
     "Bypass",
@@ -61,7 +62,7 @@ export function consoleEventSource(args: unknown[]): EventLogSource | null {
 }
 
 function orionTag(text: string): OrionTag | null {
-    const match = text.match(/\[(System|Network|Task|Cycle|Enroll|Claim|Bypass|Achievement|Startup|Patcher)\]/i);
+    const match = text.match(/\[(System|Network|Task|Cycle|Quest|Enroll|Claim|Bypass|Achievement|Startup|Patcher)\]/i);
     if (!match) return null;
     const canonical = ORION_TAGS.find(tag => tag.toLowerCase() === match[1].toLowerCase());
     return canonical ?? null;
@@ -126,7 +127,7 @@ export function inferEventCategory(
     if (/(?:NETWORK|HEARTBEAT|HTTP)/.test(code) || /\[(?:Network)\]|\bheartbeat\b|\bHTTP\s+\d{3}\b/i.test(summary)) {
         return "network";
     }
-    if (/(?:TASK|ENROLL|CLAIM|ACHIEVEMENT|VIDEO)/.test(code) || /\[(?:Task|Enroll|Claim|Achievement)\]/i.test(summary)) {
+    if (/(?:QUEST|TASK|ENROLL|CLAIM|ACHIEVEMENT|VIDEO)/.test(code) || /\[(?:Quest|Task|Enroll|Claim|Achievement)\]/i.test(summary)) {
         return "quest";
     }
     if (/(?:CYCLE|SYSTEM|STARTUP|PATCHER|ENGINE)/.test(code) || /\[(?:Cycle|System|Startup|Patcher)\]/i.test(summary)) {
@@ -168,6 +169,28 @@ export function classifyConsoleEvent(source: EventLogSource, level: string, text
     if (source === "orion") {
         const tag = orionTag(sanitized);
         const quotedName = quotedQuestName(sanitized);
+
+        if (/\bStarting OrionQuests\b/i.test(sanitized)) {
+            return classified({
+                severity: "info",
+                category: "runtime",
+                eventCode: "ORION_ENGINE_STARTED",
+                summary: "Orion engine started",
+                text: sanitized,
+                status
+            });
+        }
+
+        if (/\bStopped\.\s+(?:All cleanups flushed cleanly\.|\d+ cleanup\(s\) threw, see errors above\.)/i.test(sanitized)) {
+            return classified({
+                severity: /cleanup\(s\) threw/i.test(sanitized) ? "warning" : "info",
+                category: "runtime",
+                eventCode: "ORION_ENGINE_STOPPED",
+                summary: "Orion engine stopped",
+                text: sanitized,
+                status
+            });
+        }
 
         const aborted = sanitized.match(/\[Task\]\s+Aborted\s+"([^"]+)":\s*(.+)$/i);
         if (aborted) {
@@ -231,6 +254,19 @@ export function classifyConsoleEvent(source: EventLogSource, level: string, text
                 category: "quest",
                 eventCode: "ORION_VIDEO_UNAVAILABLE",
                 summary: status ? `Video Quest unavailable · HTTP ${status}` : "Video Quest unavailable",
+                questName: quotedName,
+                text: sanitized,
+                status
+            });
+        }
+
+        if (tag === "Quest") {
+            const blocked = /Skipping it for the rest of this run\./i.test(sanitized);
+            return classified({
+                severity: blocked ? "warning" : failureSeverity(baseSeverity, sanitized),
+                category: "quest",
+                eventCode: blocked ? "ORION_QUEST_BLOCKED" : "ORION_QUEST_EVENT",
+                summary,
                 questName: quotedName,
                 text: sanitized,
                 status
@@ -514,6 +550,7 @@ export function severityRank(severity: EventLogSeverity): number {
 }
 
 export function eventSearchText(event: EventLogEvent): string {
+    const detail = event.detail ?? {};
     return [
         event.source,
         event.severity,
@@ -523,9 +560,14 @@ export function eventSearchText(event: EventLogEvent): string {
         event.quest?.id,
         event.quest?.name,
         event.quest?.taskType,
-        event.detail?.message,
-        event.detail?.reason,
-        event.detail?.httpStatus,
-        event.detail?.upstreamCode
+        detail.message,
+        detail.reason,
+        detail.httpStatus,
+        detail.upstreamCode,
+        typeof detail.terminal === "boolean" ? `terminal:${detail.terminal}` : null,
+        typeof detail.retryable === "boolean" ? `retryable:${detail.retryable}` : null,
+        detail.attempt != null ? `attempt:${String(detail.attempt)}` : null,
+        detail.maxAttempts != null ? `maxAttempts:${String(detail.maxAttempts)}` : null,
+        detail.orionCategory
     ].filter(value => value != null).join(" ").toLowerCase();
 }

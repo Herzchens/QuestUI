@@ -26,6 +26,8 @@ export interface EventLogEvent {
     schemaVersion: 1;
     id: string;
     timestamp: number;
+    /** Discord account that owned the client state when this event was captured. */
+    accountId?: string | null;
     source: EventLogSource;
     severity: EventLogSeverity;
     category?: EventLogCategory;
@@ -43,6 +45,10 @@ export interface EventLogQuery {
     category?: "all" | EventLogCategory;
     sort?: EventLogSort;
     limit?: number;
+    /** Internal renderer-provided account scope. Omitted only for low-level maintenance. */
+    accountId?: string;
+    /** Include pre-account-scope rows as visibly legacy/unscoped history. */
+    includeLegacy?: boolean;
 }
 
 export interface EventLogQueryResult {

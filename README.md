@@ -7,13 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 ## Release status
 
 > [!IMPORTANT]
-> **v1.2.1** is the current Stable release. It fixes Orion-owned timed Quest cards continuing to show Discord's optimistic active-desktop progress after Orion has paused or stopped that Quest, and makes connected Orion status distinguish **Running** from **Idle**. It otherwise preserves the v1.2.0 Dashboard/Event Log feature set and QuestUI's explicit-click/manual-action boundary.
+> **v1.3.0** is the current Stable release. It promotes Event Log to the normal supported QuestUI surface, adds account-aware persistent history with complete cursor-based pagination and windowed rendering for large logs, consumes Orion structured events when available, and shows Orion live scheduler metadata without changing QuestUI's explicit-click/manual-action boundary.
 >
-> Orion companion controls require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Known versions below v4.10.7 are incompatible. Future optional Orion capabilities are detected independently: compatible builds that do not expose a newer structured-event API keep the Event Log console-preview fallback instead of losing existing integration.
+> Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata are additive capabilities: compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
 >
-> v1.2.0 received maintainer live UI/runtime review for the Dashboard, filters/sorting, runtime metadata and Event Log surfaces. The most recent separately documented full Orion farming/integration pass remains the v1.1.0 implementation checkpoint `5f11470` with **OrionQuests v4.10.8** on Discord Canary; automated CI is not presented as a replacement for that historical live session.
+> v1.3.0 release preparation included maintainer live Discord review of the corrected Event Log renderer against a 10k+ persisted log. Hosted build/type-check, upstream-Orion coexistence, and Stable/Canary reporter checks remain release gates, but automated checks are not presented as proof of Discord mutations or an Orion farming session.
 
-## Preview
+## Screenshots
 
 <p align="center">
 
@@ -23,7 +23,7 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 
 </p>
 
-The captures above are real Discord runtime screenshots supplied by the maintainer. They document the earlier Dashboard surface and remain documentation assets only; v1.2.0 adds the wider metadata/toolbar layout and Event Log described below.
+The captures above are real Discord runtime screenshots supplied by the maintainer. They remain documentation assets; the current release adds the metadata, Event Log, and Orion scheduler surfaces described below.
 
 ## Features
 
@@ -39,7 +39,7 @@ The captures above are real Discord runtime screenshots supplied by the maintain
 
 - Native current Orb balance plus Orion Quest / QuestUI runtime version metadata
 
-- Persistent **Event Log — Preview Feature** with searchable/filterable diagnostics, per-event details, and sanitized one-click bug reports
+- Persistent **Event Log** with account-aware searchable/filterable diagnostics, per-event details, sanitized one-click bug reports, complete pagination, and large-log windowed rendering
 
 - Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
 
@@ -69,7 +69,11 @@ The captures above are real Discord runtime screenshots supplied by the maintain
 
   - Engine-wide Start when Orion is stopped
 
-QuestUI does not turn Stop into Pause, does not reset Quest progress, and does not implement a targeted `startQuest`. Orion's own scheduler and concurrency limits decide which enrolled Quests run or queue.
+  - Structured Orion diagnostics when the companion exposes `subscribeEvents()`
+
+  - Live scheduler metadata when the companion exposes `getSchedulerSnapshot()` and `subscribeSchedulerState()`
+
+QuestUI does not turn Stop into Pause, does not reset Quest progress, and does not implement a targeted `startQuest`. Orion's own scheduler and concurrency limits decide which enrolled Quests run or wait.
 
 ## Installation
 
@@ -148,7 +152,7 @@ Newer Orion devbuild installer versions can update sibling Git userplugins autom
 Updating other userplugins in this checkout...
 ```
 
-just run `UPDATE.cmd` from the extracted devbuild installer folder. Orion fast-forwards QuestUI with `git pull --ff-only` before rebuilding Vencord.
+just run `UPDATE.cmd` from the extracted devbuild installer folder. Orion updates the companion checkout before rebuilding Vencord while preserving its updater safety rules.
 
 If your extracted Orion devbuild installer does not include that companion-update step, update QuestUI manually first:
 
@@ -157,8 +161,6 @@ git -C "$env:LOCALAPPDATA\OrionVencord\src\userplugins\QuestUI" pull --ff-only
 ```
 
 Then run Orion's `UPDATE.cmd` again from the extracted devbuild installer folder so Vencord is rebuilt with the updated QuestUI.
-
-The companion updater is fast-forward only. If QuestUI has local commits, diverged history, or cannot fast-forward, Orion reports the problem and leaves the checkout unchanged instead of resetting or deleting it.
 
 If the existing `QuestUI` directory is not a Git checkout, do not delete or replace it blindly. Check how it was installed first.
 
@@ -176,15 +178,10 @@ The title uses a seamless right-to-left color sweep. `prefers-reduced-motion` di
 The summary row always renders all six counters, including zero values:
 
 - **Red** — Available
-
 - **Green** — Ready
-
 - **Yellow** — In Progress
-
 - **Blue / Blurple** — Claimed
-
 - **Gray** — Expired
-
 - **Purple** — Hidden
 
 The five Quest-status counts come from the full live Discord Quest snapshot. **Hidden** is the number of Quest cards currently removed by Dashboard filters, including expired-age filtering.
@@ -194,11 +191,8 @@ The five Quest-status counts come from the full live Discord Quest snapshot. **H
 The Filter popout supports:
 
 - Status: Available, Ready, In Progress, Claimed, Expired
-
 - Expired age (when Expired is enabled): 7d, 15d, 30d, 90d, All, or a custom number of days
-
 - Reward: All rewards, Orbs only, Non-Orb rewards
-
 - Quest type: Play, Stream, Video, Activity, Other / Unknown
 
 **Recommended** shows Available, In Progress, and Ready while hiding Claimed and Expired cards and restores the 15-day expired-history default. **Clear all** enables every supported status/category and removes the expired-history age limit.
@@ -234,7 +228,6 @@ Orb rewards reuse Discord's themed Orb component. QuestUI keeps Discord's base r
 Examples:
 
 - `200 Orbs` → `240 Orbs`
-
 - `700 Orbs` → `840 Orbs`
 
 Nitro Basic and fractional/credit-only Nitro states are not treated as eligible for this reward multiplier.
@@ -244,7 +237,6 @@ Nitro Basic and fractional/credit-only Nitro states are not treated as eligible 
 Dashboard cards expose a mutation only when the normalized Quest state calls for it:
 
 - **Available** → **Accept Quest**
-
 - **Ready to Claim** → **Claim Reward**
 
 Every mutation requires an explicit click. QuestUI re-reads the current Quest from Discord's QuestStore immediately before acting and does not optimistically mark the Quest accepted or claimed.
@@ -257,19 +249,7 @@ Reward claim likewise reuses Discord's native claim path. Unknown, malformed, or
 
 The integration is intentionally narrow. QuestUI validates the registered `orion` command and the upstream companion surface before showing callable controls.
 
-OrionQuests **v4.10.7+** exposes source-of-truth engine/task state plus:
-
-- `getControlSnapshot`
-
-- `subscribeControlState`
-
-- `controlEngine`
-
-- `controlAll`
-
-- exact-ID `controlQuest`
-
-QuestUI treats Orion's snapshot/subscription surface as the source of truth rather than maintaining a mirrored engine/task state. Farming logic, queueing, concurrency, progress generation, task lifecycle, and engine lifecycle remain Orion-owned.
+OrionQuests **v4.10.7+** exposes the core source-of-truth engine/task control state expected by QuestUI. QuestUI consumes the companion snapshot/subscription surface rather than maintaining a mirrored engine/task state. Farming logic, queueing, concurrency, progress generation, task lifecycle, and engine lifecycle remain Orion-owned.
 
 Global header order:
 
@@ -280,15 +260,10 @@ Smart Start/Pause/Resume → Stop → Reload → Event Log → Sort → Filter �
 State rules:
 
 - no Available/In-Progress Quest → Start and Stop disabled
-
 - engine stopped + unfinished work → Start enabled, Stop disabled
-
 - engine stopped + explicit paused work → Resume enabled, Stop disabled
-
 - engine running + RUNNING/QUEUE → Pause enabled, Stop enabled
-
 - engine running + only PAUSED controllable work → Resume enabled, Stop enabled
-
 - short startup/scanning window without a published controllable row → Smart disabled, Stop enabled
 
 Start and Resume deliberately use the **same Play icon**. Pause uses a real two-bar yellow Pause SVG. Stop remains engine shutdown/cleanup.
@@ -296,41 +271,45 @@ Start and Resume deliberately use the **same Play icon**. Pause uses a real two-
 Per-Quest UI after confirmed enrollment:
 
 - engine stopped → Start the global engine
-
 - RUNNING/QUEUE → exact-ID Pause
-
 - PAUSED → exact-ID Resume
-
 - unknown/scanning while engine runs → disabled control rather than guessed state
-
 - completed → Orion control disappears and Claim Reward becomes available
 
 QuestUI does not import Orion farming internals and does not fabricate a Discord channel to invoke slash-command callbacks.
 
-## Event Log — Preview Feature
+### Orion Scheduler metadata
 
-The flask-labelled Event Log is a diagnostic preview for **QuestUI and Orion only**; it does not ingest Discord's general console spam. Events are grouped by day and can be searched, filtered by Source / Level / Category, and sorted by newest, oldest, or errors first. Every row has **View details**, while warning/error rows also expose the bug-report shortcut.
+When the installed Orion build exposes `getSchedulerSnapshot()` and `subscribeSchedulerState()`, QuestUI displays Orion's current game/video lane metadata, including lane limit, running/waiting counts, and current per-Quest running/waiting state.
 
-On desktop Vencord builds, QuestUI persists one sanitized `QuestUI/events.jsonl` file in Vencord's data directory. The file may grow to 10 MiB; after crossing that threshold QuestUI discards the oldest complete records and compacts the file back to about 5 MiB. **Open file** reveals it and **Clear log** deletes its saved history.
+The panel deliberately labels the snapshot **Live batch · unordered**. QuestUI does not infer queue position, execution order, or a scheduler decision Orion did not publish.
 
-The current Orion adapter is best-effort console capture. It recognizes Orion/QuestUI output, preserves the original DevTools console call, sanitizes sensitive values before persistence, and normalizes known Orion families such as Cycle, Task, Enroll, Claim, Network/heartbeat, Achievement/Bypass, Startup/System, and Patcher diagnostics. Transient retry/fallback messages are not automatically presented as terminal failures.
+## Event Log
 
-**Copy report** produces a sanitized diagnostic report with the selected event, related context, Quest identifiers when available, QuestUI/Orion versions, Orion health/capture source, Discord release channel/client version, Vencord version/commit, platform, and runtime information. Review a copied report before posting it publicly.
+Event Log is a supported diagnostic surface for **QuestUI and Orion only**; it does not ingest Discord's general console spam. Events are grouped by day and can be searched, filtered by Source / Level / Category, and sorted by newest, oldest, or errors first. Every row has **View details**, while warning/error rows also expose the bug-report shortcut.
 
-Future Orion structured-event APIs are capability-detected. A compatible Orion build that does not expose those future APIs continues using the console-preview fallback; only known Orion versions below v4.10.7 are hard-incompatible.
+On desktop Vencord builds, QuestUI persists one sanitized `QuestUI/events.jsonl` file in Vencord's data directory. The file may grow to 10 MiB; after crossing that threshold QuestUI discards the oldest complete records and compacts the file back toward 5 MiB. **Open file** reveals it and **Clear log** clears rows owned by the current Discord account while preserving unscoped legacy history whose original owner cannot be proven.
+
+New records are account-scoped at capture time. Older rows that predate account-aware persistence remain visible as **LEGACY** instead of being guessed as belonging to the current account. Account-change diagnostics receive a distinct surface and can display the current account username beneath their timestamp.
+
+Large histories are queried through stable cursor/snapshot pagination in pages of 250 events and rendered through an Event-Log-owned windowed scroller, so a 10k+ file does not require mounting the entire result set at once. Search/filter/sort changes start a fresh snapshot rather than splicing incompatible pages together. Malformed persisted rows are rejected at the storage boundary instead of crashing the Viewer.
+
+When Orion exposes `subscribeEvents()`, QuestUI treats Orion's structured event code/category/level/failure fields as authoritative and keeps the human message as detail. Recognized console output remains a sanitized fallback. Human console lines are briefly reconciled against structured events so the same Orion event is not persisted twice merely because both transports emitted it.
+
+The fallback classifier recognizes Orion/QuestUI output, preserves the original DevTools console call, sanitizes sensitive values before persistence, and normalizes known Orion families such as Cycle, Quest/Task, Enroll, Claim, Network/heartbeat, Achievement/Bypass, Startup/System, and Patcher diagnostics. Transient retry/fallback messages are not automatically presented as terminal failures.
+
+**Copy report** produces a sanitized diagnostic report with the selected event, related loaded context, Quest identifiers when available, QuestUI/Orion versions, Orion health/capture source, Discord release channel/client version, Vencord version/commit, platform, and runtime information. Review a copied report before posting it publicly.
+
+Structured Orion events and scheduler metadata are capability-detected independently of the core controls. Orion v4.10.7 remains the hard control baseline; compatible builds without those optional capabilities continue with the Event Log console fallback and omit scheduler metadata.
 
 ## Native Quest Reload
 
 Reload uses Discord's own current-Quest fetch-and-dispatch action located by `QUESTS_FETCH_CURRENT_QUESTS_BEGIN`.
 
 - The native request starts immediately.
-
 - If the request is still running, the icon keeps spinning.
-
 - Overlapping native reload requests are coalesced.
-
 - A successful refresh with no new Quest is still success.
-
 - Success/failure uses Vencord's native toast API.
 
 ## Detailed Status and Quest Home counters
@@ -338,9 +317,7 @@ Reload uses Discord's own current-Quest fetch-and-dispatch action located by `QU
 Detailed Status shows one attention state at a time with this priority:
 
 1. Yellow — In Progress
-
 2. Green — Ready to Claim
-
 3. Red — Available
 
 The numeric badge belongs to the displayed state, not the sum of all statuses.
@@ -348,18 +325,15 @@ The numeric badge belongs to the displayed state, not the sum of all statuses.
 Quest Home counters use:
 
 - Red — Available
-
 - Yellow — In Progress
-
 - Green — Ready to Claim
-
 - Blurple — Claimed
 
 ## Compatibility and verification
 
 QuestUI depends on Discord/Vencord internals, so future Discord updates can require matcher or native-lookup maintenance.
 
-The compatibility workflow covers manual-action logic, Orion companion/control and health/version state, Reload rotation boundaries, shortcut snapshot behavior, Orb balance, Dashboard sorting, Event Log classification/query logic, version-channel classification, clean Vencord build/type-check, the maintained upstream Orion `main` coexistence build/type-check, and Stable/Canary patch reporters.
+The compatibility workflow covers manual-action logic, Orion companion/control and health/version state, Reload rotation boundaries, shortcut snapshot behavior, Orb balance, Dashboard sorting, Event Log classification/account scoping/pagination/windowing/persistence validation, Orion structured-event normalization/reconciliation, Orion scheduler metadata, version-channel classification, clean Vencord build/type-check, the maintained upstream Orion `main` coexistence build/type-check, and Stable/Canary patch reporters.
 
 Automated checks do **not** prove live Discord mutations or a real Orion farming session. Runtime claims should be based on actual client testing.
 

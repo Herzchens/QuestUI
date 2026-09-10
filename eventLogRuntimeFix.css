@@ -1,4 +1,4 @@
-/* Live beta.2 fixes after Discord runtime review. Loaded after eventLogPolish.css. */
+/* Stable Event Log runtime fixes after Discord runtime review. Loaded after eventLogPolish.css. */
 
 /* The outer Event Log is already hosted by Discord's Popout layer. Giving the
  * panel its own high z-index/isolation hides nested Popouts (notably Sort)
@@ -11,7 +11,7 @@
 }
 
 /* Some custom themes restyle generic <strong> elements aggressively. Keep the
- * Event Log title explicit so it cannot disappear next to the preview chip. */
+ * Event Log title explicit so it cannot disappear next to adjacent header metadata. */
 .quest-ui-event-log-panel .quest-ui-event-log-header > div > strong {
     color: #f2f3f5 !important;
     display: inline-block !important;
@@ -20,6 +20,148 @@
     line-height: 20px;
     opacity: 1 !important;
     visibility: visible !important;
+}
+
+/* Quest names and detail values are generic <strong> nodes. Discord/custom
+ * theme rules can otherwise force them toward black even though the Event Log
+ * surface is dark. Own their semantic text color explicitly without changing
+ * source/category/status token colors. */
+.quest-ui-event-log-panel .quest-ui-event-copy > div > strong,
+.quest-ui-event-detail .quest-ui-event-detail-grid > strong {
+    color: var(--text-normal, #f2f3f5) !important;
+}
+
+/* Detail headings/codes are also generic Discord nodes. Keep the ordinary text
+ * readable while child semantic tokens (stopped/failed/etc.) retain their own
+ * warning/error/success colors. */
+.quest-ui-event-detail > h3,
+.quest-ui-event-detail .quest-ui-event-detail-grid > code,
+.quest-ui-event-detail code {
+    color: var(--text-normal, #f2f3f5) !important;
+}
+
+/* The compact detail severity label uses the same four-state palette as rows. */
+.quest-ui-event-detail .quest-ui-event-level.is-info {
+    color: var(--blue-345, #00a8fc) !important;
+}
+
+.quest-ui-event-detail .quest-ui-event-level.is-warning {
+    color: var(--status-warning, #f0b232) !important;
+}
+
+.quest-ui-event-detail .quest-ui-event-level.is-error {
+    color: var(--status-danger, #f23f42) !important;
+}
+
+.quest-ui-event-detail .quest-ui-event-level.is-success {
+    color: var(--status-positive, #23a55a) !important;
+}
+
+/* Pre-account-scope rows are recoverable history, but their owner is unknown.
+ * Make that uncertainty visible instead of silently attributing them to the
+ * current Discord account. */
+.quest-ui-event-account-legacy {
+    padding: 1px 4px;
+    border: 1px solid color-mix(in srgb, var(--text-muted) 38%, transparent);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--text-muted) 8%, transparent);
+    color: var(--text-muted);
+    font: 700 8.5px/1.4 var(--font-code);
+    letter-spacing: .02em;
+    white-space: nowrap;
+}
+
+/* Header storage meter. The renderer receives the authoritative byte limit
+ * from native.ts so these tones describe the actual 10 MiB compaction policy. */
+.quest-ui-event-log-panel .quest-ui-event-log-header-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    color: var(--text-muted);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.quest-ui-event-storage {
+    --quest-ui-event-storage-color: var(--text-muted, #b5bac1);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 6px;
+    border: 1px solid color-mix(in srgb, var(--quest-ui-event-storage-color) 42%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--quest-ui-event-storage-color) 8%, transparent);
+    color: var(--quest-ui-event-storage-color);
+    font: 700 10px/1.35 var(--font-code);
+}
+
+.quest-ui-event-storage-dot {
+    width: 5px;
+    height: 5px;
+    flex: 0 0 5px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.quest-ui-event-storage.is-safe {
+    --quest-ui-event-storage-color: var(--status-positive, #23a55a);
+}
+
+.quest-ui-event-storage.is-watch {
+    --quest-ui-event-storage-color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-event-storage.is-high {
+    --quest-ui-event-storage-color: color-mix(in srgb, var(--status-warning, #f0b232) 58%, var(--status-danger, #f23f42));
+}
+
+.quest-ui-event-storage.is-critical {
+    --quest-ui-event-storage-color: var(--status-danger, #f23f42);
+}
+
+/* Matching count lives inside the search field so the header stays visually
+ * quiet. Its color expresses result density, not success/error semantics. */
+.quest-ui-event-search-shell {
+    position: relative;
+    margin: 12px 0 10px;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-search-shell .quest-ui-event-search {
+    margin: 0;
+    padding-right: 126px;
+}
+
+.quest-ui-event-match-count {
+    --quest-ui-match-color: var(--text-muted, #b5bac1);
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    max-width: 42%;
+    transform: translateY(-50%);
+    overflow: hidden;
+    padding: 2px 6px;
+    border: 1px solid color-mix(in srgb, var(--quest-ui-match-color) 38%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--quest-ui-match-color) 8%, var(--input-background, var(--background-secondary)));
+    color: var(--quest-ui-match-color);
+    font: 700 9px/1.35 var(--font-code);
+    pointer-events: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-event-match-count.is-few {
+    --quest-ui-match-color: var(--blue-345, #00a8fc);
+}
+
+.quest-ui-event-match-count.is-active {
+    --quest-ui-match-color: var(--status-positive, #23a55a);
+}
+
+.quest-ui-event-match-count.is-dense {
+    --quest-ui-match-color: var(--brand-360, #949cf7);
 }
 
 /* Nested Sort Popout: explicit surface/stacking once it is in Discord's layer. */
@@ -63,35 +205,105 @@
     color: var(--status-positive, #23a55a);
 }
 
+/* Leave enough room under the timestamp for account-switch rows to show the
+ * switched-to Discord username. Long usernames wrap instead of widening rows. */
+.quest-ui-event-log-panel .quest-ui-event-row {
+    grid-template-columns: 74px 20px minmax(0, 1fr) auto;
+    transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.quest-ui-event-time-cell {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.quest-ui-event-account-name {
+    max-width: 74px;
+    color: color-mix(in srgb, #f59e42 82%, var(--text-normal, #f2f3f5));
+    font: 650 9px/1.18 var(--font-code);
+    overflow-wrap: anywhere;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Category color belongs to the whole event surface, not a nested metadata box.
+ * Explicit row classes avoid relying on :has() and let account-change emphasis
+ * override category tint cleanly. */
+.quest-ui-event-log-panel .quest-ui-event-row.is-category-quest {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 26%, transparent);
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 9%, var(--background-base-lowest, #111214));
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand-360, #949cf7) 72%, transparent);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-category-runtime {
+    border-color: color-mix(in srgb, var(--blue-345, #00a8fc) 26%, transparent);
+    background: color-mix(in srgb, var(--blue-345, #00a8fc) 8%, var(--background-base-lowest, #111214));
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--blue-345, #00a8fc) 70%, transparent);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-category-network {
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 28%, transparent);
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 8%, var(--background-base-lowest, #111214));
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--status-warning, #f0b232) 72%, transparent);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-category-diagnostic {
+    --quest-ui-diagnostic-row: #a970ff;
+    border-color: color-mix(in srgb, var(--quest-ui-diagnostic-row) 34%, transparent);
+    background: color-mix(in srgb, var(--quest-ui-diagnostic-row) 13%, var(--background-base-lowest, #111214));
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--quest-ui-diagnostic-row) 78%, transparent);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-category-quest:hover {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 14%, var(--background-base-lowest, #111214));
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-category-runtime:hover {
+    background: color-mix(in srgb, var(--blue-345, #00a8fc) 13%, var(--background-base-lowest, #111214));
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-category-network:hover {
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 13%, var(--background-base-lowest, #111214));
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-category-diagnostic:hover {
+    background: color-mix(in srgb, var(--quest-ui-diagnostic-row) 18%, var(--background-base-lowest, #111214));
+}
+
+/* Account transitions are a stronger event identity than their generic Runtime
+ * or Diagnostic category. Use orange first; the source badge still identifies
+ * Orion vs QuestUI on top of this surface. */
+.quest-ui-event-log-panel .quest-ui-event-row.is-account-change {
+    --quest-ui-account-change-row: #f59e42;
+    border-color: color-mix(in srgb, var(--quest-ui-account-change-row) 38%, transparent);
+    background: color-mix(in srgb, var(--quest-ui-account-change-row) 15%, var(--background-base-lowest, #111214));
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--quest-ui-account-change-row) 86%, transparent);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row.is-account-change:hover {
+    background: color-mix(in srgb, var(--quest-ui-account-change-row) 21%, var(--background-base-lowest, #111214));
+}
+
+/* Auto-pagination replaces the old spam-clickable Load older button. */
+.quest-ui-event-auto-load {
+    margin-top: 8px;
+    padding: 7px 8px;
+    border-radius: 7px;
+    color: var(--text-muted);
+    font: 650 10px/1.35 var(--font-code);
+    text-align: center;
+}
+
+.quest-ui-event-auto-load.is-limit {
+    border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+    background: color-mix(in srgb, var(--text-muted) 5%, transparent);
+}
+
 /* The full scrollbar implementation is shared with Dashboard in scrollbar.css.
  * Do not add Event Log-specific scrollbar-width/color here: non-auto values can
  * re-enable native arrow buttons in Windows Chromium/Electron. */
-
-/* Preview wording is intentionally explicit: this surface is still beta. */
-.quest-ui-event-log-panel .quest-ui-event-preview-chip {
-    align-items: center;
-    display: inline-flex;
-    gap: 4px;
-    padding: 3px 6px;
-    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 48%, transparent);
-    background: color-mix(in srgb, var(--status-warning, #f0b232) 7%, transparent);
-    color: var(--status-warning, #f0b232);
-    font: 650 9px/1.2 var(--font-primary);
-    letter-spacing: 0;
-    text-transform: none;
-    white-space: nowrap;
-}
-
-.quest-ui-event-preview-icon {
-    width: 11px;
-    height: 11px;
-    flex: 0 0 11px;
-    fill: none;
-    stroke: currentColor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.55;
-}
 
 /* Category is a first-class filter and remains readable on narrow Event Log panels. */
 .quest-ui-event-log-panel .quest-ui-event-filter-row {
@@ -176,6 +388,10 @@
 
 .quest-ui-event-semantic.is-danger {
     color: var(--status-danger, #f23f42);
+}
+
+.quest-ui-event-semantic.is-blocked {
+    color: color-mix(in srgb, var(--status-warning, #f0b232) 62%, var(--status-danger, #f23f42));
 }
 
 .quest-ui-event-semantic.is-warning {
