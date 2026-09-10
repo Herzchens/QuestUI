@@ -1,0 +1,85 @@
+/* Cursor-paged Event Log list. QuestUI window-renders loaded rows so traversing
+ * the full persisted history does not mount every event at once. */
+.quest-ui-event-virtual-list {
+    position: relative;
+    height: min(410px, calc(100vh - 330px));
+    min-height: 220px;
+    margin-top: 4px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-top: 1px solid color-mix(in srgb, var(--background-modifier-accent) 72%, transparent);
+}
+
+.quest-ui-event-virtual-spacer {
+    position: relative;
+    width: 100%;
+    min-height: 100%;
+}
+
+.quest-ui-event-virtual-item {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.quest-ui-event-virtual-footer {
+    position: absolute;
+    inset-inline: 0;
+}
+
+.quest-ui-event-virtual-list .quest-ui-event-day.quest-ui-event-virtual-day {
+    box-sizing: border-box;
+    height: 100%;
+    margin: 0;
+    padding: 8px 2px 3px;
+}
+
+.quest-ui-event-virtual-list .quest-ui-event-row {
+    box-sizing: border-box;
+    height: calc(100% - 4px);
+    margin: 2px 0;
+}
+
+/* Virtual rows need a predictable height. Full text remains available in
+ * View details; the list summary is intentionally capped to two lines. */
+.quest-ui-event-virtual-list .quest-ui-event-copy > span,
+.quest-ui-event-virtual-list .quest-ui-event-account-name {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+}
+
+.quest-ui-event-page-footer {
+    display: grid;
+    box-sizing: border-box;
+    height: 34px;
+    place-items: center;
+    color: var(--text-muted);
+    font: 650 10px/1.35 var(--font-code);
+}
+
+.quest-ui-event-new-events {
+    padding: 2px 7px;
+    border: 1px solid color-mix(in srgb, var(--brand-360, #949cf7) 46%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 11%, transparent);
+    color: var(--brand-360, #949cf7);
+    font: 700 9px/1.35 var(--font-code);
+    cursor: pointer;
+}
+
+.quest-ui-event-new-events:hover {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 18%, transparent);
+    color: var(--text-normal, #f2f3f5);
+}
+
+@media (max-height: 620px) {
+    .quest-ui-event-virtual-list {
+        height: 220px;
+    }
+}

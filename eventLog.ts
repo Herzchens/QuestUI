@@ -1,5 +1,7 @@
 import type { PluginNative } from "@utils/types";
+import { UserStore } from "@webpack/common";
 
+import { eventBelongsToAccount, eventVisibleForAccount, normalizeEventAccountId, UNAVAILABLE_ACCOUNT_SCOPE } from "./eventLogAccountLogic";
 import {
     classifyConsoleEvent,
     consoleArgsToText,
@@ -43,6 +45,7 @@ const ORION_SHADOW_DELAY_MS = 75;
 const ORION_SHADOW_MATCH_WINDOW_MS = 250;
 const ORION_REBIND_INTERVAL_MS = 1000;
 type PendingOrionConsole = OrionConsoleShadowCandidate & {
+    accountId: string | null;
     classified: ReturnType<typeof classifyConsoleEvent>;
     timer: ReturnType<typeof setTimeout>;
 };
@@ -55,10 +58,18 @@ let orionEventGeneration = 0;
 let orionRejectedIdentity: object | null = null;
 let orionRejectedMethod: Function | null = null;
 let orionRebindTimer: ReturnType<typeof setInterval> | null = null;
+let watchedUserStore: any = null;
+let onCurrentUserChanged: (() => void) | null = null;
+let knownAccountId: string | null = null;
 
 function eventId(): string {
     try { return globalThis.crypto?.randomUUID?.() ?? `evt-${Date.now()}-${Math.random().toString(16).slice(2)}`; }
     catch { return `evt-${Date.now()}-${Math.random().toString(16).slice(2)}`; }
+}
+
+function currentEventLogAccountId(): string | null {
+    try { return normalizeEventAccountId(UserStore?.getCurrentUser?.()?.id); }
+    catch { return null; }
 }
 
 function notify(): void {
@@ -85,15 +96,20 @@ export async function recordQuestUIEvent(input: {
     detail?: Record<string, unknown> | null;
     captureSource?: EventLogEvent["captureSource"];
     timestamp?: number;
+    accountId?: string | null;
 }): Promise<EventLogEvent> {
     const source = input.source ?? "questui";
     const eventCode = sanitizeEventText(input.eventCode, 120);
     const summary = sanitizeEventText(input.summary, 240);
     const suppliedTimestamp = Number(input.timestamp);
+    const accountId = Object.prototype.hasOwnProperty.call(input, "accountId")
+        ? normalizeEventAccountId(input.accountId)
+        : currentEventLogAccountId();
     const event: EventLogEvent = {
         schemaVersion: 1,
         id: eventId(),
         timestamp: Number.isFinite(suppliedTimestamp) && suppliedTimestamp > 0 ? suppliedTimestamp : Date.now(),
+        accountId,
         source,
         severity: input.severity,
         category: input.category ?? inferEventCategory({ source, eventCode, summary }),
@@ -125,7 +141,9 @@ function memoryQuery(options: EventLogQuery): EventLogQueryResult {
     const category = options.category ?? "all";
     const sort = options.sort ?? "newest";
     const limit = Math.max(1, Math.min(5000, options.limit ?? 200));
+    const includeLegacy = options.includeLegacy !== false;
     let events = [...memoryEvents];
+    if (options.accountId) events = events.filter(event => eventVisibleForAccount(event, options.accountId!, includeLegacy));
     if (source !== "all") events = events.filter(event => event.source === source);
     if (severity !== "all") events = events.filter(event => event.severity === severity);
     if (category !== "all") events = events.filter(event => inferEventCategory(event) === category);
@@ -137,18 +155,26 @@ function memoryQuery(options: EventLogQuery): EventLogQueryResult {
 }
 
 export async function queryEventLog(options: EventLogQuery): Promise<EventLogQueryResult> {
-    if (!Native) return memoryQuery(options);
-    try { return await Native.queryEvents(options) as EventLogQueryResult; }
-    catch { return memoryQuery(options); }
+    const scopedOptions: EventLogQuery = {
+        ...options,
+        accountId: currentEventLogAccountId() ?? UNAVAILABLE_ACCOUNT_SCOPE,
+        includeLegacy: options.includeLegacy !== false
+    };
+    if (!Native) return memoryQuery(scopedOptions);
+    try { return await Native.queryEvents(scopedOptions) as EventLogQueryResult; }
+    catch { return memoryQuery(scopedOptions); }
 }
 
 export async function clearEventLog(): Promise<void> {
-    // Do not let an already-captured console shadow repopulate the log after the user clears it.
-    // Structured events emitted after this boundary are new events and remain eligible for capture.
-    clearPendingOrionConsole(false);
-    memoryEvents.length = 0;
+    const accountId = currentEventLogAccountId() ?? UNAVAILABLE_ACCOUNT_SCOPE;
+    // Do not let an already-captured console shadow repopulate this account's log after clear.
+    // Pending shadows from a different account remain intact and keep their capture-time owner.
+    clearPendingOrionConsole(false, accountId);
+    for (let index = memoryEvents.length - 1; index >= 0; index--) {
+        if (eventBelongsToAccount(memoryEvents[index], accountId)) memoryEvents.splice(index, 1);
+    }
     if (Native) {
-        try { await Native.clearEvents(); } catch { }
+        try { await Native.clearEvents(accountId); } catch { }
     }
     notify();
 }
@@ -180,7 +206,8 @@ function recordClassifiedOrionConsole(candidate: PendingOrionConsole): void {
         quest: classified.questName ? { name: classified.questName } : null,
         detail: classified.detail,
         captureSource: "console-preview",
-        timestamp: candidate.capturedAt
+        timestamp: candidate.capturedAt,
+        accountId: candidate.accountId
     });
 }
 
@@ -191,12 +218,13 @@ function flushOrionConsoleCandidate(id: number): void {
     recordClassifiedOrionConsole(candidate);
 }
 
-function clearPendingOrionConsole(flush: boolean): void {
-    for (const candidate of pendingOrionConsole.values()) {
+function clearPendingOrionConsole(flush: boolean, accountId?: string): void {
+    for (const [id, candidate] of pendingOrionConsole) {
+        if (accountId != null && candidate.accountId !== accountId) continue;
         clearTimeout(candidate.timer);
+        pendingOrionConsole.delete(id);
         if (flush) recordClassifiedOrionConsole(candidate);
     }
-    pendingOrionConsole.clear();
 }
 
 function queueOrionConsoleCandidate(level: ConsoleLevel, text: string): void {
@@ -207,6 +235,7 @@ function queueOrionConsoleCandidate(level: ConsoleLevel, text: string): void {
     pendingOrionConsole.set(id, {
         id,
         capturedAt,
+        accountId: currentEventLogAccountId(),
         eventCode: classified.eventCode,
         severity: classified.severity,
         category: classified.category,
@@ -294,11 +323,60 @@ function refreshOrionEventSource(): void {
     }
 }
 
+function reconcileEventLogAccount(): void {
+    if (!captureStarted) return;
+    const current = currentEventLogAccountId();
+    // A transient null is not an account transition. Preserve the last confirmed identity until
+    // Discord publishes a different non-null user, matching Orion's own account watcher rule.
+    if (current == null) return;
+    if (knownAccountId == null) {
+        knownAccountId = current;
+        notify();
+        return;
+    }
+    if (current === knownAccountId) return;
+
+    knownAccountId = current;
+    // Flush old console shadows with the account captured alongside each shadow, then invalidate
+    // the structured callback generation so an old subscription cannot survive the identity swap.
+    if (orionEventIdentity || orionEventMethod || orionEventUnsubscribe) detachOrionEventSource(true);
+    else clearPendingOrionConsole(true);
+    refreshOrionEventSource();
+
+    void recordQuestUIEvent({
+        severity: "info",
+        category: "diagnostic",
+        eventCode: "QUESTUI_ACCOUNT_CHANGED",
+        summary: "Discord account changed; Event Log switched to the current account",
+        accountId: current
+    });
+}
+
+function armAccountWatcher(): void {
+    if (onCurrentUserChanged) return;
+    knownAccountId = currentEventLogAccountId();
+    const store = UserStore as any;
+    if (typeof store?.addChangeListener !== "function") return;
+
+    onCurrentUserChanged = reconcileEventLogAccount;
+    watchedUserStore = store;
+    watchedUserStore.addChangeListener(onCurrentUserChanged);
+}
+
+function disarmAccountWatcher(): void {
+    if (onCurrentUserChanged && watchedUserStore) {
+        try { watchedUserStore.removeChangeListener(onCurrentUserChanged); } catch { }
+    }
+    onCurrentUserChanged = null;
+    watchedUserStore = null;
+    knownAccountId = null;
+}
+
 function captureConsole(level: ConsoleLevel, args: unknown[]): void {
     const source = consoleEventSource(args);
     if (!source) return;
-    // v4.10.7 remains the only hard floor. Future structured APIs are capabilities, not a new
-    // minimum: compatible older Orion builds keep this console-preview fallback.
+    // Structured diagnostics are optional companion capabilities, not a raised hard minimum:
+    // compatible older Orion builds keep this console-preview fallback.
     if (source === "orion") {
         const health = getOrionIntegrationHealth(true);
         if (health.kind === "version-incompatible" || health.kind === "not-installed" || health.kind === "disabled") return;
@@ -340,8 +418,12 @@ export function startEventLogCapture(): void {
         (console as any)[level] = wrapper;
     }
 
+    armAccountWatcher();
     refreshOrionEventSource();
-    orionRebindTimer = setInterval(refreshOrionEventSource, ORION_REBIND_INTERVAL_MS);
+    orionRebindTimer = setInterval(() => {
+        reconcileEventLogAccount();
+        refreshOrionEventSource();
+    }, ORION_REBIND_INTERVAL_MS);
 
     void recordQuestUIEvent({
         severity: "info",
@@ -356,6 +438,7 @@ export function stopEventLogCapture(): void {
     captureStarted = false;
     if (orionRebindTimer != null) clearInterval(orionRebindTimer);
     orionRebindTimer = null;
+    disarmAccountWatcher();
     detachOrionEventSource(false);
     orionRejectedIdentity = null;
     orionRejectedMethod = null;
