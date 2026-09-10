@@ -1,5 +1,6 @@
 import gitHash from "~git-hash";
 
+import { isLegacyUnscopedEvent, sameEventAccountScope } from "./eventLogAccountLogic";
 import { inferEventCategory, sanitizeEventText } from "./eventLogLogic";
 import type { EventLogCategory, EventLogEvent } from "./eventLogTypes";
 import { getOrionIntegrationHealth } from "./orionIntegration";
@@ -54,6 +55,7 @@ function detailLines(event: EventLogEvent): string[] {
 export function buildDiagnosticReport(event: EventLogEvent, availableEvents: EventLogEvent[] = []): string {
     const related = availableEvents
         .filter(candidate => candidate.id !== event.id
+            && sameEventAccountScope(candidate, event)
             && candidate.source === event.source
             && (event.quest?.id ? candidate.quest?.id === event.quest.id : event.quest?.name ? candidate.quest?.name === event.quest.name : true))
         .sort((a, b) => b.timestamp - a.timestamp)
@@ -71,6 +73,7 @@ export function buildDiagnosticReport(event: EventLogEvent, availableEvents: Eve
         `Category:       ${categoryLabel(inferEventCategory(event))}`,
         `Timestamp:      ${new Date(event.timestamp).toISOString()}`,
         `Source:         ${event.source === "orion" ? "OrionQuests" : "QuestUI"}`,
+        `Account scope:  ${isLegacyUnscopedEvent(event) ? "Legacy / unscoped" : "Account-scoped"}`,
         `Summary:        ${sanitizeEventText(event.summary)}`
     ];
 
