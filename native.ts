@@ -2,7 +2,7 @@ import { app, IpcMainInvokeEvent, shell } from "electron";
 import { appendFile, mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
 import { join } from "path";
 
-import { inferEventCategory } from "./eventLogLogic";
+import { eventSearchText, inferEventCategory } from "./eventLogLogic";
 
 const MAX_LOG_BYTES = 10 * 1024 * 1024;
 const COMPACT_TO_BYTES = 5 * 1024 * 1024;
@@ -89,20 +89,7 @@ export async function queryEvents(_: IpcMainInvokeEvent, options: any = {}): Pro
     if (source !== "all") events = events.filter(event => event.source === source);
     if (severity !== "all") events = events.filter(event => event.severity === severity);
     if (category !== "all") events = events.filter(event => event.category === category);
-    if (query) {
-        events = events.filter(event => JSON.stringify({
-            source: event.source,
-            severity: event.severity,
-            category: event.category,
-            eventCode: event.eventCode,
-            summary: event.summary,
-            quest: event.quest,
-            reason: event.detail?.reason,
-            message: event.detail?.message,
-            httpStatus: event.detail?.httpStatus,
-            upstreamCode: event.detail?.upstreamCode
-        }).toLowerCase().includes(query));
-    }
+    if (query) events = events.filter(event => eventSearchText(event).includes(query));
 
     if (sort === "oldest") events.sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
     else if (sort === "severity") events.sort((a, b) => severityRank(a.severity) - severityRank(b.severity) || Number(b.timestamp) - Number(a.timestamp));

@@ -65,6 +65,9 @@ const CATEGORIES = new Set<OrionCompanionEventCategory>([
 const CODE_RE = /^[a-z][a-z0-9_.-]{1,119}$/;
 
 const STRUCTURED_TO_CONSOLE_CODES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+    "engine.started": ["ORION_ENGINE_STARTED"],
+    "engine.stopped": ["ORION_ENGINE_STOPPED"],
+    "quest.blocked": ["ORION_QUEST_BLOCKED"],
     "enroll.waiting": ["ORION_ENROLL_WAITING"],
     "enroll.started": ["ORION_ENROLL_STARTED"],
     "claim.succeeded": ["ORION_CLAIM_SUCCEEDED"],

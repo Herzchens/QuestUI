@@ -43,6 +43,8 @@ function detailLines(event: EventLogEvent): string[] {
     const lines: string[] = [];
     if (detail.httpStatus != null) lines.push(`HTTP Status:    ${String(detail.httpStatus)}`);
     if (detail.upstreamCode != null) lines.push(`Upstream Code:  ${String(detail.upstreamCode)}`);
+    if (typeof detail.terminal === "boolean") lines.push(`Terminal:       ${detail.terminal ? "Yes" : "No"}`);
+    if (typeof detail.retryable === "boolean") lines.push(`Retryable:      ${detail.retryable ? "Yes" : "No"}`);
     if (detail.attempt != null) lines.push(`Attempt:        ${String(detail.attempt)}${detail.maxAttempts != null ? ` / ${String(detail.maxAttempts)}` : ""}`);
     if (detail.reason) lines.push(`Reason:         ${sanitizeEventText(detail.reason)}`);
     if (detail.message) lines.push(`Message:        ${sanitizeEventText(detail.message)}`);

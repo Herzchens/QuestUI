@@ -64,7 +64,7 @@ function severityGlyph(severity: EventLogSeverity): string {
     return "i";
 }
 
-const SEMANTIC_TOKEN_RE = /(\[(?:System|Network|Task|Cycle|Enroll|Claim|Bypass|Achievement|Startup|Patcher)\]|HTTP\s+\d{3}|heartbeat|watchdog|retry(?:ing)?|aborted?|failed?|failure|error|warning|completed?|claimed?|accept(?:ing|ed)?|enrolled?|paused?|resum(?:ed|ing|e)?|started?|stopped?|queued?|captcha|required|unavailable|refus(?:ed|ing)|fallback|bypass|success(?:fully)?)/gi;
+const SEMANTIC_TOKEN_RE = /(\[(?:System|Network|Quest|Task|Cycle|Enroll|Claim|Bypass|Achievement|Startup|Patcher)\]|HTTP\s+\d{3}|heartbeat|watchdog|retry(?:ing)?|aborted?|failed?|failure|error|warning|completed?|claimed?|accept(?:ing|ed)?|enrolled?|paused?|resum(?:ed|ing|e)?|started?|stopped?|queued?|captcha|required|unavailable|refus(?:ed|ing)|fallback|bypass|success(?:fully)?)/gi;
 
 function semanticTokenClass(token: string): string | null {
     const normalized = token.toLowerCase();
@@ -73,7 +73,7 @@ function semanticTokenClass(token: string): string | null {
         return "is-network";
     }
     if (/^\[(cycle|system|startup|patcher)\]$/.test(normalized)) return "is-runtime";
-    if (/^\[(task|enroll|claim|achievement)\]$/.test(normalized)) return "is-quest";
+    if (/^\[(quest|task|enroll|claim|achievement)\]$/.test(normalized)) return "is-quest";
     if (/^\[bypass\]$/.test(normalized) || normalized === "bypass" || normalized === "fallback") return "is-diagnostic";
     if (/aborted|failed|failure|error|refused/.test(normalized)) return "is-danger";
     if (/retry|warning|captcha|required|unavailable|queued|paused|stopped/.test(normalized)) return "is-warning";
@@ -126,6 +126,9 @@ function EventDetail({ event, availableEvents, onBack }: { event: EventLogEvent;
                 {event.quest?.taskType && <><span>Task type</span><code>{event.quest.taskType}</code></>}
                 {event.detail?.httpStatus != null && <><span>HTTP</span><code>{String(event.detail.httpStatus)}</code></>}
                 {event.detail?.upstreamCode != null && <><span>Upstream code</span><code>{String(event.detail.upstreamCode)}</code></>}
+                {typeof event.detail?.terminal === "boolean" && <><span>Terminal</span><strong>{event.detail.terminal ? "Yes" : "No"}</strong></>}
+                {typeof event.detail?.retryable === "boolean" && <><span>Retryable</span><strong>{event.detail.retryable ? "Yes" : "No"}</strong></>}
+                {event.detail?.attempt != null && <><span>Attempt</span><code>{String(event.detail.attempt)}{event.detail?.maxAttempts != null ? ` / ${String(event.detail.maxAttempts)}` : ""}</code></>}
             </div>
             {event.detail?.reason && <section><span className="quest-ui-event-detail-label">Reason</span><p>{String(event.detail.reason)}</p></section>}
             {event.detail?.message && <section><span className="quest-ui-event-detail-label">Message</span><p>{String(event.detail.message)}</p></section>}
