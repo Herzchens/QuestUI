@@ -25,13 +25,19 @@ function categoryLabel(category: EventLogCategory): string {
     return "Diagnostic";
 }
 
+function captureSourceLabel(event: EventLogEvent): string {
+    if (event.captureSource === "console-preview") return "Console fallback";
+    if (event.captureSource === "orion-api") return "Orion structured API";
+    return "QuestUI";
+}
+
 function environmentLines(event: EventLogEvent): string[] {
     const health = getOrionIntegrationHealth(true);
     return [
         `QuestUI:        ${QUESTUI_VERSION}`,
         `OrionQuests:    ${health.installedVersion ?? "Unknown"}`,
         `Orion health:   ${health.kind}`,
-        `Capture source: ${event.captureSource}`,
+        `Capture source: ${captureSourceLabel(event)}`,
         `Discord:        ${discordChannel()} ${discordVersion()}`,
         `Vencord:        v${VERSION} (${gitHash})`,
         `Platform:       ${navigator.platform || "Unknown"}`,

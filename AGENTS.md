@@ -47,7 +47,9 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `dashboardSortLogic.ts` — persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
 - `QuestOrbBalance.tsx`, `orbBalance.ts`, `orbBalanceLogic.ts` — native VirtualCurrencyStore Orb balance and display state.
 - `OrionStatus.tsx`, `orionStatusLogic.ts`, `version.ts`, `versionChannel.ts` — runtime health/version metadata and release-channel styling.
-- `EventLogViewer.tsx`, `eventLog.ts`, `eventLogTypes.ts`, `eventLogLogic.ts`, `native.ts`, `diagnosticReport.ts` — Event Log Preview capture, normalization, persistence/querying, detail UI, and sanitized reports.
+- `EventLogViewer.tsx`, `EventLogWindowedScroller.tsx`, `eventLog.ts`, `eventLogTypes.ts`, `eventLogLogic.ts`, `eventLogAccountLogic.ts`, `eventLogValidation.ts`, `eventLogPage.ts`, `eventLogPaginationLogic.ts`, `eventLogVirtualizationLogic.ts`, `native.ts`, `diagnosticReport.ts` — Event Log capture, account scoping, persistence/querying, stable pagination/windowing, detail UI, and sanitized reports.
+- `orionCapabilities.ts`, `orionEventLogic.ts` — optional Orion structured-event capability discovery, validation, semantic normalization, and console-shadow reconciliation.
+- `orionScheduler.ts`, `orionSchedulerLogic.ts`, `OrionSchedulerPanel.tsx` — optional Orion scheduler snapshot/subscription and unordered live batch presentation.
 - `dashboardPolish.css` — title sweep, Nitro surface, summary layout, and elapsed-progress tones.
 - `QuestCardActions.tsx` — explicit Accept/Claim, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
 - `questActions.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
@@ -55,7 +57,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `questReload.ts`, `questReloadLogic.ts`, `QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
 - `orionCommandLogic.ts`, `orionControlLogic.ts`, `orionIntegration.ts` — companion validation, state machine, and safe delegation.
 - `OrionControls.tsx`, `OrionQuestControl.tsx`, `orionIcons.tsx` — global/per-Quest controls and shared icons.
-- `actions.css`, `orion.css`, `reload.css` — action/control styling.
+- `actions.css`, `orion.css`, `orionScheduler.css`, `reload.css` — action/control styling.
 - `scripts/` — pure regression tests and Stable/Canary reporter checks.
 - `.github/workflows/compatibility.yml` — build/type-check, pure tests, Orion matrix, bundle checks, reporters.
 - `docs/RELEASES.md` — release history, current Stable guidance, and publishing checklist.
@@ -76,6 +78,8 @@ pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionEventLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionSchedulerLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestShortcutLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrbBalanceLogic.ts
@@ -115,6 +119,8 @@ Do not install packages from inside QuestUI. Never claim hosted CI passed withou
 - React state in controls may only schedule rendering/pending UI; never retain a stale snapshot copy across plugin reloads.
 - Subscribe for immediate updates and re-read the current companion object on render.
 - Validate registered-command ownership and method identity immediately before mutation.
+- Optional structured diagnostics use Orion's published structured fields as authority; never re-parse the human message to replace code/category/level/failure semantics.
+- Optional scheduler metadata is display-only. Treat the published batch as unordered and never infer queue position or future execution order.
 
 ## Manual Accept / Claim invariants
 
@@ -194,17 +200,23 @@ Use Vencord's native toast API for explicit success/failure feedback.
 - Timed progress uses `mm:ss / mm:ss`; only the current elapsed value is stage-colored. Prefix/target remain neutral.
 - If Discord supplies a valid expiry, Dashboard expiry copy remains visible. Expired-history visibility is a separate filter with a 15-day recommended default and an unlimited All mode; never mutate underlying expiry/status to achieve either behavior.
 
-## Event Log Preview invariants
+## Event Log invariants
 
 - Capture only QuestUI output and confidently recognized Orion output; never ingest Discord/general plugin console spam.
 - Preserve original console calls. On unload, restore a console method only if QuestUI still owns that wrapper.
 - Sanitize credentials/tokens/OAuth material before persistence and before diagnostic-report generation.
+- New records are account-scoped at capture time. Legacy records with no provable owner stay explicitly unscoped; never guess/migrate them to the current account.
 - Desktop persistence uses one `events.jsonl` file. Crossing 10 MiB compacts oldest complete records away until about 5 MiB remains; do not split JSONL records.
-- The user must be able to reveal the file and clear saved history.
+- Persisted-row validation must reject malformed core records before sort/render code while continuing to accept valid legacy rows that simply predate account/category metadata.
+- The user must be able to reveal the file and clear current-account-owned history while preserving legacy/unscoped rows whose ownership is unknown.
 - Viewer filtering supports Source, Level, Category and search; sorting supports newest, oldest, and errors first; day separators remain chronological for the selected sort.
+- Desktop large-log traversal uses stable snapshot/cursor pagination and Event-Log-owned windowing. Never reintroduce a hidden 5,000-row fallback/cap or append pages from different query generations/sessions.
+- Automatic pagination is triggered only by genuine user scroll near the bottom; do not synthesize scroll on mount or allow a stale timer/query to load/reset another filter/sort/account generation.
 - Keep list summaries concise and put technical console/error context behind **View details**. Warning/error rows and details may copy a sanitized diagnostic report.
 - Orion event semantics must be namespace/context aware. Do not classify every string containing `failed` as terminal: retries, fallbacks and recoveries remain non-terminal when Orion treats them that way.
-- Orion **v4.10.7** is the only hard minimum. Future structured diagnostics/queue capabilities are optional capability checks; compatible builds without them keep the current fallback rather than losing existing integration.
+- When `subscribeEvents()` is present, validate its boundary and treat structured fields as authoritative. Reconcile short-lived human console shadows to avoid duplicate structured/console rows; if the capability is absent or cannot be rebound safely, preserve the sanitized console fallback.
+- Scheduler metadata requires both `getSchedulerSnapshot()` and `subscribeSchedulerState()`. Invalid snapshots fail closed; unsupported builds omit the panel rather than losing core Orion controls.
+- Orion **v4.10.7** remains the hard core-control minimum. Structured-event and scheduler metadata capabilities are additive, independently feature-detected capabilities and must not silently raise that floor.
 
 ## Discord patch / webpack rules
 
@@ -216,9 +228,9 @@ Use Vencord's native toast API for explicit success/failure feedback.
 
 ## Verification
 
-Run the full local gate for source changes. For companion changes, also run Orion pause/resume regression tests and build/type-check both plugins together.
+Run the full local gate for source changes. For companion changes, also run Orion pause/resume, structured-event, and scheduler regression tests and build/type-check both plugins together.
 
-Manual checks should cover the affected states. For the current Stable surface this includes header/Nitro layout; the six-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; Accept/Claim; global/per-Quest Orion transitions; concurrency; Reload whole rotations; dark/light/custom themes; and plugin replacement/reload safety.
+Manual checks should cover the affected states. For the current Stable surface this includes header/Nitro layout; the six-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; 10k+ large-log rendering/pagination when relevant; account switching/legacy visibility; Orion scheduler metadata when supported; Accept/Claim; global/per-Quest Orion transitions; concurrency; Reload whole rotations; dark/light/custom themes; and plugin replacement/reload safety.
 
 Automated checks do not substitute for live Discord evidence. State exactly what was and was not tested.
 
@@ -226,9 +238,9 @@ Automated checks do not substitute for live Discord evidence. State exactly what
 
 - Stable release source is `main`.
 - The old `feat/quest-actions-orion-controls` QuestUI beta and `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` companion fork are historical only; do not target them for current release work.
-- Current Orion integration targets upstream `nyxxbit/discord-quest-completer` v4.10.7+; the maintained coexistence CI gate tracks upstream `main`. Future companion capabilities are feature-detected and must not silently raise the hard minimum.
+- Current Orion integration targets upstream `nyxxbit/discord-quest-completer` v4.10.7+; the maintained coexistence CI gate tracks upstream `main`. Structured-event and scheduler capabilities are optional and must not silently raise the hard core-control minimum.
 - Keep QuestUI and Orion source/license boundaries separate in packages.
-- Git tags/releases require maintainer approval. Verify the intended target SHA, tag availability, CI evidence, and actual runtime evidence before publishing.
+- Git tags/releases require maintainer approval. Verify the intended target SHA, tag availability, CI evidence, actual runtime evidence, and tag signature before publishing.
 
 ## Issue / PR safety
 

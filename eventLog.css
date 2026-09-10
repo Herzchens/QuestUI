@@ -41,14 +41,6 @@
     font-size: 11px;
 }
 
-.quest-ui-event-preview-chip {
-    padding: 2px 5px;
-    border: 1px solid color-mix(in srgb, var(--yellow-300) 45%, transparent);
-    border-radius: 5px;
-    color: var(--yellow-300);
-    font: 600 9px/1.2 var(--font-code);
-}
-
 .quest-ui-event-search {
     box-sizing: border-box;
     width: 100%;
