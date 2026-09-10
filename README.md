@@ -7,7 +7,7 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 ## Release status
 
 > [!IMPORTANT]
-> **v1.2.0** is the current Stable release. It expands the Dashboard, adds persistent sorting and expired-history controls, native Orb balance/runtime metadata, and the Event Log **Preview Feature** while preserving QuestUI's explicit-click/manual-action boundary.
+> **v1.2.1** is the current Stable release. It fixes Orion-owned timed Quest cards continuing to show Discord's optimistic active-desktop progress after Orion has paused or stopped that Quest, and makes connected Orion status distinguish **Running** from **Idle**. It otherwise preserves the v1.2.0 Dashboard/Event Log feature set and QuestUI's explicit-click/manual-action boundary.
 >
 > Orion companion controls require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Known versions below v4.10.7 are incompatible. Future optional Orion capabilities are detected independently: compatible builds that do not expose a newer structured-event API keep the Event Log console-preview fallback instead of losing existing integration.
 >

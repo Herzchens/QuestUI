@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 import {
+    deriveConnectedOrionRuntime,
     deriveOrionIntegrationHealth,
     isKnownOrionVersionIncompatible,
     ORION_MIN_COMPANION_VERSION,
@@ -41,6 +42,10 @@ assert.equal(deriveOrionIntegrationHealth({ ...compatibleFacts, companionCompati
 assert.equal(deriveOrionIntegrationHealth({ ...compatibleFacts, snapshotCompatible: false }).kind, "integration-unavailable");
 assert.equal(deriveOrionIntegrationHealth(compatibleFacts).kind, "connected");
 
+assert.deepEqual(deriveConnectedOrionRuntime(true), { state: "running", copy: "Orion Quest Running" });
+assert.deepEqual(deriveConnectedOrionRuntime(false), { state: "idle", copy: "Orion Quest Idle" });
+assert.deepEqual(deriveConnectedOrionRuntime(null), { state: null, copy: "Orion Quest Connected" });
+assert.deepEqual(deriveConnectedOrionRuntime(undefined), { state: null, copy: "Orion Quest Connected" });
 
 // User intent and plugin enablement take precedence over compatibility diagnostics.
 assert.equal(deriveOrionIntegrationHealth({ ...compatibleFacts, enabled: false, version: "v4.10.6" }).kind, "disabled");

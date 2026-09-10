@@ -2,10 +2,12 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable — v1.2.0
+## Stable — v1.2.1
 
 - Source: `Herzchens/QuestUI` branch `main`.
-- Latest published release: **v1.2.0** (2026-09-07).
+- Latest published release: **v1.2.1** (2026-09-10).
+- v1.2.1 is a focused Dashboard/Orion display hotfix: Orion-owned timed Quests stop using Discord's active-desktop optimistic projection when Orion reports them queued, paused, or stopped, and connected Orion status now distinguishes Running from Idle.
+- The release otherwise preserves the v1.2.0 Dashboard, sorting/filtering, Orb/runtime metadata, Event Log Preview, manual-action boundaries, and Orion v4.10.7+ core companion baseline.
 - v1.2.0 expands the Dashboard, adds persistent sorting and expired-history age controls, native Orb balance/runtime metadata, and the Event Log **Preview Feature** with persistent sanitized diagnostics.
 - The Dashboard always shows Available, Ready, In Progress, Claimed, Expired, and Hidden counts, including zeros. Accepted active Quests remain pinned above available/history cards under every sort mode.
 - Valid expiry copy is no longer limited to a 15-day presentation window; the separate expired-age filter defaults to 15 days and can be set to 7/30/90/custom/All.
@@ -20,6 +22,10 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 `Dashboard • Mode` defaults to enabled for fresh settings. Vencord correctly preserves an existing stored value, so users who previously toggled Dashboard Mode off may keep `false` after upgrading and will need to enable Dashboard Mode manually. This is expected persisted-setting behavior, not a regression.
 
 ## Previous releases
+
+### v1.2.0 — previous feature release
+
+Expanded the Dashboard with persistent sorting/expired-history controls, native Orb/runtime metadata, and the persistent Event Log Preview.
 
 ### v1.1.2 — previous hotfix
 

@@ -103,6 +103,13 @@
     background: var(--status-positive);
 }
 
+.quest-ui-orion-status.is-connected.is-engine-idle .quest-ui-orion-status-dot {
+    animation: none;
+    background: var(--interactive-muted);
+    box-shadow: none;
+    opacity: 1;
+}
+
 .quest-ui-orion-status.is-starting .quest-ui-orion-status-dot {
     animation: quest-ui-orion-starting-breathe 1.65s ease-in-out infinite;
     background: var(--status-warning, #f0b232);

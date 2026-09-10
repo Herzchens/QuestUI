@@ -2,7 +2,9 @@ import { useSettings } from "@api/Settings";
 import { findByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, ThemeStore, UserStore, useRef, useState, useStateFromStores } from "@webpack/common";
 
-import { getOrionIntegrationHealth } from "./orionIntegration";
+import type { OrionControlSnapshot } from "./orionCommandLogic";
+import { orionQuestProgressSource, storedQuestTaskProgress } from "./orionControlLogic";
+import { getOrionControlSnapshot, getOrionIntegrationHealth } from "./orionIntegration";
 import { OrionIntegrationStatus } from "./OrionStatus";
 import { QuestCardActions } from "./QuestCardActions";
 import { QuestOrbBalance } from "./QuestOrbBalance";
@@ -111,10 +113,25 @@ function SortIcon() {
     );
 }
 
-function ProgressRing({ quest, completion }: { quest: NormalizedQuest; completion: DiscordQuestCompletion; }) {
-    const ratio = Number.isFinite(completion?.completedRatio) ? completion.completedRatio : quest.progress / 100;
+function ProgressRing({
+    quest,
+    completion,
+    ratioOverride = null
+}: {
+    quest: NormalizedQuest;
+    completion: DiscordQuestCompletion;
+    ratioOverride?: number | null;
+}) {
+    const hasRatioOverride = Number.isFinite(ratioOverride);
+    const ratio = hasRatioOverride
+        ? Number(ratioOverride)
+        : Number.isFinite(completion?.completedRatio)
+            ? completion.completedRatio
+            : quest.progress / 100;
     const progress = Math.max(0, Math.min(100, ratio * 100));
-    const display = completion?.completedRatioDisplay ?? `${Math.round(progress)}%`;
+    const display = hasRatioOverride
+        ? `${Math.floor(progress)}%`
+        : completion?.completedRatioDisplay ?? `${Math.round(progress)}%`;
     const isClaimed = quest.status === "claimed";
     const isExpired = quest.status === "expired";
 
@@ -259,8 +276,16 @@ function statusLabel(status: NormalizedQuest["status"]): string {
     return "Available";
 }
 
-function questProgressTone(completion: DiscordQuestCompletion, quest: NormalizedQuest): QuestProgressTone {
-    const ratio = Number.isFinite(completion?.completedRatio) ? completion.completedRatio : quest.progress / 100;
+function questProgressTone(
+    completion: DiscordQuestCompletion,
+    quest: NormalizedQuest,
+    ratioOverride: number | null = null
+): QuestProgressTone {
+    const ratio = Number.isFinite(ratioOverride)
+        ? Number(ratioOverride)
+        : Number.isFinite(completion?.completedRatio)
+            ? completion.completedRatio
+            : quest.progress / 100;
     const progress = Math.max(0, Math.min(100, ratio * 100));
 
     // This is progress, not urgency: move from neutral → brand → positive instead of
@@ -287,7 +312,7 @@ function taskTypeLabel(type: QuestTaskType): string {
     return "Quest";
 }
 
-function timedProgressParts(quest: NormalizedQuest): TimedProgressParts | null {
+function timedProgressParts(quest: NormalizedQuest, currentOverride: number | null = null): TimedProgressParts | null {
     const task = quest.primaryTask;
     if (quest.status !== "in-progress" || !task || task.target <= 0) return null;
 
@@ -297,7 +322,10 @@ function timedProgressParts(quest: NormalizedQuest): TimedProgressParts | null {
         || task.key === "PLAY_ACTIVITY";
     if (!timed) return null;
 
-    const current = Math.min(task.current, task.target);
+    const current = Math.min(
+        Number.isFinite(currentOverride) ? Number(currentOverride) : task.current,
+        task.target
+    );
     return {
         prefix: `${taskTypeLabel(task.type)} · `,
         current: formatMmSs(current),
@@ -310,15 +338,23 @@ function dashboardExpiry(quest: NormalizedQuest, now = Date.now()): string | nul
     return formatExpiry(quest.expiresAt, now);
 }
 
-function QuestCard({ quest }: { quest: NormalizedQuest; }) {
+function QuestCard({ quest, orionSnapshot }: { quest: NormalizedQuest; orionSnapshot: OrionControlSnapshot | null; }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
     const now = Date.now();
     const expiry = dashboardExpiry(quest, now);
     const urgency = expiryUrgency(quest.expiresAt, now);
     const taskType = quest.primaryTask?.type ?? quest.tasks[0]?.type ?? "other";
-    const timedProgress = timedProgressParts(quest);
+    const primaryTask = quest.primaryTask;
+    const progressSource = orionQuestProgressSource(orionSnapshot, quest.id);
+    const storedCurrent = progressSource === "stored" && primaryTask
+        ? storedQuestTaskProgress(quest.rawQuest, primaryTask)
+        : null;
+    const timedProgress = timedProgressParts(quest, storedCurrent);
+    const progressRatioOverride = timedProgress != null && storedCurrent != null && primaryTask && primaryTask.target > 0
+        ? Math.min(storedCurrent / primaryTask.target, 1)
+        : null;
     const progressCopy = timedProgress == null ? formatQuestProgress(quest) : null;
-    const progressTone = questProgressTone(completion, quest);
+    const progressTone = questProgressTone(completion, quest, progressRatioOverride);
     const showProgressCopy = quest.status !== "claimable" && quest.status !== "claimed";
     const hasNitroMultiplier = useStateFromStores([UserStore], hasEligibleNitroOrbMultiplier);
     const orbQuantity = effectiveOrbQuantity(quest, hasNitroMultiplier);
@@ -368,7 +404,7 @@ function QuestCard({ quest }: { quest: NormalizedQuest; }) {
             </div>
 
             <div className="quest-ui-card-side">
-                <ProgressRing quest={quest} completion={completion} />
+                <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} />
                 {expiry && (
                     <span className={`quest-ui-card-expiry quest-ui-expiry-${urgency}`} title={expiry}>
                         {expiry}
@@ -686,6 +722,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     useSettings(["plugins.OrionQuests.enabled"]);
     const quests = useQuestSnapshot();
     const orionHealth = getOrionIntegrationHealth(orionIntegration === true);
+    const orionSnapshot = orionHealth.kind === "connected" ? getOrionControlSnapshot() : null;
     const filtered = filterQuests(quests, dashboardScopeFromSettings(dashboardSettings));
     const hasNitroMultiplier = useStateFromStores([UserStore], hasEligibleNitroOrbMultiplier);
     const sortMode = normalizeDashboardSortMode(dashboardSettings.dashboardSortMode);
@@ -708,7 +745,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                     </div>
                 </div>
                 <div className="quest-ui-dashboard-meta-row">
-                    <OrionIntegrationStatus health={orionHealth} />
+                    <OrionIntegrationStatus health={orionHealth} engineRunning={orionSnapshot?.running ?? null} />
                     <span className="quest-ui-meta-product">QuestUI <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>{QUESTUI_VERSION}</span></span>
                     <QuestOrbBalance />
                 </div>
@@ -717,7 +754,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
             <div className="quest-ui-dashboard-content">
                 {visible.length > 0 ? (
                     visible.map(quest => (
-                        <QuestCard key={quest.id} quest={quest} />
+                        <QuestCard key={quest.id} quest={quest} orionSnapshot={orionSnapshot} />
                     ))
                 ) : (
                     <div className="quest-ui-dashboard-empty">
