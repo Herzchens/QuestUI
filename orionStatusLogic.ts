@@ -25,6 +25,11 @@ export type OrionIntegrationHealthFacts = {
     snapshotCompatible: boolean;
 };
 
+export type ConnectedOrionRuntime = {
+    state: "running" | "idle" | null;
+    copy: "Orion Quest Running" | "Orion Quest Idle" | "Orion Quest Connected";
+};
+
 type ParsedVersion = readonly [major: number, minor: number, patch: number];
 
 export function parseOrionVersion(value: unknown): ParsedVersion | null {
@@ -50,6 +55,12 @@ export function isKnownOrionVersionIncompatible(
     const current = parseOrionVersion(value);
     const required = parseOrionVersion(minimum);
     return current != null && required != null && compareParsedVersions(current, required) < 0;
+}
+
+export function deriveConnectedOrionRuntime(running: boolean | null | undefined): ConnectedOrionRuntime {
+    if (running === true) return { state: "running", copy: "Orion Quest Running" };
+    if (running === false) return { state: "idle", copy: "Orion Quest Idle" };
+    return { state: null, copy: "Orion Quest Connected" };
 }
 
 function displayVersion(value: unknown): string | null {

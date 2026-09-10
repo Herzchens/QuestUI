@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v1.2.1 - 2026-09-10
+
+- Fixed #14: Orion-owned timed Quest cards no longer keep showing Discord's active-desktop optimistic progress after Orion publishes the Quest as queued, paused, or stopped. QuestUI falls back to persisted QuestStore task progress for that inactive Orion-owned work while Orion-running and unrelated Quests retain Discord-native progress behavior.
+- Refined connected Orion runtime status to distinguish **Orion Quest Running** from **Orion Quest Idle**; the idle status dot is muted and no longer uses the active connected pulse.
+
 ## v1.2.0 - 2026-09-07
 
 - Expanded the Quest Dashboard for the wider v1.2 layout, added the compact Home action, persistent Sort and Filter controls, stable hover hitboxes, and a six-item one-line summary that always shows **Available**, **Ready**, **In Progress**, **Claimed**, **Expired**, and the live **Hidden** count, including zero values.
