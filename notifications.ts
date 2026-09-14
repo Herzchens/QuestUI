@@ -1,21 +1,45 @@
 import { showNotification } from "@api/Notifications";
 import { NavigationRouter, UserStore } from "@webpack/common";
 
+import { queryEventLog, subscribeEventLog } from "./eventLog";
+import type { EventLogEvent } from "./eventLogTypes";
 import {
     ignoredQuestIds,
     isIgnoredQuestStateReady,
     preloadIgnoredQuests,
     subscribeIgnoredQuests
 } from "./ignoredQuests";
-import { completedQuestTransitions, type QuestNotificationSnapshot } from "./notificationLogic";
+import {
+    completedQuestTransitions,
+    isActionableProblemEvent,
+    problemNotificationKey,
+    type QuestNotificationSnapshot
+} from "./notificationLogic";
 import settings from "./settings";
 import { QuestsStore } from "./stores";
+
+const PROBLEM_QUERY_LIMIT = 100;
+const PROBLEM_DEDUP_MS = 30_000;
+// Event Log change listeners run when a sanitized row enters memory, before the desktop JSONL
+// append necessarily finishes. Query after a short settle delay and once more later so desktop
+// persistence latency cannot silently drop a notification.
+const PROBLEM_SCAN_DELAY_MS = 200;
+const PROBLEM_RECHECK_DELAY_MS = 1_200;
 
 let previousAccountId: string | null = null;
 let previousQuests: QuestNotificationSnapshot[] | null = null;
 let questStoreSubscribed = false;
 let userStoreSubscribed = false;
 let ignoredUnsubscribe: (() => void) | null = null;
+let eventLogUnsubscribe: (() => void) | null = null;
+let problemAccountId: string | null = null;
+let problemBaselineReady = false;
+let problemScanGeneration = 0;
+let problemScanChain: Promise<void> = Promise.resolve();
+let problemScanTimer: ReturnType<typeof setTimeout> | null = null;
+let problemRecheckTimer: ReturnType<typeof setTimeout> | null = null;
+let seenProblemEventIds = new Set<string>();
+const recentProblemKeys = new Map<string, number>();
 
 function currentAccountId(): string | null {
     try {
@@ -45,6 +69,9 @@ function rawQuestValues(): any[] {
 }
 
 function notificationStatus(quest: any): QuestNotificationSnapshot["status"] {
+    const expiresAt = new Date(quest?.config?.expiresAt ?? 0).getTime();
+    if (Number.isFinite(expiresAt) && expiresAt > 0 && expiresAt <= Date.now()) return "expired";
+
     const status = quest?.userStatus;
     if (status?.claimedAt) return "claimed";
     if (status?.completedAt) return "claimable";
@@ -106,12 +133,114 @@ function observeQuestState(): void {
     }
 }
 
+function resetProblemBaseline(accountId: string | null): void {
+    problemAccountId = accountId;
+    problemBaselineReady = false;
+    seenProblemEventIds = new Set<string>();
+    recentProblemKeys.clear();
+}
+
+function shouldNotifyProblem(event: EventLogEvent, accountId: string): boolean {
+    if (!isActionableProblemEvent(event)) return false;
+    if (event.quest?.id && ignoredQuestIds(accountId).has(event.quest.id)) return false;
+
+    const now = Date.now();
+    for (const [key, timestamp] of recentProblemKeys) {
+        if (now - timestamp > PROBLEM_DEDUP_MS) recentProblemKeys.delete(key);
+    }
+
+    const key = problemNotificationKey(event);
+    const last = recentProblemKeys.get(key);
+    if (last != null && now - last <= PROBLEM_DEDUP_MS) return false;
+    recentProblemKeys.set(key, now);
+    return true;
+}
+
+function showProblemNotification(event: EventLogEvent): void {
+    const questName = event.quest?.name?.trim();
+    const title = questName
+        ? "Quest problem"
+        : event.source === "orion"
+            ? "Orion problem"
+            : "QuestUI problem";
+    const body = questName ? `${questName}: ${event.summary}` : event.summary;
+
+    void showNotification({
+        title,
+        body,
+        onClick: event.quest ? openQuestHome : undefined
+    });
+}
+
+async function scanProblemEvents(generation: number): Promise<void> {
+    const accountId = currentAccountId();
+    if (!accountId || generation !== problemScanGeneration) return;
+
+    if (problemAccountId !== accountId) resetProblemBaseline(accountId);
+
+    let events: EventLogEvent[];
+    try {
+        const result = await queryEventLog({ sort: "newest", limit: PROBLEM_QUERY_LIMIT });
+        events = result.events;
+    } catch {
+        return;
+    }
+    if (generation !== problemScanGeneration || currentAccountId() !== accountId) return;
+
+    if (!problemBaselineReady) {
+        seenProblemEventIds = new Set(events.map(event => event.id));
+        problemBaselineReady = true;
+        return;
+    }
+
+    const unseen = events.filter(event => !seenProblemEventIds.has(event.id)).reverse();
+    seenProblemEventIds = new Set(events.map(event => event.id));
+    if (settings.store.notifyRuntimeProblems === false || !isIgnoredQuestStateReady()) return;
+
+    for (const event of unseen) {
+        if (shouldNotifyProblem(event, accountId)) showProblemNotification(event);
+    }
+}
+
+function enqueueProblemScan(generation: number): void {
+    problemScanChain = problemScanChain
+        .catch(() => { })
+        .then(() => scanProblemEvents(generation));
+}
+
+function clearProblemScanTimers(): void {
+    if (problemScanTimer != null) clearTimeout(problemScanTimer);
+    if (problemRecheckTimer != null) clearTimeout(problemRecheckTimer);
+    problemScanTimer = null;
+    problemRecheckTimer = null;
+}
+
+function scheduleProblemScan(): void {
+    const generation = problemScanGeneration;
+    clearProblemScanTimers();
+
+    problemScanTimer = setTimeout(() => {
+        problemScanTimer = null;
+        enqueueProblemScan(generation);
+    }, PROBLEM_SCAN_DELAY_MS);
+
+    problemRecheckTimer = setTimeout(() => {
+        problemRecheckTimer = null;
+        enqueueProblemScan(generation);
+    }, PROBLEM_RECHECK_DELAY_MS);
+}
+
 function onAccountChanged(): void {
     const accountId = currentAccountId();
-    if (accountId === previousAccountId) return;
+    if (accountId === previousAccountId && accountId === problemAccountId) return;
+
     previousAccountId = accountId;
     previousQuests = null;
+    problemScanGeneration++;
+    clearProblemScanTimers();
+    resetProblemBaseline(accountId);
     observeQuestState();
+    scheduleProblemScan();
 }
 
 export function startQuestNotifications(): void {
@@ -140,7 +269,15 @@ export function startQuestNotifications(): void {
         });
     }
 
+    if (!eventLogUnsubscribe) {
+        eventLogUnsubscribe = subscribeEventLog(scheduleProblemScan);
+    }
+
+    problemScanGeneration++;
+    clearProblemScanTimers();
+    resetProblemBaseline(currentAccountId());
     observeQuestState();
+    scheduleProblemScan();
 }
 
 export function stopQuestNotifications(): void {
@@ -156,6 +293,12 @@ export function stopQuestNotifications(): void {
 
     ignoredUnsubscribe?.();
     ignoredUnsubscribe = null;
+    eventLogUnsubscribe?.();
+    eventLogUnsubscribe = null;
+
+    problemScanGeneration++;
+    clearProblemScanTimers();
     previousAccountId = null;
     previousQuests = null;
+    resetProblemBaseline(null);
 }
