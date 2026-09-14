@@ -45,9 +45,27 @@
 }
 
 .quest-ui-card-action-ignore {
+    align-items: center;
     background: var(--background-mod-strong, rgba(255, 255, 255, 0.12));
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
     color: var(--interactive-normal);
+    display: inline-flex;
+    font-size: 0;
+    height: 28px;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0;
+    width: 28px;
+}
+
+.quest-ui-card-action-ignore::before {
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 2 20 20'/%3E%3Cpath d='M6.71 6.71C4.93 7.92 3.56 9.61 3 12c1.73 4.39 5.42 7 9 7 1.65 0 3.3-.48 4.74-1.32'/%3E%3Cpath d='M10.73 5.08A9.6 9.6 0 0 1 12 5c4.58 0 8.5 2.91 10 7a11.8 11.8 0 0 1-2.16 3.19'/%3E%3Cpath d='M14.12 14.12A3 3 0 0 1 9.88 9.88'/%3E%3C/svg%3E") center / contain no-repeat;
+    background: currentColor;
+    content: "";
+    display: block;
+    height: 16px;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 2 20 20'/%3E%3Cpath d='M6.71 6.71C4.93 7.92 3.56 9.61 3 12c1.73 4.39 5.42 7 9 7 1.65 0 3.3-.48 4.74-1.32'/%3E%3Cpath d='M10.73 5.08A9.6 9.6 0 0 1 12 5c4.58 0 8.5 2.91 10 7a11.8 11.8 0 0 1-2.16 3.19'/%3E%3Cpath d='M14.12 14.12A3 3 0 0 1 9.88 9.88'/%3E%3C/svg%3E") center / contain no-repeat;
+    width: 16px;
 }
 
 .quest-ui-card-action-ignore:hover:not(:disabled),
@@ -55,9 +73,19 @@
     background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18));
 }
 
+.quest-ui-card-action-ignore:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-500));
+    outline-offset: 2px;
+}
+
 .quest-ui-card-action-ignore.is-unignore {
-    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 42%, transparent);
-    color: var(--brand-360, #949cf7);
+    border-color: color-mix(in srgb, #c77dff 46%, transparent);
+    color: #c77dff;
+}
+
+.quest-ui-card-action-ignore.is-unignore::before {
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 .quest-ui-card-orion-state,
@@ -82,11 +110,11 @@
 }
 
 .quest-ui-card-ignored-state {
-    --quest-ui-orion-state-color: var(--brand-360, #949cf7);
+    --quest-ui-orion-state-color: #c77dff;
 }
 
 .quest-ui-card-ignored {
-    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 24%, var(--border-subtle, rgba(255, 255, 255, 0.08)));
+    border-color: color-mix(in srgb, #c77dff 28%, var(--border-subtle, rgba(255, 255, 255, 0.08)));
 }
 
 .quest-ui-card-orion-state.is-started {

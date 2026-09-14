@@ -37,8 +37,13 @@
 .quest-ui-dashboard-shell .quest-ui-dashboard-summary > span:nth-child(6) { grid-column: 12; }
 .quest-ui-dashboard-shell .quest-ui-dashboard-summary > span:nth-child(7) { grid-column: 14; }
 
+/* Ignored is an explicit user preference, while Hidden is only a temporary filter result. */
 .quest-ui-dashboard-shell .quest-ui-summary-ignored {
-    color: var(--brand-360, #949cf7);
+    color: #c77dff;
+}
+
+.quest-ui-dashboard-shell .quest-ui-summary-hidden {
+    color: var(--interactive-muted, #949ba4);
 }
 
 /* Use a real fixed-size CSS circle for every status dot. */

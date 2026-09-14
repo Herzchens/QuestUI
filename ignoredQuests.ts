@@ -65,7 +65,9 @@ export function isIgnoredQuestStateReady(): boolean {
 export async function setQuestIgnored(accountId: string, questId: string, ignored: boolean): Promise<void> {
     await loadState();
 
-    writeChain = writeChain.then(async () => {
+    // A failed write must reject that caller without poisoning every later Ignore/Unignore action.
+    // Recover the serialization chain first, then attempt the next independent mutation.
+    writeChain = writeChain.catch(() => { }).then(async () => {
         const optimistic = updateIgnoredQuestState(cachedState, accountId, questId, ignored);
         cachedState = optimistic;
         notify();

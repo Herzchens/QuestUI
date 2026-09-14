@@ -6,6 +6,7 @@ import {
     farmableQuestIds,
     orionQuestProgressSource,
     orionQuestTagState,
+    shouldPauseOrionQuestBeforeIgnore,
     storedQuestTaskProgress
 } from "../orionControlLogic";
 import type { OrionControlSnapshot } from "../orionCommandLogic";
@@ -95,6 +96,19 @@ assert.deepEqual(
     ["a", "b", "c"].map(id => orionQuestTagState(snapshot(false, { a: "running", b: "queued", c: "stopped" }), id)),
     ["stopped", "stopped", "stopped"]
 );
+
+// Ignore must pause only a Quest Orion still owns as active. Explicit paused/stopped state
+// wins over scheduler metadata, and an engine that already stopped needs no mutation.
+assert.equal(shouldPauseOrionQuestBeforeIgnore(null, "a"), false);
+assert.equal(shouldPauseOrionQuestBeforeIgnore(snapshot(false, { a: "running" }), "a"), false);
+assert.equal(shouldPauseOrionQuestBeforeIgnore(snapshot(true, { a: "running" }), "a"), true);
+assert.equal(shouldPauseOrionQuestBeforeIgnore(snapshot(true, { a: "queued" }), "a"), true);
+assert.equal(shouldPauseOrionQuestBeforeIgnore(snapshot(true, { a: "paused" }), "a"), false);
+assert.equal(shouldPauseOrionQuestBeforeIgnore(snapshot(true, { a: "stopped" }), "a"), false);
+assert.equal(shouldPauseOrionQuestBeforeIgnore(snapshot(true, {}, { a: "waiting" }), "a"), true);
+assert.equal(shouldPauseOrionQuestBeforeIgnore(snapshot(true, {}, { a: "running" }), "a"), true);
+assert.equal(shouldPauseOrionQuestBeforeIgnore(snapshot(true, { a: "paused" }, { a: "running" }), "a"), false);
+assert.equal(shouldPauseOrionQuestBeforeIgnore(snapshot(true), "a"), false);
 
 const timedTask = { key: "PLAY_ON_DESKTOP", type: "play" as const, target: 900 };
 assert.equal(storedQuestTaskProgress({ userStatus: { progress: { PLAY_ON_DESKTOP: { value: 321 } } } }, timedTask), 321);

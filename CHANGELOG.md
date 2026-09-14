@@ -2,12 +2,23 @@
 
 ## Unreleased
 
+## v1.4.0 - 2026-09-15
+
+- Added account-scoped **Ignore / Unignore** for enrolled In-Progress Quests, including persisted per-account ignored IDs, a separate **Ignored** catalogue/filter, a dedicated Ignored summary count, and exclusion from the normal Dashboard, shortcut attention, Detailed Status, Quest Home counters, and QuestUI notification attention paths. Ignored Quests keep their real Discord status/progress and no longer inflate **Hidden**. Closes #15.
+- Added exact-ID Orion safety for Ignore: when a compatible Orion companion explicitly reports that exact Quest as active (`running` / `queued`, or scheduler `running` / `waiting`), QuestUI pauses that Quest before persisting Ignore. A failed Pause blocks Ignore only while Orion still reports the Quest active; Ignore never performs a global Stop, and Unignore never auto-resumes or starts Orion.
+- Hardened Ignore persistence against account-switch and write-failure races. Writes remain scoped to the account that clicked, failed writes re-read persisted state instead of leaving false optimistic state, the write chain recovers after an error, and defensive bounds retain the newest requested Ignore while evicting the oldest stored entry/account when necessary.
+- Replaced the text-heavy Ignore/Unignore action with compact eye-off / eye icons, added explicit accessible labels, and visually separated the **Ignored** summary/card treatment from the muted **Hidden** state.
+- Added independently configurable **Notifications • Ready to Claim** and **Notifications • Problems**, both enabled by default. Ready-to-Claim notifications require an observed same-account Discord `In Progress → Ready to Claim` transition and never replay startup/hydration/backlog state. Problems are sourced from sanitized Event Log rows, where errors and explicitly terminal warnings are actionable while normal retry/fallback/recovery warnings remain silent. Closes #16.
+- Routed notifications through Vencord's Notifications API so delivery follows the user's Vencord/native desktop notification settings and normal notifications remain available in Vencord's Notification Log. Completion notifications open Quest Home; ignored Quests do not generate QuestUI completion/problem attention while ignored.
+- Added short-lived problem deduplication, account-reset baselines, and delayed Event Log scans/rechecks so asynchronous desktop persistence does not silently lose a newly actionable notification.
+- Expanded pure regression and compatibility coverage for ignored-Quest normalization/bounds, Orion active-state Pause decisions, completion-transition eligibility, problem severity/deduplication, build/type-check, upstream Orion `main` coexistence, and Stable/Canary reporters.
+
 ## v1.3.0 - 2026-09-11
 
 - Promoted **Event Log** to a supported QuestUI surface and removed the old preview badge, tooltip, accessibility wording, and stale preview-only styling/documentation.
 - Added optional Orion structured-event ingestion through `subscribeEvents()`. Structured code/category/level/failure fields own semantics; the human message remains detail, and recognized console output stays available as a sanitized fallback with short-lived reconciliation to avoid duplicate structured/console twins.
 - Added optional live **Orion Scheduler** metadata through `getSchedulerSnapshot()` and `subscribeSchedulerState()`, including game/video lane limits, running/waiting counts, and current per-Quest batch state. The panel remains explicitly unordered and never invents queue position.
-- Made Event Log history account-aware. New records capture the Discord account at event creation time; pre-account rows remain visible as clearly marked **LEGACY** history rather than being guessed as belonging to the current account, and account-change diagnostics can show the switched-to username beneath the timestamp.
+- Made Event Log history account-aware. New records capture the Discord account at event creation time; pre-account rows remain visible as clearly marked **LEGACY** history rather than being guessed as belonging to the current account, and account-change diagnostics can show the switched-to username beneath their timestamp.
 - Reworked large-log browsing around stable snapshot/cursor pagination in pages of 250 events plus QuestUI-owned windowed rendering. Regression coverage traverses 10,538 events in both Newest and Oldest order with no missing or duplicate IDs.
 - Hardened Event Log persistence so malformed historical JSON objects are rejected at the storage boundary instead of reaching sort/render code and crashing the Viewer.
 - Added bottom-triggered delayed pagination instead of a spam-clickable load-more button, query-generation guards for search/filter/sort/account changes, and timer cleanup so stale live-refresh work cannot reset a newer query.

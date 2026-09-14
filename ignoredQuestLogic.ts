@@ -66,13 +66,26 @@ export function updateIgnoredQuestState(
     if (!normalizedAccountId || !normalizedQuestId) return current;
 
     const accounts = { ...current.accounts };
-    const ids = new Set(accounts[normalizedAccountId] ?? []);
-    if (ignored) ids.add(normalizedQuestId);
-    else ids.delete(normalizedQuestId);
+    const existing = accounts[normalizedAccountId] ?? [];
 
-    const next = Array.from(ids).slice(0, MAX_QUESTS_PER_ACCOUNT);
-    if (next.length > 0) accounts[normalizedAccountId] = next;
-    else delete accounts[normalizedAccountId];
+    if (!ignored) {
+        const next = existing.filter(id => id !== normalizedQuestId);
+        if (next.length > 0) accounts[normalizedAccountId] = next;
+        else delete accounts[normalizedAccountId];
+        return { version: 1, accounts };
+    }
+
+    // Keep a bounded defensive store without turning the bound into a false-success path.
+    // A newly ignored Quest must survive the update, so evict the oldest retained entry first.
+    const next = existing.filter(id => id !== normalizedQuestId);
+    next.push(normalizedQuestId);
+    if (next.length > MAX_QUESTS_PER_ACCOUNT) next.splice(0, next.length - MAX_QUESTS_PER_ACCOUNT);
+
+    if (!(normalizedAccountId in accounts) && Object.keys(accounts).length >= MAX_ACCOUNTS) {
+        const oldestAccountId = Object.keys(accounts)[0];
+        if (oldestAccountId) delete accounts[oldestAccountId];
+    }
+    accounts[normalizedAccountId] = next;
 
     return { version: 1, accounts };
 }
