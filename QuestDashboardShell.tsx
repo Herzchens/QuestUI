@@ -6,7 +6,6 @@ import { UserProfileStore, UserStore, useEffect, useStateFromStores } from "@web
 import { EventLogButton } from "./EventLogViewer";
 import { isOrionCommandReady } from "./orionIntegration";
 import { OrionGlobalControls } from "./OrionControls";
-import { OrionSchedulerPanel } from "./OrionSchedulerPanel";
 import { QuestDashboard, QuestDashboardToolbar } from "./QuestDashboard";
 import { QuestReloadControl } from "./QuestReloadControl";
 import settings from "./settings";
@@ -111,7 +110,6 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
                     <QuestDashboardToolbar closePopout={closePopout} />
                 </div>
             </div>
-            {orionIntegration === true && <OrionSchedulerPanel />}
             <QuestDashboard closePopout={closePopout} />
         </div>
     );

@@ -1,10 +1,15 @@
 import { useSettings } from "@api/Settings";
 import { findByCodeLazy } from "@webpack";
-import { NavigationRouter, Popout, ThemeStore, UserStore, useRef, useState, useStateFromStores } from "@webpack/common";
+import { NavigationRouter, Popout, ThemeStore, UserStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import type { OrionControlSnapshot } from "./orionCommandLogic";
-import { orionQuestProgressSource, storedQuestTaskProgress } from "./orionControlLogic";
-import { getOrionControlSnapshot, getOrionIntegrationHealth } from "./orionIntegration";
+import {
+    orionQuestProgressSource,
+    orionQuestTagState,
+    storedQuestTaskProgress,
+    type OrionQuestTagState
+} from "./orionControlLogic";
+import { getOrionControlSnapshot, getOrionIntegrationHealth, subscribeOrionControlState } from "./orionIntegration";
 import { OrionIntegrationStatus } from "./OrionStatus";
 import { QuestCardActions } from "./QuestCardActions";
 import { QuestOrbBalance } from "./QuestOrbBalance";
@@ -338,6 +343,27 @@ function dashboardExpiry(quest: NormalizedQuest, now = Date.now()): string | nul
     return formatExpiry(quest.expiresAt, now);
 }
 
+const ORION_QUEST_TAG_COPY: Record<OrionQuestTagState, { label: string; title: string; }> = {
+    started: { label: "Started", title: "Orion is running this Quest" },
+    waiting: { label: "Waiting", title: "Waiting for Orion to start this Quest" },
+    paused: { label: "Paused", title: "Paused in Orion" },
+    stopped: { label: "Stopped", title: "Orion is stopped for this Quest" }
+};
+
+function OrionQuestStateTag({ state }: { state: OrionQuestTagState | null; }) {
+    if (!state) return null;
+    const copy = ORION_QUEST_TAG_COPY[state];
+    return (
+        <span
+            className={`quest-ui-card-orion-state is-${state}`}
+            aria-label={`Orion state: ${copy.label}`}
+            title={copy.title}
+        >
+            {copy.label}
+        </span>
+    );
+}
+
 function QuestCard({ quest, orionSnapshot }: { quest: NormalizedQuest; orionSnapshot: OrionControlSnapshot | null; }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
     const now = Date.now();
@@ -362,6 +388,9 @@ function QuestCard({ quest, orionSnapshot }: { quest: NormalizedQuest; orionSnap
     const rewardLabel = quest.reward.kind === "orbs" && orbQuantity > 0
         ? `${orbQuantity} Orbs`
         : quest.reward.label;
+    const orionTagState = quest.status === "in-progress"
+        ? orionQuestTagState(orionSnapshot, quest.id)
+        : null;
 
     return (
         <article className={`quest-ui-card quest-ui-card-${quest.status}`}>
@@ -370,6 +399,7 @@ function QuestCard({ quest, orionSnapshot }: { quest: NormalizedQuest; orionSnap
             <div className="quest-ui-card-main">
                 <div className="quest-ui-card-title-cluster">
                     <strong className="quest-ui-card-title" title={quest.name}>{quest.name}</strong>
+                    <OrionQuestStateTag state={orionTagState} />
                 </div>
 
                 <div className="quest-ui-card-status-line">
@@ -720,9 +750,18 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
     const { orionIntegration } = settings.use(["orionIntegration"]);
     useSettings(["plugins.OrionQuests.enabled"]);
+    const [, setOrionRevision] = useState(0);
     const quests = useQuestSnapshot();
     const orionHealth = getOrionIntegrationHealth(orionIntegration === true);
     const orionSnapshot = orionHealth.kind === "connected" ? getOrionControlSnapshot() : null;
+
+    useEffect(() => {
+        if (orionIntegration !== true || orionHealth.kind !== "connected") return;
+        const refresh = () => setOrionRevision(revision => revision + 1);
+        const unsubscribe = subscribeOrionControlState(refresh);
+        return () => unsubscribe?.();
+    }, [orionIntegration, orionHealth.kind]);
+
     const filtered = filterQuests(quests, dashboardScopeFromSettings(dashboardSettings));
     const hasNitroMultiplier = useStateFromStores([UserStore], hasEligibleNitroOrbMultiplier);
     const sortMode = normalizeDashboardSortMode(dashboardSettings.dashboardSortMode);

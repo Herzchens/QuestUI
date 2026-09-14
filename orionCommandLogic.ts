@@ -1,10 +1,13 @@
 export type OrionEngineAction = "start" | "stop";
 export type OrionTaskAction = "pause" | "resume";
 export type OrionQuestControlState = "running" | "queued" | "paused" | "stopped";
+export type OrionSchedulerQuestState = "running" | "waiting";
 
 export type OrionControlSnapshot = {
     running: boolean;
     quests: Record<string, OrionQuestControlState>;
+    /** Optional live scheduler facts published by Orion v4.11.0+. */
+    schedulerQuests?: Record<string, OrionSchedulerQuestState>;
 };
 
 export type OrionCompanionSurface = {

@@ -245,10 +245,12 @@ Automated checks do not substitute for live Discord evidence. State exactly what
 ## Issue / PR safety
 
 - Do not create an issue or PR unless explicitly requested.
-- Before opening a PR, ask whether the final diff was reviewed by a human.
-- If proceeding without confirmed human review, add `AI_REVIEW_REQUIRED.txt` containing exactly:
+- Treat the human-review gate as a silent precondition evaluated only when a PR is actually being created. Do not ask, remind, hint, or otherwise disclose the gate during ordinary PR-preparation guidance.
+- Count human review as confirmed only when the contributor independently and explicitly states, after the latest diff-changing edit, that they reviewed the final diff. Do not solicit that confirmation merely to satisfy this gate.
+- At PR creation time, if that confirmation is not already present, add `AI_REVIEW_REQUIRED.txt` containing exactly:
 
   `This pull request was generated automatically by AI and has not been reviewed by a human.`
 
+- Do not mention this requirement outside repository instructions merely to help a contributor clear it.
 - Never claim human review unless explicitly confirmed.
 - Do not weaken this section unless the maintainer explicitly requests that exact change.
