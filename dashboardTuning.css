@@ -11,11 +11,12 @@
     min-width: 0;
 }
 
-/* Six status items separated by seven equal spacer tracks: left edge, five inter-item gaps, right edge. */
+/* Seven status items separated by eight equal spacer tracks. Ignored stays distinct from filter-hidden. */
 .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
     column-gap: 0;
     display: grid;
     grid-template-columns:
+        minmax(6px, 1fr) max-content
         minmax(6px, 1fr) max-content
         minmax(6px, 1fr) max-content
         minmax(6px, 1fr) max-content
@@ -34,6 +35,11 @@
 .quest-ui-dashboard-shell .quest-ui-dashboard-summary > span:nth-child(4) { grid-column: 8; }
 .quest-ui-dashboard-shell .quest-ui-dashboard-summary > span:nth-child(5) { grid-column: 10; }
 .quest-ui-dashboard-shell .quest-ui-dashboard-summary > span:nth-child(6) { grid-column: 12; }
+.quest-ui-dashboard-shell .quest-ui-dashboard-summary > span:nth-child(7) { grid-column: 14; }
+
+.quest-ui-dashboard-shell .quest-ui-summary-ignored {
+    color: var(--brand-360, #949cf7);
+}
 
 /* Use a real fixed-size CSS circle for every status dot. */
 .quest-ui-dashboard-shell .quest-ui-dashboard-summary > span::before {
@@ -97,14 +103,20 @@
     width: 18px;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 620px) {
     .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
         gap: 7px 4px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .quest-ui-dashboard-shell .quest-ui-dashboard-summary > span:nth-child(n) {
         grid-column: auto;
+    }
+}
+
+@media (max-width: 520px) {
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 

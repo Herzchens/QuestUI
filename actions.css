@@ -44,7 +44,24 @@
     background: var(--status-positive-background, #1f8f4d);
 }
 
-.quest-ui-card-orion-state {
+.quest-ui-card-action-ignore {
+    background: var(--background-mod-strong, rgba(255, 255, 255, 0.12));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    color: var(--interactive-normal);
+}
+
+.quest-ui-card-action-ignore:hover:not(:disabled),
+.quest-ui-card-action-ignore:active:not(:disabled) {
+    background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18));
+}
+
+.quest-ui-card-action-ignore.is-unignore {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 42%, transparent);
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-card-orion-state,
+.quest-ui-card-ignored-state {
     --quest-ui-orion-state-color: var(--interactive-muted);
     align-items: center;
     background: color-mix(in srgb, var(--quest-ui-orion-state-color) 11%, transparent);
@@ -62,6 +79,14 @@
     padding: 0 6px;
     text-transform: uppercase;
     white-space: nowrap;
+}
+
+.quest-ui-card-ignored-state {
+    --quest-ui-orion-state-color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-card-ignored {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 24%, var(--border-subtle, rgba(255, 255, 255, 0.08)));
 }
 
 .quest-ui-card-orion-state.is-started {

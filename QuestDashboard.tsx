@@ -2,6 +2,7 @@ import { useSettings } from "@api/Settings";
 import { findByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, ThemeStore, UserStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
+import { useIgnoredQuests } from "./ignoredQuests";
 import type { OrionControlSnapshot } from "./orionCommandLogic";
 import {
     orionQuestProgressSource,
@@ -77,6 +78,7 @@ const DASHBOARD_SETTING_KEYS = [
     "dashboardShowClaimable",
     "dashboardShowClaimed",
     "dashboardShowExpired",
+    "dashboardShowIgnored",
     "dashboardExpiredAgeDays",
     "dashboardRewardFilter",
     "dashboardIncludeUnknownRewards",
@@ -364,7 +366,19 @@ function OrionQuestStateTag({ state }: { state: OrionQuestTagState | null; }) {
     );
 }
 
-function QuestCard({ quest, orionSnapshot }: { quest: NormalizedQuest; orionSnapshot: OrionControlSnapshot | null; }) {
+function IgnoredQuestTag() {
+    return (
+        <span className="quest-ui-card-ignored-state" aria-label="QuestUI state: Ignored" title="Ignored in QuestUI">
+            Ignored
+        </span>
+    );
+}
+
+function QuestCard({ quest, orionSnapshot, ignored }: {
+    quest: NormalizedQuest;
+    orionSnapshot: OrionControlSnapshot | null;
+    ignored: boolean;
+}) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
     const now = Date.now();
     const expiry = dashboardExpiry(quest, now);
@@ -393,12 +407,13 @@ function QuestCard({ quest, orionSnapshot }: { quest: NormalizedQuest; orionSnap
         : null;
 
     return (
-        <article className={`quest-ui-card quest-ui-card-${quest.status}`}>
+        <article className={`quest-ui-card quest-ui-card-${quest.status}${ignored ? " quest-ui-card-ignored" : ""}`}>
             <QuestArtwork quest={quest} type={taskType} />
 
             <div className="quest-ui-card-main">
                 <div className="quest-ui-card-title-cluster">
                     <strong className="quest-ui-card-title" title={quest.name}>{quest.name}</strong>
+                    {ignored && <IgnoredQuestTag />}
                     <OrionQuestStateTag state={orionTagState} />
                 </div>
 
@@ -429,7 +444,7 @@ function QuestCard({ quest, orionSnapshot }: { quest: NormalizedQuest; orionSnap
                         {quest.reward.kind === "orbs" && <OrbGlyph />}
                         <strong>{rewardLabel}</strong>
                     </span>
-                    <QuestCardActions quest={quest} />
+                    <QuestCardActions quest={quest} ignored={ignored} />
                 </div>
             </div>
 
@@ -445,7 +460,11 @@ function QuestCard({ quest, orionSnapshot }: { quest: NormalizedQuest; orionSnap
     );
 }
 
-function DashboardSummary({ quests, hiddenCount }: { quests: NormalizedQuest[]; hiddenCount: number; }) {
+function DashboardSummary({ quests, hiddenCount, ignoredCount }: {
+    quests: NormalizedQuest[];
+    hiddenCount: number;
+    ignoredCount: number;
+}) {
     const counts = questStatusCounts(quests);
 
     return (
@@ -455,6 +474,7 @@ function DashboardSummary({ quests, hiddenCount }: { quests: NormalizedQuest[]; 
             <span className="quest-ui-summary-in-progress">{counts.inProgress} In Progress</span>
             <span className="quest-ui-summary-claimed">{counts.claimed} Claimed</span>
             <span className="quest-ui-summary-expired">{counts.expired} Expired</span>
+            <span className="quest-ui-summary-ignored">{ignoredCount} Ignored</span>
             <span className="quest-ui-summary-hidden">{hiddenCount} Hidden</span>
         </div>
     );
@@ -486,6 +506,7 @@ function dashboardFilterCount(store: any): number {
     if (store.dashboardShowClaimable === false) count++;
     if (store.dashboardShowClaimed !== true) count++;
     if (store.dashboardShowExpired !== true) count++;
+    if (store.dashboardShowIgnored === true) count++;
     if (store.dashboardRewardFilter !== "all") count++;
     if (store.dashboardShowExpired === true && Math.floor(Number(store.dashboardExpiredAgeDays ?? 15)) !== 15) count++;
     if (store.dashboardShowPlay === false) count++;
@@ -502,6 +523,7 @@ function clearDashboardFilters(): void {
     settings.store.dashboardShowClaimable = true;
     settings.store.dashboardShowClaimed = true;
     settings.store.dashboardShowExpired = true;
+    settings.store.dashboardShowIgnored = true;
     settings.store.dashboardExpiredAgeDays = 0;
     settings.store.dashboardRewardFilter = "all";
     settings.store.dashboardIncludeUnknownRewards = true;
@@ -518,6 +540,7 @@ function restoreRecommendedFilters(): void {
     settings.store.dashboardShowClaimable = true;
     settings.store.dashboardShowClaimed = false;
     settings.store.dashboardShowExpired = false;
+    settings.store.dashboardShowIgnored = false;
     settings.store.dashboardExpiredAgeDays = 15;
     settings.store.dashboardRewardFilter = "all";
     settings.store.dashboardIncludeUnknownRewards = true;
@@ -528,20 +551,23 @@ function restoreRecommendedFilters(): void {
     settings.store.dashboardShowOther = true;
 }
 
-function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
+function DashboardFilters({ hiddenCount, ignoredCount }: { hiddenCount: number; ignoredCount: number; }) {
     const store = settings.store;
     const expiredAgeDays = Math.max(0, Math.floor(Number(store.dashboardExpiredAgeDays ?? 15)) || 0);
     const expiredAgePresets = [7, 15, 30, 90, 0] as const;
     const customExpiredAge = expiredAgeDays > 0 && !expiredAgePresets.includes(expiredAgeDays as any)
         ? String(expiredAgeDays)
         : "";
+    const visibilityCopy = hiddenCount > 0 || ignoredCount > 0
+        ? `${hiddenCount} hidden by filters · ${ignoredCount} ignored`
+        : "All matching quests are visible";
 
     return (
         <div className="quest-ui-filter-panel" role="group" aria-label="Quest filters">
             <div className="quest-ui-filter-panel-heading">
                 <div>
                     <strong>Filters</strong>
-                    <span>{hiddenCount > 0 ? `${hiddenCount} ${hiddenCount === 1 ? "quest" : "quests"} hidden` : "All matching quests are visible"}</span>
+                    <span>{visibilityCopy}</span>
                 </div>
                 <div className="quest-ui-filter-panel-actions">
                     <button type="button" className="quest-ui-filter-reset" onClick={restoreRecommendedFilters}>Recommended</button>
@@ -557,6 +583,7 @@ function DashboardFilters({ hiddenCount }: { hiddenCount: number; }) {
                     <FilterChip active={store.dashboardShowInProgress !== false} label="In Progress" tone="warning" onClick={() => { store.dashboardShowInProgress = store.dashboardShowInProgress === false; }} />
                     <FilterChip active={store.dashboardShowClaimed === true} label="Claimed" tone="brand" onClick={() => { store.dashboardShowClaimed = store.dashboardShowClaimed !== true; }} />
                     <FilterChip active={store.dashboardShowExpired === true} label="Expired" onClick={() => { store.dashboardShowExpired = store.dashboardShowExpired !== true; }} />
+                    <FilterChip active={store.dashboardShowIgnored === true} label={`Ignored (${ignoredCount})`} onClick={() => { store.dashboardShowIgnored = store.dashboardShowIgnored !== true; }} />
                 </div>
             </div>
 
@@ -649,11 +676,24 @@ function DashboardSorts({ mode, onChange }: { mode: DashboardSortMode; onChange:
     );
 }
 
+function partitionIgnored(quests: NormalizedQuest[], ignoredIds: ReadonlySet<string>): {
+    normal: NormalizedQuest[];
+    ignored: NormalizedQuest[];
+} {
+    const normal: NormalizedQuest[] = [];
+    const ignored: NormalizedQuest[] = [];
+    for (const quest of quests) (ignoredIds.has(quest.id) ? ignored : normal).push(quest);
+    return { normal, ignored };
+}
+
 export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => void; }) {
     const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
     const quests = useQuestSnapshot();
-    const filtered = filterQuests(quests, dashboardScopeFromSettings(dashboardSettings));
-    const hiddenCount = Math.max(0, quests.length - filtered.length);
+    const { ids: ignoredIds } = useIgnoredQuests();
+    const partition = partitionIgnored(quests, ignoredIds);
+    const filtered = filterQuests(partition.normal, dashboardScopeFromSettings(dashboardSettings));
+    const hiddenCount = Math.max(0, partition.normal.length - filtered.length);
+    const ignoredCount = partition.ignored.length;
     const activeFilterCount = dashboardFilterCount(dashboardSettings);
     const sortMode = normalizeDashboardSortMode(dashboardSettings.dashboardSortMode);
     const filterButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -702,7 +742,7 @@ export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => voi
                 shouldShow={filtersOpen}
                 onRequestClose={() => setFiltersOpen(false)}
                 targetElementRef={filterButtonRef}
-                renderPopout={() => <DashboardFilters hiddenCount={hiddenCount} />}
+                renderPopout={() => <DashboardFilters hiddenCount={hiddenCount} ignoredCount={ignoredCount} />}
             >
                 {(_, { isShown }) => (
                     <button
@@ -752,6 +792,8 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     useSettings(["plugins.OrionQuests.enabled"]);
     const [, setOrionRevision] = useState(0);
     const quests = useQuestSnapshot();
+    const { ids: ignoredIds } = useIgnoredQuests();
+    const partition = partitionIgnored(quests, ignoredIds);
     const orionHealth = getOrionIntegrationHealth(orionIntegration === true);
     const orionSnapshot = orionHealth.kind === "connected" ? getOrionControlSnapshot() : null;
 
@@ -762,7 +804,9 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
         return () => unsubscribe?.();
     }, [orionIntegration, orionHealth.kind]);
 
-    const filtered = filterQuests(quests, dashboardScopeFromSettings(dashboardSettings));
+    const filteredNormal = filterQuests(partition.normal, dashboardScopeFromSettings(dashboardSettings));
+    const catalogue = dashboardSettings.dashboardShowIgnored === true ? partition.ignored : [];
+    const filtered = [...filteredNormal, ...catalogue];
     const hasNitroMultiplier = useStateFromStores([UserStore], hasEligibleNitroOrbMultiplier);
     const sortMode = normalizeDashboardSortMode(dashboardSettings.dashboardSortMode);
     const visible = sortDashboardQuests(
@@ -770,7 +814,8 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
         sortMode,
         quest => effectiveOrbQuantity(quest, hasNitroMultiplier)
     );
-    const hiddenCount = Math.max(0, quests.length - filtered.length);
+    const hiddenCount = Math.max(0, partition.normal.length - filteredNormal.length);
+    const ignoredCount = partition.ignored.length;
 
     return (
         <section className="quest-ui-dashboard" role="dialog" aria-label="Quest dashboard">
@@ -780,7 +825,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                         <div className="quest-ui-dashboard-title-row">
                             <strong className="quest-ui-dashboard-title">Quests</strong>
                         </div>
-                        <DashboardSummary quests={quests} hiddenCount={hiddenCount} />
+                        <DashboardSummary quests={partition.normal} hiddenCount={hiddenCount} ignoredCount={ignoredCount} />
                     </div>
                 </div>
                 <div className="quest-ui-dashboard-meta-row">
@@ -793,21 +838,39 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
             <div className="quest-ui-dashboard-content">
                 {visible.length > 0 ? (
                     visible.map(quest => (
-                        <QuestCard key={quest.id} quest={quest} orionSnapshot={orionSnapshot} />
+                        <QuestCard
+                            key={quest.id}
+                            quest={quest}
+                            orionSnapshot={orionSnapshot}
+                            ignored={ignoredIds.has(quest.id)}
+                        />
                     ))
                 ) : (
                     <div className="quest-ui-dashboard-empty">
                         <EmptyStateIllustration />
-                        <strong>No quests match your filters</strong>
+                        <strong>{ignoredCount > 0 && hiddenCount === 0 ? "No visible quests" : "No quests match your filters"}</strong>
                         {hiddenCount > 0
-                            ? <span>{hiddenCount} other {hiddenCount === 1 ? "quest is" : "quests are"} currently hidden.</span>
-                            : <span>No Quest data is currently available in Discord.</span>}
+                            ? <span>{hiddenCount} other {hiddenCount === 1 ? "quest is" : "quests are"} currently hidden by filters.</span>
+                            : ignoredCount > 0 && dashboardSettings.dashboardShowIgnored !== true
+                                ? <span>{ignoredCount} {ignoredCount === 1 ? "quest is" : "quests are"} ignored in QuestUI.</span>
+                                : <span>No Quest data is currently available in Discord.</span>}
 
-                        {hiddenCount > 0 && (
+                        {(hiddenCount > 0 || (ignoredCount > 0 && dashboardSettings.dashboardShowIgnored !== true)) && (
                             <div className="quest-ui-dashboard-empty-actions">
-                                <button type="button" className="quest-ui-dashboard-primary-action" onClick={clearDashboardFilters}>
-                                    Clear Filters
-                                </button>
+                                {hiddenCount > 0 && (
+                                    <button type="button" className="quest-ui-dashboard-primary-action" onClick={clearDashboardFilters}>
+                                        Clear Filters
+                                    </button>
+                                )}
+                                {ignoredCount > 0 && dashboardSettings.dashboardShowIgnored !== true && (
+                                    <button
+                                        type="button"
+                                        className="quest-ui-dashboard-primary-action"
+                                        onClick={() => { settings.store.dashboardShowIgnored = true; }}
+                                    >
+                                        Show Ignored
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

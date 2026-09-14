@@ -101,6 +101,12 @@ export default definePluginSettings({
         description: "Show expired quests.",
         default: false
     },
+    dashboardShowIgnored: {
+        type: OptionType.BOOLEAN,
+        displayName: "Dashboard • Ignored",
+        description: "Show Quests ignored locally by QuestUI.",
+        default: false
+    },
     dashboardExpiredAgeDays: {
         type: OptionType.NUMBER,
         displayName: "Dashboard • Expired Age",
@@ -238,6 +244,7 @@ export default definePluginSettings({
     dashboardShowClaimable: { hidden: true },
     dashboardShowClaimed: { hidden: true },
     dashboardShowExpired: { hidden: true },
+    dashboardShowIgnored: { hidden: true },
     dashboardExpiredAgeDays: { hidden: true },
     dashboardRewardFilter: { hidden: true },
     dashboardIncludeUnknownRewards: { hidden: true },

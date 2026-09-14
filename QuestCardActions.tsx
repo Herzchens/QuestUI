@@ -1,6 +1,7 @@
 import { showToast, Toasts, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { recordQuestUIEvent } from "./eventLog";
+import { setQuestIgnored } from "./ignoredQuests";
 import {
     getOrionControlSnapshot,
     invokeOrionEngineControl,
@@ -37,7 +38,7 @@ function submittedState(action: QuestAction, userId: string, delayMs: number): S
     return { action, userId, releaseAt: Date.now() + delayMs };
 }
 
-export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
+export function QuestCardActions({ quest, ignored = false }: { quest: NormalizedQuest; ignored?: boolean; }) {
     const action: QuestAction | null = quest.status === "available"
         ? "enroll"
         : quest.status === "claimable"
@@ -46,6 +47,7 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
     const currentUserId = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.id ?? null);
     const { orionIntegration } = settings.use(["orionIntegration"]);
     const [pending, setPending] = useState(false);
+    const [ignorePending, setIgnorePending] = useState(false);
     const [submitted, setSubmitted] = useState<SubmittedState | null>(null);
 
     useEffect(() => {
@@ -140,28 +142,75 @@ export function QuestCardActions({ quest }: { quest: NormalizedQuest; }) {
         }
     };
 
-    if (!action) {
-        if (quest.status === "in-progress" && orionIntegration && isOrionCommandReady()) {
-            return <span className="quest-ui-card-actions"><OrionQuestControl quest={quest} /></span>;
+    const canToggleIgnored = ignored || quest.status === "in-progress";
+    const toggleIgnored = async () => {
+        const userIdAtClick = currentUserId;
+        if (!canToggleIgnored || !userIdAtClick || ignorePending) return;
+        setIgnorePending(true);
+        const nextIgnored = !ignored;
+
+        try {
+            await setQuestIgnored(userIdAtClick, quest.id, nextIgnored);
+            showToast(
+                nextIgnored ? `Ignored ${quest.name}` : `Unignored ${quest.name}`,
+                Toasts.Type.SUCCESS
+            );
+            void recordQuestUIEvent({
+                severity: "info",
+                eventCode: nextIgnored ? "QUEST_IGNORED" : "QUEST_UNIGNORED",
+                summary: nextIgnored ? "Quest ignored in QuestUI" : "Quest unignored in QuestUI",
+                quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null }
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "QuestUI could not update the ignored Quest preference.";
+            void recordQuestUIEvent({
+                severity: "error",
+                eventCode: "QUEST_IGNORE_PERSIST_FAILED",
+                summary: "Ignored Quest preference could not be saved",
+                quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
+                detail: { message }
+            });
+            showToast(message, Toasts.Type.FAILURE, { duration: 6000 });
+        } finally {
+            setIgnorePending(false);
         }
-        return null;
-    }
+    };
 
     const actionSubmitted = currentUserId != null
         && submitted?.action === action
         && submitted.userId === currentUserId;
+    const showOrionControl = quest.status === "in-progress" && orionIntegration && isOrionCommandReady();
+
+    if (!action && !showOrionControl && !canToggleIgnored) return null;
 
     return (
         <span className="quest-ui-card-actions">
-            <button
-                type="button"
-                className={`quest-ui-card-action quest-ui-card-action-${action}`}
-                disabled={pending || actionSubmitted || currentUserId == null}
-                aria-busy={pending}
-                onClick={run}
-            >
-                {pending ? "Processing…" : actionSubmitted ? "Sent" : actionLabel(action)}
-            </button>
+            {action && (
+                <button
+                    type="button"
+                    className={`quest-ui-card-action quest-ui-card-action-${action}`}
+                    disabled={pending || actionSubmitted || currentUserId == null}
+                    aria-busy={pending}
+                    onClick={run}
+                >
+                    {pending ? "Processing…" : actionSubmitted ? "Sent" : actionLabel(action)}
+                </button>
+            )}
+
+            {!action && showOrionControl && <OrionQuestControl quest={quest} />}
+
+            {canToggleIgnored && (
+                <button
+                    type="button"
+                    className={`quest-ui-card-action quest-ui-card-action-ignore${ignored ? " is-unignore" : ""}`}
+                    disabled={ignorePending || currentUserId == null}
+                    aria-busy={ignorePending}
+                    onClick={toggleIgnored}
+                    title={ignored ? "Show this Quest normally again" : "Hide this Quest from normal QuestUI views"}
+                >
+                    {ignorePending ? "Saving…" : ignored ? "Unignore" : "Ignore"}
+                </button>
+            )}
         </span>
     );
 }
