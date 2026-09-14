@@ -3,6 +3,7 @@ import type { OrionControlSnapshot, OrionQuestControlState, OrionTaskAction } fr
 
 export type OrionSmartAction = "start" | OrionTaskAction;
 export type OrionQuestProgressSource = "native" | "stored";
+export type OrionQuestTagState = "started" | "waiting" | "paused" | "stopped";
 
 export type GlobalOrionControlState = {
     action: OrionSmartAction;
@@ -68,17 +69,54 @@ export function storedQuestTaskProgress(
 
 /**
  * Decide whether an Orion-owned Quest may use Discord's active-desktop optimistic progress.
- * Unknown Quest ids stay Discord-native: Orion must explicitly claim the Quest before its
- * control state can suppress a projection that may still tick after Pause/Stop.
+ * The live scheduler is more precise than the coarse control row for a current batch: a task
+ * that exists but has not acquired its lane yet must stay on persisted progress while Waiting.
  */
 export function orionQuestProgressSource(
     snapshot: OrionControlSnapshot | null,
     questId: string
 ): OrionQuestProgressSource {
     if (!snapshot) return "native";
+
     const state = snapshot.quests[questId];
+    if (state === "paused" || state === "stopped") return "stored";
+
+    const schedulerState = snapshot.schedulerQuests?.[questId];
+    if (schedulerState != null) {
+        return snapshot.running && schedulerState === "running" ? "native" : "stored";
+    }
+
     if (state == null) return "native";
     return snapshot.running && state === "running" ? "native" : "stored";
+}
+
+/**
+ * Resolve Orion's published state into the compact user-facing card tag.
+ * `WAITING` means Orion owns the Quest in the current live batch but its worker has not started
+ * yet. Older compatible Orion builds can still fall back to the control surface's `queued` row.
+ */
+export function orionQuestTagState(
+    snapshot: OrionControlSnapshot | null,
+    questId: string
+): OrionQuestTagState | null {
+    if (!snapshot) return null;
+    const state = snapshot.quests[questId];
+
+    if (!snapshot.running) {
+        return state === "paused" ? "paused" : "stopped";
+    }
+
+    // Explicit task-control state wins over scheduler metadata during Pause/Stop transitions.
+    if (state === "paused") return "paused";
+    if (state === "stopped") return "stopped";
+
+    const schedulerState = snapshot.schedulerQuests?.[questId];
+    if (schedulerState === "waiting") return "waiting";
+    if (schedulerState === "running") return "started";
+
+    if (state === "running") return "started";
+    if (state === "queued") return "waiting";
+    return null;
 }
 
 /**

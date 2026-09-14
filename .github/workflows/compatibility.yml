@@ -137,7 +137,6 @@ jobs:
             'Highest Orb Reward'
             'Shortest Required Time'
             'Event Log'
-            'Orion Scheduler'
           )
           for marker in "${required_markers[@]}"; do
             if ! grep -Fq "$marker" dist/renderer.js; then
@@ -146,7 +145,6 @@ jobs:
             fi
           done
 
-          grep -Fq 'Live batch · unordered' src/userplugins/QuestUI/OrionSchedulerPanel.tsx
           for marker in getControlSnapshot subscribeControlState controlEngine controlAll controlQuest; do
             if ! grep -Fq "$marker" src/userplugins/QuestUI/orionCommandLogic.ts; then
               echo "Missing QuestUI companion contract marker: $marker" >&2

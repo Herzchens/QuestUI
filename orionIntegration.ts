@@ -1,6 +1,7 @@
 import { ApplicationCommandOptionType, commands } from "@api/Commands";
 import { isPluginEnabled, plugins } from "@api/PluginManager";
 
+import { getOrionSchedulerCapabilitySource } from "./orionCapabilities";
 import {
     isCompatibleOrionCommand,
     isCompatibleOrionCompanion,
@@ -12,6 +13,7 @@ import type {
     OrionEngineAction,
     OrionTaskAction
 } from "./orionCommandLogic";
+import { normalizeOrionSchedulerSnapshot } from "./orionSchedulerLogic";
 import {
     deriveOrionIntegrationHealth,
     isKnownOrionVersionIncompatible
@@ -34,6 +36,21 @@ function plugin(): OrionPlugin | null {
 
 function hasCompatibleCompanion(current: OrionPlugin | null): current is CompatibleOrionPlugin {
     return isCompatibleOrionCompanion(current);
+}
+
+function schedulerQuestStates(current: OrionPlugin): OrionControlSnapshot["schedulerQuests"] | undefined {
+    const source = getOrionSchedulerCapabilitySource();
+    if (!source || source.identity !== current) return undefined;
+
+    try {
+        const snapshot = normalizeOrionSchedulerSnapshot(source.getSnapshot());
+        if (!snapshot) return undefined;
+        return Object.fromEntries(
+            Object.entries(snapshot.quests).map(([questId, quest]) => [questId, quest.state])
+        );
+    } catch {
+        return undefined;
+    }
 }
 
 export class OrionIntegrationError extends Error {
@@ -65,15 +82,36 @@ function getRegisteredOrionCommand(current = plugin()): any | null {
 export function getOrionControlSnapshot(): OrionControlSnapshot | null {
     const current = plugin();
     if (!hasCompatibleCompanion(current)) return null;
-    return readCompatibleOrionSnapshot(current);
+
+    const snapshot = readCompatibleOrionSnapshot(current);
+    if (!snapshot) return null;
+
+    const schedulerQuests = schedulerQuestStates(current);
+    return schedulerQuests === undefined ? snapshot : { ...snapshot, schedulerQuests };
 }
 
 export function subscribeOrionControlState(listener: () => void): (() => void) | null {
     const current = plugin();
     if (!hasCompatibleCompanion(current)) return null;
+
     try {
-        const unsubscribe = current.subscribeControlState(listener);
-        return typeof unsubscribe === "function" ? unsubscribe : null;
+        const controlUnsubscribe = current.subscribeControlState(listener);
+        if (typeof controlUnsubscribe !== "function") return null;
+
+        let schedulerUnsubscribe: (() => void) | null = null;
+        const schedulerSource = getOrionSchedulerCapabilitySource();
+        if (schedulerSource?.identity === current) {
+            try {
+                schedulerUnsubscribe = schedulerSource.subscribe(listener);
+            } catch {
+                schedulerUnsubscribe = null;
+            }
+        }
+
+        return () => {
+            try { controlUnsubscribe(); } catch { }
+            try { schedulerUnsubscribe?.(); } catch { }
+        };
     } catch {
         return null;
     }
