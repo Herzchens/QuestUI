@@ -1,0 +1,247 @@
+.quest-ui-update-indicator {
+    align-items: center;
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 12%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border: 1px solid color-mix(in srgb, var(--status-positive, #23a55a) 38%, var(--border-subtle, transparent));
+    border-radius: 7px;
+    color: var(--status-positive, #23a55a);
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 10.5px;
+    font-weight: 700;
+    gap: 4px;
+    line-height: 1;
+    min-height: 24px;
+    padding: 4px 7px;
+    white-space: nowrap;
+}
+
+.quest-ui-update-indicator:hover,
+.quest-ui-update-indicator.is-open {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 20%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 56%, transparent);
+}
+
+.quest-ui-update-indicator:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-500));
+    outline-offset: 2px;
+}
+
+.quest-ui-update-panel {
+    background: var(--background-floating, var(--background-base-low, #1e1f22));
+    border: 1px solid color-mix(in srgb, var(--brand-500, #5865f2) 18%, var(--border-subtle, transparent));
+    border-radius: 11px;
+    box-shadow: var(--shadow-high, 0 12px 34px rgba(0, 0, 0, 0.42));
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: calc(100vw - 32px);
+    padding: 12px;
+    width: 390px;
+}
+
+.quest-ui-update-panel-heading {
+    align-items: flex-start;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.quest-ui-update-panel-heading > div,
+.quest-ui-update-card-heading > div,
+.quest-ui-update-settings-control > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.quest-ui-update-panel-heading strong,
+.quest-ui-update-card-heading strong,
+.quest-ui-update-settings-control strong {
+    color: var(--text-strong, var(--header-primary));
+}
+
+.quest-ui-update-panel-heading strong {
+    font-size: 13px;
+}
+
+.quest-ui-update-panel-heading span,
+.quest-ui-update-card-heading span,
+.quest-ui-update-settings-control span,
+.quest-ui-update-last-check {
+    color: var(--text-muted);
+    font-size: 10.5px;
+}
+
+.quest-ui-update-check-button,
+.quest-ui-update-card-actions > button,
+.quest-ui-update-settings-control > button {
+    background: var(--background-mod-strong, rgba(255, 255, 255, 0.12));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: 7px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 650;
+    min-height: 28px;
+    padding: 5px 9px;
+}
+
+.quest-ui-update-check-button:hover:not(:disabled),
+.quest-ui-update-card-actions > button:hover:not(:disabled),
+.quest-ui-update-settings-control > button:hover:not(:disabled) {
+    background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18));
+    color: var(--interactive-hover);
+}
+
+.quest-ui-update-check-button:disabled,
+.quest-ui-update-card-actions > button:disabled,
+.quest-ui-update-settings-control > button:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+.quest-ui-update-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.quest-ui-update-card {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 7%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border: 1px solid color-mix(in srgb, var(--brand-500, #5865f2) 22%, var(--border-subtle, transparent));
+    border-radius: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 9px;
+}
+
+.quest-ui-update-card.is-suppressed {
+    opacity: .72;
+}
+
+.quest-ui-update-card-heading {
+    align-items: flex-start;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.quest-ui-update-card-heading strong {
+    font-size: 12px;
+}
+
+.quest-ui-update-channel {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--status-positive, #23a55a) 34%, transparent);
+    border-radius: 999px;
+    color: var(--status-positive, #23a55a) !important;
+    flex: 0 0 auto;
+    font-size: 9.5px !important;
+    font-weight: 700;
+    padding: 3px 6px;
+}
+
+.quest-ui-update-channel.is-prerelease {
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 14%, transparent);
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 34%, transparent);
+    color: var(--status-warning, #f0b232) !important;
+}
+
+.quest-ui-update-release-name {
+    color: var(--text-default, var(--header-secondary));
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.quest-ui-update-suppressed-copy {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.quest-ui-update-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.quest-ui-update-card-actions > button:first-child {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 16%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
+    border-color: color-mix(in srgb, var(--brand-500, #5865f2) 34%, transparent);
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-update-empty {
+    background: var(--background-mod-subtle, rgba(255, 255, 255, 0.05));
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 9px;
+}
+
+.quest-ui-update-status-grid {
+    border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    display: grid;
+    gap: 6px;
+    padding-top: 9px;
+}
+
+.quest-ui-update-status-grid > div {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 86px minmax(0, 1fr);
+}
+
+.quest-ui-update-status-grid strong {
+    color: var(--text-default, var(--header-secondary));
+    font-size: 10.5px;
+}
+
+.quest-ui-update-status-grid span {
+    color: var(--text-muted);
+    font-size: 10.5px;
+    line-height: 1.3;
+}
+
+.quest-ui-update-last-check {
+    border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    padding-top: 8px;
+}
+
+.quest-ui-update-settings-control {
+    align-items: center;
+    background: var(--background-mod-subtle, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 10px;
+    width: 100%;
+}
+
+.quest-ui-update-settings-control > div {
+    flex: 1 1 auto;
+}
+
+.quest-ui-update-settings-control strong {
+    font-size: 12px;
+}
+
+.quest-ui-update-settings-products {
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+    .quest-ui-update-panel {
+        width: min(360px, calc(100vw - 24px));
+    }
+
+    .quest-ui-update-card-actions > button {
+        flex: 1 1 auto;
+    }
+}

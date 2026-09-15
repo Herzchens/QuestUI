@@ -2,6 +2,9 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
 import { isOrionCommandReady, isOrionInstalled } from "./orionIntegration";
+import { DEFAULT_UPDATE_CHECK_HOURS, UPDATE_CHECK_HOUR_MARKERS } from "./updateLogic";
+import { UpdateSettingsControl } from "./UpdateCenter";
+import { notifyUpdateSettingsChanged } from "./updates";
 
 const rewardOptions = [
     { label: "All rewards", value: "all", default: true },
@@ -73,6 +76,34 @@ export default definePluginSettings({
         displayName: "Notifications • Problems",
         description: "Notify about actionable QuestUI/Orion errors and terminal warnings. Normal retries, fallbacks, and progress events are ignored.",
         default: true
+    },
+
+    updateCheckHours: {
+        type: OptionType.SLIDER,
+        displayName: "Updates • Check frequency (hours)",
+        description: "Choose how often QuestUI checks GitHub releases. 0 = Manual only; 168 = 7 days.",
+        markers: [...UPDATE_CHECK_HOUR_MARKERS],
+        default: DEFAULT_UPDATE_CHECK_HOURS,
+        stickToMarkers: true,
+        onChange: notifyUpdateSettingsChanged
+    },
+    updateIncludePrereleases: {
+        type: OptionType.BOOLEAN,
+        displayName: "Updates • Include beta / pre-release",
+        description: "Include newer beta, release-candidate, and other pre-release versions when checking QuestUI and OrionQuests.",
+        default: false,
+        onChange: notifyUpdateSettingsChanged
+    },
+    updateCheckOrion: {
+        type: OptionType.BOOLEAN,
+        displayName: "Updates • Check OrionQuests",
+        description: "Check the separate OrionQuests repository for newer releases. This preference stays saved when OrionQuests is not installed.",
+        default: true,
+        onChange: notifyUpdateSettingsChanged
+    },
+    updateStatus: {
+        type: OptionType.COMPONENT,
+        component: UpdateSettingsControl
     },
 
     // Dashboard filter values live in settings so they persist, but they are configured
@@ -249,6 +280,7 @@ export default definePluginSettings({
         hidden: () => !isOrionInstalled(),
         disabled: orionIntegrationDisabled
     },
+    updateCheckOrion: { disabled: () => !isOrionInstalled() },
 
     dashboardSortMode: { hidden: true },
     dashboardShowAvailable: { hidden: true },

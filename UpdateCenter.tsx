@@ -1,0 +1,257 @@
+import { Popout, showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
+
+import {
+    checkForUpdates,
+    getUpdateSnapshot,
+    skipUpdate,
+    snoozeUpdate,
+    subscribeUpdateState,
+    type PluginUpdateState,
+    type UpdateProduct,
+    type UpdateRelease,
+    type UpdateSnapshot
+} from "./updates";
+
+import "./updateCenter.css";
+
+const RELEASE_URL_PREFIXES: Record<UpdateProduct, string> = {
+    questui: "https://github.com/Herzchens/QuestUI/releases/",
+    orion: "https://github.com/nyxxbit/discord-quest-completer/releases/"
+};
+
+function useUpdateSnapshot(): UpdateSnapshot {
+    const [, setRevision] = useState(0);
+    useEffect(() => subscribeUpdateState(() => setRevision(value => value + 1)), []);
+    return getUpdateSnapshot();
+}
+
+function productLabel(product: UpdateProduct): string {
+    return product === "questui" ? "QuestUI" : "OrionQuests";
+}
+
+function visibleUpdate(state: PluginUpdateState): boolean {
+    return state.kind === "available" && state.suppression === null;
+}
+
+function availableUpdate(state: PluginUpdateState): state is Extract<PluginUpdateState, { kind: "available"; }> {
+    return state.kind === "available";
+}
+
+function safeOpenRelease(product: UpdateProduct, release: UpdateRelease): void {
+    if (!release.htmlUrl.startsWith(RELEASE_URL_PREFIXES[product])) return;
+    if (IS_WEB) {
+        window.open(release.htmlUrl, "_blank", "noopener,noreferrer");
+        return;
+    }
+    VencordNative.native.openExternal(release.htmlUrl);
+}
+
+function formatTimestamp(timestamp: number | null): string {
+    if (!Number.isFinite(timestamp)) return "Never";
+    try {
+        return new Date(Number(timestamp)).toLocaleString();
+    } catch {
+        return "Unknown";
+    }
+}
+
+function stateCopy(product: UpdateProduct, state: PluginUpdateState): string {
+    if (state.kind === "not-installed") return "Not installed";
+    if (state.kind === "disabled") return "Update checks disabled";
+    if (state.kind === "idle") return state.installed ? `Installed ${state.installed}` : "Waiting for first check";
+    if (state.kind === "custom-version") return state.installed
+        ? `Custom version ${state.installed}; automatic version comparison is disabled.`
+        : "Installed version is unavailable.";
+    if (state.kind === "up-to-date") return `${state.installed} is up to date.`;
+    if (state.kind === "error") return state.message;
+    if (state.suppression === "skipped") return `${state.release.tagName} is available, but this version is skipped.`;
+    if (state.suppression === "snoozed") return `${state.release.tagName} is available; reminder snoozed until ${formatTimestamp(state.snoozeUntil)}.`;
+    return `${state.installed} → ${state.release.tagName}`;
+}
+
+function toastFailure(message: string): void {
+    showToast(message, Toasts.Type.FAILURE);
+}
+
+function UpdateReleaseCard({ product, state }: {
+    product: UpdateProduct;
+    state: Extract<PluginUpdateState, { kind: "available"; }>;
+}) {
+    const [pending, setPending] = useState<"snooze" | "skip" | null>(null);
+    const label = productLabel(product);
+
+    const snooze = async () => {
+        if (pending) return;
+        setPending("snooze");
+        try {
+            await snoozeUpdate(product, 24);
+        } catch {
+            toastFailure(`Could not save the ${label} reminder.`);
+        } finally {
+            setPending(null);
+        }
+    };
+
+    const skip = async () => {
+        if (pending) return;
+        setPending("skip");
+        try {
+            await skipUpdate(product, state.release.tagName);
+        } catch {
+            toastFailure(`Could not save the skipped ${label} version.`);
+        } finally {
+            setPending(null);
+        }
+    };
+
+    return (
+        <div className={`quest-ui-update-card${state.suppression ? " is-suppressed" : ""}`}>
+            <div className="quest-ui-update-card-heading">
+                <div>
+                    <strong>{label}</strong>
+                    <span>{state.installed} → {state.release.tagName}</span>
+                </div>
+                <span className={`quest-ui-update-channel${state.release.prerelease ? " is-prerelease" : ""}`}>
+                    {state.release.prerelease ? "Pre-release" : "Stable"}
+                </span>
+            </div>
+
+            {state.release.name && state.release.name !== state.release.tagName && (
+                <span className="quest-ui-update-release-name">{state.release.name}</span>
+            )}
+            {state.suppression === "skipped" && <span className="quest-ui-update-suppressed-copy">Skipped for this version</span>}
+            {state.suppression === "snoozed" && <span className="quest-ui-update-suppressed-copy">Reminder snoozed for 24 hours</span>}
+
+            <div className="quest-ui-update-card-actions">
+                <button type="button" onClick={() => safeOpenRelease(product, state.release)}>View release</button>
+                <button type="button" disabled={pending !== null} onClick={snooze}>{pending === "snooze" ? "Saving…" : "Remind me later"}</button>
+                <button type="button" disabled={pending !== null} onClick={skip}>{pending === "skip" ? "Saving…" : `Skip ${state.release.tagName}`}</button>
+            </div>
+        </div>
+    );
+}
+
+function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
+    const states: Array<[UpdateProduct, PluginUpdateState]> = [
+        ["questui", snapshot.questUI],
+        ["orion", snapshot.orion]
+    ];
+    const available = states.filter((entry): entry is [UpdateProduct, Extract<PluginUpdateState, { kind: "available"; }>] => availableUpdate(entry[1]));
+
+    return (
+        <div className="quest-ui-update-panel" role="group" aria-label="Plugin updates">
+            <div className="quest-ui-update-panel-heading">
+                <div>
+                    <strong>Updates</strong>
+                    <span>QuestUI and optional OrionQuests release checks</span>
+                </div>
+                <button
+                    type="button"
+                    className="quest-ui-update-check-button"
+                    disabled={snapshot.checking}
+                    onClick={() => { void checkForUpdates(true); }}
+                >
+                    {snapshot.checking ? "Checking…" : "Check now"}
+                </button>
+            </div>
+
+            {available.length > 0 ? (
+                <div className="quest-ui-update-list">
+                    {available.map(([product, state]) => <UpdateReleaseCard key={product} product={product} state={state} />)}
+                </div>
+            ) : (
+                <div className="quest-ui-update-empty">No update reminder is currently active.</div>
+            )}
+
+            <div className="quest-ui-update-status-grid">
+                {states.map(([product, state]) => (
+                    <div key={product}>
+                        <strong>{productLabel(product)}</strong>
+                        <span>{stateCopy(product, state)}</span>
+                    </div>
+                ))}
+            </div>
+
+            <span className="quest-ui-update-last-check">Last successful check: {formatTimestamp(snapshot.lastSuccessfulCheckAt)}</span>
+        </div>
+    );
+}
+
+export function UpdateCenterIndicator() {
+    const snapshot = useUpdateSnapshot();
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
+    const [open, setOpen] = useState(false);
+    const count = Number(visibleUpdate(snapshot.questUI)) + Number(visibleUpdate(snapshot.orion));
+
+    if (count === 0) return null;
+
+    return (
+        <Popout
+            position="bottom"
+            align="left"
+            animation={Popout.Animation.NONE}
+            shouldShow={open}
+            onRequestClose={() => setOpen(false)}
+            targetElementRef={buttonRef}
+            renderPopout={() => <UpdateCenterPanel snapshot={snapshot} />}
+        >
+            {(_, { isShown }) => (
+                <button
+                    ref={buttonRef}
+                    type="button"
+                    className={`quest-ui-update-indicator${isShown ? " is-open" : ""}`}
+                    onClick={() => setOpen(value => !value)}
+                    aria-expanded={isShown}
+                    aria-label={`${count} plugin ${count === 1 ? "update" : "updates"} available`}
+                    title={`${count} ${count === 1 ? "update" : "updates"} available`}
+                >
+                    <span aria-hidden="true">↑</span>
+                    {count} {count === 1 ? "update" : "updates"}
+                </button>
+            )}
+        </Popout>
+    );
+}
+
+export function UpdateSettingsControl() {
+    const snapshot = useUpdateSnapshot();
+    const [manualPending, setManualPending] = useState(false);
+
+    const check = async () => {
+        if (manualPending || snapshot.checking) return;
+        setManualPending(true);
+        try {
+            await checkForUpdates(true);
+        } catch {
+            toastFailure("QuestUI could not check for plugin updates.");
+        } finally {
+            setManualPending(false);
+        }
+    };
+
+    const questUpdate = visibleUpdate(snapshot.questUI);
+    const orionUpdate = visibleUpdate(snapshot.orion);
+    const activeCount = Number(questUpdate) + Number(orionUpdate);
+
+    return (
+        <div className="quest-ui-update-settings-control">
+            <div>
+                <strong>Update status</strong>
+                <span>
+                    {activeCount > 0
+                        ? `${activeCount} ${activeCount === 1 ? "update is" : "updates are"} available.`
+                        : snapshot.checking
+                            ? "Checking GitHub releases…"
+                            : `Last successful check: ${formatTimestamp(snapshot.lastSuccessfulCheckAt)}`}
+                </span>
+                <span className="quest-ui-update-settings-products">
+                    QuestUI: {stateCopy("questui", snapshot.questUI)}
+                    {snapshot.orion.kind !== "not-installed" && <> · Orion: {stateCopy("orion", snapshot.orion)}</>}
+                </span>
+            </div>
+            <button type="button" disabled={manualPending || snapshot.checking} onClick={check}>
+                {manualPending || snapshot.checking ? "Checking…" : "Check now"}
+            </button>
+        </div>
+    );
+}

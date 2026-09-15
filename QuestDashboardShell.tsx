@@ -9,6 +9,7 @@ import { OrionGlobalControls } from "./OrionControls";
 import { QuestDashboard, QuestDashboardToolbar } from "./QuestDashboard";
 import { QuestReloadControl } from "./QuestReloadControl";
 import settings from "./settings";
+import { UpdateCenterIndicator } from "./UpdateCenter";
 
 import "./orion.css";
 import "./dashboardPolish.css";
@@ -103,6 +104,7 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
         <div className={`quest-ui-dashboard-shell has-dashboard-tools${showOrionControls ? " has-orion-control" : ""}`}>
             <div className="quest-ui-dashboard-topbar">
                 <QuestDashboardDisplayTitle />
+                <UpdateCenterIndicator />
                 <div className="quest-ui-dashboard-header-tools">
                     {showOrionControls && <OrionGlobalControls />}
                     <QuestReloadControl />
