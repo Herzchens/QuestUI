@@ -17,6 +17,20 @@ import {
 
 import "./updateCenter.css";
 
+interface ManagedReleaseUpdateResult {
+    ok: boolean;
+    status: string;
+    message: string;
+    restartRequired?: boolean;
+}
+
+type OrionNativeUpdater = {
+    updateOrionRelease?: (
+        installedVersion: string,
+        targetVersion: string
+    ) => Promise<ManagedReleaseUpdateResult> | ManagedReleaseUpdateResult;
+};
+
 const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>
     : null;
@@ -25,6 +39,17 @@ const RELEASE_URL_PREFIXES: Record<UpdateProduct, string> = {
     questui: "https://github.com/Herzchens/QuestUI/releases/",
     orion: "https://github.com/nyxxbit/discord-quest-completer/releases/"
 };
+
+function orionNativeUpdater(): OrionNativeUpdater | null {
+    if (IS_WEB) return null;
+    try {
+        const helpers = VencordNative.pluginHelpers as unknown as Record<string, unknown>;
+        const candidate = helpers?.OrionQuests;
+        return candidate && typeof candidate === "object" ? candidate as OrionNativeUpdater : null;
+    } catch {
+        return null;
+    }
+}
 
 function useUpdateSnapshot(): UpdateSnapshot {
     const [, setRevision] = useState(0);
@@ -85,22 +110,35 @@ function UpdateReleaseCard({ product, state }: {
     state: Extract<PluginUpdateState, { kind: "available"; }>;
 }) {
     const [pending, setPending] = useState<"update" | "snooze" | "skip" | null>(null);
-    const [updateResult, setUpdateResult] = useState<QuestUIUpdateResult | null>(null);
+    const [updateResult, setUpdateResult] = useState<ManagedReleaseUpdateResult | null>(null);
     const label = productLabel(product);
+    const canNativeUpdate = product === "questui"
+        ? Native !== null
+        : typeof orionNativeUpdater()?.updateOrionRelease === "function";
 
-    const updateQuestUI = async () => {
-        if (product !== "questui" || !Native || pending) return;
+    const updateRelease = async () => {
+        if (!canNativeUpdate || pending) return;
         setPending("update");
         setUpdateResult(null);
         try {
-            const result = await Native.updateQuestUIRelease(state.installed, state.release.tagName);
+            let result: ManagedReleaseUpdateResult;
+            if (product === "questui") {
+                if (!Native) return;
+                result = await Native.updateQuestUIRelease(state.installed, state.release.tagName) as QuestUIUpdateResult;
+            } else {
+                const orionNative = orionNativeUpdater();
+                if (typeof orionNative?.updateOrionRelease !== "function") {
+                    throw new Error("This OrionQuests build does not expose its managed release updater.");
+                }
+                result = await orionNative.updateOrionRelease(state.installed, state.release.tagName);
+            }
             setUpdateResult(result);
             showToast(result.message, result.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
         } catch {
-            const result: QuestUIUpdateResult = {
+            const result: ManagedReleaseUpdateResult = {
                 ok: false,
                 status: "failed",
-                message: "QuestUI could not invoke its native release updater."
+                message: `${label} could not invoke its managed release updater.`
             };
             setUpdateResult(result);
             toastFailure(result.message);
@@ -150,6 +188,9 @@ function UpdateReleaseCard({ product, state }: {
             )}
             {state.suppression === "skipped" && <span className="quest-ui-update-suppressed-copy">Skipped for this version</span>}
             {state.suppression === "snoozed" && <span className="quest-ui-update-suppressed-copy">Reminder snoozed for 24 hours</span>}
+            {product === "orion" && !canNativeUpdate && (
+                <span className="quest-ui-update-suppressed-copy">One-click update is not exposed by this OrionQuests build. Use View release.</span>
+            )}
             {updateResult && (
                 <span className={`quest-ui-update-result${updateResult.ok ? " is-success" : " is-error"}`}>
                     {updateResult.message}
@@ -157,8 +198,8 @@ function UpdateReleaseCard({ product, state }: {
             )}
 
             <div className="quest-ui-update-card-actions">
-                {product === "questui" && Native && !updateResult?.restartRequired && (
-                    <button type="button" disabled={pending !== null} onClick={updateQuestUI}>
+                {canNativeUpdate && !updateResult?.restartRequired && (
+                    <button type="button" disabled={pending !== null} onClick={updateRelease}>
                         {pending === "update" ? "Updating…" : "Update now"}
                     </button>
                 )}
