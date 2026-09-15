@@ -82,6 +82,14 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testDashboardSortLogic.ts
 
+      - name: Test ignored Quest logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testIgnoredQuestLogic.ts
+
+      - name: Test notification logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testNotificationLogic.ts
+
       - name: Test Event Log logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
@@ -133,10 +141,12 @@ jobs:
             'Quest list refreshed.'
             'OrionQuests'
             'Orion Quest Version Incompatible'
-            'v1.3.0'
+            'v1.4.0'
             'Highest Orb Reward'
             'Shortest Required Time'
             'Event Log'
+            'Ignored'
+            'Quest ready to claim'
           )
           for marker in "${required_markers[@]}"; do
             if ! grep -Fq "$marker" dist/renderer.js; then
@@ -154,6 +164,9 @@ jobs:
           grep -Fq 'Processing…' src/userplugins/QuestUI/QuestCardActions.tsx
           grep -Fq 'MAX_LOG_BYTES = 10 * 1024 * 1024' src/userplugins/QuestUI/native.ts
           grep -Fq 'COMPACT_TO_BYTES = 5 * 1024 * 1024' src/userplugins/QuestUI/native.ts
+          grep -Fq 'QuestUI:ignored-quests:v1' src/userplugins/QuestUI/ignoredQuests.ts
+          grep -Fq 'completedQuestTransitions' src/userplugins/QuestUI/notifications.ts
+          grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/notifications.ts
 
           grep -Fq 'shouldShow={dashboardOpen}' src/userplugins/QuestUI/QuestButton.tsx
           grep -Fq 'onRequestClose={closeDashboard}' src/userplugins/QuestUI/QuestButton.tsx

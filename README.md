@@ -2,16 +2,18 @@
 
 QuestUI is a standalone Vencord userplugin for quick access to Discord Quests and a compact, live view of their state.
 
-QuestUI is UI-focused rather than a Quest-completion engine. It can perform two narrowly scoped Quest mutations only when **you click them yourself** — **Accept Quest** and **Claim Reward**. It does not generate Quest progress, spoof games/streams, auto-claim, or bypass Discord challenges.
+QuestUI is UI-focused rather than a Quest-completion engine. It can perform two narrowly scoped Discord Quest mutations only when **you click them yourself** — **Accept Quest** and **Claim Reward**. It does not generate Quest progress, spoof games/streams, auto-claim, or bypass Discord challenges.
 
 ## Release status
 
 > [!IMPORTANT]
-> **v1.3.0** is the current Stable release. It promotes Event Log to the normal supported QuestUI surface, adds account-aware persistent history with complete cursor-based pagination and windowed rendering for large logs, consumes Orion structured events when available, and shows Orion live scheduler metadata without changing QuestUI's explicit-click/manual-action boundary.
+> **v1.4.0** is the current Stable release. It adds account-scoped **Ignore / Unignore**, a dedicated Ignored catalogue and seven-item summary, and configurable Vencord notifications for **Ready to Claim** transitions and actionable QuestUI/Orion problems.
 >
-> Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata are additive capabilities: compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+> Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
-> v1.3.0 release preparation included maintainer live Discord review of the corrected Event Log renderer against a 10k+ persisted log. Hosted build/type-check, upstream-Orion coexistence, and Stable/Canary reporter checks remain release gates, but automated checks are not presented as proof of Discord mutations or an Orion farming session.
+> Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.4.0 release preparation included maintainer live Discord validation of Ignore against an active Orion Quest and a real Ready-to-Claim Vencord/Desktop notification. The Problems notification path is covered by automated logic/CI but was not separately forced in live Discord. Automated checks are not presented as proof of untested runtime behavior.
 
 ## Screenshots
 
@@ -23,7 +25,7 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 
 </p>
 
-The captures above are real Discord runtime screenshots supplied by the maintainer. They remain documentation assets; the current release adds the metadata, Event Log, and Orion scheduler surfaces described below.
+The captures above are real Discord runtime screenshots supplied by the maintainer. They remain documentation assets; newer Stable releases add the metadata, diagnostics, Ignore, and notification surfaces described below.
 
 ## Features
 
@@ -33,7 +35,11 @@ The captures above are real Discord runtime screenshots supplied by the maintain
 
 - **Dashboard Mode** with a wider live Quest dashboard, enabled by default
 
-- Six always-visible status totals: Available, Ready, In Progress, Claimed, Expired, and Hidden
+- Seven always-visible summary totals: Available, Ready, In Progress, Claimed, Expired, Ignored, and Hidden
+
+- Account-scoped **Ignore / Unignore** with a dedicated Ignored catalogue
+
+- Configurable Vencord notifications for **Ready to Claim** and actionable runtime problems; both categories are enabled by default
 
 - Persistent Dashboard sorting, expired-history age filtering, and a compact Home action
 
@@ -47,7 +53,7 @@ The captures above are real Discord runtime screenshots supplied by the maintain
 
 - Account-scoped duplicate-submission guards and Vencord-native toast feedback
 
-- Floating filters for status, reward category, and Quest type
+- Floating filters for status, reward category, Quest type, expired history, and the separate Ignored catalogue
 
 - **Recommended** and **Clear all** filter shortcuts
 
@@ -68,6 +74,8 @@ The captures above are real Discord runtime screenshots supplied by the maintain
   - Compact exact-ID per-Quest **Pause / Resume** control after enrollment
 
   - Engine-wide Start when Orion is stopped
+
+  - Exact-ID Orion Pause before Ignore when that Quest is explicitly active
 
   - Structured Orion diagnostics when the companion exposes `subscribeEvents()`
 
@@ -175,29 +183,43 @@ If the current Discord user has an active Nitro `premiumType`, QuestUI shows a c
 
 The title uses a seamless right-to-left color sweep. `prefers-reduced-motion` disables the motion and keeps the title readable.
 
-The summary row always renders all six counters, including zero values:
+The summary row always renders all seven counters, including zero values:
 
 - **Red** — Available
 - **Green** — Ready
 - **Yellow** — In Progress
 - **Blue / Blurple** — Claimed
 - **Gray** — Expired
-- **Purple** — Hidden
+- **Magenta / Purple** — Ignored
+- **Muted gray** — Hidden
 
-The five Quest-status counts come from the full live Discord Quest snapshot. **Hidden** is the number of Quest cards currently removed by Dashboard filters, including expired-age filtering.
+The five Discord-status counts come from the full non-ignored live Quest snapshot. **Ignored** is a separate account-scoped local-presentation count. **Hidden** counts only non-ignored cards removed by normal Dashboard filters, including expired-age filtering, so Ignore never inflates Hidden.
 
 ### Filters and sorting
 
 The Filter popout supports:
 
 - Status: Available, Ready, In Progress, Claimed, Expired
+- Ignored catalogue: show locally ignored Quests separately from normal status filtering
 - Expired age (when Expired is enabled): 7d, 15d, 30d, 90d, All, or a custom number of days
 - Reward: All rewards, Orbs only, Non-Orb rewards
 - Quest type: Play, Stream, Video, Activity, Other / Unknown
 
-**Recommended** shows Available, In Progress, and Ready while hiding Claimed and Expired cards and restores the 15-day expired-history default. **Clear all** enables every supported status/category and removes the expired-history age limit.
+**Recommended** shows Available, In Progress, and Ready while hiding Claimed and Expired cards and restores the 15-day expired-history default. **Clear all** enables every supported normal status/category and removes the expired-history age limit; Ignored remains a separate explicit catalogue rather than a Discord Quest status.
 
 The Sort popout supports **Recommended**, **Expiring Soon**, **Highest Orb Reward**, **Shortest Required Time**, **Longest Required Time**, **Name A → Z**, and **Name Z → A**. In Progress and Ready Quests are an active accepted bucket and stay above Available, Claimed, and Expired history under every sort mode. Required-time sorting compares normalized timed-task seconds; achievement/count objectives are not misread as durations.
+
+### Ignore / Unignore
+
+Ignore is account-scoped and persisted locally by QuestUI. It does not change Discord enrollment, progress, completion, reward, or claim state.
+
+A normal **In Progress** Quest can be ignored. Ignored Quests are removed from the normal Dashboard list and from QuestUI attention surfaces, including the shortcut attention dot, Detailed Status, Quest Home counters, and QuestUI notifications. They remain visible through the explicit **Ignored** catalogue with their real Discord status and progress.
+
+When a compatible Orion integration is enabled and Orion explicitly publishes that exact Quest as active (`RUNNING` / `QUEUE`, or scheduler `running` / `waiting`), QuestUI sends Orion an exact-ID **Pause** before it saves Ignore. This prevents a hidden Quest from continuing to farm in the background.
+
+If Orion still reports the Quest as active after a failed Pause attempt, Ignore fails closed and the Quest stays visible. QuestUI never converts Ignore into a global Stop. If the Orion Pause succeeds but local Ignore persistence later fails, the Quest remains visible and paused rather than being auto-resumed as a rollback.
+
+**Unignore never auto-resumes or starts Orion.** It only restores the Quest to normal QuestUI presentation so the user can explicitly decide whether to resume it.
 
 ### Live progress
 
@@ -232,9 +254,22 @@ Examples:
 
 Nitro Basic and fractional/credit-only Nitro states are not treated as eligible for this reward multiplier.
 
+## Notifications
+
+QuestUI has two separately configurable notification categories in the QuestUI plugin settings, and both default to enabled:
+
+- **Notifications • Ready to Claim** — one notification when an observed same-account Quest transitions from real Discord **In Progress** to **Ready to Claim**.
+- **Notifications • Problems** — actionable QuestUI/Orion runtime problems from the sanitized Event Log. `error` is actionable; `warning` is actionable only when structured detail marks it terminal.
+
+QuestUI uses Vencord's Notifications API instead of a companion bot, backend, DM relay, or parallel OS-notification system. Delivery therefore follows Vencord's notification configuration: Vencord in-app notification, native desktop notification when Discord is unfocused, or native desktop notification always. Vencord also persists normal notifications into its Notification Log according to the user's global log settings.
+
+Ready-to-Claim notifications do not replay existing completed Quests on startup, account switch, Ignore/Unignore hydration, or setting enablement. Progress ticks and unchanged re-renders do not notify. Clicking a Ready-to-Claim notification opens Discord Quest Home.
+
+Problem notifications ignore normal retry/fallback/recovery warnings, establish existing Event Log history as a baseline rather than a notification backlog, and deduplicate the same short-lived actionable problem. Ignored Quests do not produce QuestUI completion/problem attention while ignored.
+
 ## Manual Accept and Claim
 
-Dashboard cards expose a mutation only when the normalized Quest state calls for it:
+Dashboard cards expose a Discord Quest mutation only when the normalized Quest state calls for it:
 
 - **Available** → **Accept Quest**
 - **Ready to Claim** → **Claim Reward**
@@ -276,13 +311,15 @@ Per-Quest UI after confirmed enrollment:
 - unknown/scanning while engine runs → disabled control rather than guessed state
 - completed → Orion control disappears and Claim Reward becomes available
 
+Ignore may reuse the same approved exact-ID Pause path only when Orion explicitly publishes the exact Quest as active. Unignore does not call Resume, and Ignore never calls global Stop.
+
 QuestUI does not import Orion farming internals and does not fabricate a Discord channel to invoke slash-command callbacks.
 
 ### Orion Scheduler metadata
 
-When the installed Orion build exposes `getSchedulerSnapshot()` and `subscribeSchedulerState()`, QuestUI displays Orion's current game/video lane metadata, including lane limit, running/waiting counts, and current per-Quest running/waiting state.
+When the installed Orion build exposes `getSchedulerSnapshot()` and `subscribeSchedulerState()`, QuestUI uses the published scheduler state to refine per-Quest **STARTED / WAITING** visibility.
 
-The panel deliberately labels the snapshot **Live batch · unordered**. QuestUI does not infer queue position, execution order, or a scheduler decision Orion did not publish.
+QuestUI treats Orion's published live batch as unordered. It does not infer queue position, execution order, ETA, or a scheduler decision Orion did not publish.
 
 ## Event Log
 
@@ -300,7 +337,7 @@ The fallback classifier recognizes Orion/QuestUI output, preserves the original 
 
 **Copy report** produces a sanitized diagnostic report with the selected event, related loaded context, Quest identifiers when available, QuestUI/Orion versions, Orion health/capture source, Discord release channel/client version, Vencord version/commit, platform, and runtime information. Review a copied report before posting it publicly.
 
-Structured Orion events and scheduler metadata are capability-detected independently of the core controls. Orion v4.10.7 remains the hard control baseline; compatible builds without those optional capabilities continue with the Event Log console fallback and omit scheduler metadata.
+Structured Orion events and scheduler metadata are capability-detected independently of the core controls. Orion v4.10.7 remains the hard control baseline; compatible builds without those optional capabilities continue with the Event Log console fallback and omit scheduler-derived metadata.
 
 ## Native Quest Reload
 
@@ -320,6 +357,8 @@ Detailed Status shows one attention state at a time with this priority:
 2. Green — Ready to Claim
 3. Red — Available
 
+Ignored Quests are excluded before this priority is calculated, so an ignored In Progress Quest cannot mask a newly Available Quest.
+
 The numeric badge belongs to the displayed state, not the sum of all statuses.
 
 Quest Home counters use:
@@ -329,13 +368,17 @@ Quest Home counters use:
 - Green — Ready to Claim
 - Blurple — Claimed
 
+Ignored Quests are excluded from these QuestUI-added counters.
+
 ## Compatibility and verification
 
 QuestUI depends on Discord/Vencord internals, so future Discord updates can require matcher or native-lookup maintenance.
 
-The compatibility workflow covers manual-action logic, Orion companion/control and health/version state, Reload rotation boundaries, shortcut snapshot behavior, Orb balance, Dashboard sorting, Event Log classification/account scoping/pagination/windowing/persistence validation, Orion structured-event normalization/reconciliation, Orion scheduler metadata, version-channel classification, clean Vencord build/type-check, the maintained upstream Orion `main` coexistence build/type-check, and Stable/Canary patch reporters.
+The compatibility workflow covers manual-action logic, Orion companion/control and health/version state, Reload rotation boundaries, shortcut snapshot behavior, Orb balance, Dashboard sorting, ignored-Quest state/control derivation, notification transition/problem logic, Event Log classification/account scoping/pagination/windowing/persistence validation, Orion structured-event normalization/reconciliation, Orion scheduler metadata, version-channel classification, clean Vencord build/type-check, the maintained upstream Orion `main` coexistence build/type-check, and Stable/Canary patch reporters.
 
-Automated checks do **not** prove live Discord mutations or a real Orion farming session. Runtime claims should be based on actual client testing.
+Automated checks do **not** prove live Discord mutations or a real Orion farming session. Runtime claims are based on actual client testing where stated.
+
+For v1.4.0 release preparation, the maintainer confirmed in live Discord that ignoring an Orion-controlled Quest pauses the exact Quest as intended, and separately confirmed a real Ready-to-Claim notification was delivered. The Problems notification path remains automated-test/CI verified rather than separately forced in live Discord.
 
 For the v1.1.0 Stable promotion, the implementation checkpoint `5f11470` was also exercised in a live Discord Canary run with OrionQuests `v4.10.8`: external `/orion` state changes propagated into an already-open Dashboard and a real video Quest progressed while the Dashboard stayed open.
 

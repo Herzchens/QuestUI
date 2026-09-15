@@ -2,29 +2,41 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable — v1.3.0
+## Stable — v1.4.0
 
 - Source: `Herzchens/QuestUI` branch `main`.
-- Release target: **v1.3.0** (2026-09-11).
-- v1.3.0 promotes **Event Log** to a supported Stable surface and removes the old preview badge/wording from current UI and documentation.
-- Event Log history is account-aware for newly captured records. Pre-account records remain recoverable as visibly marked **LEGACY** rows because their original account cannot be proven; they are never silently migrated to the current account.
-- Desktop Event Log persistence remains one sanitized `events.jsonl` file. The hard limit is 10 MiB; when exceeded, complete oldest records are discarded until the file is reduced toward about 5 MiB.
-- Large histories use stable snapshot/cursor pagination in pages of 250 events and an Event-Log-owned windowed renderer. Pagination/query changes do not fall back to the former 5,000-row desktop cap, and malformed persisted records are rejected at the native boundary rather than crashing the Viewer.
-- Event Log supports Source / Level / Category filtering, search, Newest / Oldest / Errors-first sorting, day grouping, whole-row semantic color, account-change emphasis, storage/matching indicators, **View details**, sanitized report copy, Open file, and the confirmation-gated **Clear log** flow.
-- When Orion exposes `subscribeEvents()`, QuestUI consumes Orion's structured event code/category/level/failure fields as authoritative. Recognized console output remains a sanitized fallback and is briefly reconciled against structured twins to avoid duplicate persistence.
-- When Orion exposes `getSchedulerSnapshot()` plus `subscribeSchedulerState()`, QuestUI shows live game/video lane limits, running/waiting counts, and current per-Quest running/waiting state. The panel is explicitly **unordered** and does not infer queue position or future execution order.
-- Runtime Orion controls still target **OrionQuests v4.10.7 or newer**. Structured Event Log and scheduler capabilities are additive, independently feature-detected capabilities and do not silently raise the hard core-control minimum.
+- Release target: **v1.4.0** (2026-09-15).
+- v1.4.0 adds account-scoped **Ignore / Unignore** for enrolled In-Progress Quests. Ignored IDs are persisted per Discord account, remain a QuestUI-local presentation preference rather than a Discord Quest status, and are recoverable through the explicit **Ignored** catalogue.
+- The Dashboard summary now always renders seven values: Available, Ready, In Progress, Claimed, Expired, Ignored, and Hidden. Ignored is counted separately and does not inflate Hidden.
+- Ignored Quests are excluded from the normal Dashboard list, shortcut attention, Detailed Status, Quest Home counters, and QuestUI notification attention paths while retaining their real Discord status/progress in the Ignored catalogue.
+- When compatible Orion explicitly reports the exact Quest as active (`running` / `queued`, or scheduler `running` / `waiting`), Ignore delegates an exact-ID **Pause** before local persistence. If the Pause fails and Orion still reports that Quest active, Ignore fails closed and the card stays visible. Ignore never becomes a global Stop, and **Unignore never auto-resumes or starts Orion**.
+- Ignore persistence remains account-scoped across account switches and recovers from failed writes without leaving false optimistic state. Defensive bounds retain the newest requested Ignore while evicting the oldest stored Quest/account entry when necessary.
+- The Ignore/Unignore action uses compact eye-off / eye controls with accessible labels; the Ignored summary/card treatment is visually distinct from muted Hidden.
+- v1.4.0 adds **Notifications • Ready to Claim** and **Notifications • Problems**. Both are separately configurable and both default to enabled.
+- Ready-to-Claim notifications require an observed same-account Discord **In Progress → Ready to Claim** transition. Initial hydration, plugin restart, account switch, Ignore/Unignore hydration, or enabling the setting after completion does not synthesize a completion notification.
+- Problems notifications consume sanitized Event Log rows. `error` is actionable; `warning` is actionable only when structured detail explicitly marks it terminal. Normal retries, fallbacks, recoveries, and progress events do not notify.
+- QuestUI uses Vencord's Notifications API rather than a companion bot, backend, DM relay, or parallel notification service. Delivery therefore follows Vencord's notification settings, including in-app notifications, native desktop notifications, and the normal Vencord Notification Log.
+- Existing Event Log history is a baseline rather than a notification backlog. Problem notifications use short-lived semantic deduplication and delayed desktop Event Log scans/rechecks so asynchronous persistence does not silently lose a newly actionable event.
+- Runtime Orion controls still target **OrionQuests v4.10.7 or newer**. Structured Event Log and scheduler capabilities remain additive, independently feature-detected capabilities and do not silently raise the hard core-control minimum.
 - The maintained Orion coexistence build/type-check tracks upstream `nyxxbit/discord-quest-completer` `main`.
-- During v1.3.0 release preparation, the maintainer confirmed the corrected Event Log renderer against a 10k+ persisted history after the blank-list regression was fixed. Automated compatibility checks remain separate evidence and are not presented as proof of Discord mutations or a real Orion farming session.
+- During v1.4.0 release preparation, the maintainer confirmed in live Discord that Ignore pauses the intended Orion-controlled Quest and separately confirmed that a real Ready-to-Claim notification was delivered. The Problems notification path was not separately forced in live Discord; its coverage is automated logic/CI evidence only.
 - QuestUI and OrionQuests remain separate Vencord userplugins and separate repositories.
 
 ### Upgrade note
 
 `Dashboard • Mode` defaults to enabled for fresh settings. Vencord correctly preserves an existing stored value, so users who previously toggled Dashboard Mode off may keep `false` after upgrading and will need to enable Dashboard Mode manually. This is expected persisted-setting behavior, not a regression.
 
+Both new notification categories default to enabled for users without an existing stored override. Notification delivery follows the user's global Vencord notification configuration.
+
 Existing `events.jsonl` history is retained. Rows written before account-aware persistence can still appear as **LEGACY** because the old schema did not record enough ownership information to assign them safely.
 
+Ignored Quest state is stored separately per Discord account. Unignore restores normal QuestUI presentation only; it does not implicitly resume Orion work.
+
 ## Previous releases
+
+### v1.3.0 — previous feature release
+
+Promoted **Event Log** to a supported Stable surface, added account-aware persistent history with complete cursor pagination and windowed rendering, consumed optional structured Orion events, and used optional Orion scheduler metadata without raising the v4.10.7 core-control minimum.
 
 ### v1.2.1 — previous hotfix
 

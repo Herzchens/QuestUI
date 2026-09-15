@@ -5,6 +5,7 @@ import { Flex } from "@components/Flex";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 
+import { useIgnoredQuests } from "./ignoredQuests";
 import { QuestDashboardShell } from "./QuestDashboardShell";
 import {
     attentionCounts,
@@ -44,7 +45,10 @@ function StatusBadge({ count, label, color }: { count: number; label: string; co
 }
 
 export function QuestsCount() {
-    const status = questStatusCounts(useQuestSnapshot("shortcut"));
+    const quests = useQuestSnapshot("shortcut");
+    const { ready: ignoredReady, ids: ignoredIds } = useIgnoredQuests();
+    const visibleQuests = ignoredReady ? quests.filter(quest => !ignoredIds.has(quest.id)) : [];
+    const status = questStatusCounts(visibleQuests);
 
     return (
         <Flex flexDirection="row" justifyContent="flex-end" className="quest-ui-badges" gap="5px">
@@ -155,6 +159,7 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
     ]);
 
     const allQuests = useQuestSnapshot("shortcut");
+    const { ready: ignoredReady, ids: ignoredIds } = useIgnoredQuests();
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const dashboardMode = settings.store.dashboardMode;
     const [dashboardOpen, setDashboardOpen] = useState(false);
@@ -164,9 +169,15 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
         if (!dashboardMode) setDashboardOpen(false);
     }, [dashboardMode]);
 
+    // Ignore is a QuestUI presentation preference, not a Discord Quest status. Wait for the
+    // account-scoped preference store before showing attention so a persisted ignored Quest
+    // cannot briefly win priority during startup/account changes.
+    const nonIgnoredQuests = ignoredReady
+        ? allQuests.filter(quest => !ignoredIds.has(quest.id))
+        : [];
     const statusQuests = detailed
-        ? filterQuests(allQuests, detailedScopeFromSettings(settings.store))
-        : allQuests;
+        ? filterQuests(nonIgnoredQuests, detailedScopeFromSettings(settings.store))
+        : nonIgnoredQuests;
     const attentionQuests = statusQuests.filter(quest =>
         quest.status === "in-progress" || quest.status === "claimable" || quest.status === "available"
     );

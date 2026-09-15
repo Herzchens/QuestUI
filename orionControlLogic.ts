@@ -120,6 +120,26 @@ export function orionQuestTagState(
 }
 
 /**
+ * Ignore is allowed to pause an Orion-owned active Quest, but only from Orion's own published
+ * state. Explicit paused/stopped state wins over stale scheduler metadata. A stopped engine also
+ * needs no per-Quest mutation even if an older row still says running/queued.
+ */
+export function shouldPauseOrionQuestBeforeIgnore(
+    snapshot: OrionControlSnapshot | null,
+    questId: string
+): boolean {
+    if (!snapshot?.running) return false;
+
+    const state = snapshot.quests[questId];
+    if (state === "paused" || state === "stopped") return false;
+
+    const schedulerState = snapshot.schedulerQuests?.[questId];
+    if (schedulerState === "running" || schedulerState === "waiting") return true;
+
+    return state === "running" || state === "queued";
+}
+
+/**
  * Derive the two global controls without inventing an Orion state mirror.
  * Discord's QuestStore decides whether there is work left; Orion decides running/queued/paused.
  */

@@ -6,9 +6,9 @@ Read `README.md`, `AGENTS.md`, `CHANGELOG.md`, and `docs/RELEASES.md` before cha
 
 ## Scope
 
-QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-clicked native Accept/Claim actions, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide sanitized QuestUI/Orion diagnostics, and optionally delegate controls to a separately installed compatible OrionQuests companion.
+QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-clicked native Accept/Claim actions, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide account-scoped Ignore/Unignore presentation preferences, provide sanitized QuestUI/Orion diagnostics, send local Vencord/native desktop notifications, and optionally delegate controls to a separately installed compatible OrionQuests companion.
 
-Do not turn QuestUI into a Quest farming engine. Do not add automatic enrollment/claim, progress spoofing, heartbeats, targeted quest execution, challenge bypasses, or private Orion farming imports.
+Do not turn QuestUI into a Quest farming engine. Do not add automatic enrollment/claim, progress spoofing, heartbeats, targeted quest execution, challenge bypasses, private Orion farming imports, or a companion-bot/backend/DM requirement just to deliver QuestUI notifications.
 
 ## Development setup
 
@@ -32,6 +32,8 @@ pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestShortcutLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrbBalanceLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testDashboardSortLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testIgnoredQuestLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testNotificationLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
 pnpm build
@@ -116,6 +118,37 @@ Per-Quest UI:
 
 Use Vencord's native toast API for explicit control success/failure feedback. Never fabricate a Discord channel to invoke slash callbacks.
 
+## Ignore / Unignore
+
+Ignored is a QuestUI-local, account-scoped presentation state. It is never a normalized Discord Quest status and must not mutate Discord enrollment, progress, completion, reward, or claim state.
+
+- Persist ignored Quest IDs per Discord account and never allow an account to inherit another account's ignored set.
+- A normal enrolled In-Progress Quest may be ignored. An already-ignored Quest remains Unignore-able even if its real Discord status later changes.
+- Ignored Quests are excluded from the normal Dashboard, shortcut attention, Detailed Status, Quest Home counters, and QuestUI notification attention paths.
+- Ignored Quests remain available through the explicit **Ignored** catalogue and retain their real Discord status/progress while shown there.
+- Ignored and Hidden are distinct. Ignored cards do not inflate Hidden; Hidden remains the count of non-ignored cards removed by normal Dashboard filters.
+- When compatible Orion explicitly reports the exact Quest active (`running` / `queued`, or scheduler `running` / `waiting`), Ignore may delegate an exact-ID Pause before persistence.
+- If that Pause fails and a fresh Orion snapshot still reports the exact Quest active, Ignore fails closed and must not be saved.
+- Ignore must never global-Stop Orion. Unignore must never auto-Resume or auto-Start Orion.
+- If Orion Pause succeeds but Ignore persistence fails, leave the Quest visible and paused rather than auto-resuming as rollback.
+- Persistence failure must re-read/restore saved local state instead of presenting an unsaved optimistic Ignore as durable.
+
+## Notifications
+
+QuestUI notification delivery stays local-first through Vencord's Notifications API. Do not add a companion bot, backend, webhook relay, or user-token DM mechanism as a requirement for this feature.
+
+- **Ready to Claim** and **Problems** are independently configurable and both default to enabled.
+- Completion eligibility is an observed same-account Discord **In Progress → Ready to Claim** transition.
+- Initial hydration, plugin restart, account switch, Ignore/Unignore hydration, and enabling the setting after completion must not synthesize a completion notification.
+- Do not notify for progress ticks or unchanged re-renders. One observed completion transition produces at most one notification.
+- Ignored Quests do not generate QuestUI completion/problem attention while ignored.
+- Runtime-problem notifications consume sanitized Event Log rows rather than raw unrelated console traffic.
+- `error` is actionable; `warning` is actionable only when structured detail explicitly marks it terminal. Normal retry/fallback/recovery warnings are not notification-worthy.
+- Existing Event Log history is a baseline, not a backlog. Account changes reset the problem baseline.
+- Suppress short-lived duplicate notifications for the same source/event code/Quest/summary while preserving distinct failures.
+- Allow desktop Event Log persistence to settle before deciding a new sanitized row is absent.
+- Normal notification persistence/delivery behavior belongs to Vencord's notification settings and Notification Log rather than a QuestUI-owned OS-notification subsystem.
+
 ## Dashboard presentation
 
 Keep the current presentation contracts unless a change explicitly targets them:
@@ -124,8 +157,8 @@ Keep the current presentation contracts unless a change explicitly targets them:
 - eligible Nitro accounts are determined from the current user's `premiumType`;
 - use Discord Nitro profile-badge artwork when hydrated, otherwise keep the Nitro tag with the existing fallback glyph;
 - title color sweep is a seamless linear right-to-left loop with no reset frame;
-- summary remains one line below tools and always renders Available / Ready / In Progress / Claimed / Expired / Hidden, including zero values;
-- the five status counts come from the full live Quest snapshot and Hidden reflects Dashboard filtering;
+- summary remains one line below tools and always renders Available / Ready / In Progress / Claimed / Expired / Ignored / Hidden, including zero values;
+- the five Discord status counts come from the full non-ignored live Quest snapshot; Ignored is a separate local count; Hidden reflects only normal filtering of non-ignored cards;
 - In Progress / Ready are the accepted-active bucket and stay above Available/Claimed/Expired under every sort mode;
 - required-time sorting compares normalized timed-task seconds and excludes achievement/count targets;
 - timed progress displays `mm:ss / mm:ss` and only the current elapsed value receives completion-stage color;
@@ -175,11 +208,15 @@ Automated tests are necessary but not sufficient. For relevant changes, manual-t
 Current manual coverage should include:
 
 - title/native Quest icon/Nitro tag without overlap;
-- six-item summary including zero/Hidden counts and even spacing;
+- seven-item summary including zero/ Ignored / Hidden counts and even spacing;
 - Sort/Filter/Home controls and custom popouts;
 - expired-age 7/15/30/90/All/custom filtering plus expiry copy outside 15 days;
 - accepted-Quest pinning and required-time sorting;
 - native Orb balance including zero and runtime version/health chips;
+- Ignore persistence/account isolation, Ignored catalogue visibility, Ignored-vs-Hidden counts, and exclusion from all normal attention surfaces;
+- active Orion exact-ID Pause on Ignore, no global Stop, and no auto-Resume on Unignore;
+- one-shot real In-Progress → Ready-to-Claim notification with no startup/backlog duplicate;
+- Problems notification behavior when explicitly testing that path, without misrepresenting automated coverage as live evidence;
 - Event Log persistence/search/source/level/category/sort/day grouping/detail/report/open/clear flows and scrollbar behavior;
 - large Event Log pagination/windowing on a 10k+ persisted history when that path changes;
 - Event Log account switching and legacy-row visibility;
@@ -195,7 +232,7 @@ Current manual coverage should include:
 - Orion absent/disabled/replaced/reloaded safety and fallback compatibility;
 - dark/light/custom theme readability.
 
-Never describe CI/build output as proof of a live Discord mutation or farming session.
+Never describe CI/build output as proof of a live Discord mutation, farming session, or notification path that was not actually exercised.
 
 ## Release channels
 
@@ -209,16 +246,12 @@ Keep QuestUI and Orion packages/repositories/licenses separate. See `docs/RELEAS
 
 Update README and release notes when behavior, compatibility, installation, or release expectations change. Keep screenshots documentation-only.
 
-Do not invent a successful build, CI run, tag, release, or manual test. If a release action/tool is unavailable, prepare the release artifacts/commands and state that publication still requires the maintainer to execute them.
+Do not invent a successful build, CI run, tag, release, or manual test. If a release action/tool is unavailable or publication is intentionally maintainer-controlled, prepare the release artifacts/commands and state that publication still requires the maintainer to execute them.
 
 ## Commits, issues, and PRs
 
 Use clear focused commit messages such as `feat:`, `fix:`, `docs:`, `ci:`, or `chore:`. Avoid noisy fixup history when it can be cleaned.
 
-Do not create an issue or PR unless explicitly requested.
+Do not create an issue or PR unless explicitly requested. Follow the repository's current `AGENTS.md` PR-creation rules at the point a PR is actually being created; ordinary branch preparation is not PR creation.
 
-Before opening a PR, ask whether the final diff was reviewed by a human. If proceeding without confirmed human review, add `AI_REVIEW_REQUIRED.txt` containing exactly:
-
-`This pull request was generated automatically by AI and has not been reviewed by a human.`
-
-Never claim human review unless explicitly confirmed.
+Never claim human review unless it was explicitly confirmed.

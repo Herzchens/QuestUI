@@ -62,6 +62,18 @@ export default definePluginSettings({
         description: "Show smart Start/Pause/Resume and Stop controls plus per-Quest controls from OrionQuests' live engine/task state. Requires Dashboard Mode and a compatible enabled OrionQuests plugin.",
         default: true
     },
+    notifyQuestCompletion: {
+        type: OptionType.BOOLEAN,
+        displayName: "Notifications • Ready to Claim",
+        description: "Notify once when an observed enrolled Quest becomes Ready to Claim. Initial startup state never generates a completion notification.",
+        default: true
+    },
+    notifyRuntimeProblems: {
+        type: OptionType.BOOLEAN,
+        displayName: "Notifications • Problems",
+        description: "Notify about actionable QuestUI/Orion errors and terminal warnings. Normal retries, fallbacks, and progress events are ignored.",
+        default: true
+    },
 
     // Dashboard filter values live in settings so they persist, but they are configured
     // from the Dashboard's dedicated filter popout instead of flooding this settings page.
@@ -99,6 +111,12 @@ export default definePluginSettings({
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Expired",
         description: "Show expired quests.",
+        default: false
+    },
+    dashboardShowIgnored: {
+        type: OptionType.BOOLEAN,
+        displayName: "Dashboard • Ignored",
+        description: "Show Quests ignored locally by QuestUI.",
         default: false
     },
     dashboardExpiredAgeDays: {
@@ -238,6 +256,7 @@ export default definePluginSettings({
     dashboardShowClaimable: { hidden: true },
     dashboardShowClaimed: { hidden: true },
     dashboardShowExpired: { hidden: true },
+    dashboardShowIgnored: { hidden: true },
     dashboardExpiredAgeDays: { hidden: true },
     dashboardRewardFilter: { hidden: true },
     dashboardIncludeUnknownRewards: { hidden: true },
