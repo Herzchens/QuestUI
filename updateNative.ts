@@ -94,6 +94,10 @@ async function deleteRef(ref: string): Promise<void> {
     try { await git("update-ref", "-d", ref); } catch { }
 }
 
+async function cleanupFetchedTag(tag: VerifiedTag | null): Promise<void> {
+    if (tag) await deleteRef(tag.ref);
+}
+
 async function currentBranch(): Promise<string | null> {
     try {
         const branch = await gitText("symbolic-ref", "--quiet", "--short", "HEAD");
@@ -351,8 +355,8 @@ export async function updateQuestUIRelease(
             message: error instanceof Error ? error.message : "QuestUI update failed before the checkout was changed."
         };
     } finally {
-        if (installedTag) await deleteRef(installedTag.ref);
-        if (targetTag) await deleteRef(targetTag.ref);
+        await cleanupFetchedTag(installedTag);
+        await cleanupFetchedTag(targetTag);
         updateInFlight = false;
     }
 }
