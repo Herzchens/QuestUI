@@ -1,5 +1,8 @@
+import type { PluginNative } from "@utils/types";
+import { relaunch } from "@utils/native";
 import { Popout, showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
 
+import type { QuestUIUpdateResult } from "./updateNative";
 import {
     checkForUpdates,
     getUpdateSnapshot,
@@ -13,6 +16,10 @@ import {
 } from "./updates";
 
 import "./updateCenter.css";
+
+const Native = !IS_WEB
+    ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>
+    : null;
 
 const RELEASE_URL_PREFIXES: Record<UpdateProduct, string> = {
     questui: "https://github.com/Herzchens/QuestUI/releases/",
@@ -77,8 +84,30 @@ function UpdateReleaseCard({ product, state }: {
     product: UpdateProduct;
     state: Extract<PluginUpdateState, { kind: "available"; }>;
 }) {
-    const [pending, setPending] = useState<"snooze" | "skip" | null>(null);
+    const [pending, setPending] = useState<"update" | "snooze" | "skip" | null>(null);
+    const [updateResult, setUpdateResult] = useState<QuestUIUpdateResult | null>(null);
     const label = productLabel(product);
+
+    const updateQuestUI = async () => {
+        if (product !== "questui" || !Native || pending) return;
+        setPending("update");
+        setUpdateResult(null);
+        try {
+            const result = await Native.updateQuestUIRelease(state.installed, state.release.tagName);
+            setUpdateResult(result);
+            showToast(result.message, result.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
+        } catch {
+            const result: QuestUIUpdateResult = {
+                ok: false,
+                status: "failed",
+                message: "QuestUI could not invoke its native release updater."
+            };
+            setUpdateResult(result);
+            toastFailure(result.message);
+        } finally {
+            setPending(null);
+        }
+    };
 
     const snooze = async () => {
         if (pending) return;
@@ -121,8 +150,21 @@ function UpdateReleaseCard({ product, state }: {
             )}
             {state.suppression === "skipped" && <span className="quest-ui-update-suppressed-copy">Skipped for this version</span>}
             {state.suppression === "snoozed" && <span className="quest-ui-update-suppressed-copy">Reminder snoozed for 24 hours</span>}
+            {updateResult && (
+                <span className={`quest-ui-update-result${updateResult.ok ? " is-success" : " is-error"}`}>
+                    {updateResult.message}
+                </span>
+            )}
 
             <div className="quest-ui-update-card-actions">
+                {product === "questui" && Native && !updateResult?.restartRequired && (
+                    <button type="button" disabled={pending !== null} onClick={updateQuestUI}>
+                        {pending === "update" ? "Updating…" : "Update now"}
+                    </button>
+                )}
+                {updateResult?.ok && updateResult.restartRequired && (
+                    <button type="button" className="quest-ui-update-restart" onClick={relaunch}>Restart Discord</button>
+                )}
                 <button type="button" onClick={() => safeOpenRelease(product, state.release)}>View release</button>
                 <button type="button" disabled={pending !== null} onClick={snooze}>{pending === "snooze" ? "Saving…" : "Remind me later"}</button>
                 <button type="button" disabled={pending !== null} onClick={skip}>{pending === "skip" ? "Saving…" : `Skip ${state.release.tagName}`}</button>
