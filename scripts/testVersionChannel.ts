@@ -6,7 +6,9 @@ import {
     parseSemver,
     selectLatestEligibleRelease,
     shouldRunScheduledUpdateCheck,
-    updateCheckIntervalLabel
+    updateCheckHoursFromStep,
+    updateCheckIntervalLabel,
+    updateCheckMarkerLabel
 } from "../updateLogic";
 import { classifyVersionChannel } from "../versionChannel";
 
@@ -33,11 +35,29 @@ assert.equal(compareSemver("v1.5.0-beta.2", "v1.5.0"), -1);
 assert.equal(compareSemver("v1.5.0-rc.1", "v1.5.0-beta.9"), 1);
 assert.equal(compareSemver("custom", "v1.0.0"), null);
 
+assert.equal(normalizeUpdateCheckHours(0), 0);
 assert.equal(normalizeUpdateCheckHours(6), 6);
+assert.equal(normalizeUpdateCheckHours(72), 72);
 assert.equal(normalizeUpdateCheckHours(168), 168);
 assert.equal(normalizeUpdateCheckHours(2), 6);
+assert.equal(updateCheckHoursFromStep(0), 0);
+assert.equal(updateCheckHoursFromStep(1), 3);
+assert.equal(updateCheckHoursFromStep(2), 6);
+assert.equal(updateCheckHoursFromStep(3), 12);
+assert.equal(updateCheckHoursFromStep(4), 24);
+assert.equal(updateCheckHoursFromStep(5), 72);
+assert.equal(updateCheckHoursFromStep(6), 168);
+assert.equal(updateCheckHoursFromStep(99), 6);
+assert.equal(updateCheckMarkerLabel(0), "0");
+assert.equal(updateCheckMarkerLabel(1), "3h");
+assert.equal(updateCheckMarkerLabel(2), "6h");
+assert.equal(updateCheckMarkerLabel(3), "12h");
+assert.equal(updateCheckMarkerLabel(4), "24h");
+assert.equal(updateCheckMarkerLabel(5), "3d");
+assert.equal(updateCheckMarkerLabel(6), "7d");
 assert.equal(updateCheckIntervalLabel(0), "Manual only");
-assert.equal(updateCheckIntervalLabel(1), "1 hour");
+assert.equal(updateCheckIntervalLabel(3), "3 hours");
+assert.equal(updateCheckIntervalLabel(72), "3 days");
 assert.equal(updateCheckIntervalLabel(168), "7 days");
 assert.equal(shouldRunScheduledUpdateCheck(null, 1_000, 6), true);
 assert.equal(shouldRunScheduledUpdateCheck(1_000, 1_000 + 6 * 60 * 60 * 1000 - 1, 6), false);

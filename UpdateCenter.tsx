@@ -87,6 +87,20 @@ function formatTimestamp(timestamp: number | null): string {
     }
 }
 
+function formatCompactTimestamp(timestamp: number | null): string {
+    if (!Number.isFinite(timestamp)) return "Never";
+    try {
+        return new Date(Number(timestamp)).toLocaleString(undefined, {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit"
+        });
+    } catch {
+        return "Unknown";
+    }
+}
+
 function stateCopy(product: UpdateProduct, state: PluginUpdateState): string {
     if (state.kind === "not-installed") return "Not installed";
     if (state.kind === "disabled") return "Update checks disabled";
@@ -101,8 +115,28 @@ function stateCopy(product: UpdateProduct, state: PluginUpdateState): string {
     return `${state.installed} → ${state.release.tagName}`;
 }
 
+function compactStateCopy(state: PluginUpdateState): string {
+    if (state.kind === "not-installed") return "Not installed";
+    if (state.kind === "disabled") return "Off";
+    if (state.kind === "idle") return state.installed ?? "Waiting";
+    if (state.kind === "custom-version") return `${state.installed ?? "Unknown"} · custom`;
+    if (state.kind === "up-to-date") return `${state.installed} ✓`;
+    if (state.kind === "error") return "Check failed";
+    if (state.suppression === "skipped") return `${state.installed} → ${state.release.tagName} · skipped`;
+    if (state.suppression === "snoozed") return `${state.installed} → ${state.release.tagName} · later`;
+    return `${state.installed} → ${state.release.tagName}`;
+}
+
 function toastFailure(message: string): void {
     showToast(message, Toasts.Type.FAILURE);
+}
+
+function UpdateCenterIcon() {
+    return (
+        <svg className="quest-ui-update-center-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19.5 7.5V3.8l-1.9 1.9A8 8 0 1 0 20 12h-2.2a5.8 5.8 0 1 1-1.75-4.15L14 9.9h5.5V7.5Z" />
+        </svg>
+    );
 }
 
 function UpdateReleaseCard({ product, state }: {
@@ -265,13 +299,14 @@ export function UpdateCenterIndicator() {
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const [open, setOpen] = useState(false);
     const count = Number(visibleUpdate(snapshot.questUI)) + Number(visibleUpdate(snapshot.orion));
-
-    if (count === 0) return null;
+    const updateCopy = count > 0
+        ? `${count} ${count === 1 ? "update" : "updates"} available`
+        : "Open update center";
 
     return (
         <Popout
             position="bottom"
-            align="left"
+            align="right"
             animation={Popout.Animation.NONE}
             shouldShow={open}
             onRequestClose={() => setOpen(false)}
@@ -282,14 +317,14 @@ export function UpdateCenterIndicator() {
                 <button
                     ref={buttonRef}
                     type="button"
-                    className={`quest-ui-update-indicator${isShown ? " is-open" : ""}`}
+                    className={`quest-ui-toolbar-button quest-ui-update-center-button${isShown ? " is-open" : ""}${count > 0 ? " has-update" : ""}${snapshot.checking ? " is-checking" : ""}`}
                     onClick={() => setOpen(value => !value)}
                     aria-expanded={isShown}
-                    aria-label={`${count} plugin ${count === 1 ? "update" : "updates"} available`}
-                    title={`${count} ${count === 1 ? "update" : "updates"} available`}
+                    aria-label={updateCopy}
+                    title={count > 0 ? updateCopy : "Updates"}
                 >
-                    <span aria-hidden="true">↑</span>
-                    {count} {count === 1 ? "update" : "updates"}
+                    <UpdateCenterIcon />
+                    {count > 0 && <span className="quest-ui-update-count" aria-hidden="true">{count > 9 ? "9+" : count}</span>}
                 </button>
             )}
         </Popout>
@@ -315,25 +350,26 @@ export function UpdateSettingsControl() {
     const questUpdate = visibleUpdate(snapshot.questUI);
     const orionUpdate = visibleUpdate(snapshot.orion);
     const activeCount = Number(questUpdate) + Number(orionUpdate);
+    const headline = activeCount > 0
+        ? `${activeCount} ${activeCount === 1 ? "update" : "updates"} available`
+        : snapshot.checking
+            ? "Checking…"
+            : `Checked ${formatCompactTimestamp(snapshot.lastSuccessfulCheckAt)}`;
 
     return (
         <div className="quest-ui-update-settings-control">
-            <div>
-                <strong>Update status</strong>
-                <span>
-                    {activeCount > 0
-                        ? `${activeCount} ${activeCount === 1 ? "update is" : "updates are"} available.`
-                        : snapshot.checking
-                            ? "Checking GitHub releases…"
-                            : `Last successful check: ${formatTimestamp(snapshot.lastSuccessfulCheckAt)}`}
-                </span>
+            <div className="quest-ui-update-settings-summary">
+                <div className="quest-ui-update-settings-headline">
+                    <strong>Update status</strong>
+                    <span>{headline}</span>
+                </div>
                 <span className="quest-ui-update-settings-products">
-                    QuestUI: {stateCopy("questui", snapshot.questUI)}
-                    {snapshot.orion.kind !== "not-installed" && <> · Orion: {stateCopy("orion", snapshot.orion)}</>}
+                    QuestUI {compactStateCopy(snapshot.questUI)}
+                    {snapshot.orion.kind !== "not-installed" && <> · Orion {compactStateCopy(snapshot.orion)}</>}
                 </span>
             </div>
             <button type="button" disabled={manualPending || snapshot.checking} onClick={check}>
-                {manualPending || snapshot.checking ? "Checking…" : "Check now"}
+                {manualPending || snapshot.checking ? "Checking…" : "Check"}
             </button>
         </div>
     );

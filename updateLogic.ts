@@ -1,5 +1,7 @@
-export const UPDATE_CHECK_HOUR_MARKERS = [0, 1, 3, 6, 12, 24, 168] as const;
+export const UPDATE_CHECK_HOURS = [0, 3, 6, 12, 24, 72, 168] as const;
+export const UPDATE_CHECK_STEP_MARKERS = [0, 1, 2, 3, 4, 5, 6] as const;
 export const DEFAULT_UPDATE_CHECK_HOURS = 6;
+export const DEFAULT_UPDATE_CHECK_STEP = 2;
 
 export interface ParsedSemver {
     raw: string;
@@ -88,17 +90,36 @@ export function isPrereleaseVersion(value: unknown): boolean {
     return (parseSemver(value)?.prerelease.length ?? 0) > 0;
 }
 
+export function normalizeUpdateCheckStep(value: unknown): number {
+    const numeric = Number(value);
+    return UPDATE_CHECK_STEP_MARKERS.includes(numeric as typeof UPDATE_CHECK_STEP_MARKERS[number])
+        ? numeric
+        : DEFAULT_UPDATE_CHECK_STEP;
+}
+
+export function updateCheckHoursFromStep(value: unknown): number {
+    return UPDATE_CHECK_HOURS[normalizeUpdateCheckStep(value)] ?? DEFAULT_UPDATE_CHECK_HOURS;
+}
+
 export function normalizeUpdateCheckHours(value: unknown): number {
     const numeric = Number(value);
-    return UPDATE_CHECK_HOUR_MARKERS.includes(numeric as typeof UPDATE_CHECK_HOUR_MARKERS[number])
+    return UPDATE_CHECK_HOURS.includes(numeric as typeof UPDATE_CHECK_HOURS[number])
         ? numeric
         : DEFAULT_UPDATE_CHECK_HOURS;
+}
+
+export function updateCheckMarkerLabel(value: unknown): string {
+    const hours = updateCheckHoursFromStep(value);
+    if (hours === 0) return "0";
+    if (hours === 72) return "3d";
+    if (hours === 168) return "7d";
+    return `${hours}h`;
 }
 
 export function updateCheckIntervalLabel(value: unknown): string {
     const hours = normalizeUpdateCheckHours(value);
     if (hours === 0) return "Manual only";
-    if (hours === 1) return "1 hour";
+    if (hours === 72) return "3 days";
     if (hours === 168) return "7 days";
     return `${hours} hours`;
 }

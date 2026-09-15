@@ -2,7 +2,7 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
 import { isOrionCommandReady, isOrionInstalled } from "./orionIntegration";
-import { DEFAULT_UPDATE_CHECK_HOURS, UPDATE_CHECK_HOUR_MARKERS } from "./updateLogic";
+import { DEFAULT_UPDATE_CHECK_STEP, UPDATE_CHECK_STEP_MARKERS, updateCheckMarkerLabel } from "./updateLogic";
 import { UpdateSettingsControl } from "./UpdateCenter";
 import { notifyUpdateSettingsChanged } from "./updates";
 
@@ -84,13 +84,17 @@ export default definePluginSettings({
         default: true
     },
 
-    updateCheckHours: {
+    updateCheckStep: {
         type: OptionType.SLIDER,
-        displayName: "Updates • Check frequency (hours)",
-        description: "Choose how often QuestUI checks GitHub releases. 0 = Manual only; 168 = 7 days.",
-        markers: [...UPDATE_CHECK_HOUR_MARKERS],
-        default: DEFAULT_UPDATE_CHECK_HOURS,
+        displayName: "Updates • Check frequency",
+        description: "How often QuestUI checks GitHub releases. 0 = manual only.",
+        markers: [...UPDATE_CHECK_STEP_MARKERS],
+        default: DEFAULT_UPDATE_CHECK_STEP,
         stickToMarkers: true,
+        componentProps: {
+            onValueRender: updateCheckMarkerLabel,
+            onMarkerRender: updateCheckMarkerLabel
+        },
         onChange: notifyUpdateSettingsChanged
     },
     updateIncludePrereleases: {

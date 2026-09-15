@@ -9,6 +9,7 @@ import { startQuestNotifications, stopQuestNotifications } from "./notifications
 import { QuestButton, QuestsCount } from "./QuestButton";
 import { QUESTUI_VERSION } from "./version";
 import settings from "./settings";
+import { updateCheckHoursFromStep } from "./updateLogic";
 import { startUpdateChecks, stopUpdateChecks } from "./updates";
 
 export default definePlugin({
@@ -27,7 +28,7 @@ export default definePlugin({
         startEventLogCapture();
         startQuestNotifications();
         startUpdateChecks(() => ({
-            checkHours: settings.store.updateCheckHours,
+            checkHours: updateCheckHoursFromStep(settings.store.updateCheckStep),
             includePrereleases: settings.store.updateIncludePrereleases,
             checkOrion: settings.store.updateCheckOrion
         }));

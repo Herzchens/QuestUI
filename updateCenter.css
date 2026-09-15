@@ -1,30 +1,46 @@
-.quest-ui-update-indicator {
+.quest-ui-update-center-button {
+    color: #fff;
+}
+
+.quest-ui-update-center-button.is-open,
+.quest-ui-update-center-button.has-update {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 13%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 42%, transparent);
+    color: color-mix(in srgb, var(--status-positive, #23a55a) 78%, white);
+}
+
+.quest-ui-update-center-icon {
+    fill: currentColor;
+    height: 18px;
+    width: 18px;
+}
+
+.quest-ui-update-center-button.is-checking .quest-ui-update-center-icon {
+    animation: quest-ui-update-spin 900ms linear infinite;
+}
+
+.quest-ui-update-count {
     align-items: center;
-    background: color-mix(in srgb, var(--status-positive, #23a55a) 12%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
-    border: 1px solid color-mix(in srgb, var(--status-positive, #23a55a) 38%, var(--border-subtle, transparent));
-    border-radius: 7px;
-    color: var(--status-positive, #23a55a);
-    cursor: pointer;
+    background: var(--status-positive, #23a55a);
+    border: 2px solid var(--background-floating, var(--background-base-low, #1e1f22));
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: #fff;
     display: inline-flex;
-    flex: 0 0 auto;
-    font-size: 10.5px;
-    font-weight: 700;
-    gap: 4px;
+    font-size: 8px;
+    font-weight: 800;
+    height: 14px;
+    justify-content: center;
     line-height: 1;
-    min-height: 24px;
-    padding: 4px 7px;
-    white-space: nowrap;
+    min-width: 14px;
+    padding: 0 3px;
+    position: absolute;
+    right: -4px;
+    top: -4px;
 }
 
-.quest-ui-update-indicator:hover,
-.quest-ui-update-indicator.is-open {
-    background: color-mix(in srgb, var(--status-positive, #23a55a) 20%, var(--background-base-low, #1e1f22));
-    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 56%, transparent);
-}
-
-.quest-ui-update-indicator:focus-visible {
-    outline: 2px solid var(--focus-primary, var(--brand-500));
-    outline-offset: 2px;
+@keyframes quest-ui-update-spin {
+    to { transform: rotate(360deg); }
 }
 
 .quest-ui-update-panel {
@@ -49,8 +65,7 @@
 }
 
 .quest-ui-update-panel-heading > div,
-.quest-ui-update-card-heading > div,
-.quest-ui-update-settings-control > div {
+.quest-ui-update-card-heading > div {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -216,24 +231,51 @@
     background: var(--background-mod-subtle, rgba(255, 255, 255, 0.05));
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
     border-radius: 8px;
+    box-sizing: border-box;
     display: flex;
-    gap: 12px;
+    gap: 8px;
     justify-content: space-between;
-    padding: 10px;
+    padding: 7px 8px;
     width: 100%;
 }
 
-.quest-ui-update-settings-control > div {
+.quest-ui-update-settings-summary {
+    display: flex;
     flex: 1 1 auto;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.quest-ui-update-settings-headline {
+    align-items: baseline;
+    display: flex;
+    gap: 7px;
+    min-width: 0;
 }
 
 .quest-ui-update-settings-control strong {
-    font-size: 12px;
+    flex: 0 0 auto;
+    font-size: 11px;
+}
+
+.quest-ui-update-settings-headline > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .quest-ui-update-settings-products {
-    line-height: 1.35;
-    overflow-wrap: anywhere;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-update-settings-control > button {
+    flex: 0 0 auto;
+    min-height: 25px;
+    padding: 3px 8px;
 }
 
 @media (max-width: 640px) {
@@ -243,5 +285,11 @@
 
     .quest-ui-update-card-actions > button {
         flex: 1 1 auto;
+    }
+
+    .quest-ui-update-settings-headline {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0;
     }
 }

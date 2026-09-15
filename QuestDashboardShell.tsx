@@ -104,10 +104,10 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
         <div className={`quest-ui-dashboard-shell has-dashboard-tools${showOrionControls ? " has-orion-control" : ""}`}>
             <div className="quest-ui-dashboard-topbar">
                 <QuestDashboardDisplayTitle />
-                <UpdateCenterIndicator />
                 <div className="quest-ui-dashboard-header-tools">
                     {showOrionControls && <OrionGlobalControls />}
                     <QuestReloadControl />
+                    <UpdateCenterIndicator />
                     <EventLogButton />
                     <QuestDashboardToolbar closePopout={closePopout} />
                 </div>
