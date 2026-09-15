@@ -12,6 +12,7 @@ import {
 import {
     completedQuestTransitions,
     isActionableProblemEvent,
+    newAvailableQuestTransitions,
     problemNotificationKey,
     type QuestNotificationSnapshot
 } from "./notificationLogic";
@@ -28,6 +29,7 @@ const PROBLEM_RECHECK_DELAY_MS = 1_200;
 
 let previousAccountId: string | null = null;
 let previousQuests: QuestNotificationSnapshot[] | null = null;
+let knownQuestIds: Set<string> | null = null;
 let questStoreSubscribed = false;
 let userStoreSubscribed = false;
 let ignoredUnsubscribe: (() => void) | null = null;
@@ -68,6 +70,10 @@ function rawQuestValues(): any[] {
     });
 }
 
+function notificationQuestId(quest: any): string {
+    return String(quest?.id ?? quest?.config?.id ?? "").trim();
+}
+
 function notificationStatus(quest: any): QuestNotificationSnapshot["status"] {
     const expiresAt = new Date(quest?.config?.expiresAt ?? 0).getTime();
     if (Number.isFinite(expiresAt) && expiresAt > 0 && expiresAt <= Date.now()) return "expired";
@@ -79,11 +85,11 @@ function notificationStatus(quest: any): QuestNotificationSnapshot["status"] {
     return "available";
 }
 
-function readNotificationSnapshot(accountId: string): QuestNotificationSnapshot[] {
+function readNotificationSnapshot(accountId: string, rawQuests = rawQuestValues()): QuestNotificationSnapshot[] {
     const ignored = ignoredQuestIds(accountId);
-    return rawQuestValues()
+    return rawQuests
         .map((quest: any): QuestNotificationSnapshot | null => {
-            const id = String(quest?.id ?? quest?.config?.id ?? "").trim();
+            const id = notificationQuestId(quest);
             if (!id || ignored.has(id)) return null;
             const name = String(
                 quest?.config?.messages?.questName
@@ -110,26 +116,52 @@ function observeQuestState(): void {
     if (!accountId || !isIgnoredQuestStateReady()) {
         previousAccountId = accountId;
         previousQuests = null;
+        knownQuestIds = null;
         return;
     }
 
-    const next = readNotificationSnapshot(accountId);
-    if (previousAccountId !== accountId || previousQuests == null) {
+    const rawQuests = rawQuestValues();
+    const next = readNotificationSnapshot(accountId, rawQuests);
+    const allQuestIds = new Set(rawQuests.map(notificationQuestId).filter(Boolean));
+    const accountChanged = previousAccountId !== accountId;
+    if (accountChanged) knownQuestIds = null;
+
+    if (accountChanged || previousQuests == null || knownQuestIds == null) {
         previousAccountId = accountId;
         previousQuests = next;
+
+        // A freshly started/switched client may briefly expose an empty QuestStore before its
+        // initial payload arrives. Do not turn that hydration into a burst of "new Quest" alerts.
+        if (allQuestIds.size > 0) {
+            if (knownQuestIds == null) knownQuestIds = new Set(allQuestIds);
+            else for (const id of allQuestIds) knownQuestIds.add(id);
+        }
         return;
     }
 
     const completed = completedQuestTransitions(previousQuests, next);
+    const newlyAvailable = newAvailableQuestTransitions(knownQuestIds, next);
     previousQuests = next;
-    if (settings.store.notifyQuestCompletion === false) return;
+    for (const id of allQuestIds) knownQuestIds.add(id);
 
-    for (const quest of completed) {
-        void showNotification({
-            title: "Quest ready to claim",
-            body: `${quest.questName} is ready to claim.`,
-            onClick: openQuestHome
-        });
+    if (settings.store.notifyQuestCompletion !== false) {
+        for (const quest of completed) {
+            void showNotification({
+                title: "Quest ready to claim",
+                body: `${quest.questName} is ready to claim.`,
+                onClick: openQuestHome
+            });
+        }
+    }
+
+    if (settings.store.notifyNewQuestAvailable !== false) {
+        for (const quest of newlyAvailable) {
+            void showNotification({
+                title: "New quest available",
+                body: `${quest.questName} is available to accept.`,
+                onClick: openQuestHome
+            });
+        }
     }
 }
 
@@ -236,6 +268,7 @@ function onAccountChanged(): void {
 
     previousAccountId = accountId;
     previousQuests = null;
+    knownQuestIds = null;
     problemScanGeneration++;
     clearProblemScanTimers();
     resetProblemBaseline(accountId);
@@ -263,7 +296,8 @@ export function startQuestNotifications(): void {
     if (!ignoredUnsubscribe) {
         ignoredUnsubscribe = subscribeIgnoredQuests(() => {
             // Ignore/Unignore and first persistence hydration are presentation changes, not Quest
-            // completion transitions. Re-baseline so neither can synthesize a notification.
+            // state transitions. Re-baseline completion state while preserving the session's
+            // known Quest IDs so Unignore cannot synthesize a "new Quest" notification either.
             previousQuests = null;
             observeQuestState();
         });
@@ -300,5 +334,6 @@ export function stopQuestNotifications(): void {
     clearProblemScanTimers();
     previousAccountId = null;
     previousQuests = null;
+    knownQuestIds = null;
     resetProblemBaseline(null);
 }

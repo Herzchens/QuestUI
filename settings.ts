@@ -71,6 +71,12 @@ export default definePluginSettings({
         description: "Notify once when an observed enrolled Quest becomes Ready to Claim. Initial startup state never generates a completion notification.",
         default: true
     },
+    notifyNewQuestAvailable: {
+        type: OptionType.BOOLEAN,
+        displayName: "Notifications • New Quest Available",
+        description: "Notify once when QuestUI observes a previously unseen Quest appear as Available. Startup/account hydration and Ignore/Unignore never generate this notification.",
+        default: true
+    },
     notifyRuntimeProblems: {
         type: OptionType.BOOLEAN,
         displayName: "Notifications • Problems",
