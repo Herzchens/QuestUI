@@ -4,6 +4,8 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 
 ## Next — v1.4.1 (release preparation)
 
+- Adds an always-visible header **Claim All N** control for non-ignored Ready rewards, disabled at `N = 0` and actionable from one Ready reward onward. The click captures a fixed same-account snapshot; each native claim must be store-confirmed before the next, and verification/CAPTCHA or any uncertain state stops the batch without retry.
+
 - Adds **New Quest Available** notifications with startup/account hydration treated as baseline rather than backlog.
 - Ends Ignore automatically when Discord reports the Quest **Expired** and prunes stale ignored IDs best-effort without changing Discord Quest state.
 - Reads Discord's explicit base/boosted Orb fields and native Quest multiplier eligibility instead of locally multiplying Nitro rewards. The Dashboard shows the existing **Nitro** badge for the Nitro source or **Xbox+** with the Xbox brand mark for the Xbox Game Pass source; native Nitro precedence is preserved if both sources are present.

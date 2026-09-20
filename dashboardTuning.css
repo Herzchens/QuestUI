@@ -281,3 +281,68 @@
         margin-top: 126px;
     }
 }
+
+
+/* Claim All is a first-class header control. Keep the neutral toolbar surface,
+ * use a positive border only when it is actionable, and show the count as a
+ * compact badge instead of appending the number to the label. */
+.quest-ui-toolbar-button.quest-ui-claim-all-button {
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 700;
+    gap: 6px;
+    letter-spacing: .01em;
+    min-width: 94px;
+    padding: 0 9px 0 10px;
+    white-space: nowrap;
+    width: auto;
+}
+
+.quest-ui-toolbar-button.quest-ui-claim-all-button:not(:disabled) {
+    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 62%, rgba(255, 255, 255, 0.14));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 0 1px color-mix(in srgb, var(--status-positive, #23a55a) 8%, transparent);
+}
+
+.quest-ui-toolbar-button.quest-ui-claim-all-button:not(:disabled):hover {
+    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 78%, rgba(255, 255, 255, 0.18));
+}
+
+.quest-ui-claim-all-label {
+    line-height: 1;
+}
+
+.quest-ui-claim-all-count {
+    align-items: center;
+    background: var(--status-positive, #23a55a);
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: #fff;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 9px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    height: 16px;
+    justify-content: center;
+    line-height: 1;
+    min-width: 16px;
+    padding: 0 4px;
+}
+
+.quest-ui-toolbar-button.quest-ui-claim-all-button:disabled,
+.quest-ui-toolbar-button.quest-ui-claim-all-button:disabled:hover {
+    background: color-mix(in srgb, var(--background-base-lowest, #111214) 35%, #202225 65%);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    color: #fff;
+    cursor: default;
+    opacity: .45;
+    transform: none;
+}
+
+.quest-ui-toolbar-button.quest-ui-claim-all-button:disabled .quest-ui-claim-all-count {
+    background: var(--interactive-muted, #949ba4);
+    color: var(--background-base-lowest, #111214);
+}

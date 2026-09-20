@@ -2,12 +2,12 @@
 
 QuestUI is a standalone Vencord userplugin for quick access to Discord Quests and a compact, live view of their state.
 
-QuestUI is UI-focused rather than a Quest-completion engine. It can perform two narrowly scoped Discord Quest mutations only when **you click them yourself** — **Accept Quest** and **Claim Reward**. It does not generate Quest progress, spoof games/streams, auto-claim, or bypass Discord challenges.
+QuestUI is UI-focused rather than a Quest-completion engine. It performs only explicit user-authorized native Quest actions: **Accept Quest**, per-card **Claim Reward**, and bounded sequential **Claim all** for a fixed snapshot of Ready rewards. It does not generate Quest progress, spoof games/streams, claim rewards in the background without user authorization, or bypass Discord challenges.
 
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.1** is in release preparation. **v1.4.0** remains the current Stable release until the signed v1.4.1 tag is published. v1.4.1 adds **New Quest Available** notifications, Expired-Ignore cleanup, Nitro/Xbox+ Orb-boost source handling, and the Dashboard/Settings Update Center.
+> **v1.4.1** is in release preparation. **v1.4.0** remains the current Stable release until the signed v1.4.1 tag is published. v1.4.1 adds bounded sequential **Claim all**, **New Quest Available** notifications, Expired-Ignore cleanup, Nitro/Xbox+ Orb-boost source handling, and the Dashboard/Settings Update Center.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
@@ -49,7 +49,7 @@ The captures above are real Discord runtime screenshots supplied by the maintain
 
 - Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
 
-- Explicit **Accept Quest** and **Claim Reward** actions
+- Explicit **Accept Quest**, **Claim Reward**, and bounded sequential **Claim all** actions
 
 - Account-scoped duplicate-submission guards and Vencord-native toast feedback
 
@@ -270,7 +270,11 @@ Dashboard cards expose a Discord Quest mutation only when the normalized Quest s
 - **Available** → **Accept Quest**
 - **Ready to Claim** → **Claim Reward**
 
-Every mutation requires an explicit click. QuestUI re-reads the current Quest from Discord's QuestStore immediately before acting and does not optimistically mark the Quest accepted or claimed.
+Every mutation requires explicit user authorization. A card click authorizes one Quest action. The header **Claim All N** control stays visible after Stop, is disabled at `N = 0`, and becomes actionable when at least one non-ignored Quest is Ready. One click captures that fixed same-account Ready snapshot and claims it strictly one Quest at a time. A Quest that becomes Ready later is not appended to the running batch.
+
+Before each batch claim, QuestUI re-reads Discord's QuestStore. It advances only after the previous reward is store-confirmed claimed, may skip a snapshot member that was already claimed elsewhere, and stops on account change, changed/unavailable state, native failure, CAPTCHA/verification, or an ambiguous submitted-only result. Per-card Claim buttons are disabled while the batch runs. QuestUI never solves a challenge and never auto-retries the batch.
+
+QuestUI does not optimistically mark a Quest accepted or claimed.
 
 Enrollment reuses Discord's native Quest enrollment action. While pending, the card shows **Processing…**. A compatible enabled OrionQuests plugin can be auto-started only after Discord confirms `enrolledAt` in QuestStore.
 
@@ -285,7 +289,7 @@ OrionQuests **v4.10.7+** exposes the core source-of-truth engine/task control st
 Global header order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Update → Event Log → Sort → Filter → Home
+Smart Start/Pause/Resume → Stop → Claim All → Reload → Update → Event Log → Sort → Filter → Home
 ```
 
 State rules:

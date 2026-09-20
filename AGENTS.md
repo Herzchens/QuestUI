@@ -12,7 +12,7 @@ QuestUI may:
 - display Quest state/progress/reward/artwork/expiry already exposed by Discord;
 - navigate to Quest Home;
 - enroll only after an explicit QuestUI click through Discord's verified native enrollment action;
-- claim only after an explicit QuestUI click through Discord's verified native claim action;
+- claim only after explicit QuestUI user authorization through Discord's verified native claim action; a single **Claim all** click may authorize only a bounded snapshot of the Quests that are Ready at that click;
 - invoke Discord's native current-Quest refresh after an explicit Reload click;
 - display Discord's native Orb balance and runtime version metadata;
 - capture, sanitize, persist, filter, and display QuestUI/recognized Orion diagnostic events;
@@ -56,6 +56,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `orionScheduler.ts`, `orionSchedulerLogic.ts` — optional Orion scheduler snapshot/subscription and unordered live-batch normalization used only for published scheduler state; no queue order is inferred.
 - `dashboardPolish.css` — title sweep, Nitro/Xbox+ source-badge surface, summary layout, and elapsed-progress tones.
 - `QuestCardActions.tsx` — explicit Accept/Claim, Ignore/Unignore with exact-ID Orion pause when active, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
+- `ClaimAllControl.tsx`, `claimAllLogic.ts`, `claimAllRuntimeState.ts` — bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
 - `questActions.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
 - `questData.ts` — normalization/filtering/sorting and live read-only QuestStore snapshot source.
 - `questReload.ts`, `questReloadLogic.ts`, `QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
@@ -81,6 +82,7 @@ Run from the Vencord root:
 pnpm install --frozen-lockfile
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testClaimAllLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionEventLogic.ts
@@ -131,7 +133,11 @@ Do not install packages from inside QuestUI. Never claim hosted CI passed withou
 
 ## Manual Accept / Claim invariants
 
-- Every mutation requires an explicit click.
+- Every mutation requires explicit user authorization. A single **Claim all** click may authorize only the fixed same-account snapshot of currently Ready, non-ignored Quest IDs captured at that click; never append a Quest that becomes claimable later without another click.
+- Claim all is strictly sequential: re-read QuestStore before each claim and advance only after the previous Quest is store-confirmed claimed. Already-claimed snapshot members may be skipped.
+- Keep the header **Claim All N** control immediately after Stop and before Reload. It stays visible, is disabled at `N = 0`, and is actionable from one non-ignored Ready reward onward.
+- Stop the batch on account change, verification/CAPTCHA, unavailable/changed Quest state, native failure, or submitted/uncertain store outcome. Never solve/bypass a challenge and never auto-retry or continue past uncertainty.
+- Acquire a module-global Claim all lock synchronously before starting async work so rapid double-clicks, stale per-card click events, and Dashboard close/reopen cannot create overlapping batches. Refuse Claim all while any same-account per-card claim is in-flight or held after an ambiguous submission; while Claim all is active, both disable per-card Claim buttons and re-check the global lock inside the card handler.
 - Re-read the Quest from QuestStore immediately before mutation.
 - Require complete current config and fail closed on malformed present safety timestamps.
 - Scope duplicate guards to account + Quest and re-check account identity on store events/timeouts.
@@ -150,7 +156,7 @@ Compatible Orion must own the exact registered `orion` command, expose `start`, 
 Header order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Update → Event Log → Sort → Filter → Home
+Smart Start/Pause/Resume → Stop → Claim All → Reload → Update → Event Log → Sort → Filter → Home
 ```
 
 Global state rules:
@@ -267,7 +273,7 @@ Use Vencord's native toast API for explicit success/failure feedback.
 
 Run the full local gate for source changes. For companion changes, also run Orion pause/resume, structured-event, and scheduler regression tests and build/type-check both plugins together.
 
-Manual checks should cover the affected states. For the current Stable surface this includes header Nitro/Xbox+ source-badge layout; the seven-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; 10k+ large-log rendering/pagination when relevant; account switching/legacy visibility; Orion STARTED/WAITING/PAUSED/STOPPED tags when supported; Accept/Claim; global/per-Quest Orion transitions; concurrency; Reload whole rotations; dark/light/custom themes; and plugin replacement/reload safety.
+Manual checks should cover the affected states. For the current Stable surface this includes header Nitro/Xbox+ source-badge layout; the seven-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; 10k+ large-log rendering/pagination when relevant; account switching/legacy visibility; Orion STARTED/WAITING/PAUSED/STOPPED tags when supported; Accept/Claim plus Claim all sequential progress and stop-on-verification behavior; global/per-Quest Orion transitions; concurrency; Reload whole rotations; Update Center current/update/error states; dark/light/custom themes; and plugin replacement/reload safety.
 
 For Ignore/Notification changes, additionally verify account-scoped Ignore persistence, active Orion exact-ID pause before Ignore, no auto-resume on Unignore, expiry immediately ending Ignore plus best-effort stale-ID cleanup, Ignored-vs-Hidden counts, exclusion from all attention surfaces, startup/account-switch hydration, one-shot New-Available and In-Progress→Ready notifications, no startup/backlog notification, notification setting toggles, actionable error/terminal-warning notifications, retry/fallback suppression, duplicate suppression, and notification click behavior.
 

@@ -6,7 +6,7 @@ Read `README.md`, `AGENTS.md`, `CHANGELOG.md`, and `docs/RELEASES.md` before cha
 
 ## Scope
 
-QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-clicked native Accept/Claim actions, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide account-scoped Ignore/Unignore presentation preferences, provide sanitized QuestUI/Orion diagnostics, send local Vencord/native desktop notifications, and optionally delegate controls to a separately installed compatible OrionQuests companion.
+QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-authorized native Accept/Claim actions including bounded sequential Claim all, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide account-scoped Ignore/Unignore presentation preferences, provide sanitized QuestUI/Orion diagnostics, send local Vencord/native desktop notifications, and optionally delegate controls to a separately installed compatible OrionQuests companion.
 
 Do not turn QuestUI into a Quest farming engine. Do not add automatic enrollment/claim, progress spoofing, heartbeats, targeted quest execution, challenge bypasses, private Orion farming imports, or a companion-bot/backend/DM requirement just to deliver QuestUI notifications.
 
@@ -24,6 +24,7 @@ Run from the Vencord root:
 pnpm install --frozen-lockfile
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testClaimAllLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionEventLogic.ts
@@ -64,7 +65,11 @@ Prefer `taskConfigV2` over legacy `taskConfig`; do not merge both into duplicate
 
 ## Manual Accept / Claim
 
-- Mutation requires an explicit QuestUI click.
+- Mutation requires explicit QuestUI user authorization. One **Claim all** click may authorize only the fixed same-account snapshot of currently Ready, non-ignored Quest IDs captured by that click.
+- Claim all must process that snapshot strictly one at a time, re-read QuestStore before every claim, advance only after store confirmation, and never append newly claimable Quests.
+- Keep the header **Claim All N** control immediately after Stop and before Reload. It stays visible, is disabled at `N = 0`, and is actionable from one non-ignored Ready reward onward.
+- Stop on account change, CAPTCHA/verification, changed/unavailable Quest state, native failure, or ambiguous/submitted-only outcomes. Do not auto-retry or continue past uncertainty.
+- Acquire a module-global Claim all lock synchronously before async work so rapid double-clicks, stale per-card click events, and Dashboard close/reopen cannot create overlapping batches. Refuse Claim all while a same-account per-card claim is in-flight/held, and re-check the global batch lock inside the card Claim handler as well as disabling the button.
 - Re-read the Quest from QuestStore immediately before mutation.
 - Fail closed on malformed present safety/config timestamps.
 - Scope duplicate guards to account + Quest.
@@ -91,7 +96,7 @@ Optional additive capabilities are feature-detected independently:
 Global UI order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Update → Event Log → Sort → Filter → Home
+Smart Start/Pause/Resume → Stop → Claim All → Reload → Update → Event Log → Sort → Filter → Home
 ```
 
 State rules:
@@ -225,7 +230,7 @@ Current manual coverage should include:
 - Orion structured-event fallback/reconciliation and scheduler metadata when supported;
 - `mm:ss` elapsed/target formatting with current-only progress color;
 - Accept → `Processing…` → confirmed enrollment;
-- Claim flow;
+- per-card Claim flow plus Claim all sequential progress, duplicate/race locking, and stop-on-verification behavior;
 - global Start/Pause/Resume/Stop state transitions;
 - per-Quest RUNNING/QUEUE ↔ PAUSED exact-ID transitions;
 - concurrency queue pressure;

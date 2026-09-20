@@ -11,6 +11,7 @@ import {
 } from "./orionIntegration";
 import { OrionQuestControl } from "./OrionQuestControl";
 import { claimQuestReward, enrollQuest, QuestActionError } from "./questActions";
+import { getClaimAllRuntimeState } from "./claimAllRuntimeState";
 import type { QuestActionResult } from "./questActions";
 import type { NormalizedQuest } from "./questData";
 import settings from "./settings";
@@ -49,7 +50,11 @@ function currentUserId(): string | null {
     }
 }
 
-export function QuestCardActions({ quest, ignored = false }: { quest: NormalizedQuest; ignored?: boolean; }) {
+export function QuestCardActions({ quest, ignored = false, claimBatchActive = false }: {
+    quest: NormalizedQuest;
+    ignored?: boolean;
+    claimBatchActive?: boolean;
+}) {
     const action: QuestAction | null = quest.status === "available"
         ? "enroll"
         : quest.status === "claimable"
@@ -74,6 +79,9 @@ export function QuestCardActions({ quest, ignored = false }: { quest: Normalized
         const userIdAtClick = currentUserIdFromStore;
         if (!action || !userIdAtClick || pending) return;
         if (submitted?.action === action && submitted.userId === userIdAtClick) return;
+        // Disabled UI is not a synchronization primitive: a stale click event can still arrive
+        // during the render that starts Claim all. Re-check the module-global batch lock here.
+        if (action === "claim" && getClaimAllRuntimeState().active) return;
         setPending(true);
         void recordQuestUIEvent({
             severity: "info",
@@ -261,9 +269,10 @@ export function QuestCardActions({ quest, ignored = false }: { quest: Normalized
                 <button
                     type="button"
                     className={`quest-ui-card-action quest-ui-card-action-${action}`}
-                    disabled={pending || actionSubmitted || currentUserIdFromStore == null}
+                    disabled={pending || actionSubmitted || currentUserIdFromStore == null || (action === "claim" && claimBatchActive)}
                     aria-busy={pending}
                     onClick={run}
+                    title={action === "claim" && claimBatchActive ? "Claim all is processing Ready rewards" : undefined}
                 >
                     {pending ? "Processing…" : actionSubmitted ? "Sent" : actionLabel(action)}
                 </button>

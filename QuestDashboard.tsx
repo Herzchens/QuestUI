@@ -2,6 +2,7 @@ import { useSettings } from "@api/Settings";
 import { findByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, ThemeStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
+import { useClaimAllBatchActive } from "./ClaimAllControl";
 import { useIgnoredQuests } from "./ignoredQuests";
 import { useQuestOrbMultiplierState } from "./orbMultiplier";
 import { effectiveOrbRewardAmount } from "./orbRewardLogic";
@@ -355,11 +356,12 @@ function IgnoredQuestTag() {
     );
 }
 
-function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost }: {
+function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive }: {
     quest: NormalizedQuest;
     orionSnapshot: OrionControlSnapshot | null;
     ignored: boolean;
     receivesOrbBoost: boolean;
+    claimBatchActive: boolean;
 }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
     const now = Date.now();
@@ -428,7 +430,7 @@ function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost }: {
                         {quest.reward.kind === "orbs" && <OrbGlyph />}
                         <strong>{rewardLabel}</strong>
                     </span>
-                    <QuestCardActions quest={quest} ignored={ignored} />
+                    <QuestCardActions quest={quest} ignored={ignored} claimBatchActive={claimBatchActive} />
                 </div>
             </div>
 
@@ -775,6 +777,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const { orionIntegration } = settings.use(["orionIntegration"]);
     useSettings(["plugins.OrionQuests.enabled"]);
     const [, setOrionRevision] = useState(0);
+    const claimBatchActive = useClaimAllBatchActive();
     const quests = useQuestSnapshot();
     const orbMultiplier = useQuestOrbMultiplierState();
     const { ids: ignoredIds } = useIgnoredQuests();
@@ -834,6 +837,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                             orionSnapshot={orionSnapshot}
                             ignored={ignoredIds.has(quest.id)}
                             receivesOrbBoost={orbMultiplier.receivesBoost}
+                            claimBatchActive={claimBatchActive}
                         />
                     ))
                 ) : (
