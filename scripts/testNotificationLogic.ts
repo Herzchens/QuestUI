@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
     completedQuestTransitions,
     isActionableProblemEvent,
+    newAvailableQuestTransitions,
     problemNotificationKey,
     type QuestNotificationSnapshot
 } from "../notificationLogic";
@@ -23,6 +24,17 @@ assert.deepEqual(
 );
 assert.deepEqual(completedQuestTransitions([], [quest("a", "claimable")]), []);
 assert.deepEqual(completedQuestTransitions([quest("a", "claimable")], [quest("a", "claimed")]), []);
+
+assert.deepEqual(
+    newAvailableQuestTransitions(
+        new Set(["a", "b"]),
+        [quest("a", "available"), quest("b", "claimable"), quest("c", "available"), quest("d", "in-progress")]
+    ),
+    [{ questId: "c", questName: "Quest c", rewardLabel: "100 Orbs" }]
+);
+assert.deepEqual(newAvailableQuestTransitions(new Set(), [quest("a", "claimable")]), []);
+assert.deepEqual(newAvailableQuestTransitions(new Set(["a"]), [quest("a", "available")]), []);
+assert.deepEqual(newAvailableQuestTransitions(new Set(["a"]), [quest("a", "expired"), quest("b", "claimed")]), []);
 
 assert.equal(isActionableProblemEvent({ severity: "error", detail: null }), true);
 assert.equal(isActionableProblemEvent({ severity: "warning", detail: { terminal: true } }), true);
