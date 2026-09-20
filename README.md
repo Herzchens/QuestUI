@@ -39,7 +39,7 @@ The captures above are real Discord runtime screenshots supplied by the maintain
 
 - Account-scoped **Ignore / Unignore** with a dedicated Ignored catalogue
 
-- Configurable Vencord notifications for **Ready to Claim** and actionable runtime problems; both categories are enabled by default
+- Configurable Vencord notifications for **New Quest Available**, **Ready to Claim**, and actionable runtime problems; all three categories are enabled by default
 
 - Persistent Dashboard sorting, expired-history age filtering, and a compact Home action
 
@@ -63,7 +63,7 @@ The captures above are real Discord runtime screenshots supplied by the maintain
 
 - Native **Reload** that asks Discord to refetch the current Quest list without Ctrl+R
 
-- Nitro Orb reward display using Discord's current 1.2x multiplier rules where eligible
+- Account-aware Orb rewards from Discord's own base/boosted fields plus Discord's native multiplier eligibility, with Nitro and Xbox+ source badges
 
 - Optional Orion integration, enabled by default when a compatible OrionQuests plugin is installed:
 
@@ -179,7 +179,7 @@ The visible heading is **Quest Dashboard** followed by Discord's native Quest ic
 > [!NOTE]
 > **Dashboard Mode** defaults to enabled for fresh settings. Vencord preserves stored settings, so users who previously toggled `Dashboard • Mode` off keep that stored `false` value after upgrading and may need to enable it manually. This is expected persisted-setting behavior, not a regression.
 
-If the current Discord user has an active Nitro `premiumType`, QuestUI shows a colored **Nitro** tag. Discord profile badge artwork is used when available; if the artwork has not been hydrated, the tag stays visible with QuestUI's fallback glyph rather than incorrectly hiding Nitro status.
+QuestUI mirrors Discord's native Quest Orb multiplier identity in the Dashboard header. Native `NITRO` eligibility keeps the existing colored **Nitro** badge and badge artwork. Native `XBOX_GAME_PASS` eligibility shows a green **Xbox+** badge with Discord's own Xbox glyph. When an account has both eligible sources, Discord's own source classifier prioritizes Nitro, so QuestUI shows **Nitro** rather than two badges. Nitro tiers that are not multiplier-eligible keep the legacy Nitro identity badge, but they still receive the base Quest reward.
 
 The title uses a seamless right-to-left color sweep. `prefers-reduced-motion` disables the motion and keeps the title readable.
 
@@ -213,7 +213,7 @@ The Sort popout supports **Recommended**, **Expiring Soon**, **Highest Orb Rewar
 
 Ignore is account-scoped and persisted locally by QuestUI. It does not change Discord enrollment, progress, completion, reward, or claim state.
 
-A normal **In Progress** Quest can be ignored. Ignored Quests are removed from the normal Dashboard list and from QuestUI attention surfaces, including the shortcut attention dot, Detailed Status, Quest Home counters, and QuestUI notifications. They remain visible through the explicit **Ignored** catalogue with their real Discord status and progress.
+A normal **In Progress** Quest can be ignored. Ignored Quests are removed from the normal Dashboard list and from QuestUI attention surfaces, including the shortcut attention dot, Detailed Status, Quest Home counters, and QuestUI notifications. They remain visible through the explicit **Ignored** catalogue with their real Discord status and progress until Discord reports them **Expired**. Expiration immediately ends Ignore, and QuestUI prunes the stale account-scoped ignored ID best-effort.
 
 When a compatible Orion integration is enabled and Orion explicitly publishes that exact Quest as active (`RUNNING` / `QUEUE`, or scheduler `running` / `waiting`), QuestUI sends Orion an exact-ID **Pause** before it saves Ignore. This prevents a hidden Quest from continuing to farm in the background.
 
@@ -245,25 +245,21 @@ Orb balance comes from Discord's `VirtualCurrencyStore`; QuestUI does not derive
 
 ### Rewards
 
-Orb rewards reuse Discord's themed Orb component. QuestUI keeps Discord's base reward value unchanged and adjusts only the displayed amount when the current account qualifies for Discord's Nitro Orb multiplier.
+Orb rewards reuse Discord's themed Orb component. QuestUI reads both Discord's base `orbQuantity` and explicit `premiumOrbQuantity`, then asks Discord's own Quest multiplier classifier whether the current account is `NITRO`, `XBOX_GAME_PASS`, `UPSELL`, or `INELIGIBLE`. It does **not** manufacture a local `×1.2` value.
 
-Examples:
-
-- `200 Orbs` → `240 Orbs`
-- `700 Orbs` → `840 Orbs`
-
-Nitro Basic and fractional/credit-only Nitro states are not treated as eligible for this reward multiplier.
+If the native classifier says the account receives the multiplier, the card displays Discord's `premiumOrbQuantity` (for example `240 Orbs` instead of the `200 Orbs` base). Otherwise it displays the base amount. Xbox Game Pass is therefore identified from Discord's perk source rather than guessed from `!Nitro` or from the existence of a boosted reward field.
 
 ## Notifications
 
-QuestUI has two separately configurable notification categories in the QuestUI plugin settings, and both default to enabled:
+QuestUI has three separately configurable notification categories in the QuestUI plugin settings, and all three default to enabled:
 
+- **Notifications • New Quest Available** — one notification when a previously unseen same-account Quest is first observed as real Discord **Available** after the initial QuestStore baseline.
 - **Notifications • Ready to Claim** — one notification when an observed same-account Quest transitions from real Discord **In Progress** to **Ready to Claim**.
 - **Notifications • Problems** — actionable QuestUI/Orion runtime problems from the sanitized Event Log. `error` is actionable; `warning` is actionable only when structured detail marks it terminal.
 
 QuestUI uses Vencord's Notifications API instead of a companion bot, backend, DM relay, or parallel OS-notification system. Delivery therefore follows Vencord's notification configuration: Vencord in-app notification, native desktop notification when Discord is unfocused, or native desktop notification always. Vencord also persists normal notifications into its Notification Log according to the user's global log settings.
 
-Ready-to-Claim notifications do not replay existing completed Quests on startup, account switch, Ignore/Unignore hydration, or setting enablement. Progress ticks and unchanged re-renders do not notify. Clicking a Ready-to-Claim notification opens Discord Quest Home.
+New-Quest notifications establish the initial QuestStore/account contents as a baseline, so startup, account hydration, and Ignore/Unignore do not create a synthetic "new Quest" alert. Ready-to-Claim notifications likewise do not replay existing completed Quests on startup, account switch, Ignore/Unignore hydration, or setting enablement. Progress ticks and unchanged re-renders do not notify. Clicking either Quest notification opens Discord Quest Home.
 
 Problem notifications ignore normal retry/fallback/recovery warnings, establish existing Event Log history as a baseline rather than a notification backlog, and deduplicate the same short-lived actionable problem. Ignored Quests do not produce QuestUI completion/problem attention while ignored.
 

@@ -5,6 +5,7 @@ import "./eventLogRuntimeFix.css";
 import definePlugin from "@utils/types";
 
 import { startEventLogCapture, stopEventLogCapture } from "./eventLog";
+import { startIgnoredQuestLifecycle, stopIgnoredQuestLifecycle } from "./ignoredQuests";
 import { startQuestNotifications, stopQuestNotifications } from "./notifications";
 import { QuestButton, QuestsCount } from "./QuestButton";
 import { QUESTUI_VERSION } from "./version";
@@ -26,6 +27,7 @@ export default definePlugin({
 
     start() {
         startEventLogCapture();
+        startIgnoredQuestLifecycle();
         startQuestNotifications();
         startUpdateChecks(() => ({
             checkHours: updateCheckHoursFromStep(settings.store.updateCheckStep),
@@ -37,6 +39,7 @@ export default definePlugin({
     stop() {
         stopUpdateChecks();
         stopQuestNotifications();
+        stopIgnoredQuestLifecycle();
         stopEventLogCapture();
     },
 

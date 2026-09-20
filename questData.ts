@@ -1,6 +1,7 @@
 import { findByCodeLazy } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
 
+import { orbRewardAmounts } from "./orbRewardLogic";
 import { sameQuestShortcutSnapshot } from "./questShortcutLogic";
 import { QuestsStore } from "./stores";
 
@@ -24,6 +25,7 @@ export interface NormalizedReward {
     kind: RewardKind;
     label: string;
     orbQuantity: number;
+    boostedOrbQuantity: number;
 }
 
 export interface NormalizedQuest {
@@ -165,9 +167,7 @@ function rewardInfo(quest: any): NormalizedReward {
         ? quest.config.rewardsConfig.rewards
         : [];
 
-    const orbQuantity = rewards.reduce((sum: number, reward: any) => {
-        return sum + Math.max(0, finiteNumber(reward?.orbQuantity));
-    }, 0);
+    const { base: orbQuantity, boosted: boostedOrbQuantity } = orbRewardAmounts(rewards);
 
     const names = rewards
         .map((reward: any) => reward?.messages?.name)
@@ -178,7 +178,8 @@ function rewardInfo(quest: any): NormalizedReward {
         return {
             kind: "orbs",
             label: orbQuantity > 0 ? `${Math.round(orbQuantity).toLocaleString()} Orbs` : names.join(" + "),
-            orbQuantity
+            orbQuantity,
+            boostedOrbQuantity
         };
     }
 
@@ -186,11 +187,12 @@ function rewardInfo(quest: any): NormalizedReward {
         return {
             kind: "non-orbs",
             label: names.length > 0 ? names.join(" + ") : "Reward",
-            orbQuantity: 0
+            orbQuantity: 0,
+            boostedOrbQuantity: 0
         };
     }
 
-    return { kind: "unknown", label: "Unknown reward", orbQuantity: 0 };
+    return { kind: "unknown", label: "Unknown reward", orbQuantity: 0, boostedOrbQuantity: 0 };
 }
 
 function taskTypeForKey(key: string): QuestTaskType {

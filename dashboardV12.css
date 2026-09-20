@@ -338,11 +338,11 @@
 }
 
 @media (max-width: 430px) {
-    .quest-ui-dashboard-nitro-wordmark {
+    .quest-ui-dashboard-boost-source-wordmark {
         display: none;
     }
 
-    .quest-ui-dashboard-nitro-tag {
+    .quest-ui-dashboard-boost-source-tag {
         padding-right: 5px;
     }
 

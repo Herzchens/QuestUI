@@ -91,7 +91,7 @@ Optional additive capabilities are feature-detected independently:
 Global UI order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Event Log → Sort → Filter → Home
+Smart Start/Pause/Resume → Stop → Reload → Update → Event Log → Sort → Filter → Home
 ```
 
 State rules:
@@ -123,7 +123,7 @@ Use Vencord's native toast API for explicit control success/failure feedback. Ne
 Ignored is a QuestUI-local, account-scoped presentation state. It is never a normalized Discord Quest status and must not mutate Discord enrollment, progress, completion, reward, or claim state.
 
 - Persist ignored Quest IDs per Discord account and never allow an account to inherit another account's ignored set.
-- A normal enrolled In-Progress Quest may be ignored. An already-ignored Quest remains Unignore-able even if its real Discord status later changes.
+- A normal enrolled In-Progress Quest may be ignored. Later real status changes keep it recoverable except **Expired**: expiration immediately ends Ignore and stale persisted IDs are pruned best-effort.
 - Ignored Quests are excluded from the normal Dashboard, shortcut attention, Detailed Status, Quest Home counters, and QuestUI notification attention paths.
 - Ignored Quests remain available through the explicit **Ignored** catalogue and retain their real Discord status/progress while shown there.
 - Ignored and Hidden are distinct. Ignored cards do not inflate Hidden; Hidden remains the count of non-ignored cards removed by normal Dashboard filters.
@@ -137,7 +137,8 @@ Ignored is a QuestUI-local, account-scoped presentation state. It is never a nor
 
 QuestUI notification delivery stays local-first through Vencord's Notifications API. Do not add a companion bot, backend, webhook relay, or user-token DM mechanism as a requirement for this feature.
 
-- **Ready to Claim** and **Problems** are independently configurable and both default to enabled.
+- **New Quest Available**, **Ready to Claim**, and **Problems** are independently configurable and default to enabled.
+- New-Quest eligibility is a previously unseen same-account Quest first observed as Discord **Available** after the initial store baseline.
 - Completion eligibility is an observed same-account Discord **In Progress → Ready to Claim** transition.
 - Initial hydration, plugin restart, account switch, Ignore/Unignore hydration, and enabling the setting after completion must not synthesize a completion notification.
 - Do not notify for progress ticks or unchanged re-renders. One observed completion transition produces at most one notification.
@@ -154,8 +155,9 @@ QuestUI notification delivery stays local-first through Vencord's Notifications 
 Keep the current presentation contracts unless a change explicitly targets them:
 
 - visible title: **Quest Dashboard** + Discord native Quest icon;
-- eligible Nitro accounts are determined from the current user's `premiumType`;
-- use Discord Nitro profile-badge artwork when hydrated, otherwise keep the Nitro tag with the existing fallback glyph;
+- boosted Quest rewards come from Discord's explicit `premiumOrbQuantity` field when present; do not locally invent the multiplier;
+- use Discord's native Quest multiplier eligibility classifier to distinguish `NITRO` from `XBOX_GAME_PASS`; never infer Xbox from reward values or from `!Nitro`;
+- show **Nitro** for the Nitro source and **Xbox+** with Discord's native Xbox glyph for the Xbox Game Pass source. If both sources are present, mirror Discord's Nitro precedence;
 - title color sweep is a seamless linear right-to-left loop with no reset frame;
 - summary remains one line below tools and always renders Available / Ready / In Progress / Claimed / Expired / Ignored / Hidden, including zero values;
 - the five Discord status counts come from the full non-ignored live Quest snapshot; Ignored is a separate local count; Hidden reflects only normal filtering of non-ignored cards;
@@ -207,15 +209,15 @@ Automated tests are necessary but not sufficient. For relevant changes, manual-t
 
 Current manual coverage should include:
 
-- title/native Quest icon/Nitro tag without overlap;
+- title/native Quest icon/Nitro-or-Xbox+ badge without overlap;
 - seven-item summary including zero/ Ignored / Hidden counts and even spacing;
 - Sort/Filter/Home controls and custom popouts;
 - expired-age 7/15/30/90/All/custom filtering plus expiry copy outside 15 days;
 - accepted-Quest pinning and required-time sorting;
 - native Orb balance including zero and runtime version/health chips;
-- Ignore persistence/account isolation, Ignored catalogue visibility, Ignored-vs-Hidden counts, and exclusion from all normal attention surfaces;
+- Ignore persistence/account isolation, expiry ending Ignore and cleaning stale IDs, Ignored catalogue visibility, Ignored-vs-Hidden counts, and exclusion from all normal attention surfaces;
 - active Orion exact-ID Pause on Ignore, no global Stop, and no auto-Resume on Unignore;
-- one-shot real In-Progress → Ready-to-Claim notification with no startup/backlog duplicate;
+- one-shot real New-Available and In-Progress → Ready-to-Claim notifications with no startup/backlog duplicate;
 - Problems notification behavior when explicitly testing that path, without misrepresenting automated coverage as live evidence;
 - Event Log persistence/search/source/level/category/sort/day grouping/detail/report/open/clear flows and scrollbar behavior;
 - large Event Log pagination/windowing on a 10k+ persisted history when that path changes;

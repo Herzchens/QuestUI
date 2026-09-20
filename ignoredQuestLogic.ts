@@ -89,3 +89,30 @@ export function updateIgnoredQuestState(
 
     return { version: 1, accounts };
 }
+
+export function pruneIgnoredQuestState(
+    value: unknown,
+    accountId: string,
+    questIds: Iterable<string>
+): IgnoredQuestState {
+    const normalizedAccountId = normalizedId(accountId);
+    const current = normalizeIgnoredQuestState(value);
+    if (!normalizedAccountId) return current;
+
+    const remove = new Set<string>();
+    for (const candidate of questIds) {
+        const questId = normalizedId(candidate);
+        if (questId) remove.add(questId);
+    }
+    if (remove.size === 0) return current;
+
+    const existing = current.accounts[normalizedAccountId] ?? [];
+    const next = existing.filter(id => !remove.has(id));
+    if (next.length === existing.length) return current;
+
+    const accounts = { ...current.accounts };
+    if (next.length > 0) accounts[normalizedAccountId] = next;
+    else delete accounts[normalizedAccountId];
+
+    return { version: 1, accounts };
+}

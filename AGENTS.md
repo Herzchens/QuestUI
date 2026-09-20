@@ -17,7 +17,7 @@ QuestUI may:
 - display Discord's native Orb balance and runtime version metadata;
 - capture, sanitize, persist, filter, and display QuestUI/recognized Orion diagnostic events;
 - keep account-scoped local presentation preferences such as Ignore/Unignore without changing Discord Quest state;
-- surface optional user notifications for observed Ready-to-Claim transitions and actionable QuestUI/Orion problems;
+- surface optional user notifications for newly observed available Quests, Ready-to-Claim transitions, and actionable QuestUI/Orion problems;
 - read an explicit Orion companion state surface and delegate Start/Stop/Pause/Resume through it;
 - auto-start compatible Orion only after Discord confirms a QuestUI enrollment in QuestStore;
 - improve accessibility, compatibility, tests, CI, documentation, and release packaging.
@@ -45,7 +45,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `index.tsx` — plugin metadata, lifecycle wiring, and Vencord patches.
 - `QuestButton.tsx` — shortcuts, status indicators, counters, dashboard/open-home behavior.
 - `QuestDashboard.tsx` — Dashboard cards, filters, artwork/rewards, native progress, summary, ignored catalogue, and expiry presentation.
-- `QuestDashboardShell.tsx` — visible **Quest Dashboard** title/native Quest icon, premium-aware Nitro tag, and fixed header tools.
+- `QuestDashboardShell.tsx` — visible **Quest Dashboard** title/native Quest icon, Nitro/Xbox+ source tag, and fixed header tools.
 - `dashboardSortLogic.ts` — persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
 - `ignoredQuests.ts`, `ignoredQuestLogic.ts` — account-scoped persisted Ignore/Unignore presentation state and pure normalization/update logic.
 - `notifications.ts`, `notificationLogic.ts` — QuestStore completion observation, Event Log problem observation, notification deduplication, and pure transition/severity logic.
@@ -149,7 +149,7 @@ Compatible Orion must own the exact registered `orion` command, expose `start`, 
 Header order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Event Log → Sort → Filter → Home
+Smart Start/Pause/Resume → Stop → Reload → Update → Event Log → Sort → Filter → Home
 ```
 
 Global state rules:
@@ -197,8 +197,9 @@ Use Vencord's native toast API for explicit success/failure feedback.
 ## Dashboard presentation invariants
 
 - Visible title: **Quest Dashboard** + Discord's native Quest icon.
-- Nitro eligibility comes from the current user's Discord `premiumType`; the tag must remain visible for an eligible account even if profile badge artwork is not hydrated.
-- Use Discord's native Nitro profile-badge artwork when available and the existing fallback glyph otherwise. Do not add a new Discord webpack finder for Nitro.
+- Use Discord's native Quest Orb multiplier classifier as the source of truth when available: `NITRO`, `XBOX_GAME_PASS`, `UPSELL`, or `INELIGIBLE`. Never infer Xbox from `premiumOrbQuantity` or from the absence of Nitro.
+- The header source badge is **Nitro** for native Nitro eligibility and **Xbox+** for native Xbox Game Pass eligibility. Discord's classifier gives Nitro precedence when both sources are present. Preserve the legacy Nitro identity badge for Nitro tiers that are not multiplier-eligible, but do not invent an Xbox fallback.
+- Read Discord's explicit `premiumOrbQuantity` reward value instead of multiplying locally. Show it only when native eligibility says the account receives the multiplier; otherwise show base `orbQuantity`.
 - Title sweep is a seamless linear right-to-left loop with an exact repeat period; no reset/transition frame.
 - Summary stays on one row and always renders Available, Ready, In Progress, Claimed, Expired, Ignored, and Hidden, including zero values.
 - The five Discord status counts come from the full non-ignored live Quest snapshot; Ignored is a separate local-presentation count; Hidden counts only non-ignored cards removed by Dashboard filters.
@@ -211,7 +212,7 @@ Use Vencord's native toast API for explicit success/failure feedback.
 
 - Ignored is a QuestUI-only presentation preference, never a normalized Discord Quest status. Ignoring a Quest may additionally delegate exact-ID Orion Pause before persistence, but never mutates Discord Quest state.
 - Persist ignored Quest IDs per Discord account. Invalid persisted rows fail closed through normalization; an account must never inherit another account's ignored set.
-- A normal enrolled In-Progress Quest may be ignored. Any already-ignored Quest remains Unignore-able even if its real Discord state later changes.
+- A normal enrolled In-Progress Quest may be ignored. Later real status changes keep the preference recoverable except **Expired**: once Discord reports the Quest expired, Ignore immediately stops applying and the stale persisted ID is pruned best-effort.
 - Ignored Quests are excluded from the normal Dashboard list, shortcut attention dot, Detailed Status, Quest Home counters, and QuestUI notification attention paths.
 - Ignored Quests remain discoverable through the explicit **Ignored** catalogue/filter and retain their real Discord status/progress while shown there.
 - **Ignored** and **Hidden** are distinct: ignored cards do not inflate Hidden, while Hidden continues to mean non-ignored cards removed by normal Dashboard filters.
@@ -224,7 +225,8 @@ Use Vencord's native toast API for explicit success/failure feedback.
 
 ## Notification invariants
 
-- Notification categories are independently configurable for Ready-to-Claim transitions and actionable runtime problems.
+- Notification categories are independently configurable for New Quest Available, Ready-to-Claim transitions, and actionable runtime problems.
+- New-Quest notification eligibility is a previously unseen same-account Quest first observed as real Discord **Available** after the initial QuestStore baseline. Startup/account hydration and Ignore/Unignore never synthesize it.
 - Completion notification eligibility is an observed same-account transition from real Discord **In Progress** to **Ready to Claim**. Initial hydration, plugin restart, account switch, Ignore/Unignore hydration, and enabling the setting after completion must not synthesize a completion notification.
 - Do not notify for progress ticks or unchanged/re-rendered QuestStore state. One observed completion transition produces at most one notification.
 - Ignored Quests do not generate QuestUI completion/problem attention while ignored.
@@ -264,9 +266,9 @@ Use Vencord's native toast API for explicit success/failure feedback.
 
 Run the full local gate for source changes. For companion changes, also run Orion pause/resume, structured-event, and scheduler regression tests and build/type-check both plugins together.
 
-Manual checks should cover the affected states. For the current Stable surface this includes header/Nitro layout; the seven-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; 10k+ large-log rendering/pagination when relevant; account switching/legacy visibility; Orion STARTED/WAITING/PAUSED/STOPPED tags when supported; Accept/Claim; global/per-Quest Orion transitions; concurrency; Reload whole rotations; dark/light/custom themes; and plugin replacement/reload safety.
+Manual checks should cover the affected states. For the current Stable surface this includes header Nitro/Xbox+ source-badge layout; the seven-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; 10k+ large-log rendering/pagination when relevant; account switching/legacy visibility; Orion STARTED/WAITING/PAUSED/STOPPED tags when supported; Accept/Claim; global/per-Quest Orion transitions; concurrency; Reload whole rotations; dark/light/custom themes; and plugin replacement/reload safety.
 
-For Ignore/Notification changes, additionally verify account-scoped Ignore persistence, active Orion exact-ID pause before Ignore, no auto-resume on Unignore, Unignore after real status changes, Ignored-vs-Hidden counts, exclusion from all attention surfaces, startup/account-switch hydration, one-shot In-Progress→Ready notifications, no startup/backlog notification, notification setting toggles, actionable error/terminal-warning notifications, retry/fallback suppression, duplicate suppression, and notification click behavior.
+For Ignore/Notification changes, additionally verify account-scoped Ignore persistence, active Orion exact-ID pause before Ignore, no auto-resume on Unignore, expiry immediately ending Ignore plus best-effort stale-ID cleanup, Ignored-vs-Hidden counts, exclusion from all attention surfaces, startup/account-switch hydration, one-shot New-Available and In-Progress→Ready notifications, no startup/backlog notification, notification setting toggles, actionable error/terminal-warning notifications, retry/fallback suppression, duplicate suppression, and notification click behavior.
 
 Automated checks do not substitute for live Discord evidence. State exactly what was and was not tested.
 

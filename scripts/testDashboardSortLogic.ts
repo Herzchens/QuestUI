@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 import { normalizeDashboardSortMode, requiredQuestTimeSeconds, sortDashboardQuests } from "../dashboardSortLogic";
+import { effectiveOrbRewardAmount, orbRewardAmounts } from "../orbRewardLogic";
 
 const quest = (
     id: string,
@@ -15,7 +16,12 @@ const quest = (
     name,
     status,
     expiresAt,
-    reward: { kind: orbQuantity > 0 ? "orbs" : "non-orbs", orbQuantity, label: "" },
+    reward: {
+        kind: orbQuantity > 0 ? "orbs" : "non-orbs",
+        orbQuantity,
+        boostedOrbQuantity: orbQuantity,
+        label: ""
+    },
     primaryTask: requiredSeconds == null ? null : {
         key: taskKey,
         type: taskKey.startsWith("WATCH_VIDEO") ? "video" : taskKey === "PLAY_ACTIVITY" ? "activity" : "play",
@@ -33,6 +39,25 @@ const sample = [
     quest("d", "Gamma", "expired", 100, 1000, null),
     quest("e", "Delta", "claimed", 150, 400, 1200)
 ];
+
+assert.deepEqual(
+    orbRewardAmounts([
+        { orbQuantity: 200, premiumOrbQuantity: 240 },
+        { type: 99 },
+        { orbQuantity: 700, premiumOrbQuantity: 840 }
+    ]),
+    { base: 900, boosted: 1080 }
+);
+assert.deepEqual(
+    orbRewardAmounts([
+        { orbQuantity: 200 },
+        { orbQuantity: 50, premiumOrbQuantity: 0 }
+    ]),
+    { base: 250, boosted: 250 }
+);
+assert.equal(effectiveOrbRewardAmount({ base: 200, boosted: 240 }, false), 200);
+assert.equal(effectiveOrbRewardAmount({ base: 200, boosted: 240 }, true), 240);
+assert.equal(effectiveOrbRewardAmount({ base: 200, boosted: 200 }, true), 200);
 
 assert.equal(normalizeDashboardSortMode("bogus"), "recommended");
 assert.equal(normalizeDashboardSortMode("required-time-desc"), "required-time-desc");

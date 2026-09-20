@@ -6,6 +6,7 @@ import { UserProfileStore, UserStore, useEffect, useStateFromStores } from "@web
 import { EventLogButton } from "./EventLogViewer";
 import { isOrionCommandReady } from "./orionIntegration";
 import { OrionGlobalControls } from "./OrionControls";
+import { useQuestOrbMultiplierState } from "./orbMultiplier";
 import { QuestDashboard, QuestDashboardToolbar } from "./QuestDashboard";
 import { QuestReloadControl } from "./QuestReloadControl";
 import settings from "./settings";
@@ -17,6 +18,11 @@ import "./dashboardV12.css";
 import "./dashboardTuning.css";
 
 const NativeQuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
+
+const NativeXboxIcon = findByCodeLazy(
+    "\"0 0 60 60\"",
+    "\"M8.95185131,8.62650012"
+);
 
 function nitroBadgeIconSrc(icon: string): string {
     return /^https?:\/\//i.test(icon)
@@ -46,41 +52,50 @@ function NitroFallbackIcon() {
     );
 }
 
-function QuestNitroTag() {
+function QuestOrbMultiplierSourceTag() {
+    const { source } = useQuestOrbMultiplierState();
     const currentUserId = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.id ?? null);
-    const premiumType = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.premiumType ?? 0);
-    const hasNitro = premiumType > 0;
+    const showNitro = source === "nitro";
 
     useEffect(() => {
-        if (!hasNitro || !currentUserId) return;
+        if (!showNitro || !currentUserId) return;
         if (UserProfileStore?.getUserProfile?.(currentUserId)) return;
         if (UserProfileStore?.isFetchingProfile?.(currentUserId)) return;
-
-        // The current User already tells us whether Nitro is active. Fetching the profile here is
-        // only for Discord's current Nitro badge artwork, so missing/evolving badge metadata can
-        // never hide the tag itself.
         void fetchUserProfile(currentUserId).catch(() => undefined);
-    }, [hasNitro, currentUserId]);
+    }, [showNitro, currentUserId]);
 
     const nitroBadge = useStateFromStores([UserProfileStore], () => {
-        if (!currentUserId) return null;
+        if (!showNitro || !currentUserId) return null;
         const profile = UserProfileStore?.getUserProfile?.(currentUserId);
         const badge = profile?.badges?.find(candidate =>
             isCurrentNitroBadge(candidate.id ?? "", candidate.description ?? "")
         );
-
         if (!badge?.icon) return null;
         return nitroBadgeIconSrc(badge.icon);
     });
 
-    if (!hasNitro) return null;
+    if (source === "xbox_game_pass") {
+        return (
+            <span className="quest-ui-dashboard-boost-source-tag is-xbox" title="Xbox Game Pass Quest Orb boost">
+                <NativeXboxIcon
+                    width={17}
+                    height={17}
+                    color="currentColor"
+                    className="quest-ui-dashboard-xbox-icon"
+                />
+                <span className="quest-ui-dashboard-boost-source-wordmark">Xbox+</span>
+            </span>
+        );
+    }
+
+    if (!showNitro) return null;
 
     return (
-        <span className="quest-ui-dashboard-nitro-tag" title="Discord Nitro">
+        <span className="quest-ui-dashboard-boost-source-tag is-nitro" title="Discord Nitro">
             {nitroBadge
                 ? <img src={nitroBadge} alt="" aria-hidden="true" />
                 : <NitroFallbackIcon />}
-            <span className="quest-ui-dashboard-nitro-wordmark">Nitro</span>
+            <span className="quest-ui-dashboard-boost-source-wordmark">Nitro</span>
         </span>
     );
 }
@@ -90,7 +105,7 @@ function QuestDashboardDisplayTitle() {
         <div className="quest-ui-dashboard-display-title" aria-hidden="true">
             <strong>Quest Dashboard</strong>
             <span className="quest-ui-dashboard-display-title-icon"><NativeQuestIcon /></span>
-            <QuestNitroTag />
+            <QuestOrbMultiplierSourceTag />
         </div>
     );
 }

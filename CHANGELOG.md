@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Added **Notifications • New Quest Available**, enabled by default, using a same-account QuestStore baseline so startup/account hydration and Ignore/Unignore cannot synthesize a backlog alert.
+- Changed Ignore lifecycle so Discord **Expired** state immediately ends the local Ignore effect; stale account-scoped ignored IDs are pruned best-effort on Quest/account changes and a periodic expiry sweep.
+- Reworked Orb reward presentation around Discord's native Quest multiplier eligibility. QuestUI now distinguishes native `NITRO` and `XBOX_GAME_PASS` sources, restores the Nitro badge for Nitro, shows an **Xbox+** badge with Discord's Xbox glyph for Game Pass, mirrors Discord's Nitro precedence when both are present, and displays `premiumOrbQuantity` only for accounts Discord says receive the boost. The local Nitro-only `×1.2` calculation is gone.
+- Added the v1.4.1 Update Center with discrete `0 / 3h / 6h / 12h / 24h / 3d / 7d` checks, stable/prerelease policy, optional Orion checks, compact settings status, a Dashboard manual Check/Update entry point, and fail-closed managed updater paths.
+
 ## v1.4.0 - 2026-09-15
 
 - Added account-scoped **Ignore / Unignore** for enrolled In-Progress Quests, including persisted per-account ignored IDs, a separate **Ignored** catalogue/filter, a dedicated Ignored summary count, and exclusion from the normal Dashboard, shortcut attention, Detailed Status, Quest Home counters, and QuestUI notification attention paths. Ignored Quests keep their real Discord status/progress and no longer inflate **Hidden**. Closes #15.

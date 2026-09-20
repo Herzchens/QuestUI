@@ -75,19 +75,14 @@
     width: 22px;
 }
 
-.quest-ui-dashboard-nitro-tag {
+.quest-ui-dashboard-boost-source-tag {
     align-items: center;
-    background-color: #7b6df6;
-    background-image: linear-gradient(120deg, #ef7cf7 0%, #ad63f5 46%, #6875f5 100%);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
     border: 0;
     border-radius: 8px;
     box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.13),
-        0 2px 6px rgba(0, 0, 0, 0.22),
-        0 0 10px rgba(142, 111, 255, 0.16);
+        0 2px 6px rgba(0, 0, 0, 0.22);
     box-sizing: border-box;
     color: #fff;
     display: inline-flex;
@@ -101,8 +96,29 @@
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
-.quest-ui-dashboard-nitro-tag > img,
-.quest-ui-dashboard-nitro-fallback-icon {
+.quest-ui-dashboard-boost-source-tag.is-nitro {
+    background-color: #7b6df6;
+    background-image: linear-gradient(120deg, #ef7cf7 0%, #ad63f5 46%, #6875f5 100%);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.13),
+        0 2px 6px rgba(0, 0, 0, 0.22),
+        0 0 10px rgba(142, 111, 255, 0.16);
+}
+
+.quest-ui-dashboard-boost-source-tag.is-xbox {
+    background-color: #107c10;
+    background-image: linear-gradient(120deg, #20a020 0%, #107c10 55%, #075d0b 100%);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 2px 6px rgba(0, 0, 0, 0.22),
+        0 0 10px rgba(16, 124, 16, 0.16);
+}
+
+.quest-ui-dashboard-boost-source-tag > img,
+.quest-ui-dashboard-nitro-fallback-icon,
+.quest-ui-dashboard-xbox-icon {
     display: block;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
     height: 17px;
@@ -110,18 +126,23 @@
     width: 17px;
 }
 
-.quest-ui-dashboard-nitro-fallback-icon {
+.quest-ui-dashboard-nitro-fallback-icon,
+.quest-ui-dashboard-xbox-icon {
     fill: currentColor;
 }
 
-.quest-ui-dashboard-nitro-wordmark {
+.quest-ui-dashboard-boost-source-wordmark {
     font-family: var(--font-display, var(--font-primary));
     font-size: 13px;
-    font-style: italic;
     font-weight: 900;
-    letter-spacing: -0.35px;
+    letter-spacing: -0.25px;
     line-height: 1;
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 0 5px rgba(255, 255, 255, 0.12);
+}
+
+.quest-ui-dashboard-boost-source-tag.is-nitro .quest-ui-dashboard-boost-source-wordmark {
+    font-style: italic;
+    letter-spacing: -0.35px;
 }
 
 /* The visible title is rendered by QuestDashboardShell so header tools never steal summary width. */
@@ -198,19 +219,18 @@
         width: 20px;
     }
 
-    .quest-ui-dashboard-nitro-tag {
+    .quest-ui-dashboard-orb-boost-tag {
         gap: 5px;
         height: 26px;
         padding: 0 7px 0 5px;
     }
 
-    .quest-ui-dashboard-nitro-tag > img,
-    .quest-ui-dashboard-nitro-fallback-icon {
+    .quest-ui-dashboard-orb-boost-icon {
         height: 15px;
         width: 15px;
     }
 
-    .quest-ui-dashboard-nitro-wordmark {
+    .quest-ui-dashboard-orb-boost-wordmark {
         font-size: 12px;
     }
 

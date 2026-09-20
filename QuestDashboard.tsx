@@ -1,8 +1,10 @@
 import { useSettings } from "@api/Settings";
 import { findByCodeLazy } from "@webpack";
-import { NavigationRouter, Popout, ThemeStore, UserStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
+import { NavigationRouter, Popout, ThemeStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { useIgnoredQuests } from "./ignoredQuests";
+import { useQuestOrbMultiplierState } from "./orbMultiplier";
+import { effectiveOrbRewardAmount } from "./orbRewardLogic";
 import type { OrionControlSnapshot } from "./orionCommandLogic";
 import {
     orionQuestProgressSource,
@@ -253,28 +255,6 @@ function orbRewardTier(quantity: number): "standard" | "large" | "boosted" {
     return "standard";
 }
 
-const NITRO_ORB_MULTIPLIER_START = Date.UTC(2026, 4, 8);
-
-function hasEligibleNitroOrbMultiplier(): boolean {
-    const user = UserStore?.getCurrentUser?.();
-    if (!user || user.premiumType !== 2) return false;
-
-    // Nitro Basic is premiumType 3 and is already excluded above. Discord marks
-    // credit-only/fractional Nitro separately; those accounts are not multiplier-eligible.
-    if (user.isFractionalPremiumWithNoSubscription?.()) return false;
-    return true;
-}
-
-function effectiveOrbQuantity(quest: NormalizedQuest, hasNitroMultiplier: boolean): number {
-    const quantity = quest.reward.orbQuantity;
-    if (!hasNitroMultiplier || quest.reward.kind !== "orbs" || quantity <= 0) return quantity;
-
-    const startsAt = new Date(quest.rawQuest?.config?.startsAt ?? 0).getTime();
-    if (!Number.isFinite(startsAt) || startsAt < NITRO_ORB_MULTIPLIER_START) return quantity;
-
-    return Math.round(quantity * 1.2);
-}
-
 function statusLabel(status: NormalizedQuest["status"]): string {
     if (status === "in-progress") return "In progress";
     if (status === "claimable") return "Ready to claim";
@@ -374,10 +354,11 @@ function IgnoredQuestTag() {
     );
 }
 
-function QuestCard({ quest, orionSnapshot, ignored }: {
+function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost }: {
     quest: NormalizedQuest;
     orionSnapshot: OrionControlSnapshot | null;
     ignored: boolean;
+    receivesOrbBoost: boolean;
 }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
     const now = Date.now();
@@ -396,11 +377,13 @@ function QuestCard({ quest, orionSnapshot, ignored }: {
     const progressCopy = timedProgress == null ? formatQuestProgress(quest) : null;
     const progressTone = questProgressTone(completion, quest, progressRatioOverride);
     const showProgressCopy = quest.status !== "claimable" && quest.status !== "claimed";
-    const hasNitroMultiplier = useStateFromStores([UserStore], hasEligibleNitroOrbMultiplier);
-    const orbQuantity = effectiveOrbQuantity(quest, hasNitroMultiplier);
-    const rewardTier = quest.reward.kind === "orbs" ? orbRewardTier(orbQuantity) : null;
-    const rewardLabel = quest.reward.kind === "orbs" && orbQuantity > 0
-        ? `${orbQuantity} Orbs`
+    const displayedOrbQuantity = effectiveOrbRewardAmount(
+        { base: quest.reward.orbQuantity, boosted: quest.reward.boostedOrbQuantity },
+        receivesOrbBoost
+    );
+    const rewardTier = quest.reward.kind === "orbs" ? orbRewardTier(displayedOrbQuantity) : null;
+    const rewardLabel = quest.reward.kind === "orbs" && displayedOrbQuantity > 0
+        ? `${Math.round(displayedOrbQuantity)} Orbs`
         : quest.reward.label;
     const orionTagState = quest.status === "in-progress"
         ? orionQuestTagState(orionSnapshot, quest.id)
@@ -792,6 +775,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     useSettings(["plugins.OrionQuests.enabled"]);
     const [, setOrionRevision] = useState(0);
     const quests = useQuestSnapshot();
+    const orbMultiplier = useQuestOrbMultiplierState();
     const { ids: ignoredIds } = useIgnoredQuests();
     const partition = partitionIgnored(quests, ignoredIds);
     const orionHealth = getOrionIntegrationHealth(orionIntegration === true);
@@ -807,12 +791,16 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const filteredNormal = filterQuests(partition.normal, dashboardScopeFromSettings(dashboardSettings));
     const catalogue = dashboardSettings.dashboardShowIgnored === true ? partition.ignored : [];
     const filtered = [...filteredNormal, ...catalogue];
-    const hasNitroMultiplier = useStateFromStores([UserStore], hasEligibleNitroOrbMultiplier);
     const sortMode = normalizeDashboardSortMode(dashboardSettings.dashboardSortMode);
     const visible = sortDashboardQuests(
         filtered,
         sortMode,
-        quest => effectiveOrbQuantity(quest, hasNitroMultiplier)
+        quest => quest.reward.kind === "orbs"
+            ? effectiveOrbRewardAmount(
+                { base: quest.reward.orbQuantity, boosted: quest.reward.boostedOrbQuantity },
+                orbMultiplier.receivesBoost
+            )
+            : 0
     );
     const hiddenCount = Math.max(0, partition.normal.length - filteredNormal.length);
     const ignoredCount = partition.ignored.length;
@@ -843,6 +831,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                             quest={quest}
                             orionSnapshot={orionSnapshot}
                             ignored={ignoredIds.has(quest.id)}
+                            receivesOrbBoost={orbMultiplier.receivesBoost}
                         />
                     ))
                 ) : (

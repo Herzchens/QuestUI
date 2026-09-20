@@ -2,6 +2,14 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
+## Next — v1.4.1 (in development)
+
+- Adds **New Quest Available** notifications with startup/account hydration treated as baseline rather than backlog.
+- Ends Ignore automatically when Discord reports the Quest **Expired** and prunes stale ignored IDs best-effort without changing Discord Quest state.
+- Reads Discord's explicit base/boosted Orb fields and native Quest multiplier eligibility instead of locally multiplying Nitro rewards. The Dashboard shows the existing **Nitro** badge for the Nitro source or **Xbox+** with Discord's Xbox glyph for the Xbox Game Pass source; native Nitro precedence is preserved if both sources are present.
+- Adds the Dashboard/Settings Update Center for manual checks, configurable release-check cadence, prerelease policy, optional Orion checks, and managed fail-closed update execution.
+- Runtime/live evidence for these v1.4.1 changes is still pending; automated checks must not be described as live Discord validation.
+
 ## Stable — v1.4.0
 
 - Source: `Herzchens/QuestUI` branch `main`.
