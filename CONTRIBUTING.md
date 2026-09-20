@@ -37,6 +37,8 @@ pnpm exec tsx src/userplugins/QuestUI/scripts/testIgnoredQuestLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testNotificationLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateNative.ts
 pnpm build
 pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
@@ -211,6 +213,8 @@ Discord internals are unstable. Treat every finder/patch as a compatibility boun
 ## Testing
 
 Automated tests are necessary but not sufficient. For relevant changes, manual-test actual Discord states and report what was truly observed.
+
+The managed updater has dedicated regression coverage: pure release-policy tests plus a temporary real Git repository that exercises SSH-signed annotated tag verification, exact checkout transitions, dirty/wrong-origin/custom-checkout refusal, conflicting tags, single-flight locking, target-build failure rollback, and rollback-build failure. Keep those tests fail-closed when updater behavior changes.
 
 Current manual coverage should include:
 

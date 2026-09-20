@@ -60,7 +60,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `questActions.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
 - `questData.ts` — normalization/filtering/sorting and live read-only QuestStore snapshot source.
 - `questReload.ts`, `questReloadLogic.ts`, `QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
-- `UpdateCenter.tsx`, `updates.ts`, `updateLogic.ts`, `updateNative.ts` — release discovery, cached scheduling, Dashboard/Settings update UI, and fail-closed managed QuestUI update execution.
+- `UpdateCenter.tsx`, `updates.ts`, `updateLogic.ts`, `updateNative.ts`, `updateNativeEngine.ts` — release discovery, cached scheduling, Dashboard/Settings update UI, fail-closed managed QuestUI update execution, and the injectable updater engine used by real-git regression tests.
 - `orionCommandLogic.ts`, `orionControlLogic.ts`, `orionIntegration.ts` — companion validation, state machine, scheduler-state refinement, and safe delegation.
 - `OrionControls.tsx`, `OrionQuestControl.tsx`, `orionIcons.tsx` — global/per-Quest controls and shared icons.
 - `actions.css`, `orion.css`, `orionScheduler.css`, `reload.css` — action/control styling.
@@ -95,6 +95,8 @@ pnpm exec tsx src/userplugins/QuestUI/scripts/testIgnoredQuestLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testNotificationLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateNative.ts
 pnpm build
 pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test

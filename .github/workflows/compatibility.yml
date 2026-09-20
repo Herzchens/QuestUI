@@ -110,6 +110,14 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
 
+      - name: Test Update Center release logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateLogic.ts
+
+      - name: Test managed updater integration
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateNative.ts
+
       - name: Reject obsolete speculative Orion API leftovers
         run: |
           set -euo pipefail
