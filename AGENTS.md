@@ -48,17 +48,18 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `QuestDashboardShell.tsx` — visible **Quest Dashboard** title/native Quest icon, Nitro/Xbox+ source tag, and fixed header tools.
 - `dashboardSortLogic.ts` — persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
 - `ignoredQuests.ts`, `ignoredQuestLogic.ts` — account-scoped persisted Ignore/Unignore presentation state and pure normalization/update logic.
-- `notifications.ts`, `notificationLogic.ts` — QuestStore completion observation, Event Log problem observation, notification deduplication, and pure transition/severity logic.
+- `notifications.ts`, `notificationLogic.ts` — QuestStore new-Available/completion observation, Event Log problem observation, notification deduplication, and pure transition/severity logic.
 - `QuestOrbBalance.tsx`, `orbBalance.ts`, `orbBalanceLogic.ts` — native VirtualCurrencyStore Orb balance and display state.
 - `OrionStatus.tsx`, `orionStatusLogic.ts`, `version.ts`, `versionChannel.ts` — runtime health/version metadata and release-channel styling.
 - `EventLogViewer.tsx`, `EventLogWindowedScroller.tsx`, `eventLog.ts`, `eventLogTypes.ts`, `eventLogLogic.ts`, `eventLogAccountLogic.ts`, `eventLogValidation.ts`, `eventLogPage.ts`, `eventLogPaginationLogic.ts`, `eventLogVirtualizationLogic.ts`, `native.ts`, `diagnosticReport.ts` — Event Log capture, account scoping, persistence/querying, stable pagination/windowing, detail UI, and sanitized reports.
 - `orionCapabilities.ts`, `orionEventLogic.ts` — optional Orion structured-event capability discovery, validation, semantic normalization, and console-shadow reconciliation.
 - `orionScheduler.ts`, `orionSchedulerLogic.ts` — optional Orion scheduler snapshot/subscription and unordered live-batch normalization used only for published scheduler state; no queue order is inferred.
-- `dashboardPolish.css` — title sweep, Nitro surface, summary layout, and elapsed-progress tones.
+- `dashboardPolish.css` — title sweep, Nitro/Xbox+ source-badge surface, summary layout, and elapsed-progress tones.
 - `QuestCardActions.tsx` — explicit Accept/Claim, Ignore/Unignore with exact-ID Orion pause when active, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
 - `questActions.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
 - `questData.ts` — normalization/filtering/sorting and live read-only QuestStore snapshot source.
 - `questReload.ts`, `questReloadLogic.ts`, `QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
+- `UpdateCenter.tsx`, `updates.ts`, `updateLogic.ts`, `updateNative.ts` — release discovery, cached scheduling, Dashboard/Settings update UI, and fail-closed managed QuestUI update execution.
 - `orionCommandLogic.ts`, `orionControlLogic.ts`, `orionIntegration.ts` — companion validation, state machine, scheduler-state refinement, and safe delegation.
 - `OrionControls.tsx`, `OrionQuestControl.tsx`, `orionIcons.tsx` — global/per-Quest controls and shared icons.
 - `actions.css`, `orion.css`, `orionScheduler.css`, `reload.css` — action/control styling.
@@ -198,7 +199,7 @@ Use Vencord's native toast API for explicit success/failure feedback.
 
 - Visible title: **Quest Dashboard** + Discord's native Quest icon.
 - Use Discord's native Quest Orb multiplier classifier as the source of truth when available: `NITRO`, `XBOX_GAME_PASS`, `UPSELL`, or `INELIGIBLE`. Never infer Xbox from `premiumOrbQuantity` or from the absence of Nitro.
-- The header source badge is **Nitro** for native Nitro eligibility and **Xbox+** for native Xbox Game Pass eligibility. Discord's classifier gives Nitro precedence when both sources are present. Preserve the legacy Nitro identity badge for Nitro tiers that are not multiplier-eligible, but do not invent an Xbox fallback.
+- The header source badge is **Nitro** for Nitro eligibility and **Xbox+** for Xbox Game Pass eligibility, using an Xbox brand mark rather than a hand-drawn approximation. Prefer Discord's native classifier; if that exact webpack surface is unavailable, read Discord's `MORE_QUEST_ORBS` perk source directly. Nitro wins if both perk sources are present. Preserve the legacy Nitro identity badge for Nitro tiers that are not multiplier-eligible, and never infer Xbox from `!Nitro`.
 - Read Discord's explicit `premiumOrbQuantity` reward value instead of multiplying locally. Show it only when native eligibility says the account receives the multiplier; otherwise show base `orbQuantity`.
 - Title sweep is a seamless linear right-to-left loop with an exact repeat period; no reset/transition frame.
 - Summary stays on one row and always renders Available, Ready, In Progress, Claimed, Expired, Ignored, and Hidden, including zero values.

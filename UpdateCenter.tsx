@@ -115,16 +115,56 @@ function stateCopy(product: UpdateProduct, state: PluginUpdateState): string {
     return `${state.installed} → ${state.release.tagName}`;
 }
 
-function compactStateCopy(state: PluginUpdateState): string {
-    if (state.kind === "not-installed") return "Not installed";
-    if (state.kind === "disabled") return "Off";
-    if (state.kind === "idle") return state.installed ?? "Waiting";
-    if (state.kind === "custom-version") return `${state.installed ?? "Unknown"} · custom`;
-    if (state.kind === "up-to-date") return `${state.installed} ✓`;
-    if (state.kind === "error") return "Check failed";
-    if (state.suppression === "skipped") return `${state.installed} → ${state.release.tagName} · skipped`;
-    if (state.suppression === "snoozed") return `${state.installed} → ${state.release.tagName} · later`;
-    return `${state.installed} → ${state.release.tagName}`;
+type UpdateVisualTone = "current" | "available" | "warning" | "error" | "muted";
+
+function stateTone(state: PluginUpdateState): UpdateVisualTone {
+    if (state.kind === "up-to-date") return "current";
+    if (state.kind === "available" && state.suppression === null) return "available";
+    if (state.kind === "error") return "error";
+    if (state.kind === "custom-version" || (state.kind === "available" && state.suppression !== null)) return "warning";
+    return "muted";
+}
+
+function stateMark(state: PluginUpdateState): string {
+    if (state.kind === "up-to-date") return "✓";
+    if (state.kind === "available" && state.suppression === null) return "↑";
+    if (state.kind === "error") return "!";
+    if (state.kind === "custom-version") return "•";
+    if (state.kind === "disabled") return "–";
+    return "•";
+}
+
+function installedVersion(state: PluginUpdateState): string {
+    return state.installed ?? "—";
+}
+
+function targetVersion(state: PluginUpdateState): string | null {
+    return state.kind === "available" ? state.release.tagName : null;
+}
+
+function UpdateProductStatus({ product, state, compact = false }: {
+    product: UpdateProduct;
+    state: PluginUpdateState;
+    compact?: boolean;
+}) {
+    const tone = stateTone(state);
+    const target = targetVersion(state);
+    const available = state.kind === "available" && state.suppression === null;
+
+    return (
+        <div className={`quest-ui-update-product-status is-${tone}${compact ? " is-compact" : ""}`}>
+            <span className="quest-ui-update-product-mark" aria-hidden="true">{stateMark(state)}</span>
+            <strong>{productLabel(product)}</strong>
+            <span className="quest-ui-update-product-version">{installedVersion(state)}</span>
+            {target && (
+                <>
+                    <span className="quest-ui-update-product-arrow" aria-hidden="true">→</span>
+                    <span className="quest-ui-update-product-target">{target}</span>
+                </>
+            )}
+            {compact && available && <span className="quest-ui-update-product-new">NEW</span>}
+        </div>
+    );
 }
 
 function toastFailure(message: string): void {
@@ -134,7 +174,8 @@ function toastFailure(message: string): void {
 function UpdateCenterIcon() {
     return (
         <svg className="quest-ui-update-center-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M19.5 7.5V3.8l-1.9 1.9A8 8 0 1 0 20 12h-2.2a5.8 5.8 0 1 1-1.75-4.15L14 9.9h5.5V7.5Z" />
+            <path d="M11 3h2v9.17l2.59-2.58L17 11l-5 5-5-5 1.41-1.41L11 12.17V3Z" />
+            <path d="M5 17h2v2h10v-2h2v4H5v-4Z" />
         </svg>
     );
 }
@@ -254,13 +295,18 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
         ["orion", snapshot.orion]
     ];
     const available = states.filter((entry): entry is [UpdateProduct, Extract<PluginUpdateState, { kind: "available"; }>] => availableUpdate(entry[1]));
+    const visibleCount = states.filter(([, state]) => visibleUpdate(state)).length;
+    const hasError = states.some(([, state]) => state.kind === "error");
 
     return (
         <div className="quest-ui-update-panel" role="group" aria-label="Plugin updates">
             <div className="quest-ui-update-panel-heading">
-                <div>
-                    <strong>Updates</strong>
-                    <span>QuestUI and optional OrionQuests release checks</span>
+                <div className="quest-ui-update-panel-title">
+                    <span className="quest-ui-update-panel-title-icon"><UpdateCenterIcon /></span>
+                    <div>
+                        <strong>Updates</strong>
+                        <span>QuestUI · OrionQuests</span>
+                    </div>
                 </div>
                 <button
                     type="button"
@@ -272,24 +318,48 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
                 </button>
             </div>
 
-            {available.length > 0 ? (
-                <div className="quest-ui-update-list">
-                    {available.map(([product, state]) => <UpdateReleaseCard key={product} product={product} state={state} />)}
+            <div className={`quest-ui-update-overview${visibleCount > 0 ? " has-update" : hasError ? " has-error" : " is-current"}`}>
+                <span className="quest-ui-update-overview-dot" aria-hidden="true" />
+                <div>
+                    <strong>
+                        {snapshot.checking
+                            ? "Checking releases…"
+                            : visibleCount > 0
+                                ? `${visibleCount} ${visibleCount === 1 ? "update" : "updates"} available`
+                                : hasError
+                                    ? "Some checks need attention"
+                                    : "Everything is current"}
+                    </strong>
+                    <span>
+                        {snapshot.checking
+                            ? "Comparing installed versions with the configured release channels."
+                            : visibleCount > 0
+                                ? "Review the new version below or update directly when supported."
+                                : hasError
+                                    ? "The last successful versions remain shown below."
+                                    : `Last checked ${formatCompactTimestamp(snapshot.lastSuccessfulCheckAt)}`}
+                    </span>
                 </div>
-            ) : (
-                <div className="quest-ui-update-empty">No update reminder is currently active.</div>
-            )}
+            </div>
 
             <div className="quest-ui-update-status-grid">
                 {states.map(([product, state]) => (
-                    <div key={product}>
-                        <strong>{productLabel(product)}</strong>
-                        <span>{stateCopy(product, state)}</span>
+                    <div className={`quest-ui-update-status-row is-${stateTone(state)}`} key={product}>
+                        <UpdateProductStatus product={product} state={state} />
+                        <span className="quest-ui-update-status-copy">{stateCopy(product, state)}</span>
                     </div>
                 ))}
             </div>
 
-            <span className="quest-ui-update-last-check">Last successful check: {formatTimestamp(snapshot.lastSuccessfulCheckAt)}</span>
+            {available.length > 0 && (
+                <div className="quest-ui-update-list">
+                    {available.map(([product, state]) => <UpdateReleaseCard key={product} product={product} state={state} />)}
+                </div>
+            )}
+
+            <span className="quest-ui-update-last-check">
+                Last successful check · {formatTimestamp(snapshot.lastSuccessfulCheckAt)}
+            </span>
         </div>
     );
 }
@@ -331,6 +401,49 @@ export function UpdateCenterIndicator() {
     );
 }
 
+export function DashboardUpdateNotice() {
+    const snapshot = useUpdateSnapshot();
+    const updates: Array<[UpdateProduct, Extract<PluginUpdateState, { kind: "available"; }>]> = [];
+
+    if (visibleUpdate(snapshot.questUI) && snapshot.questUI.kind === "available") {
+        updates.push(["questui", snapshot.questUI]);
+    }
+    if (visibleUpdate(snapshot.orion) && snapshot.orion.kind === "available") {
+        updates.push(["orion", snapshot.orion]);
+    }
+
+    const allCurrent = snapshot.questUI.kind === "up-to-date"
+        && (
+            snapshot.orion.kind === "up-to-date"
+            || snapshot.orion.kind === "not-installed"
+            || snapshot.orion.kind === "disabled"
+        );
+
+    if (updates.length === 0 && !snapshot.checking && !allCurrent) return null;
+
+    return (
+        <div className="quest-ui-dashboard-update-slot" aria-label="Update status">
+            {snapshot.checking && updates.length === 0 ? (
+                <span className="quest-ui-dashboard-update-chip is-checking">
+                    <span className="quest-ui-dashboard-update-chip-dot" aria-hidden="true" />
+                    Checking updates…
+                </span>
+            ) : updates.length > 0 ? updates.map(([product, state]) => (
+                <span className="quest-ui-dashboard-update-chip has-update" key={product}>
+                    <span className="quest-ui-dashboard-update-chip-dot" aria-hidden="true" />
+                    <strong>{product === "questui" ? "QuestUI" : "Orion"}</strong>
+                    <span>{state.release.tagName}</span>
+                </span>
+            )) : (
+                <span className="quest-ui-dashboard-update-chip is-current">
+                    <span className="quest-ui-dashboard-update-chip-check" aria-hidden="true">✓</span>
+                    <strong>Up to date</strong>
+                </span>
+            )}
+        </div>
+    );
+}
+
 export function UpdateSettingsControl() {
     const snapshot = useUpdateSnapshot();
     const [manualPending, setManualPending] = useState(false);
@@ -353,20 +466,22 @@ export function UpdateSettingsControl() {
     const headline = activeCount > 0
         ? `${activeCount} ${activeCount === 1 ? "update" : "updates"} available`
         : snapshot.checking
-            ? "Checking…"
+            ? "Checking releases…"
             : `Checked ${formatCompactTimestamp(snapshot.lastSuccessfulCheckAt)}`;
 
     return (
-        <div className="quest-ui-update-settings-control">
+        <div className={`quest-ui-update-settings-control${activeCount > 0 ? " has-update" : ""}`}>
             <div className="quest-ui-update-settings-summary">
                 <div className="quest-ui-update-settings-headline">
                     <strong>Update status</strong>
                     <span>{headline}</span>
                 </div>
-                <span className="quest-ui-update-settings-products">
-                    QuestUI {compactStateCopy(snapshot.questUI)}
-                    {snapshot.orion.kind !== "not-installed" && <> · Orion {compactStateCopy(snapshot.orion)}</>}
-                </span>
+                <div className="quest-ui-update-settings-products">
+                    <UpdateProductStatus product="questui" state={snapshot.questUI} compact />
+                    {snapshot.orion.kind !== "not-installed" && (
+                        <UpdateProductStatus product="orion" state={snapshot.orion} compact />
+                    )}
+                </div>
             </div>
             <button type="button" disabled={manualPending || snapshot.checking} onClick={check}>
                 {manualPending || snapshot.checking ? "Checking…" : "Check"}

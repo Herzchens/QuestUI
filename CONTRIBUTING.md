@@ -157,7 +157,7 @@ Keep the current presentation contracts unless a change explicitly targets them:
 - visible title: **Quest Dashboard** + Discord native Quest icon;
 - boosted Quest rewards come from Discord's explicit `premiumOrbQuantity` field when present; do not locally invent the multiplier;
 - use Discord's native Quest multiplier eligibility classifier to distinguish `NITRO` from `XBOX_GAME_PASS`; never infer Xbox from reward values or from `!Nitro`;
-- show **Nitro** for the Nitro source and **Xbox+** with Discord's native Xbox glyph for the Xbox Game Pass source. If both sources are present, mirror Discord's Nitro precedence;
+- show **Nitro** for the Nitro source and **Xbox+** with the Xbox brand mark for the Xbox Game Pass source. Prefer Discord's native classifier, then its `MORE_QUEST_ORBS` perk source if the webpack classifier surface is unavailable. If both sources are present, mirror Discord's Nitro precedence;
 - title color sweep is a seamless linear right-to-left loop with no reset frame;
 - summary remains one line below tools and always renders Available / Ready / In Progress / Claimed / Expired / Ignored / Hidden, including zero values;
 - the five Discord status counts come from the full non-ignored live Quest snapshot; Ignored is a separate local count; Hidden reflects only normal filtering of non-ignored cards;

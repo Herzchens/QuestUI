@@ -32,6 +32,7 @@ import { normalizeDashboardSortMode, sortDashboardQuests, type DashboardSortMode
 import { QUESTUI_VERSION } from "./version";
 import { versionChannelClass } from "./versionChannel";
 import settings from "./settings";
+import { DashboardUpdateNotice } from "./UpdateCenter";
 
 interface DiscordQuestCompletion {
     completedRatio: number;
@@ -819,6 +820,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                 <div className="quest-ui-dashboard-meta-row">
                     <OrionIntegrationStatus health={orionHealth} engineRunning={orionSnapshot?.running ?? null} />
                     <span className="quest-ui-meta-product">QuestUI <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>{QUESTUI_VERSION}</span></span>
+                    <DashboardUpdateNotice />
                     <QuestOrbBalance />
                 </div>
             </header>

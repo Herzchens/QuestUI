@@ -7,7 +7,7 @@ QuestUI is UI-focused rather than a Quest-completion engine. It can perform two 
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.0** is the current Stable release. It adds account-scoped **Ignore / Unignore**, a dedicated Ignored catalogue and seven-item summary, and configurable Vencord notifications for **Ready to Claim** transitions and actionable QuestUI/Orion problems.
+> **v1.4.1** is in release preparation. **v1.4.0** remains the current Stable release until the signed v1.4.1 tag is published. v1.4.1 adds **New Quest Available** notifications, Expired-Ignore cleanup, Nitro/Xbox+ Orb-boost source handling, and the Dashboard/Settings Update Center.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
@@ -179,7 +179,7 @@ The visible heading is **Quest Dashboard** followed by Discord's native Quest ic
 > [!NOTE]
 > **Dashboard Mode** defaults to enabled for fresh settings. Vencord preserves stored settings, so users who previously toggled `Dashboard • Mode` off keep that stored `false` value after upgrading and may need to enable it manually. This is expected persisted-setting behavior, not a regression.
 
-QuestUI mirrors Discord's native Quest Orb multiplier identity in the Dashboard header. Native `NITRO` eligibility keeps the existing colored **Nitro** badge and badge artwork. Native `XBOX_GAME_PASS` eligibility shows a green **Xbox+** badge with Discord's own Xbox glyph. When an account has both eligible sources, Discord's own source classifier prioritizes Nitro, so QuestUI shows **Nitro** rather than two badges. Nitro tiers that are not multiplier-eligible keep the legacy Nitro identity badge, but they still receive the base Quest reward.
+QuestUI mirrors Discord's native Quest Orb multiplier identity in the Dashboard header. Native `NITRO` eligibility keeps the existing colored **Nitro** badge and badge artwork. `XBOX_GAME_PASS` eligibility shows a green **Xbox+** badge with the Xbox brand mark. When an account has both eligible sources, Discord's own source classifier prioritizes Nitro, so QuestUI shows **Nitro** rather than two badges. Nitro tiers that are not multiplier-eligible keep the legacy Nitro identity badge, but they still receive the base Quest reward.
 
 The title uses a seamless right-to-left color sweep. `prefers-reduced-motion` disables the motion and keeps the title readable.
 
@@ -247,7 +247,7 @@ Orb balance comes from Discord's `VirtualCurrencyStore`; QuestUI does not derive
 
 Orb rewards reuse Discord's themed Orb component. QuestUI reads both Discord's base `orbQuantity` and explicit `premiumOrbQuantity`, then asks Discord's own Quest multiplier classifier whether the current account is `NITRO`, `XBOX_GAME_PASS`, `UPSELL`, or `INELIGIBLE`. It does **not** manufacture a local `×1.2` value.
 
-If the native classifier says the account receives the multiplier, the card displays Discord's `premiumOrbQuantity` (for example `240 Orbs` instead of the `200 Orbs` base). Otherwise it displays the base amount. Xbox Game Pass is therefore identified from Discord's perk source rather than guessed from `!Nitro` or from the existence of a boosted reward field.
+If the native classifier says the account receives the multiplier, the card displays Discord's `premiumOrbQuantity` (for example `240 Orbs` instead of the `200 Orbs` base). Otherwise it displays the base amount. Xbox Game Pass is therefore identified from Discord's native classifier or, when that webpack surface is unavailable, directly from Discord's `MORE_QUEST_ORBS` perk source. It is never guessed from `!Nitro` or from the existence of a boosted reward field.
 
 ## Notifications
 
@@ -285,7 +285,7 @@ OrionQuests **v4.10.7+** exposes the core source-of-truth engine/task control st
 Global header order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Event Log → Sort → Filter → Home
+Smart Start/Pause/Resume → Stop → Reload → Update → Event Log → Sort → Filter → Home
 ```
 
 State rules:

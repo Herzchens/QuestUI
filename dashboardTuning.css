@@ -183,3 +183,101 @@
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 58%, transparent);
     background: color-mix(in srgb, var(--background-base-lowest, #111214) 48%, #272a30 52%);
 }
+
+
+/* v1.4.1 header layout: reserve space structurally instead of relying on
+ * overflowing title content. The normal desktop width keeps the full title;
+ * the ellipsis below is only a last-resort safety net before the stacked breakpoint. */
+.quest-ui-dashboard-shell {
+    width: min(820px, calc(100vw - 24px));
+}
+
+.quest-ui-dashboard-topbar {
+    align-items: center;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.quest-ui-dashboard-topbar .quest-ui-dashboard-display-title {
+    flex: none;
+    justify-self: start;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    width: fit-content;
+}
+
+.quest-ui-dashboard-topbar .quest-ui-dashboard-header-tools {
+    justify-self: end;
+    min-width: 0;
+}
+
+.quest-ui-dashboard-display-title > strong {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quest-ui-dashboard-meta-row {
+    gap: 10px;
+}
+
+/* Orb balance is Discord currency, not a success state: use Discord brand
+ * blue-purple instead of the positive/green semantic palette. */
+.quest-ui-dashboard-orb-balance {
+    background: color-mix(
+        in srgb,
+        var(--brand-500, #5865f2) 16%,
+        var(--background-mod-subtle, rgba(255, 255, 255, 0.05))
+    );
+    border-color: color-mix(
+        in srgb,
+        var(--brand-360, #949cf7) 48%,
+        var(--border-subtle, transparent)
+    );
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, white 8%, transparent),
+        0 2px 8px color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
+}
+
+/* Once the viewport can no longer comfortably fit the title plus every header
+ * control, give the tools their own row rather than allowing either side to overlap. */
+@media (max-width: 780px) {
+    .quest-ui-dashboard-topbar {
+        align-items: stretch;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 8px;
+    }
+
+    .quest-ui-dashboard-topbar .quest-ui-dashboard-display-title {
+        overflow: visible;
+    }
+
+    .quest-ui-dashboard-topbar .quest-ui-dashboard-header-tools {
+        justify-self: end;
+    }
+
+    .quest-ui-dashboard-display-title > strong {
+        flex-shrink: 0;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        margin-top: 87px;
+    }
+}
+
+@media (max-width: 520px) {
+    .quest-ui-dashboard-topbar .quest-ui-dashboard-header-tools {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        max-width: 100%;
+    }
+
+    .quest-ui-dashboard-shell .quest-ui-dashboard-summary {
+        margin-top: 126px;
+    }
+}
