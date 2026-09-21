@@ -13,6 +13,12 @@ export interface QuestCompletionNotice {
     rewardLabel: string;
 }
 
+export interface QuestAvailableNotice {
+    questId: string;
+    questName: string;
+    rewardLabel: string;
+}
+
 export function completedQuestTransitions(
     previous: readonly QuestNotificationSnapshot[],
     next: readonly QuestNotificationSnapshot[]
@@ -23,6 +29,24 @@ export function completedQuestTransitions(
     for (const quest of next) {
         const before = previousById.get(quest.id);
         if (!before || before.status !== "in-progress" || quest.status !== "claimable") continue;
+        notices.push({
+            questId: quest.id,
+            questName: quest.name,
+            rewardLabel: quest.rewardLabel
+        });
+    }
+
+    return notices;
+}
+
+export function newAvailableQuestTransitions(
+    knownQuestIds: ReadonlySet<string>,
+    next: readonly QuestNotificationSnapshot[]
+): QuestAvailableNotice[] {
+    const notices: QuestAvailableNotice[] = [];
+
+    for (const quest of next) {
+        if (knownQuestIds.has(quest.id) || quest.status !== "available") continue;
         notices.push({
             questId: quest.id,
             questName: quest.name,

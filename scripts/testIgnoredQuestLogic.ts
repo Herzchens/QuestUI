@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
     ignoredQuestIdsForAccount,
     normalizeIgnoredQuestState,
+    pruneIgnoredQuestState,
     updateIgnoredQuestState
 } from "../ignoredQuestLogic";
 
@@ -73,5 +74,25 @@ assert.equal(Object.keys(boundedAccountState.accounts).length, 32);
 assert.equal(Object.hasOwn(boundedAccountState.accounts, "account-0"), false);
 assert.deepEqual(ignoredQuestIdsForAccount(boundedAccountState, "account-32"), ["quest-32"]);
 assert.deepEqual(ignoredQuestIdsForAccount(boundedAccountState, "account-1"), ["quest-1"]);
+
+const expiryState = {
+    version: 1,
+    accounts: {
+        "account-a": ["active", "expired-a", "expired-b"],
+        "account-b": ["expired-a"]
+    }
+} as const;
+
+const prunedExpiryState = pruneIgnoredQuestState(
+    expiryState,
+    "account-a",
+    ["expired-a", "expired-b"]
+);
+assert.deepEqual(ignoredQuestIdsForAccount(prunedExpiryState, "account-a"), ["active"]);
+assert.deepEqual(ignoredQuestIdsForAccount(prunedExpiryState, "account-b"), ["expired-a"]);
+assert.deepEqual(
+    pruneIgnoredQuestState(prunedExpiryState, "account-a", ["missing"]),
+    prunedExpiryState
+);
 
 console.log("QuestUI ignored Quest logic tests — PASS");

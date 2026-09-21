@@ -6,7 +6,7 @@ Read `README.md`, `AGENTS.md`, `CHANGELOG.md`, and `docs/RELEASES.md` before cha
 
 ## Scope
 
-QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-clicked native Accept/Claim actions, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide account-scoped Ignore/Unignore presentation preferences, provide sanitized QuestUI/Orion diagnostics, send local Vencord/native desktop notifications, and optionally delegate controls to a separately installed compatible OrionQuests companion.
+QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-authorized native Accept/Claim actions including bounded sequential Claim all, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide account-scoped Ignore/Unignore presentation preferences, provide sanitized QuestUI/Orion diagnostics, send local Vencord/native desktop notifications, and optionally delegate controls to a separately installed compatible OrionQuests companion.
 
 Do not turn QuestUI into a Quest farming engine. Do not add automatic enrollment/claim, progress spoofing, heartbeats, targeted quest execution, challenge bypasses, private Orion farming imports, or a companion-bot/backend/DM requirement just to deliver QuestUI notifications.
 
@@ -24,6 +24,7 @@ Run from the Vencord root:
 pnpm install --frozen-lockfile
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testClaimAllLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionEventLogic.ts
@@ -36,6 +37,8 @@ pnpm exec tsx src/userplugins/QuestUI/scripts/testIgnoredQuestLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testNotificationLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateNative.ts
 pnpm build
 pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
@@ -64,7 +67,11 @@ Prefer `taskConfigV2` over legacy `taskConfig`; do not merge both into duplicate
 
 ## Manual Accept / Claim
 
-- Mutation requires an explicit QuestUI click.
+- Mutation requires explicit QuestUI user authorization. One **Claim all** click may authorize only the fixed same-account snapshot of currently Ready, non-ignored Quest IDs captured by that click.
+- Claim all must process that snapshot strictly one at a time, re-read QuestStore before every claim, advance only after store confirmation, and never append newly claimable Quests.
+- Keep the header **Claim All N** control immediately after Stop and before Reload. It stays visible, is disabled at `N = 0`, and is actionable from one non-ignored Ready reward onward.
+- Stop on account change, CAPTCHA/verification, changed/unavailable Quest state, native failure, or ambiguous/submitted-only outcomes. Do not auto-retry or continue past uncertainty.
+- Acquire a module-global Claim all lock synchronously before async work so rapid double-clicks, stale per-card click events, and Dashboard close/reopen cannot create overlapping batches. Refuse Claim all while a same-account per-card claim is in-flight/held, and re-check the global batch lock inside the card Claim handler as well as disabling the button.
 - Re-read the Quest from QuestStore immediately before mutation.
 - Fail closed on malformed present safety/config timestamps.
 - Scope duplicate guards to account + Quest.
@@ -91,7 +98,7 @@ Optional additive capabilities are feature-detected independently:
 Global UI order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Reload → Event Log → Sort → Filter → Home
+Smart Start/Pause/Resume → Stop → Claim All → Reload → Update → Event Log → Sort → Filter → Home
 ```
 
 State rules:
@@ -123,7 +130,7 @@ Use Vencord's native toast API for explicit control success/failure feedback. Ne
 Ignored is a QuestUI-local, account-scoped presentation state. It is never a normalized Discord Quest status and must not mutate Discord enrollment, progress, completion, reward, or claim state.
 
 - Persist ignored Quest IDs per Discord account and never allow an account to inherit another account's ignored set.
-- A normal enrolled In-Progress Quest may be ignored. An already-ignored Quest remains Unignore-able even if its real Discord status later changes.
+- A normal enrolled In-Progress Quest may be ignored. Later real status changes keep it recoverable except **Expired**: expiration immediately ends Ignore and stale persisted IDs are pruned best-effort.
 - Ignored Quests are excluded from the normal Dashboard, shortcut attention, Detailed Status, Quest Home counters, and QuestUI notification attention paths.
 - Ignored Quests remain available through the explicit **Ignored** catalogue and retain their real Discord status/progress while shown there.
 - Ignored and Hidden are distinct. Ignored cards do not inflate Hidden; Hidden remains the count of non-ignored cards removed by normal Dashboard filters.
@@ -137,7 +144,8 @@ Ignored is a QuestUI-local, account-scoped presentation state. It is never a nor
 
 QuestUI notification delivery stays local-first through Vencord's Notifications API. Do not add a companion bot, backend, webhook relay, or user-token DM mechanism as a requirement for this feature.
 
-- **Ready to Claim** and **Problems** are independently configurable and both default to enabled.
+- **New Quest Available**, **Ready to Claim**, and **Problems** are independently configurable and default to enabled.
+- New-Quest eligibility is a previously unseen same-account Quest first observed as Discord **Available** after the initial store baseline.
 - Completion eligibility is an observed same-account Discord **In Progress → Ready to Claim** transition.
 - Initial hydration, plugin restart, account switch, Ignore/Unignore hydration, and enabling the setting after completion must not synthesize a completion notification.
 - Do not notify for progress ticks or unchanged re-renders. One observed completion transition produces at most one notification.
@@ -154,8 +162,9 @@ QuestUI notification delivery stays local-first through Vencord's Notifications 
 Keep the current presentation contracts unless a change explicitly targets them:
 
 - visible title: **Quest Dashboard** + Discord native Quest icon;
-- eligible Nitro accounts are determined from the current user's `premiumType`;
-- use Discord Nitro profile-badge artwork when hydrated, otherwise keep the Nitro tag with the existing fallback glyph;
+- boosted Quest rewards come from Discord's explicit `premiumOrbQuantity` field when present; do not locally invent the multiplier;
+- use Discord's native Quest multiplier eligibility classifier to distinguish `NITRO` from `XBOX_GAME_PASS`; never infer Xbox from reward values or from `!Nitro`;
+- show **Nitro** for the Nitro source and **Xbox+** with the Xbox brand mark for the Xbox Game Pass source. Prefer Discord's native classifier, then its `MORE_QUEST_ORBS` perk source if the webpack classifier surface is unavailable. If both sources are present, mirror Discord's Nitro precedence;
 - title color sweep is a seamless linear right-to-left loop with no reset frame;
 - summary remains one line below tools and always renders Available / Ready / In Progress / Claimed / Expired / Ignored / Hidden, including zero values;
 - the five Discord status counts come from the full non-ignored live Quest snapshot; Ignored is a separate local count; Hidden reflects only normal filtering of non-ignored cards;
@@ -205,17 +214,19 @@ Discord internals are unstable. Treat every finder/patch as a compatibility boun
 
 Automated tests are necessary but not sufficient. For relevant changes, manual-test actual Discord states and report what was truly observed.
 
+The managed updater has dedicated regression coverage: pure release-policy tests plus a temporary real Git repository that exercises SSH-signed annotated tag verification, exact checkout transitions, dirty/wrong-origin/custom-checkout refusal, conflicting tags, single-flight locking, target-build failure rollback, and rollback-build failure. Keep those tests fail-closed when updater behavior changes.
+
 Current manual coverage should include:
 
-- title/native Quest icon/Nitro tag without overlap;
+- title/native Quest icon/Nitro-or-Xbox+ badge without overlap;
 - seven-item summary including zero/ Ignored / Hidden counts and even spacing;
 - Sort/Filter/Home controls and custom popouts;
 - expired-age 7/15/30/90/All/custom filtering plus expiry copy outside 15 days;
 - accepted-Quest pinning and required-time sorting;
 - native Orb balance including zero and runtime version/health chips;
-- Ignore persistence/account isolation, Ignored catalogue visibility, Ignored-vs-Hidden counts, and exclusion from all normal attention surfaces;
+- Ignore persistence/account isolation, expiry ending Ignore and cleaning stale IDs, Ignored catalogue visibility, Ignored-vs-Hidden counts, and exclusion from all normal attention surfaces;
 - active Orion exact-ID Pause on Ignore, no global Stop, and no auto-Resume on Unignore;
-- one-shot real In-Progress → Ready-to-Claim notification with no startup/backlog duplicate;
+- one-shot real New-Available and In-Progress → Ready-to-Claim notifications with no startup/backlog duplicate;
 - Problems notification behavior when explicitly testing that path, without misrepresenting automated coverage as live evidence;
 - Event Log persistence/search/source/level/category/sort/day grouping/detail/report/open/clear flows and scrollbar behavior;
 - large Event Log pagination/windowing on a 10k+ persisted history when that path changes;
@@ -223,7 +234,7 @@ Current manual coverage should include:
 - Orion structured-event fallback/reconciliation and scheduler metadata when supported;
 - `mm:ss` elapsed/target formatting with current-only progress color;
 - Accept → `Processing…` → confirmed enrollment;
-- Claim flow;
+- per-card Claim flow plus Claim all sequential progress, duplicate/race locking, and stop-on-verification behavior;
 - global Start/Pause/Resume/Stop state transitions;
 - per-Quest RUNNING/QUEUE ↔ PAUSED exact-ID transitions;
 - concurrency queue pressure;

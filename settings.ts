@@ -2,6 +2,9 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
 import { isOrionCommandReady, isOrionInstalled } from "./orionIntegration";
+import { DEFAULT_UPDATE_CHECK_STEP, UPDATE_CHECK_STEP_MARKERS, updateCheckMarkerLabel } from "./updateLogic";
+import { UpdateSettingsControl } from "./UpdateCenter";
+import { notifyUpdateSettingsChanged } from "./updates";
 
 const rewardOptions = [
     { label: "All rewards", value: "all", default: true },
@@ -68,11 +71,49 @@ export default definePluginSettings({
         description: "Notify once when an observed enrolled Quest becomes Ready to Claim. Initial startup state never generates a completion notification.",
         default: true
     },
+    notifyNewQuestAvailable: {
+        type: OptionType.BOOLEAN,
+        displayName: "Notifications • New Quest Available",
+        description: "Notify once when QuestUI observes a previously unseen Quest appear as Available. Startup/account hydration and Ignore/Unignore never generate this notification.",
+        default: true
+    },
     notifyRuntimeProblems: {
         type: OptionType.BOOLEAN,
         displayName: "Notifications • Problems",
         description: "Notify about actionable QuestUI/Orion errors and terminal warnings. Normal retries, fallbacks, and progress events are ignored.",
         default: true
+    },
+
+    updateCheckStep: {
+        type: OptionType.SLIDER,
+        displayName: "Updates • Check frequency",
+        description: "How often QuestUI checks GitHub releases. 0 = manual only.",
+        markers: [...UPDATE_CHECK_STEP_MARKERS],
+        default: DEFAULT_UPDATE_CHECK_STEP,
+        stickToMarkers: true,
+        componentProps: {
+            onValueRender: updateCheckMarkerLabel,
+            onMarkerRender: updateCheckMarkerLabel
+        },
+        onChange: notifyUpdateSettingsChanged
+    },
+    updateIncludePrereleases: {
+        type: OptionType.BOOLEAN,
+        displayName: "Updates • Include beta / pre-release",
+        description: "Include newer beta, release-candidate, and other pre-release versions when checking QuestUI and OrionQuests.",
+        default: false,
+        onChange: notifyUpdateSettingsChanged
+    },
+    updateCheckOrion: {
+        type: OptionType.BOOLEAN,
+        displayName: "Updates • Check OrionQuests",
+        description: "Check the separate OrionQuests repository for newer releases. This preference stays saved when OrionQuests is not installed.",
+        default: true,
+        onChange: notifyUpdateSettingsChanged
+    },
+    updateStatus: {
+        type: OptionType.COMPONENT,
+        component: UpdateSettingsControl
     },
 
     // Dashboard filter values live in settings so they persist, but they are configured
@@ -249,6 +290,7 @@ export default definePluginSettings({
         hidden: () => !isOrionInstalled(),
         disabled: orionIntegrationDisabled
     },
+    updateCheckOrion: { disabled: () => !isOrionInstalled() },
 
     dashboardSortMode: { hidden: true },
     dashboardShowAvailable: { hidden: true },

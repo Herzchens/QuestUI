@@ -77,6 +77,18 @@ function actionKey(kind: QuestActionKind, userId: string, questId: string): stri
     return `${kind}:${userId}:${questId}`;
 }
 
+export function hasPendingClaimAction(userId = currentUserId()): boolean {
+    if (!userId) return false;
+    const prefix = `claim:${userId}:`;
+    for (const key of inFlightActions) {
+        if (key.startsWith(prefix)) return true;
+    }
+    for (const key of submittedActions) {
+        if (key.startsWith(prefix)) return true;
+    }
+    return false;
+}
+
 function beginAction(kind: QuestActionKind, userId: string, questId: string): string {
     const key = actionKey(kind, userId, questId);
     if (inFlightActions.has(key)) throw new QuestActionError("This Quest action is already in progress.");

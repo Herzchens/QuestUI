@@ -54,6 +54,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
 
+      - name: Test Claim all logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testClaimAllLogic.ts
+
       - name: Test Orion command and companion logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
@@ -106,6 +110,14 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
 
+      - name: Test Update Center release logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateLogic.ts
+
+      - name: Test managed updater integration
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateNative.ts
+
       - name: Reject obsolete speculative Orion API leftovers
         run: |
           set -euo pipefail
@@ -135,18 +147,22 @@ jobs:
             '/quest-home'
             'QUESTS_ENROLL_BEGIN'
             'QUESTS_CLAIM_REWARD_BEGIN'
+            'Claim all'
             'QUESTS_FETCH_CURRENT_QUESTS_BEGIN'
             'VIRTUAL_CURRENCY_USER_BALANCE'
             'VirtualCurrencyStore'
             'Quest list refreshed.'
             'OrionQuests'
             'Orion Quest Version Incompatible'
-            'v1.4.0'
+            'v1.4.1'
             'Highest Orb Reward'
             'Shortest Required Time'
             'Event Log'
             'Ignored'
             'Quest ready to claim'
+            'New quest available'
+            'One-click update is not exposed by this OrionQuests build'
+            'updateOrionRelease'
           )
           for marker in "${required_markers[@]}"; do
             if ! grep -Fq "$marker" dist/renderer.js; then
@@ -166,7 +182,9 @@ jobs:
           grep -Fq 'COMPACT_TO_BYTES = 5 * 1024 * 1024' src/userplugins/QuestUI/native.ts
           grep -Fq 'QuestUI:ignored-quests:v1' src/userplugins/QuestUI/ignoredQuests.ts
           grep -Fq 'completedQuestTransitions' src/userplugins/QuestUI/notifications.ts
+          grep -Fq 'newAvailableQuestTransitions' src/userplugins/QuestUI/notifications.ts
           grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/notifications.ts
+          grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/UpdateCenter.tsx
 
           grep -Fq 'shouldShow={dashboardOpen}' src/userplugins/QuestUI/QuestButton.tsx
           grep -Fq 'onRequestClose={closeDashboard}' src/userplugins/QuestUI/QuestButton.tsx
