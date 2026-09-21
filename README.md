@@ -7,11 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.1** is in release preparation. **v1.4.0** remains the current Stable release until the signed v1.4.1 tag is published. v1.4.1 adds bounded sequential **Claim all**, **New Quest Available** notifications, Expired-Ignore cleanup, Nitro/Xbox+ Orb-boost source handling, and the Dashboard/Settings Update Center.
+> **v1.4.1** is the current Stable release. It adds bounded sequential **Claim all**, **New Quest Available** notifications, Expired-Ignore cleanup, Nitro/Xbox+ Orb-boost source handling, and the Dashboard/Settings Update Center.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
 > Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.4.1 release preparation included maintainer live Discord Stable validation of the final Dashboard/header presentation, including the Quest title/icon layout, Claim All placement/count badge, and Orb balance styling. The sequential Claim All mutation path was not separately exercised as part of that final UI pass; its batching and fail-closed safety behavior is covered by automated regression tests and CI rather than being presented as live mutation evidence.
 >
 > v1.4.0 release preparation included maintainer live Discord validation of Ignore against an active Orion Quest and a real Ready-to-Claim Vencord/Desktop notification. The Problems notification path is covered by automated logic/CI but was not separately forced in live Discord. Automated checks are not presented as proof of untested runtime behavior.
 

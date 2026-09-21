@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v1.4.1 - 2026-09-21
+
 - Added an always-visible header **Claim All N** control for non-ignored Ready rewards. It is disabled at `N = 0` and enabled from one Ready reward onward. One explicit click authorizes a fixed same-account snapshot, claims strictly one at a time through Discord's verified native claim path, advances only after QuestStore confirmation, disables per-card Claim buttons during the batch, and stops without retry on CAPTCHA/verification, account changes, changed Quest state, native failure, or ambiguous submission.
 
 - Added **Notifications • New Quest Available**, enabled by default, using a same-account QuestStore baseline so startup/account hydration and Ignore/Unignore cannot synthesize a backlog alert.
