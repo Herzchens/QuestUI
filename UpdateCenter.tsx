@@ -216,6 +216,60 @@ function managedUpdateEventCode(product: UpdateProduct, outcome: ManagedUpdateEv
     return prefix + "_" + outcome.replace(/-/g, "_").toUpperCase();
 }
 
+function managedUpdateSeverity(
+    outcome: ManagedUpdateEventOutcome,
+    result: ManagedReleaseUpdateResult | null
+): "success" | "error" | "warning" | "info" {
+    if (outcome === "succeeded") return "success";
+    if (outcome === "failed") return result?.status === "rollback-failed" ? "error" : "warning";
+    if (outcome === "decision-required") return "warning";
+    return "info";
+}
+
+function managedUpdateSummary(
+    product: UpdateProduct,
+    outcome: ManagedUpdateEventOutcome,
+    result: ManagedReleaseUpdateResult | null,
+    installed: string,
+    target: string
+): string {
+    const label = productLabel(product);
+    const fromVersion = result?.fromVersion ?? installed;
+    const toVersion = result?.toVersion ?? target;
+
+    switch (outcome) {
+        case "started":
+            return label + " managed update started: " + installed + " -> " + target;
+        case "decision-required":
+            return label + " update needs a local-work decision: " + (result?.decision?.summary ?? "local checkout differs");
+        case "discard-confirmed":
+            return label + " local-work discard confirmed; revalidating the exact checkout snapshot";
+        case "kept":
+            return label + " local work kept; update skipped";
+        case "succeeded":
+            return label + " updated " + fromVersion + " -> " + toVersion
+                + (result?.method ? " via " + result.method : "");
+        case "failed":
+            return label + " update stopped"
+                + (result?.phase ? " at " + result.phase : "")
+                + " (" + (result?.status ?? "failed") + "): "
+                + (result?.message ?? "unknown failure");
+    }
+}
+
+function managedUpdateTrace(
+    outcome: ManagedUpdateEventOutcome,
+    result: ManagedReleaseUpdateResult | null,
+    installed: string,
+    target: string
+): string | null {
+    if (result?.trace?.length) return result.trace.join("\n");
+    if (outcome === "started") {
+        return "Request: " + installed + " -> " + target + "\nExecutor: QuestUI native managed updater";
+    }
+    return null;
+}
+
 function recordManagedUpdateEvent(
     product: UpdateProduct,
     outcome: ManagedUpdateEventOutcome,
@@ -223,59 +277,27 @@ function recordManagedUpdateEvent(
     installed: string,
     target: string
 ): void {
-    const label = productLabel(product);
     const rollbackFailed = result?.status === "rollback-failed";
-    const severity = outcome === "succeeded"
-        ? "success"
-        : outcome === "failed"
-            ? rollbackFailed ? "error" : "warning"
-            : outcome === "decision-required"
-                ? "warning"
-                : "info";
-
     const fromVersion = result?.fromVersion ?? installed;
     const toVersion = result?.toVersion ?? target;
-    const method = result?.method ?? null;
-    const phase = result?.phase ?? null;
-
-    const summary = outcome === "started"
-        ? label + " managed update started: " + installed + " -> " + target
-        : outcome === "decision-required"
-            ? label + " update needs a local-work decision: " + (result?.decision?.summary ?? "local checkout differs")
-            : outcome === "discard-confirmed"
-                ? label + " local-work discard confirmed; revalidating the exact checkout snapshot"
-                : outcome === "kept"
-                    ? label + " local work kept; update skipped"
-                    : outcome === "succeeded"
-                        ? label + " updated " + fromVersion + " -> " + toVersion + (method ? " via " + method : "")
-                        : label + " update stopped"
-                            + (phase ? " at " + phase : "")
-                            + " (" + (result?.status ?? "failed") + "): "
-                            + (result?.message ?? "unknown failure");
-
-    const updateTrace = result?.trace?.length
-        ? result.trace.join("\n")
-        : outcome === "started"
-            ? "Request: " + installed + " -> " + target + "\nExecutor: QuestUI native managed updater"
-            : null;
 
     void recordQuestUIEvent({
-        severity,
+        severity: managedUpdateSeverity(outcome, result),
         category: "diagnostic",
         eventCode: managedUpdateEventCode(product, outcome),
-        summary,
+        summary: managedUpdateSummary(product, outcome, result, installed, target),
         detail: {
             product,
             status: result?.status ?? outcome,
-            phase,
-            updateMethod: method,
+            phase: result?.phase ?? null,
+            updateMethod: result?.method ?? null,
             fromVersion,
             toVersion,
             fromCommit: result?.fromCommit ?? null,
             toCommit: result?.toCommit ?? null,
             localWorkSummary: result?.decision?.summary ?? null,
             localCommitCount: result?.decision?.localCommitCount ?? null,
-            updateTrace,
+            updateTrace: managedUpdateTrace(outcome, result, installed, target),
             diagnostic: result?.diagnostic ?? null,
             terminal: rollbackFailed
         }
@@ -291,11 +313,234 @@ function UpdateCenterIcon() {
     );
 }
 
+type AvailableUpdateState = Extract<PluginUpdateState, { kind: "available"; }>;
+type UpdatePendingAction = "update" | "snooze" | "skip" | null;
+
+function applyManagedUpdateResult(
+    product: UpdateProduct,
+    state: AvailableUpdateState,
+    result: ManagedReleaseUpdateResult,
+    setUpdateResult: (value: ManagedReleaseUpdateResult | null) => void
+): void {
+    setUpdateResult(result);
+
+    if (result.status === "decision-required") {
+        recordManagedUpdateEvent(product, "decision-required", result, state.installed, state.release.tagName);
+        return;
+    }
+    if (result.status === "kept") {
+        recordManagedUpdateEvent(product, "kept", result, state.installed, state.release.tagName);
+        return;
+    }
+
+    recordManagedUpdateEvent(
+        product,
+        result.ok ? "succeeded" : "failed",
+        result,
+        state.installed,
+        state.release.tagName
+    );
+    showToast(result.message, result.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
+}
+
+function managedUpdateInvocationFailure(message: string, error: unknown): ManagedReleaseUpdateResult {
+    return {
+        ok: false,
+        status: "failed",
+        message,
+        phase: "ipc",
+        diagnostic: error instanceof Error ? error.message : String(error)
+    };
+}
+
+async function runManagedReleaseUpdate(
+    product: UpdateProduct,
+    state: AvailableUpdateState,
+    label: string,
+    setPending: (value: UpdatePendingAction) => void,
+    setUpdateResult: (value: ManagedReleaseUpdateResult | null) => void
+): Promise<void> {
+    setPending("update");
+    setUpdateResult(null);
+    recordManagedUpdateEvent(product, "started", null, state.installed, state.release.tagName);
+
+    try {
+        if (!Native) return;
+        const result = product === "questui"
+            ? await Native.updateQuestUIRelease(state.installed, state.release.tagName) as QuestUIUpdateResult
+            : await Native.updateOrionRelease(state.installed, state.release.tagName);
+        applyManagedUpdateResult(product, state, result, setUpdateResult);
+    } catch (error) {
+        const result = managedUpdateInvocationFailure(
+            `${label} could not invoke its managed release updater.`,
+            error
+        );
+        setUpdateResult(result);
+        recordManagedUpdateEvent(product, "failed", result, state.installed, state.release.tagName);
+        toastFailure(result.message);
+    } finally {
+        setPending(null);
+    }
+}
+
+async function runOrionUpdateDecision(
+    action: "keep" | "discard",
+    state: AvailableUpdateState,
+    currentResult: ManagedReleaseUpdateResult,
+    setPending: (value: UpdatePendingAction) => void,
+    setUpdateResult: (value: ManagedReleaseUpdateResult | null) => void
+): Promise<void> {
+    if (!Native || !currentResult.decision) return;
+
+    setPending("update");
+    if (action === "discard") {
+        recordManagedUpdateEvent("orion", "discard-confirmed", currentResult, state.installed, state.release.tagName);
+    }
+
+    try {
+        const result = await Native.updateOrionRelease(
+            state.installed,
+            state.release.tagName,
+            { action, token: currentResult.decision.token }
+        );
+        applyManagedUpdateResult("orion", state, result, setUpdateResult);
+    } catch (error) {
+        const result = managedUpdateInvocationFailure(
+            "OrionQuests could not resolve the local-work update choice.",
+            error
+        );
+        setUpdateResult(result);
+        recordManagedUpdateEvent("orion", "failed", result, state.installed, state.release.tagName);
+        toastFailure(result.message);
+    } finally {
+        setPending(null);
+    }
+}
+
+async function saveUpdateReminder(
+    product: UpdateProduct,
+    label: string,
+    setPending: (value: UpdatePendingAction) => void
+): Promise<void> {
+    setPending("snooze");
+    try {
+        await snoozeUpdate(product, 24);
+    } catch {
+        toastFailure(`Could not save the ${label} reminder.`);
+    } finally {
+        setPending(null);
+    }
+}
+
+async function saveSkippedUpdate(
+    product: UpdateProduct,
+    state: AvailableUpdateState,
+    label: string,
+    setPending: (value: UpdatePendingAction) => void
+): Promise<void> {
+    setPending("skip");
+    try {
+        await skipUpdate(product, state.release.tagName);
+    } catch {
+        toastFailure(`Could not save the skipped ${label} version.`);
+    } finally {
+        setPending(null);
+    }
+}
+
+function UpdateResultNotice({ result }: { result: ManagedReleaseUpdateResult | null; }) {
+    if (!result) return null;
+    const tone = result.status === "decision-required" || result.status === "kept"
+        ? " is-warning"
+        : result.ok
+            ? " is-success"
+            : " is-error";
+    return <span className={`quest-ui-update-result${tone}`}>{result.message}</span>;
+}
+
+function OrionUpdateDecisionPanel({
+    result,
+    pending,
+    onDecision
+}: {
+    result: ManagedReleaseUpdateResult | null;
+    pending: UpdatePendingAction;
+    onDecision(action: "keep" | "discard"): void;
+}) {
+    if (result?.status !== "decision-required" || !result.decision) return null;
+
+    return (
+        <div className="quest-ui-update-decision">
+            <strong>Local OrionQuests work detected</strong>
+            <span>{result.decision.summary}</span>
+            <span>
+                Keep leaves the checkout untouched and skips this update. Discard &amp; update resets tracked local work,
+                removes non-ignored untracked files, then updates and rebuilds Vencord.
+            </span>
+            <div className="quest-ui-update-decision-actions">
+                <button type="button" disabled={pending !== null} onClick={() => onDecision("keep")}>
+                    Keep
+                </button>
+                <button
+                    type="button"
+                    className="is-destructive"
+                    disabled={pending !== null}
+                    onClick={() => onDecision("discard")}
+                >
+                    {pending === "update" ? "Updating…" : "Discard & update"}
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function UpdateCardActions({
+    product,
+    state,
+    pending,
+    updateResult,
+    canNativeUpdate,
+    awaitingDecision,
+    onUpdate,
+    onSnooze,
+    onSkip
+}: {
+    product: UpdateProduct;
+    state: AvailableUpdateState;
+    pending: UpdatePendingAction;
+    updateResult: ManagedReleaseUpdateResult | null;
+    canNativeUpdate: boolean;
+    awaitingDecision: boolean;
+    onUpdate(): void;
+    onSnooze(): void;
+    onSkip(): void;
+}) {
+    return (
+        <div className="quest-ui-update-card-actions">
+            {canNativeUpdate && !updateResult?.restartRequired && !awaitingDecision && (
+                <button type="button" disabled={pending !== null} onClick={onUpdate}>
+                    {pending === "update" ? "Updating…" : "Update now"}
+                </button>
+            )}
+            {updateResult?.ok && updateResult.restartRequired && (
+                <button type="button" className="quest-ui-update-restart" onClick={relaunch}>Restart Discord</button>
+            )}
+            <button type="button" onClick={() => safeOpenRelease(product, state.release)}>View release</button>
+            <button type="button" disabled={pending !== null} onClick={onSnooze}>
+                {pending === "snooze" ? "Saving…" : "Remind me later"}
+            </button>
+            <button type="button" disabled={pending !== null} onClick={onSkip}>
+                {pending === "skip" ? "Saving…" : `Skip ${state.release.tagName}`}
+            </button>
+        </div>
+    );
+}
+
 function UpdateReleaseCard({ product, state }: {
     product: UpdateProduct;
-    state: Extract<PluginUpdateState, { kind: "available"; }>;
+    state: AvailableUpdateState;
 }) {
-    const [pending, setPending] = useState<"update" | "snooze" | "skip" | null>(null);
+    const [pending, setPending] = useState<UpdatePendingAction>(null);
     const [updateResult, setUpdateResult] = useState<ManagedReleaseUpdateResult | null>(null);
     const label = productLabel(product);
     const canNativeUpdate = Native !== null;
@@ -303,114 +548,21 @@ function UpdateReleaseCard({ product, state }: {
         && updateResult?.status === "decision-required"
         && updateResult.decision != null;
 
-    const applyManagedResult = (result: ManagedReleaseUpdateResult) => {
-        setUpdateResult(result);
-
-        if (result.status === "decision-required") {
-            recordManagedUpdateEvent(product, "decision-required", result, state.installed, state.release.tagName);
-            return;
-        }
-
-        if (result.status === "kept") {
-            recordManagedUpdateEvent(product, "kept", result, state.installed, state.release.tagName);
-            return;
-        }
-
-        recordManagedUpdateEvent(
-            product,
-            result.ok ? "succeeded" : "failed",
-            result,
-            state.installed,
-            state.release.tagName
-        );
-        showToast(result.message, result.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
-    };
-
-    const updateRelease = async () => {
+    const updateRelease = () => {
         if (!canNativeUpdate || pending) return;
-        setPending("update");
-        setUpdateResult(null);
-        recordManagedUpdateEvent(product, "started", null, state.installed, state.release.tagName);
-        try {
-            if (!Native) return;
-
-            const result = product === "questui"
-                ? await Native.updateQuestUIRelease(state.installed, state.release.tagName) as QuestUIUpdateResult
-                : await Native.updateOrionRelease(state.installed, state.release.tagName);
-
-            applyManagedResult(result);
-        } catch (error) {
-            const reason = error instanceof Error ? error.message : String(error);
-            const result: ManagedReleaseUpdateResult = {
-                ok: false,
-                status: "failed",
-                message: `${label} could not invoke its managed release updater.`,
-                phase: "ipc",
-                diagnostic: reason
-            };
-            setUpdateResult(result);
-            recordManagedUpdateEvent(product, "failed", result, state.installed, state.release.tagName);
-            toastFailure(result.message);
-        } finally {
-            setPending(null);
-        }
+        void runManagedReleaseUpdate(product, state, label, setPending, setUpdateResult);
     };
-
-    const resolveOrionDecision = async (action: "keep" | "discard") => {
-        if (!Native || product !== "orion" || pending || !updateResult?.decision) return;
-
-        const decision = updateResult.decision;
-        setPending("update");
-        if (action === "discard") {
-            recordManagedUpdateEvent(product, "discard-confirmed", updateResult, state.installed, state.release.tagName);
-        }
-
-        try {
-            const result = await Native.updateOrionRelease(
-                state.installed,
-                state.release.tagName,
-                { action, token: decision.token }
-            );
-            applyManagedResult(result);
-        } catch (error) {
-            const reason = error instanceof Error ? error.message : String(error);
-            const result: ManagedReleaseUpdateResult = {
-                ok: false,
-                status: "failed",
-                message: "OrionQuests could not resolve the local-work update choice.",
-                phase: "ipc",
-                diagnostic: reason
-            };
-            setUpdateResult(result);
-            recordManagedUpdateEvent(product, "failed", result, state.installed, state.release.tagName);
-            toastFailure(result.message);
-        } finally {
-            setPending(null);
-        }
+    const resolveOrionDecision = (action: "keep" | "discard") => {
+        if (product !== "orion" || pending || !updateResult?.decision) return;
+        void runOrionUpdateDecision(action, state, updateResult, setPending, setUpdateResult);
     };
-
-    const snooze = async () => {
+    const snooze = () => {
         if (pending) return;
-        setPending("snooze");
-        try {
-            await snoozeUpdate(product, 24);
-        } catch {
-            toastFailure(`Could not save the ${label} reminder.`);
-        } finally {
-            setPending(null);
-        }
+        void saveUpdateReminder(product, label, setPending);
     };
-
-    const skip = async () => {
+    const skip = () => {
         if (pending) return;
-        setPending("skip");
-        try {
-            await skipUpdate(product, state.release.tagName);
-        } catch {
-            toastFailure(`Could not save the skipped ${label} version.`);
-        } finally {
-            setPending(null);
-        }
+        void saveSkippedUpdate(product, state, label, setPending);
     };
 
     return (
@@ -433,55 +585,26 @@ function UpdateReleaseCard({ product, state }: {
             {!canNativeUpdate && (
                 <span className="quest-ui-update-suppressed-copy">Managed source updates require Vencord desktop. Use View release.</span>
             )}
-            {updateResult && (
-                <span className={`quest-ui-update-result${
-                    updateResult.status === "decision-required" || updateResult.status === "kept"
-                        ? " is-warning"
-                        : updateResult.ok
-                            ? " is-success"
-                            : " is-error"
-                }`}>
-                    {updateResult.message}
-                </span>
-            )}
 
-            {awaitingDecision && updateResult.decision && (
-                <div className="quest-ui-update-decision">
-                    <strong>Local OrionQuests work detected</strong>
-                    <span>{updateResult.decision.summary}</span>
-                    <span>
-                        Keep leaves the checkout untouched and skips this update. Discard &amp; update resets tracked local work,
-                        removes non-ignored untracked files, then updates and rebuilds Vencord.
-                    </span>
-                    <div className="quest-ui-update-decision-actions">
-                        <button type="button" disabled={pending !== null} onClick={() => resolveOrionDecision("keep")}>
-                            Keep
-                        </button>
-                        <button
-                            type="button"
-                            className="is-destructive"
-                            disabled={pending !== null}
-                            onClick={() => resolveOrionDecision("discard")}
-                        >
-                            {pending === "update" ? "Updating…" : "Discard & update"}
-                        </button>
-                    </div>
-                </div>
+            <UpdateResultNotice result={updateResult} />
+            {product === "orion" && (
+                <OrionUpdateDecisionPanel
+                    result={updateResult}
+                    pending={pending}
+                    onDecision={resolveOrionDecision}
+                />
             )}
-
-            <div className="quest-ui-update-card-actions">
-                {canNativeUpdate && !updateResult?.restartRequired && !awaitingDecision && (
-                    <button type="button" disabled={pending !== null} onClick={updateRelease}>
-                        {pending === "update" ? "Updating…" : "Update now"}
-                    </button>
-                )}
-                {updateResult?.ok && updateResult.restartRequired && (
-                    <button type="button" className="quest-ui-update-restart" onClick={relaunch}>Restart Discord</button>
-                )}
-                <button type="button" onClick={() => safeOpenRelease(product, state.release)}>View release</button>
-                <button type="button" disabled={pending !== null} onClick={snooze}>{pending === "snooze" ? "Saving…" : "Remind me later"}</button>
-                <button type="button" disabled={pending !== null} onClick={skip}>{pending === "skip" ? "Saving…" : `Skip ${state.release.tagName}`}</button>
-            </div>
+            <UpdateCardActions
+                product={product}
+                state={state}
+                pending={pending}
+                updateResult={updateResult}
+                canNativeUpdate={canNativeUpdate}
+                awaitingDecision={awaitingDecision}
+                onUpdate={updateRelease}
+                onSnooze={snooze}
+                onSkip={skip}
+            />
         </div>
     );
 }
