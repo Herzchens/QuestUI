@@ -364,6 +364,124 @@ export function getUpdateSnapshot(): UpdateSnapshot {
     return snapshot;
 }
 
+type ReleaseFetchResult =
+    | { ok: true; value: UpdateRelease[]; }
+    | { ok: false; error: unknown; };
+
+async function settleReleaseFeed(product: UpdateProduct): Promise<ReleaseFetchResult> {
+    try {
+        return { ok: true, value: await fetchReleaseFeed(product) };
+    } catch (error) {
+        return { ok: false, error };
+    }
+}
+
+function applyQuestUIReleaseResult(
+    result: ReleaseFetchResult,
+    preferences: UpdatePreferences,
+    checkedAt: number
+): void {
+    if (result.ok) {
+        cachedQuestUIReleases = result.value;
+        snapshot = {
+            ...snapshot,
+            questUI: resolvePluginState("questui", QUESTUI_VERSION, result.value, preferences.includePrereleases, checkedAt)
+        };
+        return;
+    }
+
+    snapshot = {
+        ...snapshot,
+        questUI: {
+            kind: "error",
+            installed: QUESTUI_VERSION,
+            message: result.error instanceof Error ? result.error.message : "QuestUI update check failed."
+        }
+    };
+}
+
+function applyOrionReleaseResult(
+    result: ReleaseFetchResult | null,
+    preferences: UpdatePreferences,
+    checkedAt: number
+): void {
+    if (!orionInstalled()) {
+        snapshot = { ...snapshot, orion: { kind: "not-installed", installed: null } };
+        return;
+    }
+    if (!preferences.checkOrion) {
+        snapshot = { ...snapshot, orion: { kind: "disabled", installed: installedOrionVersion() } };
+        return;
+    }
+    if (result?.ok) {
+        cachedOrionReleases = result.value;
+        snapshot = {
+            ...snapshot,
+            orion: resolvePluginState("orion", installedOrionVersion(), result.value, preferences.includePrereleases, checkedAt)
+        };
+        return;
+    }
+
+    snapshot = {
+        ...snapshot,
+        orion: {
+            kind: "error",
+            installed: installedOrionVersion(),
+            message: result?.error instanceof Error ? result.error.message : "Orion update check failed."
+        }
+    };
+}
+
+async function persistUpdateCheck(
+    questResult: ReleaseFetchResult,
+    orionResult: ReleaseFetchResult | null,
+    wantsOrion: boolean,
+    checkedAt: number
+): Promise<void> {
+    const fullySuccessful = questResult.ok && (!wantsOrion || orionResult?.ok === true);
+    lastAttemptFailed = !fullySuccessful;
+
+    const nextPersisted: PersistedUpdateState = {
+        ...persisted,
+        lastSuccessfulCheckAt: fullySuccessful ? checkedAt : persisted.lastSuccessfulCheckAt,
+        questUIReleases: questResult.ok
+            ? questResult.value.slice(0, MAX_CACHED_RELEASES)
+            : persisted.questUIReleases,
+        orionReleases: orionResult?.ok
+            ? orionResult.value.slice(0, MAX_CACHED_RELEASES)
+            : persisted.orionReleases
+    };
+    persisted = nextPersisted;
+    try { await writePersistedState(nextPersisted); } catch { }
+}
+
+async function runUpdateCheck(preferences: UpdatePreferences, startedAt: number): Promise<UpdateSnapshot> {
+    lastAttemptAt = startedAt;
+    snapshot = { ...snapshot, checking: true };
+    notify();
+
+    const wantsOrion = preferences.checkOrion && orionInstalled();
+    const [questResult, orionResult] = await Promise.all([
+        settleReleaseFeed("questui"),
+        wantsOrion ? settleReleaseFeed("orion") : Promise.resolve(null)
+    ]);
+
+    const checkedAt = Date.now();
+    applyQuestUIReleaseResult(questResult, preferences, checkedAt);
+    applyOrionReleaseResult(orionResult, preferences, checkedAt);
+    await persistUpdateCheck(questResult, orionResult, wantsOrion, checkedAt);
+
+    snapshot = {
+        ...snapshot,
+        checking: false,
+        checkedAt,
+        lastSuccessfulCheckAt: persisted.lastSuccessfulCheckAt
+    };
+    notify();
+    scheduleNextCheck();
+    return snapshot;
+}
+
 export async function checkForUpdates(manual = true): Promise<UpdateSnapshot> {
     await ensurePersistedState();
     if (activeCheck) return activeCheck;
@@ -375,87 +493,7 @@ export async function checkForUpdates(manual = true): Promise<UpdateSnapshot> {
         return snapshot;
     }
 
-    activeCheck = (async () => {
-        lastAttemptAt = now;
-        snapshot = { ...snapshot, checking: true };
-        notify();
-
-        const wantsOrion = preferences.checkOrion && orionInstalled();
-        const questPromise = fetchReleaseFeed("questui");
-        const orionPromise = wantsOrion ? fetchReleaseFeed("orion") : null;
-        const [questResult, orionResult] = await Promise.all([
-            questPromise.then(value => ({ ok: true as const, value }), error => ({ ok: false as const, error })),
-            orionPromise
-                ? orionPromise.then(value => ({ ok: true as const, value }), error => ({ ok: false as const, error }))
-                : Promise.resolve(null)
-        ]);
-
-        const checkedAt = Date.now();
-        if (questResult.ok) {
-            cachedQuestUIReleases = questResult.value;
-            snapshot = {
-                ...snapshot,
-                questUI: resolvePluginState("questui", QUESTUI_VERSION, questResult.value, preferences.includePrereleases, checkedAt)
-            };
-        } else {
-            snapshot = {
-                ...snapshot,
-                questUI: {
-                    kind: "error",
-                    installed: QUESTUI_VERSION,
-                    message: questResult.error instanceof Error ? questResult.error.message : "QuestUI update check failed."
-                }
-            };
-        }
-
-        if (!orionInstalled()) {
-            snapshot = { ...snapshot, orion: { kind: "not-installed", installed: null } };
-        } else if (!preferences.checkOrion) {
-            snapshot = { ...snapshot, orion: { kind: "disabled", installed: installedOrionVersion() } };
-        } else if (orionResult?.ok) {
-            cachedOrionReleases = orionResult.value;
-            snapshot = {
-                ...snapshot,
-                orion: resolvePluginState("orion", installedOrionVersion(), orionResult.value, preferences.includePrereleases, checkedAt)
-            };
-        } else {
-            snapshot = {
-                ...snapshot,
-                orion: {
-                    kind: "error",
-                    installed: installedOrionVersion(),
-                    message: orionResult?.error instanceof Error ? orionResult.error.message : "Orion update check failed."
-                }
-            };
-        }
-
-        const fullySuccessful = questResult.ok && (!wantsOrion || orionResult?.ok === true);
-        lastAttemptFailed = !fullySuccessful;
-
-        const nextPersisted: PersistedUpdateState = {
-            ...persisted,
-            lastSuccessfulCheckAt: fullySuccessful ? checkedAt : persisted.lastSuccessfulCheckAt,
-            questUIReleases: questResult.ok
-                ? questResult.value.slice(0, MAX_CACHED_RELEASES)
-                : persisted.questUIReleases,
-            orionReleases: orionResult?.ok
-                ? orionResult.value.slice(0, MAX_CACHED_RELEASES)
-                : persisted.orionReleases
-        };
-        persisted = nextPersisted;
-        try { await writePersistedState(nextPersisted); } catch { }
-
-        snapshot = {
-            ...snapshot,
-            checking: false,
-            checkedAt,
-            lastSuccessfulCheckAt: persisted.lastSuccessfulCheckAt
-        };
-        notify();
-        scheduleNextCheck();
-        return snapshot;
-    })().finally(() => { activeCheck = null; });
-
+    activeCheck = runUpdateCheck(preferences, now).finally(() => { activeCheck = null; });
     return activeCheck;
 }
 
