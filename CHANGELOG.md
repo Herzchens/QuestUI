@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## v1.4.2 - 2026-09-22
+
+- Changed OrionQuests one-click updates so QuestUI owns the native Git/rebuild workflow instead of requiring an experimental `updateOrionRelease` API from Orion. The updater accepts one official-origin `main` checkout, validates the selected release tag/version against current upstream `main`, preserves the upstream-rewrite recovery case, and updates clean history non-destructively. Dirty or locally divergent `main` now prompts **Keep** or **Discard & update**; Discard revalidates HEAD/upstream/target plus a content-aware local-work fingerprint before reset/clean, while Keep leaves all local work untouched. Vencord rebuilds after update and rolls back the previous commit on target-build failure.
+- Expanded managed QuestUI/Orion Event Log audit rows with the selected update strategy, exact version/commit transition, execution phase, sanitized command-oriented trace, build command, rollback path, and native failure diagnostics so successful and failed updates can be reconstructed from **View details**.
+- Fixed live Event Log refreshes blanking and repopulating the list whenever a new event arrived. A notification for the current query now refreshes the first page in place; full clearing/loading reset remains reserved for an actual query/filter/sort/account change.
+- Reworked Dashboard update status into a compact combined status surface immediately after the QuestUI version chip. The current state now reads **You are up to date**, while update/error/checking states keep explicit state-specific copy without stretching the surface across unused header space. The Update Center uses the same release wording and shows a manual-check warning after the last successful check when scheduled update checks are disabled.
+- Added a real-Git Orion updater regression suite and native-bundle assertions alongside the existing signed QuestUI updater coverage.
 
 ## v1.4.1 - 2026-09-21
 

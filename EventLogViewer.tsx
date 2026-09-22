@@ -201,12 +201,22 @@ function EventDetail({ event, availableEvents, onBack }: { event: EventLogEvent;
                 {event.quest?.taskType && <><span>Task type</span><code>{event.quest.taskType}</code></>}
                 {event.detail?.httpStatus != null && <><span>HTTP</span><code>{String(event.detail.httpStatus)}</code></>}
                 {event.detail?.upstreamCode != null && <><span>Upstream code</span><code>{String(event.detail.upstreamCode)}</code></>}
+                {event.detail?.status != null && <><span>Update status</span><code>{String(event.detail.status)}</code></>}
+                {event.detail?.phase != null && <><span>Update phase</span><code>{String(event.detail.phase)}</code></>}
+                {event.detail?.updateMethod != null && <><span>Update method</span><code>{String(event.detail.updateMethod)}</code></>}
+                {event.detail?.fromVersion != null && <><span>From version</span><code>{String(event.detail.fromVersion)}</code></>}
+                {event.detail?.toVersion != null && <><span>To version</span><code>{String(event.detail.toVersion)}</code></>}
+                {event.detail?.fromCommit != null && <><span>From commit</span><code>{String(event.detail.fromCommit)}</code></>}
+                {event.detail?.toCommit != null && <><span>To commit</span><code>{String(event.detail.toCommit)}</code></>}
                 {typeof event.detail?.terminal === "boolean" && <><span>Terminal</span><strong>{event.detail.terminal ? "Yes" : "No"}</strong></>}
                 {typeof event.detail?.retryable === "boolean" && <><span>Retryable</span><strong>{event.detail.retryable ? "Yes" : "No"}</strong></>}
                 {event.detail?.attempt != null && <><span>Attempt</span><code>{String(event.detail.attempt)}{event.detail?.maxAttempts != null ? ` / ${String(event.detail.maxAttempts)}` : ""}</code></>}
             </div>
             {event.detail?.reason && <section><span className="quest-ui-event-detail-label">Reason</span><p>{String(event.detail.reason)}</p></section>}
             {event.detail?.message && <section><span className="quest-ui-event-detail-label">Message</span><p>{String(event.detail.message)}</p></section>}
+            {event.detail?.localWorkSummary != null && <section><span className="quest-ui-event-detail-label">Local work</span><p>{String(event.detail.localWorkSummary)}</p></section>}
+            {event.detail?.updateTrace != null && <section><span className="quest-ui-event-detail-label">Update trace</span><pre>{String(event.detail.updateTrace)}</pre></section>}
+            {event.detail?.diagnostic != null && <section><span className="quest-ui-event-detail-label">Native diagnostic</span><pre>{String(event.detail.diagnostic)}</pre></section>}
             {event.detail?.rawConsole && <section><span className="quest-ui-event-detail-label">Captured console detail</span><pre>{String(event.detail.rawConsole)}</pre></section>}
             {event.detail?.stack && <section><span className="quest-ui-event-detail-label">Stack</span><pre>{String(event.detail.stack)}</pre></section>}
         </div>
@@ -278,6 +288,7 @@ function EventLogPanel() {
     const sortButtonRef = useRef<HTMLButtonElement | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
     const requestGenerationRef = useRef(0);
+    const queryIdentityRef = useRef<string | null>(null);
     const loadMoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const liveRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const loadMoreArmedRef = useRef(true);
@@ -287,21 +298,28 @@ function EventLogPanel() {
 
     useEffect(() => {
         const generation = ++requestGenerationRef.current;
+        const queryIdentity = JSON.stringify([query, source, severity, category, sort, currentUserId]);
+        const hardReset = queryIdentityRef.current !== queryIdentity;
+        queryIdentityRef.current = queryIdentity;
+
         if (loadMoreTimerRef.current) clearTimeout(loadMoreTimerRef.current);
         if (liveRefreshTimerRef.current) clearTimeout(liveRefreshTimerRef.current);
         loadMoreTimerRef.current = null;
         liveRefreshTimerRef.current = null;
-        loadMoreArmedRef.current = true;
-        atHeadRef.current = true;
-        setEvents([]);
-        setTotal(0);
-        setHasMore(false);
-        setNextCursor(null);
-        setSessionId(null);
-        setLoadingMore(false);
-        setLoadingInitial(true);
-        setNewEventsAvailable(false);
-        if (listRef.current) listRef.current.scrollTop = 0;
+
+        if (hardReset) {
+            loadMoreArmedRef.current = true;
+            atHeadRef.current = true;
+            setEvents([]);
+            setTotal(0);
+            setHasMore(false);
+            setNextCursor(null);
+            setSessionId(null);
+            setLoadingMore(false);
+            setLoadingInitial(true);
+            setNewEventsAvailable(false);
+            if (listRef.current) listRef.current.scrollTop = 0;
+        }
 
         const timer = setTimeout(() => {
             void Promise.all([
@@ -310,20 +328,25 @@ function EventLogPanel() {
             ]).then(([result, nextInfo]) => {
                 if (generation !== requestGenerationRef.current) return;
                 if (result.stale) {
-                    setLoadingInitial(false);
+                    if (hardReset) setLoadingInitial(false);
                     return;
                 }
+
+                // Live Event Log notifications refresh the current first page in place. Do not clear
+                // the existing window first: update start/success events can arrive seconds apart,
+                // and blanking the list on every notification makes the panel visibly flash.
                 setEvents(result.events);
                 setTotal(result.total);
                 setHasMore(result.hasMore);
                 setNextCursor(result.nextCursor);
                 setSessionId(result.sessionId);
                 setInfo(nextInfo);
-                setLoadingInitial(false);
+                setNewEventsAvailable(false);
+                if (hardReset) setLoadingInitial(false);
             }).catch(() => {
-                if (generation === requestGenerationRef.current) setLoadingInitial(false);
+                if (generation === requestGenerationRef.current && hardReset) setLoadingInitial(false);
             });
-        }, 120);
+        }, hardReset ? 120 : 0);
 
         return () => clearTimeout(timer);
     }, [query, source, severity, category, sort, currentUserId, refreshNonce]);

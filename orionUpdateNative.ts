@@ -4,19 +4,18 @@ import { join } from "path";
 import { promisify } from "util";
 
 import {
-    createQuestUIUpdateEngine,
-    type QuestUIUpdateResult,
-    type QuestUIUpdateStatus
-} from "./updateNativeEngine";
+    createOrionUpdateEngine,
+    type OrionUpdateDecisionRequest,
+    type OrionUpdateResult,
+    type OrionUpdateStatus
+} from "./orionUpdateNativeEngine";
 
-export type { QuestUIUpdateResult, QuestUIUpdateStatus };
+export type { OrionUpdateDecisionRequest, OrionUpdateResult, OrionUpdateStatus };
 
 const execFile = promisify(execFileCallback);
 const VENCORD_SRC_DIR = join(__dirname, "..");
-const QUESTUI_DIR = join(VENCORD_SRC_DIR, "src", "userplugins", "QuestUI");
-const OFFICIAL_REPO = "https://github.com/herzchens/questui";
-const SIGNER_PRINCIPAL = "166841132+Herzchens@users.noreply.github.com";
-const SIGNER_PUBLIC_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMwKdHjkKqlWReNnF5Hz6GmWWCkZqx9sNklZuAeMPiRD";
+const USERPLUGINS_DIR = join(VENCORD_SRC_DIR, "src", "userplugins");
+const OFFICIAL_REPO = "https://github.com/nyxxbit/discord-quest-completer";
 const MAX_BUFFER = 16 * 1024 * 1024;
 
 async function run(command: string, args: string[], cwd: string): Promise<void> {
@@ -39,24 +38,19 @@ async function buildVencord(): Promise<void> {
     else await run("node", BUILD_ARGS, VENCORD_SRC_DIR);
 }
 
-const updater = createQuestUIUpdateEngine({
-    questUIDir: QUESTUI_DIR,
+const updater = createOrionUpdateEngine({
+    userpluginsDir: USERPLUGINS_DIR,
     vencordSrcDir: VENCORD_SRC_DIR,
     officialRepo: OFFICIAL_REPO,
-    signerPrincipal: SIGNER_PRINCIPAL,
-    signerPublicKey: SIGNER_PUBLIC_KEY,
     buildVencord,
     buildCommand: BUILD_COMMAND
 });
 
-export async function inspectQuestUICheckout(_: IpcMainInvokeEvent): Promise<QuestUIUpdateResult> {
-    return updater.inspectCheckout();
-}
-
-export async function updateQuestUIRelease(
+export async function updateOrionRelease(
     _: IpcMainInvokeEvent,
-    installedVersionInput: string,
-    targetVersionInput: string
-): Promise<QuestUIUpdateResult> {
-    return updater.updateRelease(installedVersionInput, targetVersionInput);
+    runningVersionInput: string,
+    targetVersionInput: string,
+    decision?: OrionUpdateDecisionRequest
+): Promise<OrionUpdateResult> {
+    return updater.updateRelease(runningVersionInput, targetVersionInput, decision);
 }

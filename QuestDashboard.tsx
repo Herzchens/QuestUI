@@ -821,9 +821,14 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                     </div>
                 </div>
                 <div className="quest-ui-dashboard-meta-row">
-                    <OrionIntegrationStatus health={orionHealth} engineRunning={orionSnapshot?.running ?? null} />
-                    <span className="quest-ui-meta-product">QuestUI <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>{QUESTUI_VERSION}</span></span>
-                    <DashboardUpdateNotice />
+                    <div className="quest-ui-dashboard-meta-primary">
+                        <OrionIntegrationStatus health={orionHealth} engineRunning={orionSnapshot?.running ?? null} />
+                        <div className="quest-ui-meta-product">
+                            <span>QuestUI</span>
+                            <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>{QUESTUI_VERSION}</span>
+                            <DashboardUpdateNotice />
+                        </div>
+                    </div>
                     <QuestOrbBalance />
                 </div>
             </header>

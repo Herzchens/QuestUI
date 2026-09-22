@@ -103,6 +103,7 @@ async function setupFixture() {
             signerPrincipal: TEST_PRINCIPAL,
             signerPublicKey: trustedKey.publicKey,
             buildVencord,
+            buildCommand: "node scripts/build/build.mjs",
             now: () => 1_800_000_000_000,
             randomSuffix: () => `case-${++suffix}`
         });
@@ -147,6 +148,10 @@ async function main() {
             assert.equal(result.fromCommit, fixture.v140);
             assert.equal(result.toCommit, fixture.v141);
             assert.equal(result.restartRequired, true);
+            assert.equal(result.method, "signed-detached-checkout");
+            assert.match((result.trace ?? []).join("\n"), /Verify target release/);
+            assert.match((result.trace ?? []).join("\n"), /git switch --detach/);
+            assert.match((result.trace ?? []).join("\n"), /node scripts\/build\/build\.mjs/);
             assert.equal(await git(checkout, "rev-parse", "HEAD"), fixture.v141);
             assert.equal(builds.length, 1);
             assert.match(builds[0], /v1\.4\.1/);
@@ -226,6 +231,9 @@ async function main() {
             const result = await updater.updateRelease("v1.4.0", "v1.4.1");
             assert.equal(result.status, "build-failed");
             assert.equal(result.ok, false);
+            assert.match(result.diagnostic ?? "", /target build failed/);
+            assert.match((result.trace ?? []).join("\n"), /Build: failed/);
+            assert.match((result.trace ?? []).join("\n"), /Rollback build: completed successfully/);
             assert.equal(builds, 2);
             assert.equal(await git(checkout, "rev-parse", "HEAD"), fixture.v140);
             assert.equal(await git(checkout, "branch", "--show-current"), "installed");

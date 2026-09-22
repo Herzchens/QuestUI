@@ -2,6 +2,7 @@ import type { PluginNative } from "@utils/types";
 import { relaunch } from "@utils/native";
 import { Popout, showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
 
+import { recordQuestUIEvent } from "./eventLog";
 import type { QuestUIUpdateResult } from "./updateNative";
 import {
     checkForUpdates,
@@ -21,15 +22,30 @@ interface ManagedReleaseUpdateResult {
     ok: boolean;
     status: string;
     message: string;
+    fromVersion?: string;
+    toVersion?: string;
+    fromCommit?: string;
+    toCommit?: string;
     restartRequired?: boolean;
+    phase?: string;
+    diagnostic?: string;
+    method?: string;
+    trace?: readonly string[];
+    decision?: {
+        token: string;
+        summary: string;
+        changes: readonly string[];
+        localCommitCount: number;
+    };
 }
 
-type OrionNativeUpdater = {
-    updateOrionRelease?: (
-        installedVersion: string,
-        targetVersion: string
-    ) => Promise<ManagedReleaseUpdateResult> | ManagedReleaseUpdateResult;
-};
+type ManagedUpdateEventOutcome =
+    | "started"
+    | "decision-required"
+    | "discard-confirmed"
+    | "kept"
+    | "succeeded"
+    | "failed";
 
 const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>
@@ -39,17 +55,6 @@ const RELEASE_URL_PREFIXES: Record<UpdateProduct, string> = {
     questui: "https://github.com/Herzchens/QuestUI/releases/",
     orion: "https://github.com/nyxxbit/discord-quest-completer/releases/"
 };
-
-function orionNativeUpdater(): OrionNativeUpdater | null {
-    if (IS_WEB) return null;
-    try {
-        const helpers = VencordNative.pluginHelpers as unknown as Record<string, unknown>;
-        const candidate = helpers?.OrionQuests;
-        return candidate && typeof candidate === "object" ? candidate as OrionNativeUpdater : null;
-    } catch {
-        return null;
-    }
-}
 
 function useUpdateSnapshot(): UpdateSnapshot {
     const [, setRevision] = useState(0);
@@ -142,6 +147,41 @@ function targetVersion(state: PluginUpdateState): string | null {
     return state.kind === "available" ? state.release.tagName : null;
 }
 
+function visibleReleaseVersion(state: PluginUpdateState): string | null {
+    return visibleUpdate(state) && state.kind === "available"
+        ? state.release.tagName
+        : null;
+}
+
+function combinedAvailabilityCopy(snapshot: UpdateSnapshot): string {
+    const questUIVersion = visibleReleaseVersion(snapshot.questUI);
+    const orionVersion = visibleReleaseVersion(snapshot.orion);
+
+    if (orionVersion && questUIVersion) {
+        return `OrionQuest ${orionVersion} and QuestUI ${questUIVersion} are available`;
+    }
+    if (orionVersion) return `OrionQuest ${orionVersion} is available`;
+    if (questUIVersion) return `QuestUI ${questUIVersion} is available`;
+
+    return "You are up to date";
+}
+
+function dashboardAvailabilityLines(snapshot: UpdateSnapshot): readonly [string, string | null] {
+    const questUIVersion = visibleReleaseVersion(snapshot.questUI);
+    const orionVersion = visibleReleaseVersion(snapshot.orion);
+    const hasError = snapshot.questUI.kind === "error" || snapshot.orion.kind === "error";
+
+    if (snapshot.checking) return ["Checking updates…", null];
+    if (hasError && !questUIVersion && !orionVersion) return ["Update check", "needs attention"];
+    if (orionVersion && questUIVersion) {
+        return [`OrionQuest ${orionVersion} and`, `QuestUI ${questUIVersion} are available`];
+    }
+    if (orionVersion) return [`OrionQuest ${orionVersion}`, "is available"];
+    if (questUIVersion) return [`QuestUI ${questUIVersion}`, "is available"];
+
+    return ["You are up to date", null];
+}
+
 function UpdateProductStatus({ product, state, compact = false }: {
     product: UpdateProduct;
     state: PluginUpdateState;
@@ -171,6 +211,77 @@ function toastFailure(message: string): void {
     showToast(message, Toasts.Type.FAILURE);
 }
 
+function managedUpdateEventCode(product: UpdateProduct, outcome: ManagedUpdateEventOutcome): string {
+    const prefix = product === "questui" ? "QUESTUI_UPDATE" : "ORION_UPDATE";
+    return prefix + "_" + outcome.replace(/-/g, "_").toUpperCase();
+}
+
+function recordManagedUpdateEvent(
+    product: UpdateProduct,
+    outcome: ManagedUpdateEventOutcome,
+    result: ManagedReleaseUpdateResult | null,
+    installed: string,
+    target: string
+): void {
+    const label = productLabel(product);
+    const rollbackFailed = result?.status === "rollback-failed";
+    const severity = outcome === "succeeded"
+        ? "success"
+        : outcome === "failed"
+            ? rollbackFailed ? "error" : "warning"
+            : outcome === "decision-required"
+                ? "warning"
+                : "info";
+
+    const fromVersion = result?.fromVersion ?? installed;
+    const toVersion = result?.toVersion ?? target;
+    const method = result?.method ?? null;
+    const phase = result?.phase ?? null;
+
+    const summary = outcome === "started"
+        ? label + " managed update started: " + installed + " -> " + target
+        : outcome === "decision-required"
+            ? label + " update needs a local-work decision: " + (result?.decision?.summary ?? "local checkout differs")
+            : outcome === "discard-confirmed"
+                ? label + " local-work discard confirmed; revalidating the exact checkout snapshot"
+                : outcome === "kept"
+                    ? label + " local work kept; update skipped"
+                    : outcome === "succeeded"
+                        ? label + " updated " + fromVersion + " -> " + toVersion + (method ? " via " + method : "")
+                        : label + " update stopped"
+                            + (phase ? " at " + phase : "")
+                            + " (" + (result?.status ?? "failed") + "): "
+                            + (result?.message ?? "unknown failure");
+
+    const updateTrace = result?.trace?.length
+        ? result.trace.join("\n")
+        : outcome === "started"
+            ? "Request: " + installed + " -> " + target + "\nExecutor: QuestUI native managed updater"
+            : null;
+
+    void recordQuestUIEvent({
+        severity,
+        category: "diagnostic",
+        eventCode: managedUpdateEventCode(product, outcome),
+        summary,
+        detail: {
+            product,
+            status: result?.status ?? outcome,
+            phase,
+            updateMethod: method,
+            fromVersion,
+            toVersion,
+            fromCommit: result?.fromCommit ?? null,
+            toCommit: result?.toCommit ?? null,
+            localWorkSummary: result?.decision?.summary ?? null,
+            localCommitCount: result?.decision?.localCommitCount ?? null,
+            updateTrace,
+            diagnostic: result?.diagnostic ?? null,
+            terminal: rollbackFailed
+        }
+    });
+}
+
 function UpdateCenterIcon() {
     return (
         <svg className="quest-ui-update-center-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -187,35 +298,91 @@ function UpdateReleaseCard({ product, state }: {
     const [pending, setPending] = useState<"update" | "snooze" | "skip" | null>(null);
     const [updateResult, setUpdateResult] = useState<ManagedReleaseUpdateResult | null>(null);
     const label = productLabel(product);
-    const canNativeUpdate = product === "questui"
-        ? Native !== null
-        : typeof orionNativeUpdater()?.updateOrionRelease === "function";
+    const canNativeUpdate = Native !== null;
+    const awaitingDecision = product === "orion"
+        && updateResult?.status === "decision-required"
+        && updateResult.decision != null;
+
+    const applyManagedResult = (result: ManagedReleaseUpdateResult) => {
+        setUpdateResult(result);
+
+        if (result.status === "decision-required") {
+            recordManagedUpdateEvent(product, "decision-required", result, state.installed, state.release.tagName);
+            return;
+        }
+
+        if (result.status === "kept") {
+            recordManagedUpdateEvent(product, "kept", result, state.installed, state.release.tagName);
+            return;
+        }
+
+        recordManagedUpdateEvent(
+            product,
+            result.ok ? "succeeded" : "failed",
+            result,
+            state.installed,
+            state.release.tagName
+        );
+        showToast(result.message, result.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
+    };
 
     const updateRelease = async () => {
         if (!canNativeUpdate || pending) return;
         setPending("update");
         setUpdateResult(null);
+        recordManagedUpdateEvent(product, "started", null, state.installed, state.release.tagName);
         try {
-            let result: ManagedReleaseUpdateResult;
-            if (product === "questui") {
-                if (!Native) return;
-                result = await Native.updateQuestUIRelease(state.installed, state.release.tagName) as QuestUIUpdateResult;
-            } else {
-                const orionNative = orionNativeUpdater();
-                if (typeof orionNative?.updateOrionRelease !== "function") {
-                    throw new Error("This OrionQuests build does not expose its managed release updater.");
-                }
-                result = await orionNative.updateOrionRelease(state.installed, state.release.tagName);
-            }
-            setUpdateResult(result);
-            showToast(result.message, result.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
-        } catch {
+            if (!Native) return;
+
+            const result = product === "questui"
+                ? await Native.updateQuestUIRelease(state.installed, state.release.tagName) as QuestUIUpdateResult
+                : await Native.updateOrionRelease(state.installed, state.release.tagName);
+
+            applyManagedResult(result);
+        } catch (error) {
+            const reason = error instanceof Error ? error.message : String(error);
             const result: ManagedReleaseUpdateResult = {
                 ok: false,
                 status: "failed",
-                message: `${label} could not invoke its managed release updater.`
+                message: `${label} could not invoke its managed release updater.`,
+                phase: "ipc",
+                diagnostic: reason
             };
             setUpdateResult(result);
+            recordManagedUpdateEvent(product, "failed", result, state.installed, state.release.tagName);
+            toastFailure(result.message);
+        } finally {
+            setPending(null);
+        }
+    };
+
+    const resolveOrionDecision = async (action: "keep" | "discard") => {
+        if (!Native || product !== "orion" || pending || !updateResult?.decision) return;
+
+        const decision = updateResult.decision;
+        setPending("update");
+        if (action === "discard") {
+            recordManagedUpdateEvent(product, "discard-confirmed", updateResult, state.installed, state.release.tagName);
+        }
+
+        try {
+            const result = await Native.updateOrionRelease(
+                state.installed,
+                state.release.tagName,
+                { action, token: decision.token }
+            );
+            applyManagedResult(result);
+        } catch (error) {
+            const reason = error instanceof Error ? error.message : String(error);
+            const result: ManagedReleaseUpdateResult = {
+                ok: false,
+                status: "failed",
+                message: "OrionQuests could not resolve the local-work update choice.",
+                phase: "ipc",
+                diagnostic: reason
+            };
+            setUpdateResult(result);
+            recordManagedUpdateEvent(product, "failed", result, state.installed, state.release.tagName);
             toastFailure(result.message);
         } finally {
             setPending(null);
@@ -263,17 +430,47 @@ function UpdateReleaseCard({ product, state }: {
             )}
             {state.suppression === "skipped" && <span className="quest-ui-update-suppressed-copy">Skipped for this version</span>}
             {state.suppression === "snoozed" && <span className="quest-ui-update-suppressed-copy">Reminder snoozed for 24 hours</span>}
-            {product === "orion" && !canNativeUpdate && (
-                <span className="quest-ui-update-suppressed-copy">One-click update is not exposed by this OrionQuests build. Use View release.</span>
+            {!canNativeUpdate && (
+                <span className="quest-ui-update-suppressed-copy">Managed source updates require Vencord desktop. Use View release.</span>
             )}
             {updateResult && (
-                <span className={`quest-ui-update-result${updateResult.ok ? " is-success" : " is-error"}`}>
+                <span className={`quest-ui-update-result${
+                    updateResult.status === "decision-required" || updateResult.status === "kept"
+                        ? " is-warning"
+                        : updateResult.ok
+                            ? " is-success"
+                            : " is-error"
+                }`}>
                     {updateResult.message}
                 </span>
             )}
 
+            {awaitingDecision && updateResult.decision && (
+                <div className="quest-ui-update-decision">
+                    <strong>Local OrionQuests work detected</strong>
+                    <span>{updateResult.decision.summary}</span>
+                    <span>
+                        Keep leaves the checkout untouched and skips this update. Discard &amp; update resets tracked local work,
+                        removes non-ignored untracked files, then updates and rebuilds Vencord.
+                    </span>
+                    <div className="quest-ui-update-decision-actions">
+                        <button type="button" disabled={pending !== null} onClick={() => resolveOrionDecision("keep")}>
+                            Keep
+                        </button>
+                        <button
+                            type="button"
+                            className="is-destructive"
+                            disabled={pending !== null}
+                            onClick={() => resolveOrionDecision("discard")}
+                        >
+                            {pending === "update" ? "Updating…" : "Discard & update"}
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="quest-ui-update-card-actions">
-                {canNativeUpdate && !updateResult?.restartRequired && (
+                {canNativeUpdate && !updateResult?.restartRequired && !awaitingDecision && (
                     <button type="button" disabled={pending !== null} onClick={updateRelease}>
                         {pending === "update" ? "Updating…" : "Update now"}
                     </button>
@@ -297,6 +494,7 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
     const available = states.filter((entry): entry is [UpdateProduct, Extract<PluginUpdateState, { kind: "available"; }>] => availableUpdate(entry[1]));
     const visibleCount = states.filter(([, state]) => visibleUpdate(state)).length;
     const hasError = states.some(([, state]) => state.kind === "error");
+    const availabilityCopy = combinedAvailabilityCopy(snapshot);
 
     return (
         <div className="quest-ui-update-panel" role="group" aria-label="Plugin updates">
@@ -324,17 +522,15 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
                     <strong>
                         {snapshot.checking
                             ? "Checking releases…"
-                            : visibleCount > 0
-                                ? `${visibleCount} ${visibleCount === 1 ? "update" : "updates"} available`
-                                : hasError
-                                    ? "Some checks need attention"
-                                    : "Everything is current"}
+                            : hasError
+                                ? "Some checks need attention"
+                                : availabilityCopy}
                     </strong>
                     <span>
                         {snapshot.checking
                             ? "Comparing installed versions with the configured release channels."
                             : visibleCount > 0
-                                ? "Review the new version below or update directly when supported."
+                                ? "Review the release below or update directly when supported."
                                 : hasError
                                     ? "The last successful versions remain shown below."
                                     : `Last checked ${formatCompactTimestamp(snapshot.lastSuccessfulCheckAt)}`}
@@ -357,9 +553,14 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
                 </div>
             )}
 
-            <span className="quest-ui-update-last-check">
-                Last successful check · {formatTimestamp(snapshot.lastSuccessfulCheckAt)}
-            </span>
+            <div className="quest-ui-update-last-check">
+                <span>Last successful check · {formatTimestamp(snapshot.lastSuccessfulCheckAt)}</span>
+                {!snapshot.automaticChecksEnabled && (
+                    <span className="quest-ui-update-manual-warning">
+                        You are turning off AutoUpdater, please check update manually
+                    </span>
+                )}
+            </div>
         </div>
     );
 }
@@ -403,14 +604,10 @@ export function UpdateCenterIndicator() {
 
 export function DashboardUpdateNotice() {
     const snapshot = useUpdateSnapshot();
-    const updates: Array<[UpdateProduct, Extract<PluginUpdateState, { kind: "available"; }>]> = [];
-
-    if (visibleUpdate(snapshot.questUI) && snapshot.questUI.kind === "available") {
-        updates.push(["questui", snapshot.questUI]);
-    }
-    if (visibleUpdate(snapshot.orion) && snapshot.orion.kind === "available") {
-        updates.push(["orion", snapshot.orion]);
-    }
+    const questUIVersion = visibleReleaseVersion(snapshot.questUI);
+    const orionVersion = visibleReleaseVersion(snapshot.orion);
+    const hasUpdate = questUIVersion != null || orionVersion != null;
+    const hasError = snapshot.questUI.kind === "error" || snapshot.orion.kind === "error";
 
     const allCurrent = snapshot.questUI.kind === "up-to-date"
         && (
@@ -419,27 +616,28 @@ export function DashboardUpdateNotice() {
             || snapshot.orion.kind === "disabled"
         );
 
-    if (updates.length === 0 && !snapshot.checking && !allCurrent) return null;
+    if (!snapshot.checking && !hasUpdate && !hasError && !allCurrent) return null;
+
+    const [primaryCopy, secondaryCopy] = dashboardAvailabilityLines(snapshot);
+    const ariaCopy = secondaryCopy ? `${primaryCopy} ${secondaryCopy}` : primaryCopy;
 
     return (
-        <div className="quest-ui-dashboard-update-slot" aria-label="Update status">
-            {snapshot.checking && updates.length === 0 ? (
-                <span className="quest-ui-dashboard-update-chip is-checking">
-                    <span className="quest-ui-dashboard-update-chip-dot" aria-hidden="true" />
-                    Checking updates…
+        <div className="quest-ui-dashboard-update-slot" aria-label={ariaCopy}>
+            <span className={`quest-ui-dashboard-update-chip${
+                snapshot.checking
+                    ? " is-checking"
+                    : hasUpdate
+                        ? " has-update"
+                        : hasError
+                            ? " has-error"
+                            : " is-current"
+            }`}>
+                <span className="quest-ui-dashboard-update-chip-dot" aria-hidden="true" />
+                <span className="quest-ui-dashboard-update-chip-copy">
+                    <span>{primaryCopy}</span>
+                    {secondaryCopy && <span>{secondaryCopy}</span>}
                 </span>
-            ) : updates.length > 0 ? updates.map(([product, state]) => (
-                <span className="quest-ui-dashboard-update-chip has-update" key={product}>
-                    <span className="quest-ui-dashboard-update-chip-dot" aria-hidden="true" />
-                    <strong>{product === "questui" ? "QuestUI" : "Orion"}</strong>
-                    <span>{state.release.tagName}</span>
-                </span>
-            )) : (
-                <span className="quest-ui-dashboard-update-chip is-current">
-                    <span className="quest-ui-dashboard-update-chip-check" aria-hidden="true">✓</span>
-                    <strong>Up to date</strong>
-                </span>
-            )}
+            </span>
         </div>
     );
 }

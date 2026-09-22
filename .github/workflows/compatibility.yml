@@ -114,9 +114,13 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateLogic.ts
 
-      - name: Test managed updater integration
+      - name: Test QuestUI managed updater integration
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateNative.ts
+
+      - name: Test Orion managed updater integration
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionUpdateNative.ts
 
       - name: Reject obsolete speculative Orion API leftovers
         run: |
@@ -154,14 +158,16 @@ jobs:
             'Quest list refreshed.'
             'OrionQuests'
             'Orion Quest Version Incompatible'
-            'v1.4.1'
+            'v1.4.2'
             'Highest Orb Reward'
             'Shortest Required Time'
             'Event Log'
             'Ignored'
             'Quest ready to claim'
             'New quest available'
-            'One-click update is not exposed by this OrionQuests build'
+            'Managed source updates require Vencord desktop'
+            'You are up to date'
+            'You are turning off AutoUpdater, please check update manually'
             'updateOrionRelease'
           )
           for marker in "${required_markers[@]}"; do
@@ -185,6 +191,20 @@ jobs:
           grep -Fq 'newAvailableQuestTransitions' src/userplugins/QuestUI/notifications.ts
           grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/notifications.ts
           grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/UpdateCenter.tsx
+          grep -Fq 'recordManagedUpdateEvent' src/userplugins/QuestUI/UpdateCenter.tsx
+          grep -Fq 'combinedAvailabilityCopy' src/userplugins/QuestUI/UpdateCenter.tsx
+          grep -Fq 'dashboardAvailabilityLines' src/userplugins/QuestUI/UpdateCenter.tsx
+          grep -Fq 'quest-ui-dashboard-update-chip-copy' src/userplugins/QuestUI/updateCenter.css
+          grep -Fq 'automaticChecksEnabled' src/userplugins/QuestUI/updates.ts
+          grep -Fq 'updateTrace' src/userplugins/QuestUI/UpdateCenter.tsx
+          grep -Fq 'Update trace' src/userplugins/QuestUI/EventLogViewer.tsx
+          grep -Fq 'queryIdentityRef.current !== queryIdentity' src/userplugins/QuestUI/EventLogViewer.tsx
+          grep -Fq 'hardReset ? 120 : 0' src/userplugins/QuestUI/EventLogViewer.tsx
+          grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/native.ts
+          grep -Fq 'nyxxbit/discord-quest-completer' dist/vencordDesktopMain.js
+          grep -Fq 'Automatic OrionQuests updates require the official main branch' dist/vencordDesktopMain.js
+          grep -Fq 'decision-required' dist/vencordDesktopMain.js
+          grep -Fq 'Discard & update' dist/renderer.js
 
           grep -Fq 'shouldShow={dashboardOpen}' src/userplugins/QuestUI/QuestButton.tsx
           grep -Fq 'onRequestClose={closeDashboard}' src/userplugins/QuestUI/QuestButton.tsx
