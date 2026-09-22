@@ -14,6 +14,7 @@ import type { EventLogEvent, EventLogSort } from "./eventLogTypes";
 import { normalizePersistedEvent } from "./eventLogValidation";
 
 export { inspectQuestUICheckout, updateQuestUIRelease } from "./updateNative";
+export { updateOrionRelease } from "./orionUpdateNative";
 
 const MAX_LOG_BYTES = 10 * 1024 * 1024;
 const COMPACT_TO_BYTES = 5 * 1024 * 1024;
