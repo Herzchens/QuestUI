@@ -35,6 +35,7 @@ export interface UpdateSnapshot {
     checking: boolean;
     checkedAt: number | null;
     lastSuccessfulCheckAt: number | null;
+    automaticChecksEnabled: boolean;
     questUI: PluginUpdateState;
     orion: PluginUpdateState;
 }
@@ -91,6 +92,7 @@ let snapshot: UpdateSnapshot = {
     checking: false,
     checkedAt: null,
     lastSuccessfulCheckAt: null,
+    automaticChecksEnabled: true,
     questUI: { kind: "idle", installed: QUESTUI_VERSION },
     orion: { kind: "not-installed", installed: null }
 };
@@ -298,6 +300,11 @@ function resolvePluginState(
 
 function recomputeCachedPolicy(now = Date.now()): void {
     const preferences = readPreferences();
+    snapshot = {
+        ...snapshot,
+        automaticChecksEnabled: normalizeUpdateCheckHours(preferences.checkHours) > 0
+    };
+
     if (cachedQuestUIReleases) {
         snapshot = {
             ...snapshot,

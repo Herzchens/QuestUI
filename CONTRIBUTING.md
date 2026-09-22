@@ -6,7 +6,7 @@ Read `README.md`, `AGENTS.md`, `CHANGELOG.md`, and `docs/RELEASES.md` before cha
 
 ## Scope
 
-QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-authorized native Accept/Claim actions including bounded sequential Claim all, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide account-scoped Ignore/Unignore presentation preferences, provide sanitized QuestUI/Orion diagnostics, send local Vencord/native desktop notifications, and optionally delegate controls to a separately installed compatible OrionQuests companion.
+QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-authorized native Accept/Claim actions including bounded sequential Claim all, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide account-scoped Ignore/Unignore presentation preferences, provide sanitized QuestUI/Orion diagnostics, send local Vencord/native desktop notifications, optionally delegate controls to a separately installed compatible OrionQuests companion, and update a clean official OrionQuests source checkout after an explicit Update click.
 
 Do not turn QuestUI into a Quest farming engine. Do not add automatic enrollment/claim, progress spoofing, heartbeats, targeted quest execution, challenge bypasses, private Orion farming imports, or a companion-bot/backend/DM requirement just to deliver QuestUI notifications.
 
@@ -184,6 +184,8 @@ Keep the current presentation contracts unless a change explicitly targets them:
 - Keep Source / Level / Category filtering, search, day grouping, newest/oldest/errors-first sorting, **View details**, Open file and confirmation-gated Clear log behavior testable.
 - Large desktop histories use stable snapshot/cursor pagination in pages of 250 events plus QuestUI-owned windowed rendering. Do not reintroduce a hidden 5,000-row fallback or mix pages from different query generations/sessions.
 - Auto-pagination should fire only after genuine user scrolling reaches the bottom margin; cancel stale pagination/live-refresh timers across search/filter/sort/account resets.
+- Same-query live notifications refresh the current Event Log page in place; do not clear rows or reset scroll/loading state between update-start/update-success events.
+- Managed update rows keep the list summary compact, but **View details** should expose the sanitized update method, phase, version/commit transition, command-oriented execution trace, build/rollback path, and native diagnostic when a command fails.
 - Classify fallback Orion console messages by namespace/context rather than naive keywords so retry/fallback/recovery logs are not mislabeled as terminal failures.
 - When structured events are available, reconcile their short-lived console shadows rather than persisting duplicate twins.
 - Orion v4.10.7 remains the hard core-control minimum. Structured-event and scheduler APIs are additive capabilities; compatible builds without them keep safe fallback behavior.
@@ -214,7 +216,7 @@ Discord internals are unstable. Treat every finder/patch as a compatibility boun
 
 Automated tests are necessary but not sufficient. For relevant changes, manual-test actual Discord states and report what was truly observed.
 
-The managed updater has dedicated regression coverage: pure release-policy tests plus a temporary real Git repository that exercises SSH-signed annotated tag verification, exact checkout transitions, dirty/wrong-origin/custom-checkout refusal, conflicting tags, single-flight locking, target-build failure rollback, and rollback-build failure. Keep those tests fail-closed when updater behavior changes.
+The managed updaters have dedicated real-Git regression coverage. QuestUI self-update exercises pinned SSH-signed annotated tag verification, exact checkout transitions, dirty/wrong-origin/custom-checkout refusal, conflicting tags, single-flight locking, and build rollback. Orion update separately exercises official-origin/main/source-version gates, release-tag-to-current-main ancestry, upstream-rewrite recovery, Keep/Discard handling for dirty or locally divergent `main`, content-aware stale-decision refusal, non-ignored untracked cleanup only after explicit Discard, single-flight locking, and target/rollback build failures. Keep both suites fail-closed when updater behavior changes; do not describe Orion's lightweight/unsigned upstream tags as cryptographically verified.
 
 Current manual coverage should include:
 

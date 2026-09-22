@@ -7,11 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.1** is the current Stable release. It adds bounded sequential **Claim all**, **New Quest Available** notifications, Expired-Ignore cleanup, Nitro/Xbox+ Orb-boost source handling, and the Dashboard/Settings Update Center.
+> **v1.4.2** is the current Stable release. It hardens managed source updates, moves OrionQuests one-click source updating into QuestUI's native updater, expands managed-update diagnostics, fixes live Event Log refresh flicker, and refines the compact Dashboard update-status surface.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
 > Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.4.2 release preparation included maintainer live Discord validation of the final Dashboard update-status presentation, including the compact **You are up to date** state. Build/type-check, upstream Orion coexistence, Stable/Canary reporter checks, and temporary real-Git updater regression suites provide automated coverage; a destructive Orion managed update against a real user checkout was not performed as live release evidence.
 >
 > v1.4.1 release preparation included maintainer live Discord Stable validation of the final Dashboard/header presentation, including the Quest title/icon layout, Claim All placement/count badge, and Orb balance styling. The sequential Claim All mutation path was not separately exercised as part of that final UI pass; its batching and fail-closed safety behavior is covered by automated regression tests and CI rather than being presented as live mutation evidence.
 >
@@ -48,6 +50,8 @@ The captures above are real Discord runtime screenshots supplied by the maintain
 - Native current Orb balance plus Orion Quest / QuestUI runtime version metadata
 
 - Persistent **Event Log** with account-aware searchable/filterable diagnostics, per-event details, sanitized one-click bug reports, complete pagination, and large-log windowed rendering
+
+- Dashboard/Settings **Update Center** with release checks, a pinned-signature managed QuestUI updater, and an explicit QuestUI-owned OrionQuests source updater. Clean official `main` checkouts update directly; dirty/divergent official-main checkouts present **Keep** or **Discard & update**, with destructive consent rebound to the exact checkout snapshot before reset/clean. Vencord rebuilds after update and rolls back the previous commit on build failure.
 
 - Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
 

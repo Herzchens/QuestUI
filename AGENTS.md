@@ -20,6 +20,7 @@ QuestUI may:
 - surface optional user notifications for newly observed available Quests, Ready-to-Claim transitions, and actionable QuestUI/Orion problems;
 - read an explicit Orion companion state surface and delegate Start/Stop/Pause/Resume through it;
 - auto-start compatible Orion only after Discord confirms a QuestUI enrollment in QuestStore;
+- after an explicit Update click, update a clean official OrionQuests Git checkout to a newer verified release target and rebuild Vencord fail-closed without importing Orion runtime internals;
 - improve accessibility, compatibility, tests, CI, documentation, and release packaging.
 
 QuestUI must not:
@@ -36,6 +37,8 @@ QuestUI must not:
 - treat Stop as Pause;
 - implement targeted `startQuest`;
 - become a combined QuestUI + Orion farming implementation;
+- overwrite detached, fork-origin, ambiguous, or locally divergent OrionQuests source without the updater's explicit user-decision contract; dirty/divergent official-main work may be discarded only after the user chooses **Discard & update** for the exact revalidated snapshot, while Keep/no decision preserves it;
+- claim cryptographic Orion release verification when upstream provides only an unsigned/lightweight tag;
 - ingest unrelated Discord/plugin console traffic into the Event Log or persist credentials/tokens.
 
 The maintainer approved the current companion surface: global Start/Pause/Resume + Stop, exact-ID per-Quest Pause/Resume, and engine-wide Start from an enrolled card. Anything broader requires explicit approval.
@@ -60,7 +63,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `questActions.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
 - `questData.ts` — normalization/filtering/sorting and live read-only QuestStore snapshot source.
 - `questReload.ts`, `questReloadLogic.ts`, `QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
-- `UpdateCenter.tsx`, `updates.ts`, `updateLogic.ts`, `updateNative.ts`, `updateNativeEngine.ts` — release discovery, cached scheduling, Dashboard/Settings update UI, fail-closed managed QuestUI update execution, and the injectable updater engine used by real-git regression tests.
+- `UpdateCenter.tsx`, `updates.ts`, `updateLogic.ts`, `updateNative.ts`, `updateNativeEngine.ts`, `orionUpdateNative.ts`, `orionUpdateNativeEngine.ts` — release discovery, cached scheduling, Dashboard/Settings update UI, signed fail-closed QuestUI updates, clean-official-checkout Orion updates, and injectable real-git updater engines.
 - `orionCommandLogic.ts`, `orionControlLogic.ts`, `orionIntegration.ts` — companion validation, state machine, scheduler-state refinement, and safe delegation.
 - `OrionControls.tsx`, `OrionQuestControl.tsx`, `orionIcons.tsx` — global/per-Quest controls and shared icons.
 - `actions.css`, `orion.css`, `orionScheduler.css`, `reload.css` — action/control styling.
@@ -97,6 +100,7 @@ pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateLogic.ts
 pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateNative.ts
+pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionUpdateNative.ts
 pnpm build
 pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
@@ -257,7 +261,8 @@ Use Vencord's native toast API for explicit success/failure feedback.
 - Viewer filtering supports Source, Level, Category and search; sorting supports newest, oldest, and errors first; day separators remain chronological for the selected sort.
 - Desktop large-log traversal uses stable snapshot/cursor pagination and Event-Log-owned windowing. Never reintroduce a hidden 5,000-row fallback/cap or append pages from different query generations/sessions.
 - Automatic pagination is triggered only by genuine user scroll near the bottom; do not synthesize scroll on mount or allow a stale timer/query to load/reset another filter/sort/account generation.
-- Keep list summaries concise and put technical console/error context behind **View details**. Warning/error rows and details may copy a sanitized diagnostic report.
+- A live same-query Event Log notification must refresh in place. Do not blank rows, toggle initial-loading state, or reset scroll just because a new event arrived; full reset is reserved for a real query/filter/sort/account identity change.
+- Keep list summaries concise and put technical console/error context behind **View details**. Managed updater details should preserve sanitized method/phase/version+commit transition, command-oriented execution trace, build/rollback path, and native diagnostic on failure. Warning/error rows and details may copy a sanitized diagnostic report.
 - Orion event semantics must be namespace/context aware. Do not classify every string containing `failed` as terminal: retries, fallbacks and recoveries remain non-terminal when Orion treats them that way.
 - When `subscribeEvents()` is present, validate its boundary and treat structured fields as authoritative. Reconcile short-lived human console shadows to avoid duplicate structured/console rows; if the capability is absent or cannot be rebound safely, preserve the sanitized console fallback.
 - Scheduler metadata requires both `getSchedulerSnapshot()` and `subscribeSchedulerState()`. Invalid snapshots fail closed; unsupported builds omit scheduler-derived tag refinement rather than losing core Orion controls.
@@ -273,9 +278,9 @@ Use Vencord's native toast API for explicit success/failure feedback.
 
 ## Verification
 
-Run the full local gate for source changes. For companion changes, also run Orion pause/resume, structured-event, and scheduler regression tests and build/type-check both plugins together.
+Run the full local gate for source changes. For updater changes, run both managed-updater real-git suites. For companion changes, also run Orion pause/resume, structured-event, and scheduler regression tests and build/type-check both plugins together.
 
-Manual checks should cover the affected states. For the current Stable surface this includes header Nitro/Xbox+ source-badge layout; the seven-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; 10k+ large-log rendering/pagination when relevant; account switching/legacy visibility; Orion STARTED/WAITING/PAUSED/STOPPED tags when supported; Accept/Claim plus Claim all sequential progress and stop-on-verification behavior; global/per-Quest Orion transitions; concurrency; Reload whole rotations; Update Center current/update/error states; dark/light/custom themes; and plugin replacement/reload safety.
+Manual checks should cover the affected states. For the current Stable surface this includes header Nitro/Xbox+ source-badge layout; the seven-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; 10k+ large-log rendering/pagination when relevant; account switching/legacy visibility; Orion STARTED/WAITING/PAUSED/STOPPED tags when supported; Accept/Claim plus Claim all sequential progress and stop-on-verification behavior; global/per-Quest Orion transitions; concurrency; Reload whole rotations; Update Center current/update/error states including Orion Keep/Discard divergence handling and stale-decision refusal; dark/light/custom themes; and plugin replacement/reload safety.
 
 For Ignore/Notification changes, additionally verify account-scoped Ignore persistence, active Orion exact-ID pause before Ignore, no auto-resume on Unignore, expiry immediately ending Ignore plus best-effort stale-ID cleanup, Ignored-vs-Hidden counts, exclusion from all attention surfaces, startup/account-switch hydration, one-shot New-Available and In-Progress→Ready notifications, no startup/backlog notification, notification setting toggles, actionable error/terminal-warning notifications, retry/fallback suppression, duplicate suppression, and notification click behavior.
 
@@ -286,6 +291,8 @@ Automated checks do not substitute for live Discord evidence. State exactly what
 - Stable release source is `main`.
 - The old `feat/quest-actions-orion-controls` QuestUI beta and `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` companion fork are historical only; do not target them for current release work.
 - Current Orion integration targets upstream `nyxxbit/discord-quest-completer` v4.10.7+; the maintained coexistence CI gate tracks upstream `main`. Structured-event and scheduler capabilities are optional and must not silently raise the hard core-control minimum.
+- Orion managed updates are QuestUI-owned source-management only: require exactly one official-origin `main` checkout, validate target tag/version/current-main ancestry, preserve safe upstream-rewrite recovery, and never depend on an Orion updater API. Clean linear/rewrite-safe checkouts update automatically. Dirty or locally divergent `main` checkouts must surface **Keep** / **Discard & update**; Keep is non-destructive, while Discard is honored only after revalidating branch, HEAD, fetched upstream, target and a content-aware tracked/index/untracked fingerprint immediately before reset/clean. Non-ignored untracked files may be removed only under that explicit Discard choice. Orion tags are not assumed to carry QuestUI's pinned SSH-signature guarantee.
+- Dashboard update status sits immediately after the QuestUI version chip and uses one compact combined status surface rather than separate availability pills or a stretched full-width strip. The current state copy is **You are up to date**; update/error/checking states keep their state-specific copy. Scheduled-check frequency `0` is manual-only and must surface the explicit manual-check warning in the Update Center.
 - Keep QuestUI and Orion source/license boundaries separate in packages.
 - Git tags/releases require maintainer approval. Verify the intended target SHA, tag availability, CI evidence, actual runtime evidence, and tag signature before publishing.
 

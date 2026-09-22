@@ -2,7 +2,20 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable — v1.4.1
+## Stable — v1.4.2
+
+- Source: `Herzchens/QuestUI` branch `main`.
+- Release target: **v1.4.2** (2026-09-22).
+- Moves OrionQuests one-click source updating into a QuestUI-owned native Git/rebuild path instead of depending on an Orion updater API. Managed updates require exactly one official-origin `main` checkout, validate the selected release tag/version against current upstream `main`, fast-forward clean linear history, and retain guarded recovery for a clean upstream history rewrite.
+- Dirty or locally divergent Orion `main` checkouts require an explicit **Keep** or **Discard & update** decision. Discard is bound to the approved branch/HEAD/upstream/target plus a content-aware tracked/index/untracked fingerprint and is revalidated immediately before reset/clean; stale consent fails closed.
+- Rebuilds Vencord after a managed update and rolls the Orion checkout back to the previous commit when the target build fails and the checkout still matches the guarded target state.
+- Expands managed QuestUI/Orion Event Log details with update method, phase, version/commit transition, sanitized execution trace, build/rollback path, and native diagnostics.
+- Fixes same-query live Event Log refreshes so new events refresh in place instead of visibly blanking and repopulating the list.
+- Refines Dashboard update status into a compact state surface immediately after the QuestUI version chip; the current state reads **You are up to date**, and manual-only update scheduling keeps an explicit manual-check warning in the Update Center.
+- Adds temporary real-Git Orion updater regression coverage plus native-bundle assertions alongside the signed QuestUI updater tests.
+- Release preparation included maintainer live Discord validation of the final Dashboard update-status presentation. Build/type-check, upstream Orion coexistence, Stable/Canary reporters, and temporary real-Git updater suites were exercised in CI. A destructive Orion managed update against a real user checkout was not performed as live release evidence.
+
+## Previous Stable — v1.4.1
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.1** (2026-09-21).
@@ -14,7 +27,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Adds the Dashboard/Settings Update Center for manual checks, configurable release-check cadence, prerelease policy, optional Orion checks, and managed fail-closed update execution.
 - Release preparation included maintainer live Discord Stable validation of the final Dashboard/header presentation, including the title/Quest-icon layout, Claim All placement/count badge, and Orb balance styling. The sequential Claim All mutation path itself was not separately exercised in that final UI pass; automated regression/CI coverage must not be described as live mutation evidence.
 
-## Previous Stable — v1.4.0
+## Earlier Stable — v1.4.0
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.0** (2026-09-15).

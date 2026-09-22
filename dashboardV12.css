@@ -61,8 +61,18 @@
 }
 
 .quest-ui-dashboard-meta-row {
+    align-items: center;
     gap: 10px;
     min-height: 38px;
+}
+
+.quest-ui-dashboard-meta-primary {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    gap: 10px;
+    min-width: 0;
 }
 
 .quest-ui-meta-product {
@@ -72,6 +82,7 @@
     flex: 0 0 auto;
     font-size: 12px;
     gap: 6px;
+    min-width: 0;
     white-space: nowrap;
 }
 
@@ -290,6 +301,10 @@
 }
 
 @media (max-width: 520px) {
+    .quest-ui-dashboard-meta-primary {
+        flex-wrap: wrap;
+    }
+
     .quest-ui-dashboard-topbar {
         gap: 7px;
         left: 12px;
