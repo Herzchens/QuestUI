@@ -57,7 +57,14 @@ export function newAvailableQuestTransitions(
     return notices;
 }
 
-export function isActionableProblemEvent(event: Pick<EventLogEvent, "severity" | "detail">): boolean {
+export function isActionableProblemEvent(
+    event: Pick<EventLogEvent, "source" | "eventCode" | "severity" | "detail">
+): boolean {
+    // Orion's network.failed event is terminal for one queued HTTP operation, not necessarily for
+    // the owning task. Keep that request-layer diagnostic in Event Log and let the task/enroll/
+    // claim/bypass terminal outcome own user-facing problem attention.
+    if (event.source === "orion" && event.eventCode === "network.failed") return false;
+
     if (event.severity === "error") return true;
     return event.severity === "warning" && event.detail?.terminal === true;
 }

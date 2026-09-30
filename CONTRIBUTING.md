@@ -151,7 +151,7 @@ QuestUI notification delivery stays local-first through Vencord's Notifications 
 - Do not notify for progress ticks or unchanged re-renders. One observed completion transition produces at most one notification.
 - Ignored Quests do not generate QuestUI completion/problem attention while ignored.
 - Runtime-problem notifications consume sanitized Event Log rows rather than raw unrelated console traffic.
-- `error` is actionable; `warning` is actionable only when structured detail explicitly marks it terminal. Normal retry/fallback/recovery warnings are not notification-worthy.
+- User-facing terminal outcomes are actionable: `error`, plus `warning` when structured detail explicitly marks it terminal. Orion's structured `network.failed` remains request-layer diagnostics and does not notify by itself; the owning task/enroll/claim/bypass terminal event owns user-facing attention. Normal retry/fallback/recovery warnings are not notification-worthy.
 - Existing Event Log history is a baseline, not a backlog. Account changes reset the problem baseline.
 - Suppress short-lived duplicate notifications for the same source/event code/Quest/summary while preserving distinct failures.
 - Allow desktop Event Log persistence to settle before deciding a new sanitized row is absent.
