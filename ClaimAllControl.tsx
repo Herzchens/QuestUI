@@ -1,4 +1,4 @@
-import { showToast, Toasts, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { showToast, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import {
     buildClaimAllSnapshot,
@@ -84,7 +84,7 @@ export function ClaimAllControl() {
         if (hasPendingClaimAction(accountId)) {
             showToast(
                 "Another reward claim is still in progress. Wait for Discord to refresh, then try Claim all again.",
-                Toasts.Type.FAILURE,
+                "failure",
                 { duration: 5000 }
             );
             return;
@@ -119,7 +119,7 @@ export function ClaimAllControl() {
                 : "";
             showToast(
                 `Claimed ${result.claimed} ${result.claimed === 1 ? "reward" : "rewards"}${skippedCopy}.`,
-                Toasts.Type.SUCCESS
+                "success"
             );
             void recordQuestUIEvent({
                 severity: "success",
@@ -138,7 +138,7 @@ export function ClaimAllControl() {
                 : stopped?.message ?? (error instanceof Error ? error.message : "Claim all stopped unexpectedly.");
             const message = `Claim all stopped at ${at}/${total}: ${reason}`;
 
-            showToast(message, Toasts.Type.FAILURE, { duration: 7000 });
+            showToast(message, "failure", { duration: 7000 });
             void recordQuestUIEvent({
                 severity: isVerification ? "warning" : "error",
                 eventCode: "QUEST_CLAIM_ALL_STOPPED",

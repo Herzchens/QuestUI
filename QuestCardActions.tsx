@@ -1,4 +1,4 @@
-import { showToast, Toasts, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { showToast, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { recordQuestUIEvent } from "./eventLog";
 import { setQuestIgnored } from "./ignoredQuests";
@@ -101,7 +101,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
             setSubmitted(result.resubmitAfterMs == null
                 ? null
                 : submittedState(action, userIdAtClick, result.resubmitAfterMs));
-            showToast(successMessage(action, quest, result), Toasts.Type.SUCCESS);
+            showToast(successMessage(action, quest, result), "success");
             void recordQuestUIEvent({
                 severity: "success",
                 eventCode: action === "enroll" ? "QUEST_ACCEPT_SUCCEEDED" : "QUEST_CLAIM_SUCCEEDED",
@@ -128,7 +128,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                         });
                         showToast(
                             `Quest was accepted, but Orion could not start automatically: ${error instanceof Error ? error.message : "unknown control error"}`,
-                            Toasts.Type.FAILURE,
+                            "failure",
                             { duration: 6000 }
                         );
                     }
@@ -155,7 +155,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                     stack: error instanceof Error ? error.stack ?? null : null
                 }
             });
-            showToast(message, Toasts.Type.FAILURE, { duration: 6000 });
+            showToast(message, "failure", { duration: 6000 });
         } finally {
             setPending(false);
         }
@@ -203,7 +203,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                                 accountId: userIdAtClick
                             });
                             if (currentUserId() === userIdAtClick) {
-                                showToast(message, Toasts.Type.FAILURE, { duration: 6000 });
+                                showToast(message, "failure", { duration: 6000 });
                             }
                             return;
                         }
@@ -230,7 +230,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                             ? `Ignored ${quest.name} and paused it in Orion`
                             : `Ignored ${quest.name}`
                         : `Unignored ${quest.name}`,
-                    Toasts.Type.SUCCESS
+                    "success"
                 );
             }
         } catch (error) {
@@ -249,7 +249,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 accountId: userIdAtClick
             });
             if (currentUserId() === userIdAtClick) {
-                showToast(message, Toasts.Type.FAILURE, { duration: 6000 });
+                showToast(message, "failure", { duration: 6000 });
             }
         } finally {
             setIgnorePending(false);

@@ -1,4 +1,4 @@
-import { showToast, Toasts, useEffect, useState } from "@webpack/common";
+import { showToast, useEffect, useState } from "@webpack/common";
 
 import { deriveQuestOrionControl } from "./orionControlLogic";
 import { OrionPauseIcon, OrionPlayIcon } from "./orionIcons";
@@ -40,11 +40,11 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
             const response = control.action === "start"
                 ? await invokeOrionEngineControl("start")
                 : await invokeOrionQuestTaskControl(quest.id, control.action);
-            showToast(`Orion: ${response}`, Toasts.Type.SUCCESS);
+            showToast(`Orion: ${response}`, "success");
         } catch (error) {
             showToast(
                 error instanceof Error ? error.message : "Orion rejected the requested Quest control action.",
-                Toasts.Type.FAILURE,
+                "failure",
                 { duration: 6000 }
             );
         } finally {

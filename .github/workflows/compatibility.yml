@@ -183,6 +183,11 @@ jobs:
               exit 1
             fi
           done
+          if grep -R -n -F 'Toasts.Type.' src/userplugins/QuestUI --include='*.ts' --include='*.tsx'; then
+            echo 'QuestUI must use showToast string toast types; Vencord no longer exposes Toasts.Type.' >&2
+            exit 1
+          fi
+
           grep -Fq 'Processing…' src/userplugins/QuestUI/QuestCardActions.tsx
           grep -Fq 'MAX_LOG_BYTES = 10 * 1024 * 1024' src/userplugins/QuestUI/native.ts
           grep -Fq 'COMPACT_TO_BYTES = 5 * 1024 * 1024' src/userplugins/QuestUI/native.ts

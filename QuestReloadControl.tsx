@@ -1,4 +1,4 @@
-import { showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
+import { showToast, useEffect, useRef, useState } from "@webpack/common";
 
 import { recordQuestUIEvent } from "./eventLog";
 import { reloadQuestList } from "./questReload";
@@ -82,12 +82,12 @@ export function QuestReloadControl() {
                 });
                 showToast(
                     failure instanceof Error ? failure.message : "Failed to refresh the Quest list.",
-                    Toasts.Type.FAILURE,
+                    "failure",
                     { duration: 6000 }
                 );
             } else {
                 void recordQuestUIEvent({ severity: "success", eventCode: "QUEST_RELOAD_SUCCEEDED", summary: "Quest list refreshed" });
-                showToast("Quest list refreshed.", Toasts.Type.SUCCESS);
+                showToast("Quest list refreshed.", "success");
             }
         } finally {
             pendingRef.current = false;

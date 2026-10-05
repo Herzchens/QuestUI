@@ -1,6 +1,6 @@
 import type { PluginNative } from "@utils/types";
 import { relaunch } from "@utils/native";
-import { Popout, showToast, Toasts, useEffect, useRef, useState } from "@webpack/common";
+import { Popout, showToast, useEffect, useRef, useState } from "@webpack/common";
 
 import { recordQuestUIEvent } from "./eventLog";
 import type { QuestUIUpdateResult } from "./updateNative";
@@ -208,7 +208,7 @@ function UpdateProductStatus({ product, state, compact = false }: {
 }
 
 function toastFailure(message: string): void {
-    showToast(message, Toasts.Type.FAILURE);
+    showToast(message, "failure");
 }
 
 function managedUpdateEventCode(product: UpdateProduct, outcome: ManagedUpdateEventOutcome): string {
@@ -340,7 +340,7 @@ function applyManagedUpdateResult(
         state.installed,
         state.release.tagName
     );
-    showToast(result.message, result.ok ? Toasts.Type.SUCCESS : Toasts.Type.FAILURE);
+    showToast(result.message, result.ok ? "success" : "failure");
 }
 
 function managedUpdateInvocationFailure(message: string, error: unknown): ManagedReleaseUpdateResult {
