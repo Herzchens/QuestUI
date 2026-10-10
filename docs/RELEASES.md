@@ -2,7 +2,19 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable — v1.4.2
+## Stable — v1.4.3
+
+- Source: `Herzchens/QuestUI` branch `main`.
+- Release target: **v1.4.3** (2026-10-10).
+- Restores compatibility with Vencord's current toast API across Quest actions, Claim All, Orion controls, Reload, Update Center, and Event Log.
+- Fixes #26, where a successful reward claim could throw during success-toast presentation and then be recorded as `QUEST_CLAIM_FAILED`.
+- Prevents duplicate Orion Problems notifications for request-layer `network.failed` events when the owning terminal task event represents the same failure; structured Event Log diagnostics remain intact.
+- Adds a CI guard against reintroducing obsolete `Toasts.Type.*` usage.
+- Existing historical Event Log rows are retained and are not migrated or rewritten automatically.
+- Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
+- Release preparation included maintainer live Discord validation of the reported Claim Reward path. The final v1.4.3 target is gated on build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks.
+
+## Previous Stable — v1.4.2
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.2** (2026-09-22).
@@ -15,7 +27,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Adds temporary real-Git Orion updater regression coverage plus native-bundle assertions alongside the signed QuestUI updater tests.
 - Release preparation included maintainer live Discord validation of the final Dashboard update-status presentation. Build/type-check, upstream Orion coexistence, Stable/Canary reporters, and temporary real-Git updater suites were exercised in CI. A destructive Orion managed update against a real user checkout was not performed as live release evidence.
 
-## Previous Stable — v1.4.1
+## Earlier Stable — v1.4.1
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.1** (2026-09-21).

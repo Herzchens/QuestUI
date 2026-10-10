@@ -7,11 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.2** is the current Stable release. It hardens managed source updates, moves OrionQuests one-click source updating into QuestUI's native updater, expands managed-update diagnostics, fixes live Event Log refresh flicker, and refines the compact Dashboard update-status surface.
+> **v1.4.3** is the current Stable release. It restores compatibility with Vencord's current toast API across QuestUI, fixes #26 where a successful reward claim could be recorded as failed after toast presentation threw, and suppresses duplicate Orion Problems notifications for request-layer `network.failed` events when the owning terminal task event reports the same failure. Structured Event Log diagnostics remain preserved.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
 > Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.4.3 release preparation included maintainer live Discord validation of the reported Claim Reward path: the reward was claimed successfully without the previous false `QUEST_CLAIM_FAILED` result. Existing historical Event Log rows are intentionally not rewritten. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks gate the final release target.
 >
 > v1.4.2 release preparation included maintainer live Discord validation of the final Dashboard update-status presentation, including the compact **You are up to date** state. Build/type-check, upstream Orion coexistence, Stable/Canary reporter checks, and temporary real-Git updater regression suites provide automated coverage; a destructive Orion managed update against a real user checkout was not performed as live release evidence.
 >

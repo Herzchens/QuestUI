@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4.3 - 2026-10-10
+
+- Fixed #26: successful Quest reward claims could be incorrectly recorded as failed after Vencord removed the old `Toasts.Type.*` API. QuestUI now uses Vencord's current string toast types across Quest actions, Claim All, Orion controls, Reload, Update Center, and Event Log.
+- Prevented duplicate Orion Problems notifications when a request-layer `network.failed` event is followed by the owning terminal task event for the same failure. Both structured events remain available in Event Log for diagnostics.
+- Added a compatibility guard that rejects obsolete `Toasts.Type.*` usage during CI.
+- Existing historical Event Log rows are retained and are not migrated or rewritten automatically; users can clear Event Log manually if they no longer want older diagnostic history.
+
 ## v1.4.2 - 2026-09-22
 
 - Changed OrionQuests one-click updates so QuestUI owns the native Git/rebuild workflow instead of requiring an experimental `updateOrionRelease` API from Orion. The updater accepts one official-origin `main` checkout, validates the selected release tag/version against current upstream `main`, preserves the upstream-rewrite recovery case, and updates clean history non-destructively. Dirty or locally divergent `main` now prompts **Keep** or **Discard & update**; Discard revalidates HEAD/upstream/target plus a content-aware local-work fingerprint before reset/clean, while Keep leaves all local work untouched. Vencord rebuilds after update and rolls back the previous commit on target-build failure.
