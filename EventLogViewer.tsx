@@ -1,4 +1,4 @@
-import { Popout, showToast, Toasts, UserStore, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
+import { Popout, showToast, UserStore, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { buildDiagnosticReport } from "./diagnosticReport";
 import { EventLogWindowedScroller } from "./EventLogWindowedScroller";
@@ -171,9 +171,9 @@ function SemanticText({ text }: { text: unknown; }) {
 async function copyDiagnosticReport(event: EventLogEvent, availableEvents: EventLogEvent[]): Promise<void> {
     try {
         await navigator.clipboard.writeText(buildDiagnosticReport(event, availableEvents));
-        showToast("Diagnostic report copied.", Toasts.Type.SUCCESS);
+        showToast("Diagnostic report copied.", "success");
     } catch {
-        showToast("Could not copy the diagnostic report.", Toasts.Type.FAILURE);
+        showToast("Could not copy the diagnostic report.", "failure");
     }
 }
 
@@ -559,7 +559,7 @@ function EventLogPanel() {
                             setClearing(true);
                             void clearEventLog().then(() => {
                                 setClearCountdown(null);
-                                showToast("Event Log cleared successfully.", Toasts.Type.SUCCESS);
+                                showToast("Event Log cleared successfully.", "success");
                                 setRefreshNonce(value => value + 1);
                             }).finally(() => setClearing(false));
                         }}

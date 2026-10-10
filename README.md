@@ -261,7 +261,7 @@ QuestUI has three separately configurable notification categories in the QuestUI
 
 - **Notifications • New Quest Available** — one notification when a previously unseen same-account Quest is first observed as real Discord **Available** after the initial QuestStore baseline.
 - **Notifications • Ready to Claim** — one notification when an observed same-account Quest transitions from real Discord **In Progress** to **Ready to Claim**.
-- **Notifications • Problems** — actionable QuestUI/Orion runtime problems from the sanitized Event Log. `error` is actionable; `warning` is actionable only when structured detail marks it terminal.
+- **Notifications • Problems** — actionable QuestUI/Orion runtime problems from the sanitized Event Log. User-facing terminal outcomes notify; Orion's structured request-layer `network.failed` stays diagnostic so the owning terminal task/enroll/claim/bypass outcome produces the alert instead of a duplicate.
 
 QuestUI uses Vencord's Notifications API instead of a companion bot, backend, DM relay, or parallel OS-notification system. Delivery therefore follows Vencord's notification configuration: Vencord in-app notification, native desktop notification when Discord is unfocused, or native desktop notification always. Vencord also persists normal notifications into its Notification Log according to the user's global log settings.
 

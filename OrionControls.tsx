@@ -1,4 +1,4 @@
-import { showToast, Toasts, useEffect, useState } from "@webpack/common";
+import { showToast, useEffect, useState } from "@webpack/common";
 
 import { deriveGlobalOrionControl, farmableQuestIds } from "./orionControlLogic";
 import { OrionPauseIcon, OrionPlayIcon, OrionStopIcon } from "./orionIcons";
@@ -17,13 +17,13 @@ function smartLabel(action: "start" | "pause" | "resume"): string {
 }
 
 function showControlSuccess(response: string): void {
-    showToast(`Orion: ${response}`, Toasts.Type.SUCCESS);
+    showToast(`Orion: ${response}`, "success");
 }
 
 function showControlFailure(error: unknown): void {
     showToast(
         error instanceof Error ? error.message : "Orion rejected the requested control action.",
-        Toasts.Type.FAILURE,
+        "failure",
         { duration: 6000 }
     );
 }

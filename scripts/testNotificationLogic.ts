@@ -36,11 +36,50 @@ assert.deepEqual(newAvailableQuestTransitions(new Set(), [quest("a", "claimable"
 assert.deepEqual(newAvailableQuestTransitions(new Set(["a"]), [quest("a", "available")]), []);
 assert.deepEqual(newAvailableQuestTransitions(new Set(["a"]), [quest("a", "expired"), quest("b", "claimed")]), []);
 
-assert.equal(isActionableProblemEvent({ severity: "error", detail: null }), true);
-assert.equal(isActionableProblemEvent({ severity: "warning", detail: { terminal: true } }), true);
-assert.equal(isActionableProblemEvent({ severity: "warning", detail: { terminal: false } }), false);
-assert.equal(isActionableProblemEvent({ severity: "warning", detail: { retryable: true } }), false);
-assert.equal(isActionableProblemEvent({ severity: "info", detail: null }), false);
+const genericProblem = (severity: "info" | "warning" | "error", detail: Record<string, unknown> | null) => ({
+    source: "questui" as const,
+    eventCode: "QUESTUI_TEST_PROBLEM",
+    severity,
+    detail
+});
+
+assert.equal(isActionableProblemEvent(genericProblem("error", null)), true);
+assert.equal(isActionableProblemEvent(genericProblem("warning", { terminal: true })), true);
+assert.equal(isActionableProblemEvent(genericProblem("warning", { terminal: false })), false);
+assert.equal(isActionableProblemEvent(genericProblem("warning", { retryable: true })), false);
+assert.equal(isActionableProblemEvent(genericProblem("info", null)), false);
+
+const real403NetworkFailure = {
+    source: "orion" as const,
+    eventCode: "network.failed",
+    severity: "warning" as const,
+    detail: {
+        terminal: true,
+        retryable: false,
+        attempt: 1,
+        maxAttempts: 1,
+        httpStatus: 403,
+        upstreamCode: 260000,
+        reason: "User is not enrolled in the given quest"
+    }
+};
+const real403TaskFailure = {
+    source: "orion" as const,
+    eventCode: "task.failed",
+    severity: "error" as const,
+    detail: {
+        terminal: true,
+        retryable: false,
+        attempt: null,
+        maxAttempts: null,
+        httpStatus: 403,
+        upstreamCode: 260000,
+        reason: "Client Error 403"
+    }
+};
+assert.equal(isActionableProblemEvent(real403NetworkFailure), false);
+assert.equal(isActionableProblemEvent(real403TaskFailure), true);
+assert.equal(isActionableProblemEvent({ ...real403NetworkFailure, severity: "error" }), false);
 
 const keyA = problemNotificationKey({
     source: "orion",
