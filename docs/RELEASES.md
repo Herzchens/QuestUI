@@ -2,7 +2,17 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable — v1.4.3
+## Stable — v1.4.4
+
+- Source: `Herzchens/QuestUI` branch `main`.
+- Release target: **v1.4.4** (2026-10-21).
+- Adapts QuestUI to Vencord's new object-form toast API across Quest actions, Claim All, Orion controls, Reload, Update Center, and Event Log; failure toasts now use the `critical` variant.
+- Adds CI guards against both the removed `Toasts.Type.*` surface and legacy positional `showToast(message, type, options)` calls.
+- Implements #28 by making the Dashboard Orb balance an accessible Discord Shop shortcut. The Dashboard closes before navigation to `/shop`, and the existing Orb balance fetch/store behavior remains unchanged.
+- Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
+- Release preparation included maintainer live Discord validation of the Orb balance Shop shortcut and automatic Dashboard dismissal. The final v1.4.4 target is gated on build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks.
+
+## Previous Stable — v1.4.3
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.3** (2026-10-10).
@@ -14,7 +24,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
 - Release preparation included maintainer live Discord validation of the reported Claim Reward path. The final v1.4.3 target is gated on build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks.
 
-## Previous Stable — v1.4.2
+## Earlier Stable — v1.4.2
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.2** (2026-09-22).

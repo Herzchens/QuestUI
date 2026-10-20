@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.4.4 - 2026-10-21
+
+- Updated QuestUI to Vencord's new object-form `showToast({ ... })` API across Quest actions, Claim All, Orion controls, Reload, Update Center, and Event Log. Failure toasts now use Vencord's `critical` variant.
+- Added CI compatibility guards that reject the removed `Toasts.Type.*` surface and legacy positional `showToast(message, type, options)` calls.
+- Implemented #28: the Dashboard Orb balance is now an accessible shortcut to Discord Shop. Clicking it closes the Quest Dashboard before navigating to `/shop`, while keeping Discord's VirtualCurrencyStore authoritative for the displayed balance.
+
 ## v1.4.3 - 2026-10-10
 
 - Fixed #26: successful Quest reward claims could be incorrectly recorded as failed after Vencord removed the old `Toasts.Type.*` API. QuestUI now uses Vencord's current string toast types across Quest actions, Claim All, Orion controls, Reload, Update Center, and Event Log.

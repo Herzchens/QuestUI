@@ -7,11 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.3** is the current Stable release. It restores compatibility with Vencord's current toast API across QuestUI, fixes #26 where a successful reward claim could be recorded as failed after toast presentation threw, and suppresses duplicate Orion Problems notifications for request-layer `network.failed` events when the owning terminal task event reports the same failure. Structured Event Log diagnostics remain preserved.
+> **v1.4.4** is the current Stable release. It adapts QuestUI to Vencord's new object-form toast API, adds CI protection against legacy toast calls, and implements #28 by turning the Dashboard Orb balance into a Discord Shop shortcut that closes the Dashboard before navigation.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
 > Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.4.4 release preparation included maintainer live Discord validation of the Orb balance Shop shortcut, including automatic Dashboard dismissal before Shop navigation. The final release target is gated on build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks.
 >
 > v1.4.3 release preparation included maintainer live Discord validation of the reported Claim Reward path: the reward was claimed successfully without the previous false `QUEST_CLAIM_FAILED` result. Existing historical Event Log rows are intentionally not rewritten. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks gate the final release target.
 >
