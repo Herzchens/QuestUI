@@ -208,7 +208,7 @@ function UpdateProductStatus({ product, state, compact = false }: {
 }
 
 function toastFailure(message: string): void {
-    showToast(message, "failure");
+    showToast({ text: message, variant: "critical" });
 }
 
 function managedUpdateEventCode(product: UpdateProduct, outcome: ManagedUpdateEventOutcome): string {
@@ -340,7 +340,7 @@ function applyManagedUpdateResult(
         state.installed,
         state.release.tagName
     );
-    showToast(result.message, result.ok ? "success" : "failure");
+    showToast({ text: result.message, variant: result.ok ? "success" : "critical" });
 }
 
 function managedUpdateInvocationFailure(message: string, error: unknown): ManagedReleaseUpdateResult {

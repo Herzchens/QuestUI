@@ -80,14 +80,14 @@ export function QuestReloadControl() {
                     summary: "Quest list refresh failed",
                     detail: { message: failure instanceof Error ? failure.message : String(failure), stack: failure instanceof Error ? failure.stack ?? null : null }
                 });
-                showToast(
-                    failure instanceof Error ? failure.message : "Failed to refresh the Quest list.",
-                    "failure",
-                    { duration: 6000 }
-                );
+                showToast({
+                    text: failure instanceof Error ? failure.message : "Failed to refresh the Quest list.",
+                    variant: "critical",
+                    duration: 6000
+                });
             } else {
                 void recordQuestUIEvent({ severity: "success", eventCode: "QUEST_RELOAD_SUCCEEDED", summary: "Quest list refreshed" });
-                showToast("Quest list refreshed.", "success");
+                showToast({ text: "Quest list refreshed.", variant: "success" });
             }
         } finally {
             pendingRef.current = false;
