@@ -242,6 +242,24 @@
         0 2px 8px color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
 }
 
+.quest-ui-dashboard-orb-balance:not(:disabled):hover {
+    background: color-mix(
+        in srgb,
+        var(--brand-500, #5865f2) 24%,
+        var(--background-mod-subtle, rgba(255, 255, 255, 0.05))
+    );
+    border-color: color-mix(
+        in srgb,
+        var(--brand-360, #949cf7) 66%,
+        var(--border-subtle, transparent)
+    );
+    transform: translateY(-1px);
+}
+
+.quest-ui-dashboard-orb-balance:not(:disabled):active {
+    transform: translateY(0);
+}
+
 /* Once the viewport can no longer comfortably fit the title plus every header
  * control, give the tools their own row rather than allowing either side to overlap. */
 @media (max-width: 780px) {

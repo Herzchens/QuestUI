@@ -231,12 +231,24 @@
 
 .quest-ui-dashboard-orb-balance {
     align-items: center;
+    appearance: none;
     color: var(--text-muted);
+    cursor: pointer;
     display: inline-flex;
+    font: inherit;
     font-size: 12px;
     gap: 6px;
     margin-left: auto;
     min-width: 0;
+}
+
+.quest-ui-dashboard-orb-balance:disabled {
+    cursor: default;
+}
+
+.quest-ui-dashboard-orb-balance:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-360, #949cf7));
+    outline-offset: 2px;
 }
 
 .quest-ui-dashboard-orb-balance > strong {

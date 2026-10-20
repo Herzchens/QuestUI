@@ -17,15 +17,15 @@ function smartLabel(action: "start" | "pause" | "resume"): string {
 }
 
 function showControlSuccess(response: string): void {
-    showToast(`Orion: ${response}`, "success");
+    showToast({ text: `Orion: ${response}`, variant: "success" });
 }
 
 function showControlFailure(error: unknown): void {
-    showToast(
-        error instanceof Error ? error.message : "Orion rejected the requested control action.",
-        "failure",
-        { duration: 6000 }
-    );
+    showToast({
+        text: error instanceof Error ? error.message : "Orion rejected the requested control action.",
+        variant: "critical",
+        duration: 6000
+    });
 }
 
 export function OrionGlobalControls() {

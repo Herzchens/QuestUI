@@ -101,7 +101,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
             setSubmitted(result.resubmitAfterMs == null
                 ? null
                 : submittedState(action, userIdAtClick, result.resubmitAfterMs));
-            showToast(successMessage(action, quest, result), "success");
+            showToast({ text: successMessage(action, quest, result), variant: "success" });
             void recordQuestUIEvent({
                 severity: "success",
                 eventCode: action === "enroll" ? "QUEST_ACCEPT_SUCCEEDED" : "QUEST_CLAIM_SUCCEEDED",
@@ -126,11 +126,11 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                             quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
                             detail: { message: error instanceof Error ? error.message : String(error) }
                         });
-                        showToast(
-                            `Quest was accepted, but Orion could not start automatically: ${error instanceof Error ? error.message : "unknown control error"}`,
-                            "failure",
-                            { duration: 6000 }
-                        );
+                        showToast({
+                            text: `Quest was accepted, but Orion could not start automatically: ${error instanceof Error ? error.message : "unknown control error"}`,
+                            variant: "critical",
+                            duration: 6000
+                        });
                     }
                 }
             }
@@ -155,7 +155,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                     stack: error instanceof Error ? error.stack ?? null : null
                 }
             });
-            showToast(message, "failure", { duration: 6000 });
+            showToast({ text: message, variant: "critical", duration: 6000 });
         } finally {
             setPending(false);
         }
@@ -203,7 +203,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                                 accountId: userIdAtClick
                             });
                             if (currentUserId() === userIdAtClick) {
-                                showToast(message, "failure", { duration: 6000 });
+                                showToast({ text: message, variant: "critical", duration: 6000 });
                             }
                             return;
                         }
@@ -224,14 +224,14 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 accountId: userIdAtClick
             });
             if (currentUserId() === userIdAtClick) {
-                showToast(
-                    nextIgnored
+                showToast({
+                    text: nextIgnored
                         ? orionPausedForIgnore
                             ? `Ignored ${quest.name} and paused it in Orion`
                             : `Ignored ${quest.name}`
                         : `Unignored ${quest.name}`,
-                    "success"
-                );
+                    variant: "success"
+                });
             }
         } catch (error) {
             const reason = error instanceof Error ? error.message : "QuestUI could not update the ignored Quest preference.";
@@ -249,7 +249,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 accountId: userIdAtClick
             });
             if (currentUserId() === userIdAtClick) {
-                showToast(message, "failure", { duration: 6000 });
+                showToast({ text: message, variant: "critical", duration: 6000 });
             }
         } finally {
             setIgnorePending(false);

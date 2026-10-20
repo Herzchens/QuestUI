@@ -82,11 +82,11 @@ export function ClaimAllControl() {
         // A per-card claim may already be in-flight or intentionally held after an ambiguous
         // submission. Refuse the batch rather than overlap native reward claims.
         if (hasPendingClaimAction(accountId)) {
-            showToast(
-                "Another reward claim is still in progress. Wait for Discord to refresh, then try Claim all again.",
-                "failure",
-                { duration: 5000 }
-            );
+            showToast({
+                text: "Another reward claim is still in progress. Wait for Discord to refresh, then try Claim all again.",
+                variant: "critical",
+                duration: 5000
+            });
             return;
         }
 
@@ -117,10 +117,10 @@ export function ClaimAllControl() {
             const skippedCopy = result.skipped > 0
                 ? `; skipped ${result.skipped} already claimed`
                 : "";
-            showToast(
-                `Claimed ${result.claimed} ${result.claimed === 1 ? "reward" : "rewards"}${skippedCopy}.`,
-                "success"
-            );
+            showToast({
+                text: `Claimed ${result.claimed} ${result.claimed === 1 ? "reward" : "rewards"}${skippedCopy}.`,
+                variant: "success"
+            });
             void recordQuestUIEvent({
                 severity: "success",
                 eventCode: "QUEST_CLAIM_ALL_SUCCEEDED",
@@ -138,7 +138,7 @@ export function ClaimAllControl() {
                 : stopped?.message ?? (error instanceof Error ? error.message : "Claim all stopped unexpectedly.");
             const message = `Claim all stopped at ${at}/${total}: ${reason}`;
 
-            showToast(message, "failure", { duration: 7000 });
+            showToast({ text: message, variant: "critical", duration: 7000 });
             void recordQuestUIEvent({
                 severity: isVerification ? "warning" : "error",
                 eventCode: "QUEST_CLAIM_ALL_STOPPED",

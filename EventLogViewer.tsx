@@ -171,9 +171,9 @@ function SemanticText({ text }: { text: unknown; }) {
 async function copyDiagnosticReport(event: EventLogEvent, availableEvents: EventLogEvent[]): Promise<void> {
     try {
         await navigator.clipboard.writeText(buildDiagnosticReport(event, availableEvents));
-        showToast("Diagnostic report copied.", "success");
+        showToast({ text: "Diagnostic report copied.", variant: "success" });
     } catch {
-        showToast("Could not copy the diagnostic report.", "failure");
+        showToast({ text: "Could not copy the diagnostic report.", variant: "critical" });
     }
 }
 
@@ -559,7 +559,7 @@ function EventLogPanel() {
                             setClearing(true);
                             void clearEventLog().then(() => {
                                 setClearCountdown(null);
-                                showToast("Event Log cleared successfully.", "success");
+                                showToast({ text: "Event Log cleared successfully.", variant: "success" });
                                 setRefreshNonce(value => value + 1);
                             }).finally(() => setClearing(false));
                         }}

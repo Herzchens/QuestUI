@@ -40,13 +40,13 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
             const response = control.action === "start"
                 ? await invokeOrionEngineControl("start")
                 : await invokeOrionQuestTaskControl(quest.id, control.action);
-            showToast(`Orion: ${response}`, "success");
+            showToast({ text: `Orion: ${response}`, variant: "success" });
         } catch (error) {
-            showToast(
-                error instanceof Error ? error.message : "Orion rejected the requested Quest control action.",
-                "failure",
-                { duration: 6000 }
-            );
+            showToast({
+                text: error instanceof Error ? error.message : "Orion rejected the requested Quest control action.",
+                variant: "critical",
+                duration: 6000
+            });
         } finally {
             setPending(false);
         }
