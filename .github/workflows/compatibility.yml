@@ -185,9 +185,31 @@ jobs:
             fi
           done
           if grep -R -n -F 'Toasts.Type.' src/userplugins/QuestUI --include='*.ts' --include='*.tsx'; then
-            echo 'QuestUI must use showToast string toast types; Vencord no longer exposes Toasts.Type.' >&2
+            echo 'QuestUI must not use the removed Toasts.Type API.' >&2
             exit 1
           fi
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const root = "src/userplugins/QuestUI";
+          const legacy = [];
+          const walk = dir => {
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                  const file = path.join(dir, entry.name);
+                  if (entry.isDirectory()) walk(file);
+                  else if (/\.(?:ts|tsx)$/.test(entry.name)) {
+                      const source = fs.readFileSync(file, "utf8");
+                      if (/\bshowToast\s*\(\s*(?!\{)/s.test(source)) legacy.push(file);
+                  }
+              }
+          };
+          walk(root);
+          if (legacy.length) {
+              console.error("QuestUI must use Vencord's object-form showToast API:");
+              for (const file of legacy) console.error(" - " + file);
+              process.exit(1);
+          }
+          NODE
 
           grep -Fq 'Processing…' src/userplugins/QuestUI/QuestCardActions.tsx
           grep -Fq 'MAX_LOG_BYTES = 10 * 1024 * 1024' src/userplugins/QuestUI/native.ts
