@@ -1,4 +1,4 @@
-import { UserStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
+import { NavigationRouter, UserStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { fetchOrbBalance } from "./orbBalance";
 import {
@@ -9,7 +9,7 @@ import {
 import { QuestOrbIcon } from "./QuestOrbIcon";
 import { VirtualCurrencyStore } from "./stores";
 
-export function QuestOrbBalance() {
+export function QuestOrbBalance({ closePopout }: { closePopout?: () => void; }) {
     const currentUserId = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.id ?? null);
     const rawBalance = useStateFromStores([VirtualCurrencyStore], () =>
         VirtualCurrencyStore?.getCurrentBalance?.() ?? VirtualCurrencyStore?.balance ?? null
@@ -92,15 +92,29 @@ export function QuestOrbBalance() {
             ? "•••"
             : "—";
 
+    const shopLabel = state.kind === "ready"
+        ? `Open Shop — ${state.balance} Orbs`
+        : state.kind === "loading"
+            ? "Open Shop — loading Orb balance"
+            : currentUserId
+                ? "Open Shop — Orb balance unavailable"
+                : "Orb balance unavailable";
+
     return (
-        <span
+        <button
+            type="button"
             className={`quest-ui-dashboard-orb-balance is-${state.kind}`}
             aria-busy={state.kind === "loading"}
-            title={state.kind === "ready" ? `${state.balance} Orbs` : state.kind === "loading" ? "Loading Orb balance" : "Discord Orb balance is currently unavailable."}
-            aria-label={state.kind === "ready" ? `${state.balance} Orbs` : state.kind === "loading" ? "Loading Orb balance" : "Orb balance unavailable"}
+            aria-label={shopLabel}
+            title={shopLabel}
+            disabled={currentUserId == null}
+            onClick={() => {
+                closePopout?.();
+                NavigationRouter.transitionTo("/shop");
+            }}
         >
             <QuestOrbIcon size={22} className="quest-ui-dashboard-orb-icon" />
             <strong>{copy}</strong>
-        </span>
+        </button>
     );
 }

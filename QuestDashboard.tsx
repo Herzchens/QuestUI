@@ -829,7 +829,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                             <DashboardUpdateNotice />
                         </div>
                     </div>
-                    <QuestOrbBalance />
+                    <QuestOrbBalance closePopout={closePopout} />
                 </div>
             </header>
 

@@ -137,6 +137,7 @@
     height: 38px;
     margin-left: auto;
     padding: 0 11px;
+    transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
 }
 
 .quest-ui-dashboard-orb-balance > strong {

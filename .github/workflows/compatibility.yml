@@ -149,6 +149,7 @@ jobs:
             'Adds Discord Quest shortcuts'
             'Quest Dashboard'
             '/quest-home'
+            '/shop'
             'QUESTS_ENROLL_BEGIN'
             'QUESTS_CLAIM_REWARD_BEGIN'
             'Claim all'
