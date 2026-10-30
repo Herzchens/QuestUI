@@ -7,11 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.4** is the current Stable release. It adapts QuestUI to Vencord's new object-form toast API, adds CI protection against legacy toast calls, and implements #28 by turning the Dashboard Orb balance into a Discord Shop shortcut that closes the Dashboard before navigation.
+> **v1.4.5** is the current Stable release. It restores Quest reward claiming after Discord moved the native claim implementation behind a public per-Quest de-duplication wrapper, while preserving compatibility with the previous Discord action shape. It also updates the Vencord compatibility workflow and reporter guard for the current upstream APIs.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
 > Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.4.5 release preparation included maintainer live Discord validation of the repaired Claim Reward path on the current Stable desktop client. The reward claim completed successfully after the Discord action-resolver compatibility fix. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks gate the final release target.
 >
 > v1.4.4 release preparation included maintainer live Discord validation of the Orb balance Shop shortcut, including automatic Dashboard dismissal before Shop navigation. The final release target is gated on build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks.
 >

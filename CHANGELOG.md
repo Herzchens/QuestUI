@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4.5 - 2026-10-30
+
+- Fixed #30: restored Quest reward claiming after Discord refactored the native claim action so the public export is now a per-Quest de-duplication wrapper while the marker-bearing implementation remains private inside the same webpack module.
+- Kept compatibility with both the previous directly exported claim implementation and the newer wrapper layout without bypassing Discord's de-duplication behavior.
+- Updated Vencord compatibility CI to the current `pnpm test:ts` command and updated the reporter guard/self-test to track the new `mapMangledModule` claim resolver.
+- Validated the repaired Claim Reward path manually on the current Discord Stable desktop client; the reward claim completed successfully. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks also passed.
+
 ## v1.4.4 - 2026-10-21
 
 - Updated QuestUI to Vencord's new object-form `showToast({ ... })` API across Quest actions, Claim All, Orion controls, Reload, Update Center, and Event Log. Failure toasts now use Vencord's `critical` variant.

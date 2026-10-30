@@ -2,7 +2,17 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable — v1.4.4
+## Stable — v1.4.5
+
+- Source: `Herzchens/QuestUI` branch `main`.
+- Release target: **v1.4.5** (2026-10-30).
+- Fixes #30 by restoring Quest reward claiming after Discord changed the public claim action from the marker-bearing implementation to a per-Quest de-duplication wrapper.
+- Resolves the public claim export from the Quest action module while retaining compatibility with the previous Discord action layout and preserving Discord's new de-duplication wrapper.
+- Updates Vencord compatibility CI to the current `pnpm test:ts` command and teaches the reporter guard/self-test to recognize failures of the new `mapMangledModule` claim lookup.
+- Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
+- Release preparation included maintainer live Discord validation of the repaired Claim Reward path on the current Stable desktop client. The reward claim completed successfully. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks also passed.
+
+## Previous Stable — v1.4.4
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.4** (2026-10-21).
@@ -12,7 +22,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
 - Release preparation included maintainer live Discord validation of the Orb balance Shop shortcut and automatic Dashboard dismissal. The final v1.4.4 target is gated on build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks.
 
-## Previous Stable — v1.4.3
+## Earlier Stable — v1.4.3
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.3** (2026-10-10).
