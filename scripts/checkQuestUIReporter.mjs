@@ -17,7 +17,7 @@ const WEBPACK_FIND_SIGNATURES = [
     'findComponentByCode("shouldUseThemeColor", "customSize", "loading")',
     'findByCode("VIRTUAL_CURRENCY_BALANCE_FETCH", "VIRTUAL_CURRENCY_BALANCE_FETCH_SUCCESS", "VIRTUAL_CURRENCY_USER_BALANCE")',
     'findByCode("QUESTS_ENROLL_BEGIN", "QUESTS_ENROLL_SUCCESS", "QUESTS_ENROLL_FAILURE", "previous_in_flight_request")',
-    'findByCode("QUESTS_CLAIM_REWARD_BEGIN", "QUESTS_CLAIM_REWARD_SUCCESS", "QUESTS_CLAIM_REWARD_FAILURE", "traffic_metadata_sealed")',
+    'mapMangledModule("QUESTS_CLAIM_REWARD_BEGIN,QUESTS_CLAIM_REWARD_SUCCESS,QUESTS_CLAIM_REWARD_FAILURE,traffic_metadata_sealed"',
     'findByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")'
 ];
 
@@ -96,7 +96,7 @@ function runSelfTest() {
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindComponentByCode("shouldUseThemeColor", "customSize", "loading")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("VIRTUAL_CURRENCY_BALANCE_FETCH", "VIRTUAL_CURRENCY_BALANCE_FETCH_SUCCESS", "VIRTUAL_CURRENCY_USER_BALANCE")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_ENROLL_BEGIN", "QUESTS_ENROLL_SUCCESS", "QUESTS_ENROLL_FAILURE", "previous_in_flight_request")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
-    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_CLAIM_REWARD_BEGIN", "QUESTS_CLAIM_REWARD_SUCCESS", "QUESTS_CLAIM_REWARD_FAILURE", "traffic_metadata_sealed")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nmapMangledModule("QUESTS_CLAIM_REWARD_BEGIN,QUESTS_CLAIM_REWARD_SUCCESS,QUESTS_CLAIM_REWARD_FAILURE,traffic_metadata_sealed", {\n\tclaimQuestReward: function isNativeClaimQuestRewardExport(candidate) {...\n})\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.deepEqual(analyzeReport(completeReport({ badPatches: "- SomeOtherPlugin (had no effect)\n" }), "", 1), {
         problems: [],

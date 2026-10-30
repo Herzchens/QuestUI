@@ -137,7 +137,7 @@ jobs:
 
       - name: Type-check Vencord
         working-directory: vencord
-        run: pnpm testTsc
+        run: pnpm test:ts
 
       - name: Verify QuestUI build contracts
         working-directory: vencord
@@ -343,7 +343,7 @@ jobs:
 
       - name: Type-check Vencord with both plugins
         working-directory: vencord
-        run: pnpm testTsc
+        run: pnpm test:ts
 
       - name: Verify both plugins are bundled
         working-directory: vencord
