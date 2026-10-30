@@ -1,4 +1,4 @@
-import { findByCodeLazy } from "@webpack";
+import { findByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 
 import {
@@ -32,12 +32,38 @@ const nativeEnrollQuest = findByCodeLazy(
     "previous_in_flight_request"
 ) as NativeEnrollQuest;
 
-const nativeClaimQuestReward = findByCodeLazy(
-    "QUESTS_CLAIM_REWARD_BEGIN",
-    "QUESTS_CLAIM_REWARD_SUCCESS",
-    "QUESTS_CLAIM_REWARD_FAILURE",
-    "traffic_metadata_sealed"
-) as NativeClaimQuestReward;
+function isNativeClaimQuestRewardExport(candidate: unknown): boolean {
+    if (typeof candidate !== "function" || candidate.length !== 3) return false;
+
+    const source = Function.prototype.toString.call(candidate);
+
+    // Discord <= late October 2026 exported the claim implementation directly.
+    if (
+        source.includes("QUESTS_CLAIM_REWARD_BEGIN")
+        && source.includes("QUESTS_CLAIM_REWARD_SUCCESS")
+        && source.includes("QUESTS_CLAIM_REWARD_FAILURE")
+        && source.includes("traffic_metadata_sealed")
+    ) {
+        return true;
+    }
+
+    // Newer Discord builds export a small per-quest de-duplication wrapper instead.
+    // The implementation containing the Flux markers is now private inside the same
+    // webpack module, so find the module by those markers and select its public wrapper.
+    return source.includes(".get(")
+        && source.includes(".set(")
+        && source.includes("null!=");
+}
+
+const { claimQuestReward: nativeClaimQuestReward } = mapMangledModuleLazy(
+    [
+        "QUESTS_CLAIM_REWARD_BEGIN",
+        "QUESTS_CLAIM_REWARD_SUCCESS",
+        "QUESTS_CLAIM_REWARD_FAILURE",
+        "traffic_metadata_sealed"
+    ],
+    { claimQuestReward: isNativeClaimQuestRewardExport }
+) as { claimQuestReward: NativeClaimQuestReward; };
 
 const inFlightActions = new Set<string>();
 const submittedActions = new Set<string>();
