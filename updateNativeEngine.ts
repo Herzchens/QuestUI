@@ -1,5 +1,5 @@
 import { execFile as execFileCallback } from "child_process";
-import { mkdtemp, readFile, rm, stat, writeFile } from "fs/promises";
+import { cp, mkdtemp, readFile, rm, stat, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { promisify } from "util";
@@ -14,6 +14,7 @@ export type QuestUIUpdateStatus =
     | "dirty"
     | "custom-checkout"
     | "diverged"
+    | "stale-checkout"
     | "invalid-version"
     | "invalid-signature"
     | "tag-mismatch"
@@ -34,6 +35,8 @@ export interface QuestUIUpdateResult {
     diagnostic?: string;
     method?: string;
     trace?: readonly string[];
+    sourceIdentity?: "official-main-history";
+    officialMainCommit?: string;
 }
 
 export interface QuestUIUpdateEngineConfig {
@@ -60,8 +63,14 @@ interface FetchedMain {
     commit: string;
 }
 
+interface VencordDistSnapshot {
+    root: string;
+    dist: string;
+}
+
 const execFile = promisify(execFileCallback);
 const MAX_BUFFER = 16 * 1024 * 1024;
+const VENCORD_RUNTIME_FILES = ["patcher.js", "preload.js", "renderer.js", "renderer.css"] as const;
 
 export function normalizeUpdaterRepoUrl(value: string): string {
     return value.trim()
@@ -89,20 +98,23 @@ async function exists(path: string): Promise<boolean> {
 }
 
 function diagnosticText(error: unknown): string {
-    if (!(error instanceof Error)) return String(error).slice(0, 4000);
+    if (!(error instanceof Error)) return String(error).slice(0, 8000);
 
     const processError = error as Error & { stdout?: unknown; stderr?: unknown; };
-    const parts = [
-        error.message,
-        String(processError.stderr ?? "").trim(),
-        String(processError.stdout ?? "").trim()
-    ].filter(Boolean);
+    const sections = [
+        ["message", error.message],
+        ["stderr", String(processError.stderr ?? "").trim()],
+        ["stdout", String(processError.stdout ?? "").trim()]
+    ] as const;
 
-    return [...new Set(parts)]
-        .join(" | ")
-        .replace(/\s+/g, " ")
+    return sections
+        .filter(([, value]) => Boolean(value))
+        .map(([label, value]) => label + ":\n" + value)
+        .filter((value, index, values) => values.indexOf(value) === index)
+        .join("\n\n")
+        .replace(/\r\n?/g, "\n")
         .trim()
-        .slice(0, 4000);
+        .slice(0, 8000);
 }
 
 function shortCommit(value: string): string {
@@ -136,6 +148,44 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
 
     async function gitText(...args: string[]): Promise<string> {
         return (await git(...args)).stdout.trim();
+    }
+
+    async function verifyVencordRuntimeDist(distPath: string): Promise<void> {
+        for (const name of VENCORD_RUNTIME_FILES) {
+            const path = join(distPath, name);
+            const info = await stat(path);
+            if (!info.isFile() || info.size <= 0) {
+                throw new Error("Vencord runtime file " + name + " is missing or empty.");
+            }
+        }
+    }
+
+    async function snapshotVencordDist(): Promise<VencordDistSnapshot> {
+        const currentDist = join(config.vencordSrcDir, "dist");
+        await verifyVencordRuntimeDist(currentDist);
+
+        const root = await mkdtemp(join(tmpdir(), "questui-dist-rollback-"));
+        const snapshotDist = join(root, "dist");
+        try {
+            await cp(currentDist, snapshotDist, { recursive: true, force: true });
+            await verifyVencordRuntimeDist(snapshotDist);
+            return { root, dist: snapshotDist };
+        } catch (error) {
+            await rm(root, { recursive: true, force: true }).catch(() => undefined);
+            throw error;
+        }
+    }
+
+    async function restoreVencordDist(snapshot: VencordDistSnapshot): Promise<void> {
+        const currentDist = join(config.vencordSrcDir, "dist");
+        await rm(currentDist, { recursive: true, force: true });
+        await cp(snapshot.dist, currentDist, { recursive: true, force: true });
+        await verifyVencordRuntimeDist(currentDist);
+    }
+
+    async function cleanupVencordDistSnapshot(snapshot: VencordDistSnapshot | null): Promise<void> {
+        if (!snapshot) return;
+        await rm(snapshot.root, { recursive: true, force: true }).catch(() => undefined);
     }
 
     async function deleteRef(ref: string): Promise<void> {
@@ -344,6 +394,8 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                 status: "updated",
                 message: "QuestUI checkout is clean and belongs to the official main history.",
                 fromCommit: head,
+                sourceIdentity: "official-main-history",
+                officialMainCommit: officialMain.commit,
                 ...(version ? { fromVersion: version } : {})
             };
         } catch (error) {
@@ -388,6 +440,8 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
         updateInFlight = true;
         let officialMain: FetchedMain | null = null;
         let targetTag: VerifiedTag | null = null;
+        let distSnapshot: VencordDistSnapshot | null = null;
+        let preserveDistSnapshot = false;
         let phase = "preflight";
         const method = "signed-detached-checkout";
         const trace: string[] = [];
@@ -460,6 +514,10 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                 };
             }
             trace.push("Verify source: current HEAD is part of freshly fetched official main history");
+            const sourceProvenance = {
+                sourceIdentity: "official-main-history" as const,
+                officialMainCommit: officialMain.commit
+            };
 
             phase = "verify-signature";
             return await withAllowedSigners(async allowedSignersPath => {
@@ -482,7 +540,8 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                             : "QuestUI could not verify the signed target release tag.",
                         fromVersion: currentVersion,
                         toVersion: targetVersion,
-                        fromCommit: currentHead
+                        fromCommit: currentHead,
+                        ...sourceProvenance
                     };
                 }
 
@@ -498,7 +557,8 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         fromVersion: currentVersion,
                         toVersion: targetVersion,
                         fromCommit: currentHead,
-                        toCommit: targetTag.commit
+                        toCommit: targetTag.commit,
+                        ...sourceProvenance
                     };
                 }
 
@@ -514,28 +574,81 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         fromVersion: currentVersion,
                         toVersion: targetVersion,
                         fromCommit: currentHead,
-                        toCommit: targetTag.commit
+                        toCommit: targetTag.commit,
+                        ...sourceProvenance
                     };
                 }
                 trace.push("Checkout identity: clean current HEAD is trusted through official main history");
 
-                const statusBeforeSwitch = await gitText("status", "--porcelain", "--untracked-files=all");
-                const headBeforeSwitch = await gitText("rev-parse", "HEAD");
-                if (statusBeforeSwitch || headBeforeSwitch !== currentHead) {
-                    trace.push("Checkout guard: worktree or HEAD changed after verification; update cancelled");
+                phase = "snapshot";
+                trace.push("Snapshot: preserve the current verified Vencord dist before checkout mutation");
+                try {
+                    distSnapshot = await snapshotVencordDist();
+                    trace.push("Snapshot: current Vencord dist preserved successfully");
+                } catch (error) {
+                    trace.push("Snapshot: failed; update cancelled before checkout mutation");
                     return {
                         ok: false,
-                        status: "dirty",
+                        status: "failed",
                         phase,
                         method,
                         trace: [...trace],
-                        message: "QuestUI checkout changed during update preflight. Nothing was overwritten.",
+                        diagnostic: diagnosticText(error),
+                        message: "QuestUI could not preserve the current Vencord build for safe rollback. Nothing was changed.",
                         fromVersion: currentVersion,
                         toVersion: targetVersion,
                         fromCommit: currentHead,
-                        toCommit: targetTag.commit
+                        toCommit: targetTag.commit,
+                        ...sourceProvenance
                     };
                 }
+
+                phase = "checkout-guard";
+                const blockedBeforeSwitch = await localPreflight();
+                if (blockedBeforeSwitch) {
+                    trace.push("Checkout guard: " + blockedBeforeSwitch.message);
+                    return {
+                        ...blockedBeforeSwitch,
+                        phase: "checkout-guard",
+                        method,
+                        trace: [...trace],
+                        fromVersion: currentVersion,
+                        toVersion: targetVersion,
+                        fromCommit: currentHead,
+                        toCommit: targetTag.commit,
+                        ...sourceProvenance
+                    };
+                }
+
+                const headBeforeSwitch = await gitText("rev-parse", "HEAD");
+                const mainRefCommit = await gitText("rev-parse", `${officialMain!.ref}^{commit}`);
+                const targetRefCommit = await gitText("rev-parse", `${targetTag.ref}^{commit}`);
+                const sourceStillOnMain = await isAncestor(currentHead, officialMain!.commit);
+                const targetStillOnMain = await isAncestor(targetTag.commit, officialMain!.commit);
+                const targetStillForward = await isAncestor(currentHead, targetTag.commit);
+
+                if (headBeforeSwitch !== currentHead
+                    || mainRefCommit !== officialMain!.commit
+                    || targetRefCommit !== targetTag.commit
+                    || !sourceStillOnMain
+                    || !targetStillOnMain
+                    || !targetStillForward) {
+                    trace.push("Checkout guard: verified source or target identity changed before mutation; update cancelled");
+                    return {
+                        ok: false,
+                        status: "stale-checkout",
+                        phase: "checkout-guard",
+                        method,
+                        trace: [...trace],
+                        message: "QuestUI checkout identity changed after verification. Nothing was overwritten.",
+                        fromVersion: currentVersion,
+                        toVersion: targetVersion,
+                        fromCommit: currentHead,
+                        toCommit: targetTag.commit,
+                        ...sourceProvenance
+                    };
+                }
+                trace.push("Checkout guard: revalidated origin, HEAD, worktree, source ref and signed target ref");
 
                 try {
                     trace.push("Tag install: ensure local refs/tags/" + targetVersion + " points to the verified tag object");
@@ -555,7 +668,8 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         fromVersion: currentVersion,
                         toVersion: targetVersion,
                         fromCommit: currentHead,
-                        toCommit: targetTag.commit
+                        toCommit: targetTag.commit,
+                        ...sourceProvenance
                     };
                 }
 
@@ -580,24 +694,35 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         trace.push("Rollback checkout: restore " + shortCommit(currentHead)
                             + (branch ? " and branch " + branch : ""));
                         await restoreCheckout(currentHead, branch);
-                        trace.push("Rollback build: " + buildCommand);
-                        await config.buildVencord();
-                        trace.push("Rollback build: completed successfully");
+
+                        if (!distSnapshot) {
+                            throw new Error("Pre-update Vencord dist snapshot is unavailable.");
+                        }
+
+                        trace.push("Rollback dist: restore the pre-update Vencord runtime snapshot");
+                        await restoreVencordDist(distSnapshot);
+                        trace.push("Rollback dist: previous runtime restored successfully; no rebuild required");
                     } catch (rollbackError) {
                         trace.push("Rollback: failed");
+                        preserveDistSnapshot = distSnapshot != null;
                         return {
                             ok: false,
                             status: "rollback-failed",
                             phase,
                             method,
                             trace: [...trace],
-                            diagnostic: [buildDiagnostic, diagnosticText(rollbackError)].filter(Boolean).join(" | "),
-                            message: "The update build failed and QuestUI could not fully rebuild the previous checkout: "
-                                + (rollbackError instanceof Error ? rollbackError.message : "unknown rollback error"),
+                            diagnostic: [
+                                buildDiagnostic,
+                                diagnosticText(rollbackError),
+                                distSnapshot ? "Recovery snapshot retained in system temp: " + distSnapshot.dist : ""
+                            ].filter(Boolean).join("\n\n"),
+                            message: "The update build failed and QuestUI could not fully restore the previous Vencord runtime. "
+                                + (distSnapshot ? "A recovery snapshot was retained in the system temp directory." : ""),
                             fromVersion: currentVersion,
                             toVersion: targetVersion,
                             fromCommit: currentHead,
-                            toCommit: targetTag.commit
+                            toCommit: targetTag.commit,
+                            ...sourceProvenance
                         };
                     }
 
@@ -609,11 +734,12 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         trace: [...trace],
                         diagnostic: buildDiagnostic,
                         message: "The " + targetVersion + " build failed. QuestUI restored the previous "
-                            + currentVersion + " checkout and rebuilt it successfully.",
+                            + currentVersion + " checkout and the pre-update Vencord runtime.",
                         fromVersion: currentVersion,
                         toVersion: targetVersion,
                         fromCommit: currentHead,
-                        toCommit: targetTag.commit
+                        toCommit: targetTag.commit,
+                        ...sourceProvenance
                     };
                 }
 
@@ -630,7 +756,8 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                     toVersion: targetVersion,
                     fromCommit: currentHead,
                     toCommit: targetTag.commit,
-                    restartRequired: true
+                    restartRequired: true,
+                    ...sourceProvenance
                 };
             });
         } catch (error) {
@@ -649,6 +776,9 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
         } finally {
             if (officialMain) await deleteRef(officialMain.ref);
             await cleanupFetchedTag(targetTag);
+            if (!preserveDistSnapshot) {
+                await cleanupVencordDistSnapshot(distSnapshot);
+            }
             updateInFlight = false;
         }
     }

@@ -9,6 +9,25 @@ import { createQuestUIUpdateEngine } from "../updateNativeEngine";
 
 const execFile = promisify(execFileCallback);
 const TEST_PRINCIPAL = "questui-updater-test@example.com";
+const TEST_RUNTIME_FILES = ["patcher.js", "preload.js", "renderer.js", "renderer.css"] as const;
+
+async function writeKnownGoodDist(vencord: string, marker = "known-good"): Promise<Map<string, string>> {
+    const dist = join(vencord, "dist");
+    await mkdir(dist, { recursive: true });
+    const files = new Map<string, string>();
+    for (const name of TEST_RUNTIME_FILES) {
+        const content = marker + ":" + name + "\n";
+        files.set(name, content);
+        await writeFile(join(dist, name), content, "utf8");
+    }
+    return files;
+}
+
+async function assertRuntimeDist(vencord: string, expected: Map<string, string>): Promise<void> {
+    for (const [name, content] of expected) {
+        assert.equal(await readFile(join(vencord, "dist", name), "utf8"), content);
+    }
+}
 
 async function run(command: string, args: string[], cwd: string): Promise<string> {
     const result = await execFile(command, args, {
@@ -89,6 +108,7 @@ async function setupFixture() {
     await mkdir(join(vencord, "scripts", "build"), { recursive: true });
     await writeFile(join(vencord, "package.json"), "{}\n", "utf8");
     await writeFile(join(vencord, "scripts", "build", "build.mjs"), "export {};\n", "utf8");
+    await writeKnownGoodDist(vencord);
 
     let suffix = 0;
 
@@ -152,6 +172,8 @@ async function main() {
             const inspected = await updater.inspectCheckout();
             assert.equal(inspected.ok, true);
             assert.equal(inspected.fromCommit, fixture.v140);
+            assert.equal(inspected.sourceIdentity, "official-main-history");
+            assert.equal(inspected.officialMainCommit, fixture.v142);
 
             const result = await updater.updateRelease("v1.4.0", "v1.4.1");
             assert.equal(result.ok, true);
@@ -163,6 +185,13 @@ async function main() {
             assert.match((result.trace ?? []).join("\n"), /Verify target release/);
             assert.match((result.trace ?? []).join("\n"), /git switch --detach/);
             assert.match((result.trace ?? []).join("\n"), /node scripts\/build\/build\.mjs/);
+            assert.match(
+                (result.trace ?? []).join("\n"),
+                /Checkout guard: revalidated origin, HEAD, worktree, source ref and signed target ref/
+            );
+            assert.match((result.trace ?? []).join("\n"), /Snapshot: current Vencord dist preserved successfully/);
+            assert.equal(result.sourceIdentity, "official-main-history");
+            assert.equal(result.officialMainCommit, fixture.v142);
             assert.equal(await git(checkout, "rev-parse", "HEAD"), fixture.v141);
             assert.equal(builds.length, 1);
             assert.match(builds[0], /v1\.4\.1/);
@@ -228,6 +257,8 @@ async function main() {
             const inspected = await updater.inspectCheckout();
             assert.equal(inspected.ok, true);
             assert.equal(inspected.fromCommit, fixture.v140);
+            assert.equal(inspected.sourceIdentity, "official-main-history");
+            assert.equal(inspected.officialMainCommit, fixture.v142);
             assert.match(inspected.message, /official main history/);
             await assertNoTemporaryRefs(checkout);
         }
@@ -255,39 +286,52 @@ async function main() {
 
         {
             const checkout = await fixture.cloneInstalled("rollback-success");
+            const originalDist = await writeKnownGoodDist(fixture.vencord, "before-update");
             let builds = 0;
             const updater = fixture.engine(checkout, async () => {
                 builds++;
-                if (builds === 1) throw new Error("target build failed");
+                await writeFile(
+                    join(fixture.vencord, "dist", "renderer.js"),
+                    "partial broken target\n",
+                    "utf8"
+                );
+                throw new Error("target build filesystem failure");
             });
 
             const result = await updater.updateRelease("v1.4.0", "v1.4.1");
             assert.equal(result.status, "build-failed");
             assert.equal(result.ok, false);
-            assert.match(result.diagnostic ?? "", /target build failed/);
+            assert.match(result.diagnostic ?? "", /target build filesystem failure/);
             assert.match((result.trace ?? []).join("\n"), /Build: failed/);
-            assert.match((result.trace ?? []).join("\n"), /Rollback build: completed successfully/);
-            assert.equal(builds, 2);
+            assert.match(
+                (result.trace ?? []).join("\n"),
+                /Rollback dist: previous runtime restored successfully; no rebuild required/
+            );
+            assert.doesNotMatch((result.trace ?? []).join("\n"), /Rollback build:/);
+            assert.equal(builds, 1);
             assert.equal(await git(checkout, "rev-parse", "HEAD"), fixture.v140);
             assert.equal(await git(checkout, "branch", "--show-current"), "installed");
             assert.match(await readFile(join(checkout, "version.ts"), "utf8"), /v1\.4\.0/);
+            await assertRuntimeDist(fixture.vencord, originalDist);
             await assertNoTemporaryRefs(checkout);
         }
 
         {
-            const checkout = await fixture.cloneInstalled("rollback-failure");
+            const checkout = await fixture.cloneInstalled("snapshot-required");
+            const rendererCss = join(fixture.vencord, "dist", "renderer.css");
+            const originalCss = await readFile(rendererCss, "utf8");
+            await rm(rendererCss, { force: true });
             let builds = 0;
-            const updater = fixture.engine(checkout, async () => {
-                builds++;
-                throw new Error(builds === 1 ? "target build failed" : "rollback build failed");
-            });
+            const updater = fixture.engine(checkout, async () => { builds++; });
 
             const result = await updater.updateRelease("v1.4.0", "v1.4.1");
-            assert.equal(result.status, "rollback-failed");
+            assert.equal(result.status, "failed");
+            assert.equal(result.phase, "snapshot");
             assert.equal(result.ok, false);
-            assert.equal(builds, 2);
+            assert.equal(builds, 0);
+            assert.match((result.trace ?? []).join("\n"), /Snapshot: failed; update cancelled before checkout mutation/);
             assert.equal(await git(checkout, "rev-parse", "HEAD"), fixture.v140);
-            assert.equal(await git(checkout, "branch", "--show-current"), "installed");
+            await writeFile(rendererCss, originalCss, "utf8");
             await assertNoTemporaryRefs(checkout);
         }
 

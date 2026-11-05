@@ -31,6 +31,8 @@ interface ManagedReleaseUpdateResult {
     diagnostic?: string;
     method?: string;
     trace?: readonly string[];
+    sourceIdentity?: string;
+    officialMainCommit?: string;
     decision?: {
         token: string;
         summary: string;
@@ -295,6 +297,8 @@ function recordManagedUpdateEvent(
             toVersion,
             fromCommit: result?.fromCommit ?? null,
             toCommit: result?.toCommit ?? null,
+            sourceIdentity: result?.sourceIdentity ?? null,
+            officialMainCommit: result?.officialMainCommit ?? null,
             localWorkSummary: result?.decision?.summary ?? null,
             localCommitCount: result?.decision?.localCommitCount ?? null,
             updateTrace: managedUpdateTrace(outcome, result, installed, target),
@@ -542,11 +546,56 @@ function UpdateReleaseCard({ product, state }: {
 }) {
     const [pending, setPending] = useState<UpdatePendingAction>(null);
     const [updateResult, setUpdateResult] = useState<ManagedReleaseUpdateResult | null>(null);
+    const [questUIInspection, setQuestUIInspection] = useState<QuestUIUpdateResult | null>(null);
+    const [questUIInspectionPending, setQuestUIInspectionPending] = useState(false);
     const label = productLabel(product);
-    const canNativeUpdate = Native !== null;
+    const nativeAvailable = Native !== null;
+
+    useEffect(() => {
+        if (product !== "questui" || !Native) {
+            setQuestUIInspection(null);
+            setQuestUIInspectionPending(false);
+            return;
+        }
+
+        let cancelled = false;
+        setQuestUIInspection(null);
+        setQuestUIInspectionPending(true);
+
+        void Native.inspectQuestUICheckout()
+            .then(result => {
+                if (!cancelled) setQuestUIInspection(result);
+            })
+            .catch(error => {
+                if (cancelled) return;
+                setQuestUIInspection({
+                    ok: false,
+                    status: "failed",
+                    message: "QuestUI could not inspect this managed checkout.",
+                    diagnostic: error instanceof Error ? error.message : String(error)
+                });
+            })
+            .finally(() => {
+                if (!cancelled) setQuestUIInspectionPending(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [product, state.installed, state.release.tagName]);
+
+    const canNativeUpdate = nativeAvailable
+        && (product !== "questui" || (!questUIInspectionPending && questUIInspection?.ok === true));
     const awaitingDecision = product === "orion"
         && updateResult?.status === "decision-required"
         && updateResult.decision != null;
+    const questUIInspectionMessage = product !== "questui" || !nativeAvailable
+        ? null
+        : questUIInspectionPending || questUIInspection == null
+            ? "Checking whether this QuestUI checkout can be updated safely…"
+            : questUIInspection.ok
+                ? null
+                : questUIInspection.message;
 
     const updateRelease = () => {
         if (!canNativeUpdate || pending) return;
@@ -582,8 +631,11 @@ function UpdateReleaseCard({ product, state }: {
             )}
             {state.suppression === "skipped" && <span className="quest-ui-update-suppressed-copy">Skipped for this version</span>}
             {state.suppression === "snoozed" && <span className="quest-ui-update-suppressed-copy">Reminder snoozed for 24 hours</span>}
-            {!canNativeUpdate && (
+            {!nativeAvailable && (
                 <span className="quest-ui-update-suppressed-copy">Managed source updates require Vencord desktop. Use View release.</span>
+            )}
+            {questUIInspectionMessage && (
+                <span className="quest-ui-update-suppressed-copy">{questUIInspectionMessage}</span>
             )}
 
             <UpdateResultNotice result={updateResult} />

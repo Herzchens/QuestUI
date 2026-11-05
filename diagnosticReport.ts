@@ -50,6 +50,15 @@ function detailLines(event: EventLogEvent): string[] {
     const lines: string[] = [];
     if (detail.httpStatus != null) lines.push(`HTTP Status:    ${String(detail.httpStatus)}`);
     if (detail.upstreamCode != null) lines.push(`Upstream Code:  ${String(detail.upstreamCode)}`);
+    if (detail.status != null) lines.push(`Update Status:  ${sanitizeEventText(detail.status)}`);
+    if (detail.phase != null) lines.push(`Update Phase:   ${sanitizeEventText(detail.phase)}`);
+    if (detail.updateMethod != null) lines.push(`Update Method:  ${sanitizeEventText(detail.updateMethod)}`);
+    if (detail.fromVersion != null) lines.push(`From Version:   ${sanitizeEventText(detail.fromVersion)}`);
+    if (detail.toVersion != null) lines.push(`To Version:     ${sanitizeEventText(detail.toVersion)}`);
+    if (detail.fromCommit != null) lines.push(`From Commit:    ${sanitizeEventText(detail.fromCommit)}`);
+    if (detail.toCommit != null) lines.push(`To Commit:      ${sanitizeEventText(detail.toCommit)}`);
+    if (detail.sourceIdentity != null) lines.push(`Source Identity: ${sanitizeEventText(detail.sourceIdentity)}`);
+    if (detail.officialMainCommit != null) lines.push(`Official Main:  ${sanitizeEventText(detail.officialMainCommit)}`);
     if (typeof detail.terminal === "boolean") lines.push(`Terminal:       ${detail.terminal ? "Yes" : "No"}`);
     if (typeof detail.retryable === "boolean") lines.push(`Retryable:      ${detail.retryable ? "Yes" : "No"}`);
     if (detail.attempt != null) lines.push(`Attempt:        ${String(detail.attempt)}${detail.maxAttempts != null ? ` / ${String(detail.maxAttempts)}` : ""}`);
@@ -93,6 +102,12 @@ export function buildDiagnosticReport(event: EventLogEvent, availableEvents: Eve
     const details = detailLines(event);
     if (details.length) lines.push("", "Error / Detail", "--------------", ...details);
 
+    if (event.detail?.updateTrace) {
+        lines.push("", "Update Trace", "------------", sanitizeEventText(event.detail.updateTrace));
+    }
+    if (event.detail?.diagnostic) {
+        lines.push("", "Native Diagnostic", "-----------------", sanitizeEventText(event.detail.diagnostic));
+    }
     if (event.detail?.rawConsole) {
         lines.push("", "Captured Console Detail", "-----------------------", sanitizeEventText(event.detail.rawConsole));
     }
