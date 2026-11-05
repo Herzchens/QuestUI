@@ -2,17 +2,29 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable — v1.4.6
+## Stable - v1.4.7
+
+- Source: `Herzchens/QuestUI` branch `main`.
+- Release target: **v1.4.7** (2026-11-06).
+- Fixes #32 by targeting the actual Discord window-chrome module for the optional top-bar Quest shortcut on both current Stable and Canary.
+- Adds a semantic Stable/Canary reporter gate that rejects a top-bar patch when the selected module is not the expected window-chrome/header shape.
+- Allows managed QuestUI updates from any clean official-origin checkout whose HEAD is in freshly fetched official `main` history, while continuing to require a pinned-key SSH-signed annotated target release on official `main`.
+- Preflights QuestUI checkout support before enabling the in-app update action, covers Orion devbuild-style nested checkouts, and revalidates source/target identity immediately before checkout mutation.
+- Adds source provenance and the fetched official-main commit to managed update diagnostics.
+- Hardens the #33 failure path by snapshotting the current verified Vencord `dist` before checkout mutation and restoring it directly after a target build failure instead of rebuilding the rollback checkout. Copied diagnostic reports now include the updater trace and native diagnostic needed to identify the initiating build failure.
+- Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
+- Release preparation verified the full logic/updater integration suites, Vencord build/type-check, upstream Orion coexistence, and semantic Stable/Canary Patch Reporter gates.
+
+## Previous Stable - v1.4.6
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.6** (2026-11-05).
-- Restores the optional top-bar Quest shortcut on current Discord Canary after Discord removed the `.PlatformTypes.WEB` marker previously used to locate the shared header module.
-- Anchors the patch to the header function shape QuestUI actually modifies, preserving the existing replacement behavior and matching both current Stable and Canary builds.
-- Refreshes the README Dashboard screenshot to the current Stable QuestUI interface; this documentation change does not alter runtime behavior.
+- Restored the optional top-bar Quest shortcut on then-current Discord Canary after the previous `.PlatformTypes.WEB` module anchor disappeared.
+- Replaced the old platform-enum anchor with a generic header-function shape. Later validation found that this could match an unrelated modal action-bar module while Patch Reporter still reported success; v1.4.7 replaces it with the window-chrome-specific target.
+- Refreshed the README Dashboard screenshot to the current Stable QuestUI interface.
 - Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
-- Release preparation verified build/type-check, upstream Orion coexistence, and both Stable and Canary patch reporters. No new live Discord mutation path is claimed for this compatibility/documentation release.
 
-## Previous Stable — v1.4.5
+## Earlier Stable - v1.4.5
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.5** (2026-10-30).

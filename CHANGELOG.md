@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.4.7 - 2026-11-06
+
+- Fixed #32 by restoring the optional Quest top-bar shortcut on current Discord Stable and Canary. The patch now locates Discord's actual window-chrome module through the `"data-window-chrome"` marker and matches the exact `leading/title/trailing/windowKey/className/growLeading` header shape instead of the generic `let{leading` function shape.
+- Hardened the Stable and Canary Patch Reporter gate so a QuestUI top-bar patch only passes when the selected module has both the window-chrome marker and the expected header shape. This catches the v1.4.6 false-positive case where the patch applied successfully to an unrelated modal action-bar module.
+- Changed the managed QuestUI updater so any clean checkout from the official `Herzchens/QuestUI` origin is trusted when its current HEAD is an ancestor of a freshly fetched official `main`. Updates still land only on the exact commit of a pinned-key, SSH-signed annotated release tag, and the target must be forward from the current checkout and part of official `main`.
+- Added managed-checkout preflight to Update Center before enabling `Update now`, added Orion devbuild-style nested checkout coverage, accepted Git worktrees without requiring a physical `.git` directory, and revalidated origin, HEAD, worktree, source ref, and signed target ref immediately before checkout mutation. Update diagnostics now include source provenance and the fetched official-main commit.
+- Hardened the failure path reported in #33: QuestUI now snapshots the current known-good Vencord `dist` before checkout mutation and restores that snapshot directly if the target build fails, instead of retrying the same build during rollback. Copied diagnostic reports now include the updater execution trace and native build diagnostic so the original environment/filesystem failure remains visible.
+- Verified the full QuestUI logic suite, managed updater integration suite, Vencord build/type-check, upstream Orion coexistence, and semantic Stable/Canary Patch Reporter gates.
+
 ## v1.4.6 - 2026-11-05
 
 - Restored the optional top-bar Quest shortcut on current Discord Canary after the previous `.PlatformTypes.WEB` module anchor disappeared.

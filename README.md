@@ -7,11 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.6** is the current Stable release. It restores the optional top-bar Quest shortcut on current Discord Canary after Discord removed the `.PlatformTypes.WEB` marker that QuestUI previously used to locate the shared header module. QuestUI now anchors that patch to the header function shape it actually modifies, while keeping the replacement behavior unchanged across current Stable and Canary builds. This release also refreshes the README Dashboard screenshot to the current Stable interface.
+> **v1.4.7** is the current Stable release. It fixes #32 by restoring the Quest top-bar shortcut on current Discord Stable and Canary with a window-chrome-specific patch target and a semantic reporter gate. It also makes the managed QuestUI updater accept clean official-main-history checkouts while keeping signed release tags as the only update destination, and preflights managed checkout support before enabling in-app update. The updater also snapshots the current Vencord runtime before mutation, so a failed target build can restore the known-good `dist` without attempting a second build; copied update diagnostics now retain the full execution trace and native diagnostic.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
 > Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.4.7 release preparation verified the full logic and updater integration suites, Vencord build/type-check, upstream Orion coexistence, and semantic Stable/Canary Patch Reporter gates. Managed QuestUI updates now trust only clean official-main-history sources and still require a pinned-key signed target release.
 >
 > v1.4.6 release preparation verified build/type-check, upstream Orion coexistence, and both Stable and Canary patch reporters after the top-bar compatibility fix. No new live Discord mutation path is claimed for this compatibility/documentation release.
 >
