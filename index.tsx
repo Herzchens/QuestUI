@@ -45,7 +45,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".PlatformTypes.WEB",
+            find: /\(\i\)\{let\{leading/,
             predicate: () => settings.store.showQuestsButtonTopBar,
             replacement: {
                 match: /(\((\i)\){)(let{leading)/,
