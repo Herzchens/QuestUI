@@ -391,6 +391,20 @@ jobs:
         working-directory: vencord
         run: pnpm install --frozen-lockfile
 
+      - name: Instrument QuestUI top-bar reporter target
+        working-directory: vencord
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const path = "src/webpack/patchWebpack.ts";
+          let source = fs.readFileSync(path, "utf8");
+          const needle = "        if (!moduleMatches) {\n            continue;\n        }\n\n        // Save the result from the previous patch so we can restore it in case a patch group fails.";
+          const replacement = "        if (!moduleMatches) {\n            continue;\n        }\n\n        if (patch.plugin === \"QuestUI\" && String(patch.find).includes(\"data-window-chrome\")) {\n            const headerShape = originalFactoryCode.includes(\"leading:\")\n                && originalFactoryCode.includes(\"title:\")\n                && originalFactoryCode.includes(\"trailing:\")\n                && originalFactoryCode.includes(\"windowKey:\")\n                && originalFactoryCode.includes(\"growLeading:\");\n            console.log(\"[PUP_DEBUG]\", \"QUESTUI_TOPBAR_TARGET\", JSON.stringify({\n                moduleId: String(moduleId),\n                windowChrome: originalFactoryCode.includes(\"data-window-chrome\"),\n                headerShape\n            }));\n        }\n\n        // Save the result from the previous patch so we can restore it in case a patch group fails.";
+          if (!source.includes(needle)) throw new Error("QuestUI reporter target instrumentation point not found");
+          fs.writeFileSync(path, source.replace(needle, replacement));
+          NODE
+
       - name: Build reporter
         working-directory: vencord
         run: pnpm buildReporter
@@ -433,4 +447,4 @@ jobs:
           fi
 
           node "$GITHUB_WORKSPACE/questui/scripts/checkQuestUIReporter.mjs" \
-            "$report_file" "$stderr_file" "$reporter_exit"
+            "$report_file" "$stderr_file" "$reporter_exit" --require-topbar-target

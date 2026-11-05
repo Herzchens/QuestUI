@@ -27,7 +27,7 @@ function extractSection(report, name) {
     return match?.[1] ?? null;
 }
 
-function analyzeReport(report, stderr = "", reporterExitCode = 0) {
+function analyzeReport(report, stderr = "", reporterExitCode = 0, requireTopBarTarget = false) {
     const problems = [];
     const warnings = [];
 
@@ -72,6 +72,25 @@ function analyzeReport(report, stderr = "", reporterExitCode = 0) {
         if (pattern.test(stderr)) problems.push(`reporter infrastructure failure matched ${pattern}`);
     }
 
+    if (requireTopBarTarget) {
+        const targetLine = stderr
+            .split(/\r?\n/)
+            .find(line => /(?:STABLE|CANARY) --- QUESTUI_TOPBAR_TARGET /.test(line));
+
+        if (!targetLine) {
+            problems.push("QuestUI top-bar target identity was not observed");
+        } else {
+            try {
+                const payload = JSON.parse(targetLine.slice(targetLine.indexOf("{")));
+                if (payload.windowChrome !== true || payload.headerShape !== true) {
+                    problems.push("QuestUI top-bar patch targeted a non-window-chrome module");
+                }
+            } catch {
+                problems.push("QuestUI top-bar target identity was malformed");
+            }
+        }
+    }
+
     if (reporterExitCode !== 0 && problems.length === 0) {
         warnings.push(`reporter exited with ${reporterExitCode}, but only unrelated Vencord failures were found`);
     }
@@ -104,6 +123,21 @@ function runSelfTest() {
     });
     assert.ok(analyzeReport("not a report").problems.length > 0);
     assert.ok(analyzeReport(completeReport(), "TimeoutError: timed out", 1).problems.length > 0);
+    const validTopBarTarget = 'STABLE --- QUESTUI_TOPBAR_TARGET {"moduleId":"71855","windowChrome":true,"headerShape":true}';
+    assert.deepEqual(analyzeReport(completeReport(), validTopBarTarget, 0, true), { problems: [], warnings: [] });
+    assert.match(
+        analyzeReport(completeReport(), "", 0, true).problems.join("\n"),
+        /top-bar target identity was not observed/
+    );
+    assert.match(
+        analyzeReport(
+            completeReport(),
+            'CANARY --- QUESTUI_TOPBAR_TARGET {"moduleId":"696208","windowChrome":false,"headerShape":false}',
+            0,
+            true
+        ).problems.join("\n"),
+        /targeted a non-window-chrome module/
+    );
     console.log("checkQuestUIReporter self-test — PASS");
 }
 
@@ -112,9 +146,9 @@ if (process.argv[2] === "--self-test") {
     process.exit(0);
 }
 
-const [reportPath, stderrPath, exitCodeText] = process.argv.slice(2);
+const [reportPath, stderrPath, exitCodeText, topBarFlag] = process.argv.slice(2);
 if (!reportPath || !stderrPath || exitCodeText == null) {
-    console.error("Usage: node checkQuestUIReporter.mjs <report.md> <stderr.log> <reporter-exit-code>");
+    console.error("Usage: node checkQuestUIReporter.mjs <report.md> <stderr.log> <reporter-exit-code> [--require-topbar-target]");
     process.exit(2);
 }
 
@@ -134,7 +168,12 @@ if (!Number.isInteger(reporterExitCode)) {
     process.exit(2);
 }
 
-const { problems, warnings } = analyzeReport(report, stderr, reporterExitCode);
+const { problems, warnings } = analyzeReport(
+    report,
+    stderr,
+    reporterExitCode,
+    topBarFlag === "--require-topbar-target"
+);
 for (const warning of warnings) console.warn(`WARNING: ${warning}`);
 if (problems.length) {
     for (const problem of problems) console.error(`ERROR: ${problem}`);

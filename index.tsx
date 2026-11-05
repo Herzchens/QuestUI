@@ -45,10 +45,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: /\(\i\)\{let\{leading/,
+            find: "\"data-window-chrome\"",
             predicate: () => settings.store.showQuestsButtonTopBar,
             replacement: {
-                match: /(\((\i)\){)(let{leading)/,
+                match: /(\((\i)\){)(let{leading:\i,title:\i,trailing:\i,windowKey:\i,className:\i,growLeading:\i}=\2)/,
                 replace: "$1$2?.trailing?.props?.children?.unshift($self.renderQuestButtonTopBar());$3"
             }
         },
