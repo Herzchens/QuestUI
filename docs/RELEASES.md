@@ -2,7 +2,17 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable — v1.4.5
+## Stable — v1.4.6
+
+- Source: `Herzchens/QuestUI` branch `main`.
+- Release target: **v1.4.6** (2026-11-05).
+- Restores the optional top-bar Quest shortcut on current Discord Canary after Discord removed the `.PlatformTypes.WEB` marker previously used to locate the shared header module.
+- Anchors the patch to the header function shape QuestUI actually modifies, preserving the existing replacement behavior and matching both current Stable and Canary builds.
+- Refreshes the README Dashboard screenshot to the current Stable QuestUI interface; this documentation change does not alter runtime behavior.
+- Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
+- Release preparation verified build/type-check, upstream Orion coexistence, and both Stable and Canary patch reporters. No new live Discord mutation path is claimed for this compatibility/documentation release.
+
+## Previous Stable — v1.4.5
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.5** (2026-10-30).
@@ -12,7 +22,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
 - Release preparation included maintainer live Discord validation of the repaired Claim Reward path on the current Stable desktop client. The reward claim completed successfully. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks also passed.
 
-## Previous Stable — v1.4.4
+## Earlier Stable — v1.4.4
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.4** (2026-10-21).

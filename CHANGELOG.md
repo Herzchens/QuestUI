@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4.6 - 2026-11-05
+
+- Restored the optional top-bar Quest shortcut on current Discord Canary after the previous `.PlatformTypes.WEB` module anchor disappeared.
+- Replaced that brittle platform-enum anchor with the header function shape QuestUI actually patches, keeping the existing injection behavior unchanged while matching both current Stable and Canary builds.
+- Refreshed the README Dashboard screenshot to the current Stable QuestUI interface.
+- Verified build/type-check, upstream Orion coexistence, and both Stable and Canary patch reporters. No new live Discord mutation path is claimed for this compatibility/documentation release.
+
 ## v1.4.5 - 2026-10-30
 
 - Fixed #30: restored Quest reward claiming after Discord refactored the native claim action so the public export is now a per-Quest de-duplication wrapper while the marker-bearing implementation remains private inside the same webpack module.

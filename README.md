@@ -7,11 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.5** is the current Stable release. It restores Quest reward claiming after Discord moved the native claim implementation behind a public per-Quest de-duplication wrapper, while preserving compatibility with the previous Discord action shape. It also updates the Vencord compatibility workflow and reporter guard for the current upstream APIs.
+> **v1.4.6** is the current Stable release. It restores the optional top-bar Quest shortcut on current Discord Canary after Discord removed the `.PlatformTypes.WEB` marker that QuestUI previously used to locate the shared header module. QuestUI now anchors that patch to the header function shape it actually modifies, while keeping the replacement behavior unchanged across current Stable and Canary builds. This release also refreshes the README Dashboard screenshot to the current Stable interface.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
 > Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.4.6 release preparation verified build/type-check, upstream Orion coexistence, and both Stable and Canary patch reporters after the top-bar compatibility fix. No new live Discord mutation path is claimed for this compatibility/documentation release.
 >
 > v1.4.5 release preparation included maintainer live Discord validation of the repaired Claim Reward path on the current Stable desktop client. The reward claim completed successfully after the Discord action-resolver compatibility fix. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks gate the final release target.
 >
