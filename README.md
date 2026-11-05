@@ -29,13 +29,11 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 
 <p align="center">
 
-  <img src="docs/images/dashboard-active.webp" width="48%" alt="QuestUI Dashboard with an active Quest, live progress, claimable Quests, and header controls" />
-
-  <img src="docs/images/dashboard-claimed.webp" width="48%" alt="QuestUI Dashboard showing claimed Quests and the Nitro header tag" />
+  <img src="docs/images/dashboard.webp" width="96%" alt="QuestUI Dashboard showing the current Stable interface with Orion and QuestUI version metadata, status counters, header controls, Orb balance, and claimed Quests" />
 
 </p>
 
-The captures above are real Discord runtime screenshots supplied by the maintainer. They remain documentation assets; newer Stable releases add the metadata, diagnostics, Ignore, and notification surfaces described below.
+The capture above is a real Discord runtime screenshot supplied by the maintainer and reflects the current Stable QuestUI interface.
 
 ## Features
 
