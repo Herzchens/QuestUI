@@ -72,12 +72,17 @@ async function setupFixture() {
 
     await mkdir(source, { recursive: true });
     await git(source, "init");
+    await git(source, "symbolic-ref", "HEAD", "refs/heads/main");
     await configureIdentity(source);
 
     const trustedKey = await createKey(root, "trusted_ed25519");
     const untrustedKey = await createKey(root, "untrusted_ed25519");
 
     const v140 = await commitRelease(source, "v1.4.0", trustedKey.privateKey);
+    await writeFile(join(source, "MAIN_SNAPSHOT"), "official main snapshot\n", "utf8");
+    await git(source, "add", "MAIN_SNAPSHOT");
+    await git(source, "commit", "-m", "main snapshot between releases");
+    const mainSnapshot = await git(source, "rev-parse", "HEAD");
     const v141 = await commitRelease(source, "v1.4.1", trustedKey.privateKey);
     const v142 = await commitRelease(source, "v1.4.2", untrustedKey.privateKey);
 
@@ -87,11 +92,16 @@ async function setupFixture() {
 
     let suffix = 0;
 
-    async function cloneInstalled(name: string): Promise<string> {
-        const checkout = resolve(join(root, name));
-        await run("git", ["clone", "--quiet", source, checkout], root);
+    async function cloneInstalled(
+        name: string,
+        revision = v140,
+        parent = root
+    ): Promise<string> {
+        await mkdir(parent, { recursive: true });
+        const checkout = resolve(join(parent, name));
+        await run("git", ["clone", "--quiet", source, checkout], parent);
         await configureIdentity(checkout);
-        await git(checkout, "switch", "-C", "installed", v140);
+        await git(checkout, "switch", "-C", "installed", revision);
         return checkout;
     }
 
@@ -114,6 +124,7 @@ async function setupFixture() {
         source,
         vencord,
         v140,
+        mainSnapshot,
         v141,
         v142,
         cloneInstalled,
@@ -162,8 +173,7 @@ async function main() {
             const checkout = await fixture.cloneInstalled("invalid-version");
             const updater = fixture.engine(checkout, async () => undefined);
             assert.equal((await updater.updateRelease("v1.4.0", "v1.4.0")).status, "invalid-version");
-            assert.equal((await updater.updateRelease("v1.4.1", "v1.4.0")).status, "invalid-version");
-            assert.equal((await updater.updateRelease("dev", "v1.4.1")).status, "invalid-version");
+            assert.equal((await updater.updateRelease("v1.4.0", "dev")).status, "invalid-version");
             assert.equal(await git(checkout, "rev-parse", "HEAD"), fixture.v140);
         }
 
@@ -194,8 +204,31 @@ async function main() {
 
             const updater = fixture.engine(checkout, async () => undefined);
             const result = await updater.updateRelease("v1.4.0", "v1.4.1");
-            assert.equal(result.status, "custom-checkout");
+            assert.equal(result.status, "diverged");
             assert.equal(await git(checkout, "rev-parse", "HEAD"), localHead);
+            await assertNoTemporaryRefs(checkout);
+        }
+
+        {
+            const checkout = await fixture.cloneInstalled("official-main-history", fixture.mainSnapshot);
+            const updater = fixture.engine(checkout, async () => undefined);
+            const result = await updater.updateRelease("v0.0.0", "v1.4.1");
+            assert.equal(result.status, "updated");
+            assert.equal(result.ok, true);
+            assert.equal(result.fromCommit, fixture.mainSnapshot);
+            assert.equal(result.toCommit, fixture.v141);
+            assert.match((result.trace ?? []).join("\n"), /official main history/);
+            await assertNoTemporaryRefs(checkout);
+        }
+
+        {
+            const devbuildParent = join(fixture.vencord, "src", "userplugins");
+            const checkout = await fixture.cloneInstalled("QuestUI", fixture.v140, devbuildParent);
+            const updater = fixture.engine(checkout, async () => undefined);
+            const inspected = await updater.inspectCheckout();
+            assert.equal(inspected.ok, true);
+            assert.equal(inspected.fromCommit, fixture.v140);
+            assert.match(inspected.message, /official main history/);
             await assertNoTemporaryRefs(checkout);
         }
 

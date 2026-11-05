@@ -13,6 +13,7 @@ export type QuestUIUpdateStatus =
     | "wrong-origin"
     | "dirty"
     | "custom-checkout"
+    | "diverged"
     | "invalid-version"
     | "invalid-signature"
     | "tag-mismatch"
@@ -51,6 +52,11 @@ interface VerifiedTag {
     tag: string;
     ref: string;
     object: string;
+    commit: string;
+}
+
+interface FetchedMain {
+    ref: string;
     commit: string;
 }
 
@@ -204,6 +210,39 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
         }
     }
 
+    async function fetchOfficialMain(purpose: string): Promise<FetchedMain> {
+        const now = config.now?.() ?? Date.now();
+        const suffix = config.randomSuffix?.() ?? Math.random().toString(16).slice(2);
+        const ref = `refs/questui-update/${purpose}-${now}-${suffix}`;
+        try {
+            await git("fetch", "--force", "--no-tags", "origin", `refs/heads/main:${ref}`);
+            const commit = await gitText("rev-parse", `${ref}^{commit}`);
+            return { ref, commit };
+        } catch (error) {
+            await deleteRef(ref);
+            throw error;
+        }
+    }
+
+    async function isAncestor(ancestor: string, descendant: string): Promise<boolean> {
+        try {
+            await git("merge-base", "--is-ancestor", ancestor, descendant);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    async function versionAtCommit(commit: string): Promise<string | null> {
+        try {
+            const source = (await git("show", `${commit}:version.ts`)).stdout;
+            const match = source.match(/QUESTUI_VERSION\s*=\s*["']([^"']+)["']/);
+            return normalizeUpdaterReleaseTag(match?.[1]) ?? null;
+        } catch {
+            return null;
+        }
+    }
+
     async function installVerifiedLocalTag(tag: VerifiedTag): Promise<void> {
         const localRef = `refs/tags/${tag.tag}`;
         let existing: string | null = null;
@@ -227,12 +266,27 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
     async function localPreflight(): Promise<QuestUIUpdateResult | null> {
         if (!await exists(join(config.vencordSrcDir, "package.json"))
             || !await exists(join(config.vencordSrcDir, "scripts", "build", "build.mjs"))
-            || !await exists(join(config.questUIDir, ".git"))
             || !await exists(join(config.questUIDir, "version.ts"))) {
             return {
                 ok: false,
                 status: "unsupported-install",
                 message: "QuestUI could not locate a managed source checkout inside this Vencord build."
+            };
+        }
+
+        try {
+            if (await gitText("rev-parse", "--is-inside-work-tree") !== "true") {
+                return {
+                    ok: false,
+                    status: "unsupported-install",
+                    message: "QuestUI is not installed as a Git worktree that the managed updater can verify."
+                };
+            }
+        } catch {
+            return {
+                ok: false,
+                status: "unsupported-install",
+                message: "QuestUI is not installed as a Git worktree that the managed updater can verify."
             };
         }
 
@@ -268,16 +322,29 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
     }
 
     async function inspectCheckout(): Promise<QuestUIUpdateResult> {
+        let officialMain: FetchedMain | null = null;
         try {
             const blocked = await localPreflight();
             if (blocked) return blocked;
 
             const head = await gitText("rev-parse", "HEAD");
+            officialMain = await fetchOfficialMain("inspect-main");
+            if (!await isAncestor(head, officialMain.commit)) {
+                return {
+                    ok: false,
+                    status: "diverged",
+                    message: "QuestUI HEAD is not part of the freshly fetched official main history. Automatic update was left disabled.",
+                    fromCommit: head
+                };
+            }
+
+            const version = await versionAtCommit(head);
             return {
                 ok: true,
                 status: "updated",
-                message: "QuestUI managed checkout is available for signed release updates.",
-                fromCommit: head
+                message: "QuestUI checkout is clean and belongs to the official main history.",
+                fromCommit: head,
+                ...(version ? { fromVersion: version } : {})
             };
         } catch (error) {
             return {
@@ -285,6 +352,8 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                 status: "failed",
                 message: error instanceof Error ? error.message : "QuestUI checkout inspection failed."
             };
+        } finally {
+            if (officialMain) await deleteRef(officialMain.ref);
         }
     }
 
@@ -303,30 +372,28 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
             };
         }
 
-        const installedVersion = normalizeUpdaterReleaseTag(installedVersionInput);
+        const requestedInstalledVersion = normalizeUpdaterReleaseTag(installedVersionInput);
         const targetVersion = normalizeUpdaterReleaseTag(targetVersionInput);
-        if (!installedVersion
-            || !targetVersion
-            || (compareSemver(targetVersion, installedVersion) ?? 0) <= 0) {
+        if (!targetVersion) {
             return {
                 ok: false,
                 status: "invalid-version",
                 phase: "preflight",
                 method: "none",
-                trace: ["Preflight: rejected invalid or non-upgrade release request"],
-                message: "QuestUI refused an invalid or non-upgrade release target."
+                trace: ["Preflight: rejected invalid release target"],
+                message: "QuestUI refused an invalid release target."
             };
         }
 
         updateInFlight = true;
-        let installedTag: VerifiedTag | null = null;
+        let officialMain: FetchedMain | null = null;
         let targetTag: VerifiedTag | null = null;
         let phase = "preflight";
         const method = "signed-detached-checkout";
         const trace: string[] = [];
 
         try {
-            trace.push("Preflight: requested " + installedVersion + " -> " + targetVersion);
+            trace.push("Preflight: requested update to " + targetVersion);
 
             const blocked = await localPreflight();
             if (blocked) {
@@ -337,21 +404,72 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
 
             const currentHead = await gitText("rev-parse", "HEAD");
             const branch = await currentBranch();
+            const currentVersion = await versionAtCommit(currentHead);
+            if (!currentVersion) {
+                trace.push("Preflight: version.ts at current HEAD is not a valid QuestUI release version");
+                return {
+                    ok: false,
+                    status: "invalid-version",
+                    phase,
+                    method: "none",
+                    trace,
+                    message: "QuestUI could not determine a valid installed version from the current checkout.",
+                    fromCommit: currentHead,
+                    toVersion: targetVersion
+                };
+            }
+            if ((compareSemver(targetVersion, currentVersion) ?? 0) <= 0) {
+                trace.push("Preflight: target is not newer than version.ts at current HEAD");
+                return {
+                    ok: false,
+                    status: "invalid-version",
+                    phase,
+                    method: "none",
+                    trace,
+                    message: "QuestUI refused a non-upgrade release target.",
+                    fromVersion: currentVersion,
+                    toVersion: targetVersion,
+                    fromCommit: currentHead
+                };
+            }
+
             trace.push("Preflight: current HEAD " + shortCommit(currentHead)
-                + (branch ? " on branch " + branch : " in detached HEAD"));
+                + (branch ? " on branch " + branch : " in detached HEAD")
+                + " reports " + currentVersion);
+            if (requestedInstalledVersion && requestedInstalledVersion !== currentVersion) {
+                trace.push("Preflight: renderer reported " + requestedInstalledVersion
+                    + ", but native version.ts reports " + currentVersion + "; native checkout identity wins");
+            }
+
+            phase = "verify-source";
+            officialMain = await fetchOfficialMain("main");
+            trace.push("Verify source: fetched official main at " + shortCommit(officialMain.commit));
+
+            if (!await isAncestor(currentHead, officialMain.commit)) {
+                trace.push("Verify source: current HEAD is not in official main history");
+                return {
+                    ok: false,
+                    status: "diverged",
+                    phase,
+                    method,
+                    trace,
+                    message: "Current QuestUI HEAD is not part of the freshly fetched official main history. Local or development history was left untouched.",
+                    fromVersion: currentVersion,
+                    toVersion: targetVersion,
+                    fromCommit: currentHead
+                };
+            }
+            trace.push("Verify source: current HEAD is part of freshly fetched official main history");
 
             phase = "verify-signature";
             return await withAllowedSigners(async allowedSignersPath => {
                 try {
-                    trace.push("Verify installed release: fetch signed annotated tag " + installedVersion + " from origin");
-                    installedTag = await fetchVerifiedTag(installedVersion, "installed", allowedSignersPath);
-                    trace.push("Verify installed release: SSH signature, tag name and version.ts accepted; commit " + shortCommit(installedTag.commit));
-
                     trace.push("Verify target release: fetch signed annotated tag " + targetVersion + " from origin");
                     targetTag = await fetchVerifiedTag(targetVersion, "target", allowedSignersPath);
-                    trace.push("Verify target release: SSH signature, tag name and version.ts accepted; commit " + shortCommit(targetTag.commit));
+                    trace.push("Verify target release: SSH signature, tag name and version.ts accepted; commit "
+                        + shortCommit(targetTag.commit));
                 } catch (error) {
-                    trace.push("Verify signature: failed");
+                    trace.push("Verify target release: signature or release identity failed");
                     return {
                         ok: false,
                         status: "invalid-signature",
@@ -361,26 +479,45 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         diagnostic: diagnosticText(error),
                         message: error instanceof Error
                             ? error.message
-                            : "QuestUI could not verify the signed release tags."
+                            : "QuestUI could not verify the signed target release tag.",
+                        fromVersion: currentVersion,
+                        toVersion: targetVersion,
+                        fromCommit: currentHead
                     };
                 }
 
-                if (installedTag.commit !== currentHead) {
-                    trace.push("Checkout identity: current HEAD does not equal the verified installed release commit; update refused");
+                if (!await isAncestor(targetTag.commit, officialMain!.commit)) {
+                    trace.push("Verify target release: signed target is not in official main history");
                     return {
                         ok: false,
-                        status: "custom-checkout",
+                        status: "tag-mismatch",
                         phase,
                         method,
                         trace: [...trace],
-                        message: `Current QuestUI HEAD is not the signed ${installedVersion} release. Local or development history was left untouched.`,
-                        fromVersion: installedVersion,
+                        message: "The signed target release is not part of the freshly fetched official main history.",
+                        fromVersion: currentVersion,
                         toVersion: targetVersion,
                         fromCommit: currentHead,
                         toCommit: targetTag.commit
                     };
                 }
-                trace.push("Checkout identity: current HEAD exactly matches signed " + installedVersion);
+
+                if (!await isAncestor(currentHead, targetTag.commit)) {
+                    trace.push("Verify target release: target is not forward from current official checkout");
+                    return {
+                        ok: false,
+                        status: "invalid-version",
+                        phase,
+                        method,
+                        trace: [...trace],
+                        message: "The selected release is not newer than this official QuestUI checkout. Nothing was changed.",
+                        fromVersion: currentVersion,
+                        toVersion: targetVersion,
+                        fromCommit: currentHead,
+                        toCommit: targetTag.commit
+                    };
+                }
+                trace.push("Checkout identity: clean current HEAD is trusted through official main history");
 
                 const statusBeforeSwitch = await gitText("status", "--porcelain", "--untracked-files=all");
                 const headBeforeSwitch = await gitText("rev-parse", "HEAD");
@@ -392,7 +529,11 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         phase,
                         method,
                         trace: [...trace],
-                        message: "QuestUI checkout changed during update preflight. Nothing was overwritten."
+                        message: "QuestUI checkout changed during update preflight. Nothing was overwritten.",
+                        fromVersion: currentVersion,
+                        toVersion: targetVersion,
+                        fromCommit: currentHead,
+                        toCommit: targetTag.commit
                     };
                 }
 
@@ -410,14 +551,18 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         diagnostic: diagnosticText(error),
                         message: error instanceof Error
                             ? error.message
-                            : "QuestUI found a conflicting local release tag."
+                            : "QuestUI found a conflicting local release tag.",
+                        fromVersion: currentVersion,
+                        toVersion: targetVersion,
+                        fromCommit: currentHead,
+                        toCommit: targetTag.commit
                     };
                 }
 
                 phase = "checkout";
                 trace.push("Checkout: git switch --detach " + shortCommit(targetTag.commit));
                 await git("switch", "--detach", targetTag.commit);
-                trace.push("Checkout validation: detached target release commit is active");
+                trace.push("Checkout validation: detached signed target release commit is active");
 
                 phase = "build";
                 const buildCommand = config.buildCommand ?? "Vencord build command";
@@ -447,8 +592,9 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                             method,
                             trace: [...trace],
                             diagnostic: [buildDiagnostic, diagnosticText(rollbackError)].filter(Boolean).join(" | "),
-                            message: `The update build failed and QuestUI could not fully rebuild the previous checkout: ${rollbackError instanceof Error ? rollbackError.message : "unknown rollback error"}`,
-                            fromVersion: installedVersion,
+                            message: "The update build failed and QuestUI could not fully rebuild the previous checkout: "
+                                + (rollbackError instanceof Error ? rollbackError.message : "unknown rollback error"),
+                            fromVersion: currentVersion,
                             toVersion: targetVersion,
                             fromCommit: currentHead,
                             toCommit: targetTag.commit
@@ -462,8 +608,9 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         method,
                         trace: [...trace],
                         diagnostic: buildDiagnostic,
-                        message: `The ${targetVersion} build failed. QuestUI restored the previous ${installedVersion} checkout and rebuilt it successfully.`,
-                        fromVersion: installedVersion,
+                        message: "The " + targetVersion + " build failed. QuestUI restored the previous "
+                            + currentVersion + " checkout and rebuilt it successfully.",
+                        fromVersion: currentVersion,
                         toVersion: targetVersion,
                         fromCommit: currentHead,
                         toCommit: targetTag.commit
@@ -477,8 +624,9 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                     phase,
                     method,
                     trace: [...trace],
-                    message: `QuestUI updated from ${installedVersion} to ${targetVersion}. Restart Discord to load the new build.`,
-                    fromVersion: installedVersion,
+                    message: "QuestUI updated from " + currentVersion + " to " + targetVersion
+                        + ". Restart Discord to load the new build.",
+                    fromVersion: currentVersion,
                     toVersion: targetVersion,
                     fromCommit: currentHead,
                     toCommit: targetTag.commit,
@@ -499,7 +647,7 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                     : "QuestUI update failed before the checkout was changed."
             };
         } finally {
-            await cleanupFetchedTag(installedTag);
+            if (officialMain) await deleteRef(officialMain.ref);
             await cleanupFetchedTag(targetTag);
             updateInFlight = false;
         }
