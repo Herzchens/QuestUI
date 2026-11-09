@@ -220,8 +220,8 @@ jobs:
           grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
           grep -Fq 'recordManagedUpdateEvent' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
-          grep -Fq 'combinedAvailabilityCopy' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
-          grep -Fq 'dashboardAvailabilityLines' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
+          grep -Fq 'combinedAvailabilityCopy' src/userplugins/QuestUI/src/updates/status.tsx
+          grep -Fq 'dashboardAvailabilityLines' src/userplugins/QuestUI/src/updates/status.tsx
           grep -Fq 'quest-ui-dashboard-update-chip-copy' src/userplugins/QuestUI/src/updates/styles.css
           grep -Fq 'automaticChecksEnabled' src/userplugins/QuestUI/src/updates/runtime.ts
           grep -Fq 'updateTrace' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
