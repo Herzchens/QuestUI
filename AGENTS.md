@@ -67,7 +67,8 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/quests/actions/native.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
 - `src/quests/data.ts` — normalization/filtering/sorting and live read-only QuestStore snapshot source.
 - `src/quests/reload/native.ts`, `src/quests/reload/logic.ts`, `src/quests/reload/QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
-- `src/updates/UpdateCenter.tsx` — update-center orchestration, managed-update actions/decisions, native updater invocation, restart handling, and update diagnostics.
+- `src/updates/UpdateCenter.tsx` — update-center UI orchestration, release cards, restart handling, and dashboard/settings surfaces.
+- `src/updates/managed.ts` — managed-update invocation, Orion local-work decisions, snooze/skip persistence, and update diagnostic events.
 - `src/updates/status.tsx` — update status copy, release visibility, channel/version presentation, dashboard availability copy, and status components.
 - `src/updates/runtime.ts`, `src/updates/logic.ts`, `src/updates/questui/native.ts`, `src/updates/questui/engine.ts`, `src/updates/orion/native.ts`, `src/updates/orion/engine.ts` — release discovery/cached scheduling plus signed fail-closed QuestUI updates, clean-official-checkout Orion updates, and injectable real-git updater engines.
 - `src/orion/companion.ts`, `src/orion/controls.ts`, `src/orion/integration.ts` — companion validation, state machine, scheduler-state refinement, and safe delegation.
