@@ -331,8 +331,9 @@
 }
 
 .quest-ui-filter-icon {
-    fill: currentColor;
+    fill: none;
     height: 18px;
+    stroke: currentColor;
     width: 18px;
 }
 

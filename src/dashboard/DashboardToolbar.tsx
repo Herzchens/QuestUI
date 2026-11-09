@@ -28,16 +28,46 @@ function QuestHomeIcon() {
 
 function FilterIcon() {
     return (
-        <svg className="quest-ui-filter-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3.5 5.25A1.25 1.25 0 0 1 4.75 4h14.5a1.25 1.25 0 0 1 .96 2.05l-5.46 6.52v4.68a1.25 1.25 0 0 1-.58 1.05l-3 1.9A1.25 1.25 0 0 1 9.25 19v-6.43L3.79 6.05a1.25 1.25 0 0 1-.29-.8Zm2.2.25 5.05 6.03v6.1l2.5-1.58v-4.52L18.3 5.5H5.7Z" />
+        <svg
+            className="quest-ui-filter-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M5 3v8" />
+            <circle cx="5" cy="15" r="2" />
+            <path d="M5 19v2" />
+            <path d="M12 3v2" />
+            <circle cx="12" cy="9" r="2" />
+            <path d="M12 13v8" />
+            <path d="M19 3v8" />
+            <circle cx="19" cy="15" r="2" />
+            <path d="M19 19v2" />
         </svg>
     );
 }
 
 function SortIcon() {
     return (
-        <svg className="quest-ui-sort-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M7 4 3.5 7.5 5 9l1-1v9.5H8V8l1 1 1.5-1.5L7 4Zm10 16 3.5-3.5L19 15l-1 1V6.5h-2V16l-1-1-1.5 1.5L17 20Z" />
+        <svg
+            className="quest-ui-sort-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M5 20V4" />
+            <path d="m2.5 6.5 2.5-2.5 2.5 2.5" />
+            <path d="M11 7h9" />
+            <path d="M11 12h7" />
+            <path d="M11 17h5" />
         </svg>
     );
 }

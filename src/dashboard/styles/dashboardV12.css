@@ -211,7 +211,13 @@
     color: var(--brand-360, #949cf7);
 }
 
-.quest-ui-sort-icon,
+.quest-ui-sort-icon {
+    fill: none;
+    height: 18px;
+    stroke: currentColor;
+    width: 18px;
+}
+
 .quest-ui-home-glyph {
     fill: currentColor;
     height: 18px;
