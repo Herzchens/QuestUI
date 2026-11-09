@@ -75,7 +75,7 @@ The capture above is a real Discord runtime screenshot supplied by the maintaine
 
 - Color-coded counters on Discord's own Quest Home links
 
-- Native **Reload** that asks Discord to refetch the current Quest list without Ctrl+R
+- Native **Reload** that asks Discord to refetch the current Quest list without Ctrl+R, plus enabled-by-default background auto reload that works without opening the Dashboard
 
 - Account-aware Orb rewards from Discord's own base/boosted fields plus Discord's native multiplier eligibility, with Nitro and Xbox+ source badges
 
@@ -357,11 +357,12 @@ Structured Orion events and scheduler metadata are capability-detected independe
 
 Reload uses Discord's own current-Quest fetch-and-dispatch action located by `QUESTS_FETCH_CURRENT_QUESTS_BEGIN`.
 
-- The native request starts immediately.
-- If the request is still running, the icon keeps spinning.
-- Overlapping native reload requests are coalesced.
-- A successful refresh with no new Quest is still success.
-- Success/failure uses Vencord's native toast API.
+- Manual Reload starts the native request immediately and keeps the existing whole-rotation spinner and toast behavior.
+- Background auto reload is enabled by default at **5h** and supports **10m / 20m / 30m / 1h / 2h / 4h / 5h / 12h / 24h**.
+- Background reload runs from the plugin lifecycle even when the Dashboard is closed and reuses the same Discord-native fetch path.
+- Successful background refreshes stay silent. If the fetch exposes a newly Available Quest, the existing **New Quest Available** QuestStore observer notifies the user.
+- Overlapping native reload requests remain coalesced, and a successful refresh with no new Quest is still success.
+- A successful manual Reload updates the same persisted freshness timestamp used by the background scheduler, preventing an unnecessary immediate duplicate fetch.
 
 ## Detailed Status and Quest Home counters
 

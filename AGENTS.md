@@ -68,6 +68,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/quests/actions/native.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
 - `src/quests/data.ts` — normalization/filtering/sorting and live read-only QuestStore snapshot source.
 - `src/quests/reload/native.ts`, `src/quests/reload/logic.ts`, `src/quests/reload/QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
+- `src/quests/reload/auto.ts`, `src/quests/reload/autoLogic.ts` — background native Quest-list refresh lifecycle plus persisted freshness scheduling. It runs independently of Dashboard visibility and reuses the same Discord-native fetch path so existing QuestStore notifications remain authoritative.
 - `src/updates/UpdateCenter.tsx` — update-center UI orchestration, release cards, restart handling, and dashboard/settings surfaces.
 - `src/updates/managed.ts` — managed-update invocation, Orion local-work decisions, snooze/skip persistence, and update diagnostic events.
 - `src/updates/status.tsx` — update status copy, release visibility, channel/version presentation, dashboard availability copy, and status components.
@@ -215,6 +216,10 @@ Use Vencord's native toast API for explicit success/failure feedback.
 - Coalesce overlapping native calls and synchronously guard duplicate clicks.
 - Success with no new Quest is still success.
 - Keep Reload available without Orion and theme-readable while pending/disabled.
+- Background auto reload defaults to enabled at 5 hours and supports only 10m, 20m, 30m, 1h, 2h, 4h, 5h, 12h, and 24h.
+- Background reload must work with the Dashboard closed, reuse the same Discord-native fetch path, and never manufacture Quest state or a second notification source.
+- Start Quest notifications before background reload scheduling so newly fetched Quests flow through the existing QuestStore transition observer.
+- A successful manual Reload refreshes the same persisted freshness timestamp so an automatic reload is not immediately duplicated.
 
 ## Dashboard presentation invariants
 

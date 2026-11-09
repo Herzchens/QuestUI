@@ -1,6 +1,7 @@
 import { showToast, useEffect, useRef, useState } from "@webpack/common";
 
 import { recordQuestUIEvent } from "../../eventLog/runtime";
+import { markQuestReloadSuccessful } from "./auto";
 import { reloadQuestList } from "./native";
 import { shouldFinishReloadSpin } from "./logic";
 
@@ -57,6 +58,7 @@ export function QuestReloadControl() {
         let failure: unknown = null;
         try {
             await reloadQuestList();
+            await markQuestReloadSuccessful();
         } catch (error) {
             failure = error;
         } finally {

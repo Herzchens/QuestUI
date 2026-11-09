@@ -7,6 +7,8 @@ import definePlugin from "@utils/types";
 import { startEventLogCapture, stopEventLogCapture } from "./src/eventLog/runtime";
 import { startIgnoredQuestLifecycle, stopIgnoredQuestLifecycle } from "./src/quests/ignored/runtime";
 import { startQuestNotifications, stopQuestNotifications } from "./src/notifications/runtime";
+import { startQuestAutoReload, stopQuestAutoReload } from "./src/quests/reload/auto";
+import { questAutoReloadMinutesFromStep } from "./src/quests/reload/autoLogic";
 import { QuestButton, QuestsCount } from "./src/dashboard/QuestButton";
 import { QUESTUI_VERSION } from "./src/plugin/version";
 import settings from "./src/plugin/settings";
@@ -29,6 +31,10 @@ export default definePlugin({
         startEventLogCapture();
         startIgnoredQuestLifecycle();
         startQuestNotifications();
+        startQuestAutoReload(() => ({
+            enabled: settings.store.autoReloadQuestList,
+            intervalMinutes: questAutoReloadMinutesFromStep(settings.store.autoReloadQuestListStep)
+        }));
         startUpdateChecks(() => ({
             checkHours: updateCheckHoursFromStep(settings.store.updateCheckStep),
             questUIIncludePrereleases: settings.store.updateIncludePrereleases,
@@ -39,6 +45,7 @@ export default definePlugin({
 
     stop() {
         stopUpdateChecks();
+        stopQuestAutoReload();
         stopQuestNotifications();
         stopIgnoredQuestLifecycle();
         stopEventLogCapture();

@@ -74,6 +74,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/reload.test.ts
 
+      - name: Test background Quest reload scheduling
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/autoReload.test.ts
+
       - name: Test Quest shortcut snapshot logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/shortcut.test.ts
@@ -225,6 +229,9 @@ jobs:
           grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'openQuestDashboard()' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'registerQuestDashboardOpener(type' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx
+          grep -Fq 'QUEST_AUTO_RELOAD_MINUTES = [10, 20, 30, 60, 120, 240, 300, 720, 1440]' src/userplugins/QuestUI/src/quests/reload/autoLogic.ts
+          grep -Fq 'startQuestAutoReload(() => ({' src/userplugins/QuestUI/index.tsx
+          grep -Fq 'animation: quest-ui-dashboard-title-sweep 3.8s linear infinite' src/userplugins/QuestUI/src/dashboard/styles/dashboardPolish.css
           grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/src/updates/managed.ts
           grep -Fq 'recordManagedUpdateEvent' src/userplugins/QuestUI/src/updates/managed.ts
           grep -Fq 'combinedAvailabilityCopy' src/userplugins/QuestUI/src/updates/status.tsx
@@ -347,6 +354,10 @@ jobs:
       - name: Test Quest reload rotation logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/reload.test.ts
+
+      - name: Test background Quest reload scheduling
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/autoReload.test.ts
 
       - name: Verify Orion companion source surface
         shell: bash

@@ -2,6 +2,12 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
 import { isOrionCommandReady, isOrionInstalled } from "../orion/integration";
+import { notifyQuestAutoReloadSettingsChanged } from "../quests/reload/auto";
+import {
+    DEFAULT_QUEST_AUTO_RELOAD_STEP,
+    QUEST_AUTO_RELOAD_STEP_MARKERS,
+    questAutoReloadMarkerLabel
+} from "../quests/reload/autoLogic";
 import { DEFAULT_UPDATE_CHECK_STEP, UPDATE_CHECK_STEP_MARKERS, updateCheckMarkerLabel } from "../updates/logic";
 import { UpdateSettingsControl } from "../updates/UpdateCenter";
 import { notifyUpdateSettingsChanged } from "../updates/runtime";
@@ -64,6 +70,26 @@ export default definePluginSettings({
         displayName: "Dashboard • Orion Integration",
         description: "Show smart Start/Pause/Resume and Stop controls plus per-Quest controls from OrionQuests' live engine/task state. Requires Dashboard Mode and a compatible enabled OrionQuests plugin.",
         default: true
+    },
+    autoReloadQuestList: {
+        type: OptionType.BOOLEAN,
+        displayName: "Quest List • Auto Reload",
+        description: "Refresh Discord's Quest list in the background so new Quests can be discovered and notified without opening the Dashboard.",
+        default: true,
+        onChange: notifyQuestAutoReloadSettingsChanged
+    },
+    autoReloadQuestListStep: {
+        type: OptionType.SLIDER,
+        displayName: "Quest List • Auto Reload Frequency",
+        description: "How often QuestUI asks Discord to refresh the Quest list in the background.",
+        markers: [...QUEST_AUTO_RELOAD_STEP_MARKERS],
+        default: DEFAULT_QUEST_AUTO_RELOAD_STEP,
+        stickToMarkers: true,
+        componentProps: {
+            onValueRender: questAutoReloadMarkerLabel,
+            onMarkerRender: questAutoReloadMarkerLabel
+        },
+        onChange: notifyQuestAutoReloadSettingsChanged
     },
     notifyQuestCompletion: {
         type: OptionType.BOOLEAN,
@@ -297,6 +323,7 @@ export default definePluginSettings({
         hidden: () => !isOrionInstalled(),
         disabled: orionIntegrationDisabled
     },
+    autoReloadQuestListStep: { hidden() { return this.store.autoReloadQuestList === false; } },
     updateCheckOrion: { disabled: () => !isOrionInstalled() },
 
     dashboardSortMode: { hidden: true },
