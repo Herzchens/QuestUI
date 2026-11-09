@@ -179,7 +179,7 @@ jobs:
           done
 
           for marker in getControlSnapshot subscribeControlState controlEngine controlAll controlQuest; do
-            if ! grep -Fq "$marker" src/userplugins/QuestUI/orionCommandLogic.ts; then
+            if ! grep -Fq "$marker" src/userplugins/QuestUI/src/orion/orionCommandLogic.ts; then
               echo "Missing QuestUI companion contract marker: $marker" >&2
               exit 1
             fi
@@ -211,41 +211,41 @@ jobs:
           }
           NODE
 
-          grep -Fq 'Processing…' src/userplugins/QuestUI/QuestCardActions.tsx
-          grep -Fq 'MAX_LOG_BYTES = 10 * 1024 * 1024' src/userplugins/QuestUI/native.ts
-          grep -Fq 'COMPACT_TO_BYTES = 5 * 1024 * 1024' src/userplugins/QuestUI/native.ts
-          grep -Fq 'QuestUI:ignored-quests:v1' src/userplugins/QuestUI/ignoredQuests.ts
-          grep -Fq 'completedQuestTransitions' src/userplugins/QuestUI/notifications.ts
-          grep -Fq 'newAvailableQuestTransitions' src/userplugins/QuestUI/notifications.ts
-          grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/notifications.ts
-          grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/UpdateCenter.tsx
-          grep -Fq 'recordManagedUpdateEvent' src/userplugins/QuestUI/UpdateCenter.tsx
-          grep -Fq 'combinedAvailabilityCopy' src/userplugins/QuestUI/UpdateCenter.tsx
-          grep -Fq 'dashboardAvailabilityLines' src/userplugins/QuestUI/UpdateCenter.tsx
-          grep -Fq 'quest-ui-dashboard-update-chip-copy' src/userplugins/QuestUI/updateCenter.css
-          grep -Fq 'automaticChecksEnabled' src/userplugins/QuestUI/updates.ts
-          grep -Fq 'updateTrace' src/userplugins/QuestUI/UpdateCenter.tsx
-          grep -Fq 'Update trace' src/userplugins/QuestUI/EventLogViewer.tsx
-          grep -Fq 'queryIdentityRef.current !== queryIdentity' src/userplugins/QuestUI/EventLogViewer.tsx
-          grep -Fq 'hardReset ? 120 : 0' src/userplugins/QuestUI/EventLogViewer.tsx
+          grep -Fq 'Processing…' src/userplugins/QuestUI/src/quests/actions/QuestCardActions.tsx
+          grep -Fq 'MAX_LOG_BYTES = 10 * 1024 * 1024' src/userplugins/QuestUI/src/eventLog/native.ts
+          grep -Fq 'COMPACT_TO_BYTES = 5 * 1024 * 1024' src/userplugins/QuestUI/src/eventLog/native.ts
+          grep -Fq 'QuestUI:ignored-quests:v1' src/userplugins/QuestUI/src/quests/ignored/ignoredQuests.ts
+          grep -Fq 'completedQuestTransitions' src/userplugins/QuestUI/src/notifications/notifications.ts
+          grep -Fq 'newAvailableQuestTransitions' src/userplugins/QuestUI/src/notifications/notifications.ts
+          grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/src/notifications/notifications.ts
+          grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
+          grep -Fq 'recordManagedUpdateEvent' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
+          grep -Fq 'combinedAvailabilityCopy' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
+          grep -Fq 'dashboardAvailabilityLines' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
+          grep -Fq 'quest-ui-dashboard-update-chip-copy' src/userplugins/QuestUI/src/updates/styles.css
+          grep -Fq 'automaticChecksEnabled' src/userplugins/QuestUI/src/updates/updates.ts
+          grep -Fq 'updateTrace' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
+          grep -Fq 'Update trace' src/userplugins/QuestUI/src/eventLog/EventLogViewer.tsx
+          grep -Fq 'queryIdentityRef.current !== queryIdentity' src/userplugins/QuestUI/src/eventLog/EventLogViewer.tsx
+          grep -Fq 'hardReset ? 120 : 0' src/userplugins/QuestUI/src/eventLog/EventLogViewer.tsx
           grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/native.ts
           grep -Fq 'nyxxbit/discord-quest-completer' dist/vencordDesktopMain.js
           grep -Fq 'Automatic OrionQuests updates require the official main branch' dist/vencordDesktopMain.js
           grep -Fq 'decision-required' dist/vencordDesktopMain.js
           grep -Fq 'Discard & update' dist/renderer.js
 
-          grep -Fq 'shouldShow={dashboardOpen}' src/userplugins/QuestUI/QuestButton.tsx
-          grep -Fq 'onRequestClose={closeDashboard}' src/userplugins/QuestUI/QuestButton.tsx
-          if grep -Fq 'popoutProps.onClick' src/userplugins/QuestUI/QuestButton.tsx; then
+          grep -Fq 'shouldShow={dashboardOpen}' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx
+          grep -Fq 'onRequestClose={closeDashboard}' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx
+          if grep -Fq 'popoutProps.onClick' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx; then
             echo 'Quest shortcut must own HeaderBar popout visibility instead of delegating to popoutProps.onClick.' >&2
             exit 1
           fi
 
-          grep -Fq 'useQuestSnapshot("shortcut")' src/userplugins/QuestUI/QuestButton.tsx
-          grep -Fq 'SHORTCUT_REFRESH_FALLBACK_MS = 60_000' src/userplugins/QuestUI/questData.ts
-          grep -Fq 'sameQuestShortcutSnapshot' src/userplugins/QuestUI/questData.ts
-          grep -Fq 'const quests = useQuestSnapshot();' src/userplugins/QuestUI/QuestDashboard.tsx
-          if grep -Fq 'const allQuests = useQuestSnapshot();' src/userplugins/QuestUI/QuestButton.tsx; then
+          grep -Fq 'useQuestSnapshot("shortcut")' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx
+          grep -Fq 'SHORTCUT_REFRESH_FALLBACK_MS = 60_000' src/userplugins/QuestUI/src/quests/questData.ts
+          grep -Fq 'sameQuestShortcutSnapshot' src/userplugins/QuestUI/src/quests/questData.ts
+          grep -Fq 'const quests = useQuestSnapshot();' src/userplugins/QuestUI/src/dashboard/QuestDashboard.tsx
+          if grep -Fq 'const allQuests = useQuestSnapshot();' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx; then
             echo 'Quest shortcut must not subscribe to the 250ms live-progress render clock.' >&2
             exit 1
           fi
