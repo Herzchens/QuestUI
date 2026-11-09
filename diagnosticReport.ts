@@ -4,7 +4,7 @@ import { isLegacyUnscopedEvent, sameEventAccountScope } from "./eventLogAccountL
 import { inferEventCategory, sanitizeEventText } from "./eventLogLogic";
 import type { EventLogCategory, EventLogEvent } from "./eventLogTypes";
 import { getOrionIntegrationHealth } from "./orionIntegration";
-import { QUESTUI_VERSION } from "./version";
+import { QUESTUI_VERSION } from "./src/plugin/version";
 
 function discordChannel(): string {
     try { return window.GLOBAL_ENV?.RELEASE_CHANNEL ?? "Unknown"; }

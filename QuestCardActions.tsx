@@ -14,7 +14,7 @@ import { claimQuestReward, enrollQuest, QuestActionError } from "./questActions"
 import { getClaimAllRuntimeState } from "./claimAllRuntimeState";
 import type { QuestActionResult } from "./questActions";
 import type { NormalizedQuest } from "./questData";
-import settings from "./settings";
+import settings from "./src/plugin/settings";
 
 import "./actions.css";
 

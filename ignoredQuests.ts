@@ -8,7 +8,7 @@ import {
     updateIgnoredQuestState,
     type IgnoredQuestState
 } from "./ignoredQuestLogic";
-import { QuestsStore } from "./stores";
+import { QuestsStore } from "./src/plugin/stores";
 
 const DATA_STORE_KEY = "QuestUI:ignored-quests:v1";
 

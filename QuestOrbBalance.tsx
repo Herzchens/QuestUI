@@ -7,7 +7,7 @@ import {
     shouldFetchOrbBalance
 } from "./orbBalanceLogic";
 import { QuestOrbIcon } from "./QuestOrbIcon";
-import { VirtualCurrencyStore } from "./stores";
+import { VirtualCurrencyStore } from "./src/plugin/stores";
 
 export function QuestOrbBalance({ closePopout }: { closePopout?: () => void; }) {
     const currentUserId = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.id ?? null);

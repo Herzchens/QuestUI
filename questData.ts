@@ -3,7 +3,7 @@ import { useEffect, useState } from "@webpack/common";
 
 import { orbRewardAmounts } from "./orbRewardLogic";
 import { sameQuestShortcutSnapshot } from "./questShortcutLogic";
-import { QuestsStore } from "./stores";
+import { QuestsStore } from "./src/plugin/stores";
 
 export type QuestStatus = "available" | "in-progress" | "claimable" | "claimed" | "expired";
 export type AttentionStatus = "available" | "in-progress" | "claimable";

@@ -8,8 +8,8 @@ import { startEventLogCapture, stopEventLogCapture } from "./eventLog";
 import { startIgnoredQuestLifecycle, stopIgnoredQuestLifecycle } from "./ignoredQuests";
 import { startQuestNotifications, stopQuestNotifications } from "./notifications";
 import { QuestButton, QuestsCount } from "./QuestButton";
-import { QUESTUI_VERSION } from "./version";
-import settings from "./settings";
+import { QUESTUI_VERSION } from "./src/plugin/version";
+import settings from "./src/plugin/settings";
 import { updateCheckHoursFromStep } from "./updateLogic";
 import { startUpdateChecks, stopUpdateChecks } from "./updates";
 

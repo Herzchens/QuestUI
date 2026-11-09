@@ -19,7 +19,7 @@ import { useIgnoredQuests } from "./ignoredQuests";
 import { isQuestVerificationError } from "./questActionLogic";
 import { claimQuestReward, hasPendingClaimAction, QuestActionError } from "./questActions";
 import { useQuestSnapshot } from "./questData";
-import { QuestsStore } from "./stores";
+import { QuestsStore } from "./src/plugin/stores";
 
 import "./actions.css";
 

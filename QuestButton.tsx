@@ -17,7 +17,7 @@ import {
     useQuestSnapshot
 } from "./questData";
 import type { AttentionCounts } from "./questData";
-import settings from "./settings";
+import settings from "./src/plugin/settings";
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 // Match the same Discord header-bar button component VencordToolbox uses. The old

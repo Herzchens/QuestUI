@@ -16,8 +16,8 @@ import {
     problemNotificationKey,
     type QuestNotificationSnapshot
 } from "./notificationLogic";
-import settings from "./settings";
-import { QuestsStore } from "./stores";
+import settings from "./src/plugin/settings";
+import { QuestsStore } from "./src/plugin/stores";
 
 const PROBLEM_QUERY_LIMIT = 100;
 const PROBLEM_DEDUP_MS = 30_000;

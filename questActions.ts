@@ -14,7 +14,7 @@ import {
     storeWaitTimeoutResult
 } from "./questActionRuntimeLogic";
 import type { NormalizedQuest } from "./questData";
-import { QuestsStore } from "./stores";
+import { QuestsStore } from "./src/plugin/stores";
 
 const QUEST_HOME_DESKTOP_LOCATION = 11;
 const STORE_CONFIRM_TIMEOUT_MS = 5000;

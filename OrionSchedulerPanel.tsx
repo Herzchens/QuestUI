@@ -1,4 +1,4 @@
-import { QuestsStore } from "./stores";
+import { QuestsStore } from "./src/plugin/stores";
 import { useOrionSchedulerView } from "./orionScheduler";
 import { schedulerLaneCopy, schedulerQuestEntries, type OrionSchedulerLane } from "./orionSchedulerLogic";
 

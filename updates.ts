@@ -8,7 +8,7 @@ import {
     shouldRunScheduledUpdateCheck,
     type ReleaseLike
 } from "./updateLogic";
-import { QUESTUI_VERSION } from "./version";
+import { QUESTUI_VERSION } from "./src/plugin/version";
 
 export type UpdateProduct = "questui" | "orion";
 export type UpdateSuppression = "skipped" | "snoozed" | null;

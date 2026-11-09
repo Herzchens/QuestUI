@@ -10,7 +10,7 @@ import { OrionGlobalControls } from "./OrionControls";
 import { useQuestOrbMultiplierState } from "./orbMultiplier";
 import { QuestDashboard, QuestDashboardToolbar } from "./QuestDashboard";
 import { QuestReloadControl } from "./QuestReloadControl";
-import settings from "./settings";
+import settings from "./src/plugin/settings";
 import { UpdateCenterIndicator } from "./UpdateCenter";
 
 import "./orion.css";

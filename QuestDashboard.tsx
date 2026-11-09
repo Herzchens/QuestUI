@@ -30,9 +30,9 @@ import {
 } from "./questData";
 import type { NormalizedQuest, QuestTaskType } from "./questData";
 import { normalizeDashboardSortMode, sortDashboardQuests, type DashboardSortMode } from "./dashboardSortLogic";
-import { QUESTUI_VERSION } from "./version";
+import { QUESTUI_VERSION } from "./src/plugin/version";
 import { versionChannelClass } from "./versionChannel";
-import settings from "./settings";
+import settings from "./src/plugin/settings";
 import { DashboardUpdateNotice } from "./UpdateCenter";
 
 interface DiscordQuestCompletion {
