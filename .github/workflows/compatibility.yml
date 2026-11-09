@@ -48,79 +48,79 @@ jobs:
 
       - name: Test Quest action logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestActionLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/actionResponses.test.ts
 
       - name: Test Quest action runtime logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestActionRuntimeLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/actionSafety.test.ts
 
       - name: Test Claim all logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/testClaimAllLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/claimAll.test.ts
 
       - name: Test Orion command and companion logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionCommandLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/companion.test.ts
 
       - name: Test Orion control-state logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionControlLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/controls.test.ts
 
       - name: Test Orion status/version logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionStatusLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/status.test.ts
 
       - name: Test Quest reload rotation logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestReloadLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/reload.test.ts
 
       - name: Test Quest shortcut snapshot logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestShortcutLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/shortcut.test.ts
 
       - name: Test Orb balance logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orbs/testOrbBalanceLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orbs/balance.test.ts
 
       - name: Test Dashboard sort logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/testDashboardSortLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/sort.test.ts
 
       - name: Test ignored Quest logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/testIgnoredQuestLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
 
       - name: Test notification logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/notifications/testNotificationLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/notifications/logic.test.ts
 
       - name: Test Event Log logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/testEventLogLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/eventLog.test.ts
 
       - name: Test Orion structured Event Log logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionEventLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/events.test.ts
 
       - name: Test Orion scheduler metadata logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionSchedulerLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/scheduler.test.ts
 
       - name: Test version channel logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/updates/testVersionChannel.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/updates/channel.test.ts
 
       - name: Test Update Center release logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/updates/testUpdateLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/updates/logic.test.ts
 
       - name: Test QuestUI managed updater integration
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/updates/testUpdateNative.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/updates/questuiNative.test.ts
 
       - name: Test Orion managed updater integration
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/updates/testOrionUpdateNative.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/updates/orionNative.test.ts
 
       - name: Reject obsolete speculative Orion API leftovers
         run: |
@@ -297,27 +297,27 @@ jobs:
 
       - name: Test Orion command and companion logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionCommandLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/companion.test.ts
 
       - name: Test Orion control-state logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionControlLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/controls.test.ts
 
       - name: Test Orion status/version logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionStatusLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/status.test.ts
 
       - name: Test Orion structured Event Log logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionEventLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/events.test.ts
 
       - name: Test Orion scheduler metadata logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionSchedulerLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/scheduler.test.ts
 
       - name: Test Quest reload rotation logic
         working-directory: vencord
-        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestReloadLogic.ts
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/reload.test.ts
 
       - name: Verify Orion companion source surface
         shell: bash

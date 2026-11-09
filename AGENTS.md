@@ -84,24 +84,24 @@ Run from the Vencord root:
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestActionLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestActionRuntimeLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/quests/testClaimAllLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionCommandLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionControlLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionEventLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionSchedulerLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestReloadLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestShortcutLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/orbs/testOrbBalanceLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/testDashboardSortLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/quests/testIgnoredQuestLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/notifications/testNotificationLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/testEventLogLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/updates/testVersionChannel.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/updates/testUpdateLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/updates/testUpdateNative.ts
-pnpm exec tsx src/userplugins/QuestUI/tests/updates/testOrionUpdateNative.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/actionResponses.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/actionSafety.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/claimAll.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/companion.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/controls.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/events.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/scheduler.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/reload.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/shortcut.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orbs/balance.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/sort.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/notifications/logic.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/eventLog.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/channel.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/logic.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/questuiNative.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/orionNative.test.ts
 pnpm build
 pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
