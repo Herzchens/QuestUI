@@ -4,13 +4,13 @@ import {
     buildClaimAllSnapshot,
     ClaimAllBatchStoppedError,
     runClaimAllBatch
-} from "../../src/quests/actions/claimAllLogic";
+} from "../../src/quests/actions/claimAll";
 import {
     beginClaimAllRuntime,
     endClaimAllRuntime,
     getClaimAllRuntimeState,
     updateClaimAllRuntimeProgress
-} from "../../src/quests/actions/claimAllRuntimeState";
+} from "../../src/quests/actions/claimAllState";
 
 const quest = (id: string, status = "claimable") => ({ id, name: `Quest ${id}`, status });
 

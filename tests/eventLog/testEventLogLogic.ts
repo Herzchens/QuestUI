@@ -7,23 +7,23 @@ import {
     normalizeEventAccountId,
     sameEventAccountScope,
     UNAVAILABLE_ACCOUNT_SCOPE
-} from "../../src/eventLog/eventLogAccountLogic";
+} from "../../src/eventLog/account";
 import {
     classifyConsoleEvent,
     consoleEventSource,
     inferEventCategory,
     sanitizeEventText
-} from "../../src/eventLog/eventLogLogic";
+} from "../../src/eventLog/logic";
 import {
     compareEventLogOrder,
     cursorFromEvent,
     eventLogCursorStartIndex,
     pageSortedEventLogEvents,
     sortEventLogEvents
-} from "../../src/eventLog/eventLogPaginationLogic";
-import type { EventLogEvent, EventLogSeverity, EventLogSort } from "../../src/eventLog/eventLogTypes";
-import { normalizePersistedEvent } from "../../src/eventLog/eventLogValidation";
-import { buildEventLogVirtualLayout, eventLogVirtualRange } from "../../src/eventLog/eventLogVirtualizationLogic";
+} from "../../src/eventLog/pagination";
+import type { EventLogEvent, EventLogSeverity, EventLogSort } from "../../src/eventLog/types";
+import { normalizePersistedEvent } from "../../src/eventLog/validation";
+import { buildEventLogVirtualLayout, eventLogVirtualRange } from "../../src/eventLog/virtualization";
 
 assert.equal(consoleEventSource(["%c Vencord %c %c OrionQuests ", "style", "", "style", '[Task] Aborted "Quest A": heartbeat watchdog timeout']), "orion");
 assert.equal(consoleEventSource(["Discord random log"]), null);

@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 
-import { classifyConsoleEvent, eventSearchText } from "../../src/eventLog/eventLogLogic";
-import type { EventLogEvent } from "../../src/eventLog/eventLogTypes";
+import { classifyConsoleEvent, eventSearchText } from "../../src/eventLog/logic";
+import type { EventLogEvent } from "../../src/eventLog/types";
 import {
     findOrionConsoleShadowMatch,
     mapOrionCategory,
     normalizeOrionCompanionEvent
-} from "../../src/orion/orionEventLogic";
+} from "../../src/orion/events";
 
 assert.equal(mapOrionCategory("task"), "quest");
 assert.equal(mapOrionCategory("network"), "network");

@@ -1,14 +1,14 @@
 import type { PluginNative } from "@utils/types";
 import { UserStore } from "@webpack/common";
 
-import { queryEventLog } from "./eventLog";
-import { UNAVAILABLE_ACCOUNT_SCOPE } from "./eventLogAccountLogic";
+import { queryEventLog } from "./runtime";
+import { UNAVAILABLE_ACCOUNT_SCOPE } from "./account";
 import {
     pageSortedEventLogEvents,
     sortEventLogEvents,
     type EventLogPageQuery,
     type EventLogPageResult
-} from "./eventLogPaginationLogic";
+} from "./pagination";
 
 const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>

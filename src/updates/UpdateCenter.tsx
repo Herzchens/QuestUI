@@ -2,8 +2,8 @@ import type { PluginNative } from "@utils/types";
 import { relaunch } from "@utils/native";
 import { Popout, showToast, useEffect, useRef, useState } from "@webpack/common";
 
-import { recordQuestUIEvent } from "../eventLog/eventLog";
-import type { QuestUIUpdateResult } from "./questui/updateNative";
+import { recordQuestUIEvent } from "../eventLog/runtime";
+import type { QuestUIUpdateResult } from "./questui/native";
 import {
     checkForUpdates,
     getUpdateSnapshot,
@@ -14,7 +14,7 @@ import {
     type UpdateProduct,
     type UpdateRelease,
     type UpdateSnapshot
-} from "./updates";
+} from "./runtime";
 
 import "./styles.css";
 

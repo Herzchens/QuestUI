@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 
-import { createOrionUpdateEngine } from "../../src/updates/orion/orionUpdateNativeEngine";
+import { createOrionUpdateEngine } from "../../src/updates/orion/engine";
 
 const exec = promisify(execFile);
 

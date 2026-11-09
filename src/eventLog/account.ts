@@ -1,4 +1,4 @@
-import type { EventLogEvent } from "./eventLogTypes";
+import type { EventLogEvent } from "./types";
 
 /**
  * Renderer-side sentinel used when Discord's current user identity is temporarily unavailable.

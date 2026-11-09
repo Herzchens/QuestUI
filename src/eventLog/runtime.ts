@@ -1,7 +1,7 @@
 import type { PluginNative } from "@utils/types";
 import { UserStore } from "@webpack/common";
 
-import { eventBelongsToAccount, eventVisibleForAccount, normalizeEventAccountId, UNAVAILABLE_ACCOUNT_SCOPE } from "./eventLogAccountLogic";
+import { eventBelongsToAccount, eventVisibleForAccount, normalizeEventAccountId, UNAVAILABLE_ACCOUNT_SCOPE } from "./account";
 import {
     classifyConsoleEvent,
     consoleArgsToText,
@@ -10,7 +10,7 @@ import {
     inferEventCategory,
     sanitizeEventText,
     severityRank
-} from "./eventLogLogic";
+} from "./logic";
 import type {
     EventLogCategory,
     EventLogEvent,
@@ -18,15 +18,15 @@ import type {
     EventLogQueryResult,
     EventLogSource,
     EventLogSeverity
-} from "./eventLogTypes";
-import { getOrionEventCapabilitySource } from "../orion/orionCapabilities";
+} from "./types";
+import { getOrionEventCapabilitySource } from "../orion/capabilities";
 import {
     findOrionConsoleShadowMatch,
     normalizeOrionCompanionEvent,
     type NormalizedOrionEvent,
     type OrionConsoleShadowCandidate
-} from "../orion/orionEventLogic";
-import { getOrionIntegrationHealth } from "../orion/orionIntegration";
+} from "../orion/events";
+import { getOrionIntegrationHealth } from "../orion/integration";
 
 const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>

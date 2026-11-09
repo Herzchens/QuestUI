@@ -7,7 +7,7 @@ import {
     createQuestUIUpdateEngine,
     type QuestUIUpdateResult,
     type QuestUIUpdateStatus
-} from "./updateNativeEngine";
+} from "./engine";
 
 export type { QuestUIUpdateResult, QuestUIUpdateStatus };
 

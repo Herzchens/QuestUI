@@ -1,4 +1,4 @@
-import type { EventLogEvent, EventLogSeverity, EventLogSort } from "./eventLogTypes";
+import type { EventLogEvent, EventLogSeverity, EventLogSort } from "./types";
 
 export interface EventLogCursor {
     version: 1;

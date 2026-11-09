@@ -10,7 +10,7 @@ import {
     updateCheckHoursFromStep,
     updateCheckIntervalLabel,
     updateCheckMarkerLabel
-} from "../../src/updates/updateLogic";
+} from "../../src/updates/logic";
 
 function main() {
     assert.deepEqual(parseSemver("v1.4.1"), {

@@ -7,7 +7,7 @@ import {
     selectLatestEligibleRelease,
     shouldRunScheduledUpdateCheck,
     type ReleaseLike
-} from "./updateLogic";
+} from "./logic";
 import { QUESTUI_VERSION } from "../plugin/version";
 
 export type UpdateProduct = "questui" | "orion";

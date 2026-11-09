@@ -4,14 +4,14 @@ import "./src/eventLog/styles/eventLogRuntimeFix.css";
 
 import definePlugin from "@utils/types";
 
-import { startEventLogCapture, stopEventLogCapture } from "./src/eventLog/eventLog";
-import { startIgnoredQuestLifecycle, stopIgnoredQuestLifecycle } from "./src/quests/ignored/ignoredQuests";
-import { startQuestNotifications, stopQuestNotifications } from "./src/notifications/notifications";
+import { startEventLogCapture, stopEventLogCapture } from "./src/eventLog/runtime";
+import { startIgnoredQuestLifecycle, stopIgnoredQuestLifecycle } from "./src/quests/ignored/runtime";
+import { startQuestNotifications, stopQuestNotifications } from "./src/notifications/runtime";
 import { QuestButton, QuestsCount } from "./src/dashboard/QuestButton";
 import { QUESTUI_VERSION } from "./src/plugin/version";
 import settings from "./src/plugin/settings";
-import { updateCheckHoursFromStep } from "./src/updates/updateLogic";
-import { startUpdateChecks, stopUpdateChecks } from "./src/updates/updates";
+import { updateCheckHoursFromStep } from "./src/updates/logic";
+import { startUpdateChecks, stopUpdateChecks } from "./src/updates/runtime";
 
 export default definePlugin({
     name: "QuestUI",

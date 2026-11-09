@@ -1,14 +1,14 @@
 import { showToast, useEffect, useState } from "@webpack/common";
 
-import { deriveQuestOrionControl } from "./orionControlLogic";
-import { OrionPauseIcon, OrionPlayIcon } from "./orionIcons";
+import { deriveQuestOrionControl } from "./controls";
+import { OrionPauseIcon, OrionPlayIcon } from "./icons";
 import {
     getOrionControlSnapshot,
     invokeOrionEngineControl,
     invokeOrionQuestTaskControl,
     subscribeOrionControlState
-} from "./orionIntegration";
-import type { NormalizedQuest } from "../quests/questData";
+} from "./integration";
+import type { NormalizedQuest } from "../quests/data";
 
 function titleFor(action: "start" | "pause" | "resume", questName: string, disabled: boolean): string {
     if (disabled) return `Waiting for Orion to queue ${questName}`;

@@ -1,6 +1,6 @@
-import type { OrionIntegrationHealth } from "./orionStatusLogic";
-import { deriveConnectedOrionRuntime, ORION_MIN_COMPANION_VERSION } from "./orionStatusLogic";
-import { versionChannelClass } from "../updates/versionChannel";
+import type { OrionIntegrationHealth } from "./status";
+import { deriveConnectedOrionRuntime, ORION_MIN_COMPANION_VERSION } from "./status";
+import { versionChannelClass } from "../updates/channel";
 
 const HEALTH_COPY: Record<OrionIntegrationHealth["kind"], string> = {
     "not-installed": "Orion Quest Not Installed",

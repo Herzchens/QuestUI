@@ -4,7 +4,7 @@ import {
     deriveOrbBalanceDisplayState,
     normalizeOrbBalance,
     shouldFetchOrbBalance
-} from "../../src/orbs/orbBalanceLogic";
+} from "../../src/orbs/balanceState";
 
 assert.equal(normalizeOrbBalance(null), null);
 assert.equal(normalizeOrbBalance(undefined), null);

@@ -1,4 +1,4 @@
-import type { EventLogCategory, EventLogSeverity } from "../eventLog/eventLogTypes";
+import type { EventLogCategory, EventLogSeverity } from "../eventLog/types";
 
 export type OrionCompanionEventLevel = "debug" | "info" | "success" | "warning" | "error";
 export type OrionCompanionEventCategory =

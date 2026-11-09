@@ -4,7 +4,7 @@ import { lstat, readFile, readlink, readdir, stat } from "fs/promises";
 import { join } from "path";
 import { promisify } from "util";
 
-import { compareSemver, parseSemver } from "../updateLogic";
+import { compareSemver, parseSemver } from "../logic";
 
 export type OrionUpdateStatus =
     | "updated"

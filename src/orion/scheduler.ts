@@ -1,7 +1,7 @@
 import { useEffect, useState } from "@webpack/common";
 
-import { getOrionSchedulerCapabilitySource } from "./orionCapabilities";
-import { normalizeOrionSchedulerSnapshot, type OrionSchedulerSnapshot } from "./orionSchedulerLogic";
+import { getOrionSchedulerCapabilitySource } from "./capabilities";
+import { normalizeOrionSchedulerSnapshot, type OrionSchedulerSnapshot } from "./schedulerState";
 
 export type OrionSchedulerView = {
     state: "unsupported" | "available" | "invalid";

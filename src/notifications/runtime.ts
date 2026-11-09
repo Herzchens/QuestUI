@@ -1,21 +1,21 @@
 import { showNotification } from "@api/Notifications";
 import { NavigationRouter, UserStore } from "@webpack/common";
 
-import { queryEventLog, subscribeEventLog } from "../eventLog/eventLog";
-import type { EventLogEvent } from "../eventLog/eventLogTypes";
+import { queryEventLog, subscribeEventLog } from "../eventLog/runtime";
+import type { EventLogEvent } from "../eventLog/types";
 import {
     ignoredQuestIds,
     isIgnoredQuestStateReady,
     preloadIgnoredQuests,
     subscribeIgnoredQuests
-} from "../quests/ignored/ignoredQuests";
+} from "../quests/ignored/runtime";
 import {
     completedQuestTransitions,
     isActionableProblemEvent,
     newAvailableQuestTransitions,
     problemNotificationKey,
     type QuestNotificationSnapshot
-} from "./notificationLogic";
+} from "./logic";
 import settings from "../plugin/settings";
 import { QuestsStore } from "../plugin/stores";
 

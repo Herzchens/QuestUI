@@ -5,7 +5,7 @@ import {
     classifyOptionalTimestamp,
     questAccessSuspensionState,
     storeWaitTimeoutResult
-} from "../../src/quests/actions/questActionRuntimeLogic";
+} from "../../src/quests/actions/safety";
 
 assert.deepEqual(classifyOptionalTimestamp(undefined), { kind: "missing" });
 assert.deepEqual(classifyOptionalTimestamp(null), { kind: "missing" });

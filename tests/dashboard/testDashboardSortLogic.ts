@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 
-import { normalizeDashboardSortMode, requiredQuestTimeSeconds, sortDashboardQuests } from "../../src/dashboard/dashboardSortLogic";
-import { effectiveOrbRewardAmount, orbRewardAmounts } from "../../src/orbs/orbRewardLogic";
+import { normalizeDashboardSortMode, requiredQuestTimeSeconds, sortDashboardQuests } from "../../src/dashboard/sort";
+import { effectiveOrbRewardAmount, orbRewardAmounts } from "../../src/orbs/rewards";
 
 const quest = (
     id: string,

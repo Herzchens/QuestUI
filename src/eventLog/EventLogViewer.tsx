@@ -1,13 +1,13 @@
 import { Popout, showToast, UserStore, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
 
-import { buildDiagnosticReport } from "./diagnosticReport";
+import { buildDiagnosticReport } from "./report";
 import { EventLogWindowedScroller } from "./EventLogWindowedScroller";
-import { clearEventLog, getEventLogInfo, openEventLogFolder, subscribeEventLog } from "./eventLog";
-import { isLegacyUnscopedEvent } from "./eventLogAccountLogic";
-import { inferEventCategory } from "./eventLogLogic";
-import { queryEventLogPage } from "./eventLogPage";
-import type { EventLogCursor } from "./eventLogPaginationLogic";
-import type { EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort, EventLogSource } from "./eventLogTypes";
+import { clearEventLog, getEventLogInfo, openEventLogFolder, subscribeEventLog } from "./runtime";
+import { isLegacyUnscopedEvent } from "./account";
+import { inferEventCategory } from "./logic";
+import { queryEventLogPage } from "./page";
+import type { EventLogCursor } from "./pagination";
+import type { EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort, EventLogSource } from "./types";
 
 import "./styles/eventLog.css";
 import "./styles/eventLogPagination.css";

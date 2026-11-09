@@ -6,7 +6,7 @@ import {
     isKnownOrionVersionIncompatible,
     ORION_MIN_COMPANION_VERSION,
     parseOrionVersion
-} from "../../src/orion/orionStatusLogic";
+} from "../../src/orion/status";
 
 const compatibleFacts = {
     installed: true,

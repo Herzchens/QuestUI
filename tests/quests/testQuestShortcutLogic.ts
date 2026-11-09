@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import { sameQuestShortcutSnapshot } from "../../src/quests/questShortcutLogic";
+import { sameQuestShortcutSnapshot } from "../../src/quests/shortcut";
 
 function quest(overrides: Partial<any> = {}) {
     return {

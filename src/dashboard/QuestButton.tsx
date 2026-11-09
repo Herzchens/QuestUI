@@ -5,7 +5,7 @@ import { Flex } from "@components/Flex";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 
-import { useIgnoredQuests } from "../quests/ignored/ignoredQuests";
+import { useIgnoredQuests } from "../quests/ignored/runtime";
 import { QuestDashboardShell } from "./QuestDashboardShell";
 import {
     attentionCounts,
@@ -15,8 +15,8 @@ import {
     prioritizedAttention,
     questStatusCounts,
     useQuestSnapshot
-} from "../quests/questData";
-import type { AttentionCounts } from "../quests/questData";
+} from "../quests/data";
+import type { AttentionCounts } from "../quests/data";
 import settings from "../plugin/settings";
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");

@@ -1,10 +1,10 @@
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
-import { isOrionCommandReady, isOrionInstalled } from "../orion/orionIntegration";
-import { DEFAULT_UPDATE_CHECK_STEP, UPDATE_CHECK_STEP_MARKERS, updateCheckMarkerLabel } from "../updates/updateLogic";
+import { isOrionCommandReady, isOrionInstalled } from "../orion/integration";
+import { DEFAULT_UPDATE_CHECK_STEP, UPDATE_CHECK_STEP_MARKERS, updateCheckMarkerLabel } from "../updates/logic";
 import { UpdateSettingsControl } from "../updates/UpdateCenter";
-import { notifyUpdateSettingsChanged } from "../updates/updates";
+import { notifyUpdateSettingsChanged } from "../updates/runtime";
 
 const rewardOptions = [
     { label: "All rewards", value: "all", default: true },

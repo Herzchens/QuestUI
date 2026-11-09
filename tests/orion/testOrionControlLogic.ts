@@ -8,8 +8,8 @@ import {
     orionQuestTagState,
     shouldPauseOrionQuestBeforeIgnore,
     storedQuestTaskProgress
-} from "../../src/orion/orionControlLogic";
-import type { OrionControlSnapshot } from "../../src/orion/orionCommandLogic";
+} from "../../src/orion/controls";
+import type { OrionControlSnapshot } from "../../src/orion/companion";
 
 const snapshot = (
     running: boolean,

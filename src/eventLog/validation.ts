@@ -1,4 +1,4 @@
-import type { EventLogCaptureSource, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSource } from "./eventLogTypes";
+import type { EventLogCaptureSource, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSource } from "./types";
 
 const EVENT_SOURCES = new Set<EventLogSource>(["orion", "questui"]);
 const EVENT_SEVERITIES = new Set<EventLogSeverity>(["info", "success", "warning", "error"]);

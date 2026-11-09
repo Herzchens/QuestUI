@@ -8,7 +8,7 @@ import {
     type OrionUpdateDecisionRequest,
     type OrionUpdateResult,
     type OrionUpdateStatus
-} from "./orionUpdateNativeEngine";
+} from "./engine";
 
 export type { OrionUpdateDecisionRequest, OrionUpdateResult, OrionUpdateStatus };
 

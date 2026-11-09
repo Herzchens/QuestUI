@@ -1,5 +1,5 @@
-import type { NormalizedQuest, NormalizedTask } from "../quests/questData";
-import type { OrionControlSnapshot, OrionQuestControlState, OrionTaskAction } from "./orionCommandLogic";
+import type { NormalizedQuest, NormalizedTask } from "../quests/data";
+import type { OrionControlSnapshot, OrionQuestControlState, OrionTaskAction } from "./companion";
 
 export type OrionSmartAction = "start" | OrionTaskAction;
 export type OrionQuestProgressSource = "native" | "stored";

@@ -1,4 +1,4 @@
-import type { EventLogEvent } from "../eventLog/eventLogTypes";
+import type { EventLogEvent } from "../eventLog/types";
 
 export interface QuestNotificationSnapshot {
     id: string;

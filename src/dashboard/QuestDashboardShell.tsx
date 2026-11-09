@@ -5,9 +5,9 @@ import { UserProfileStore, UserStore, useEffect, useStateFromStores } from "@web
 
 import { ClaimAllControl } from "../quests/actions/ClaimAllControl";
 import { EventLogButton } from "../eventLog/EventLogViewer";
-import { isOrionCommandReady } from "../orion/orionIntegration";
+import { isOrionCommandReady } from "../orion/integration";
 import { OrionGlobalControls } from "../orion/OrionControls";
-import { useQuestOrbMultiplierState } from "../orbs/orbMultiplier";
+import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { QuestDashboard, QuestDashboardToolbar } from "./QuestDashboard";
 import { QuestReloadControl } from "../quests/reload/QuestReloadControl";
 import settings from "../plugin/settings";

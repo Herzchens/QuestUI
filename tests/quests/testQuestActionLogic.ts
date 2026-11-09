@@ -5,7 +5,7 @@ import {
     assessEnrollResponse,
     isQuestVerificationError,
     selectClaimTarget
-} from "../../src/quests/actions/questActionLogic";
+} from "../../src/quests/actions/responses";
 
 assert.equal(assessEnrollResponse({ type: "success" }), "success");
 assert.equal(assessEnrollResponse({ type: "captcha_failed" }), "verification");

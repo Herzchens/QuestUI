@@ -3,17 +3,17 @@ import { findByCodeLazy } from "@webpack";
 import { NavigationRouter, Popout, ThemeStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { useClaimAllBatchActive } from "../quests/actions/ClaimAllControl";
-import { useIgnoredQuests } from "../quests/ignored/ignoredQuests";
-import { useQuestOrbMultiplierState } from "../orbs/orbMultiplier";
-import { effectiveOrbRewardAmount } from "../orbs/orbRewardLogic";
-import type { OrionControlSnapshot } from "../orion/orionCommandLogic";
+import { useIgnoredQuests } from "../quests/ignored/runtime";
+import { useQuestOrbMultiplierState } from "../orbs/multiplier";
+import { effectiveOrbRewardAmount } from "../orbs/rewards";
+import type { OrionControlSnapshot } from "../orion/companion";
 import {
     orionQuestProgressSource,
     orionQuestTagState,
     storedQuestTaskProgress,
     type OrionQuestTagState
-} from "../orion/orionControlLogic";
-import { getOrionControlSnapshot, getOrionIntegrationHealth, subscribeOrionControlState } from "../orion/orionIntegration";
+} from "../orion/controls";
+import { getOrionControlSnapshot, getOrionIntegrationHealth, subscribeOrionControlState } from "../orion/integration";
 import { OrionIntegrationStatus } from "../orion/OrionStatus";
 import { QuestCardActions } from "../quests/actions/QuestCardActions";
 import { QuestOrbBalance } from "../orbs/QuestOrbBalance";
@@ -27,11 +27,11 @@ import {
     formatQuestProgress,
     questStatusCounts,
     useQuestSnapshot
-} from "../quests/questData";
-import type { NormalizedQuest, QuestTaskType } from "../quests/questData";
-import { normalizeDashboardSortMode, sortDashboardQuests, type DashboardSortMode } from "./dashboardSortLogic";
+} from "../quests/data";
+import type { NormalizedQuest, QuestTaskType } from "../quests/data";
+import { normalizeDashboardSortMode, sortDashboardQuests, type DashboardSortMode } from "./sort";
 import { QUESTUI_VERSION } from "../plugin/version";
-import { versionChannelClass } from "../updates/versionChannel";
+import { versionChannelClass } from "../updates/channel";
 import settings from "../plugin/settings";
 import { DashboardUpdateNotice } from "../updates/UpdateCenter";
 

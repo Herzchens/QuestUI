@@ -4,7 +4,7 @@ import {
     normalizeOrionSchedulerSnapshot,
     schedulerLaneCopy,
     schedulerQuestEntries
-} from "../../src/orion/orionSchedulerLogic";
+} from "../../src/orion/schedulerState";
 
 const snapshot = normalizeOrionSchedulerSnapshot({
     lanes: {

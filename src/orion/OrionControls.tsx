@@ -1,14 +1,14 @@
 import { showToast, useEffect, useState } from "@webpack/common";
 
-import { deriveGlobalOrionControl, farmableQuestIds } from "./orionControlLogic";
-import { OrionPauseIcon, OrionPlayIcon, OrionStopIcon } from "./orionIcons";
+import { deriveGlobalOrionControl, farmableQuestIds } from "./controls";
+import { OrionPauseIcon, OrionPlayIcon, OrionStopIcon } from "./icons";
 import {
     getOrionControlSnapshot,
     invokeOrionEngineControl,
     invokeOrionGlobalTaskControl,
     subscribeOrionControlState
-} from "./orionIntegration";
-import { useQuestSnapshot } from "../quests/questData";
+} from "./integration";
+import { useQuestSnapshot } from "../quests/data";
 
 function smartLabel(action: "start" | "pause" | "resume"): string {
     if (action === "pause") return "Pause all Orion Quest farming";

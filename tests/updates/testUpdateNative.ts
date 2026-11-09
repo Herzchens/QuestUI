@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 
-import { createQuestUIUpdateEngine } from "../../src/updates/questui/updateNativeEngine";
+import { createQuestUIUpdateEngine } from "../../src/updates/questui/engine";
 
 const execFile = promisify(execFileCallback);
 const TEST_PRINCIPAL = "questui-updater-test@example.com";

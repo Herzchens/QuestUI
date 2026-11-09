@@ -9,8 +9,8 @@ import {
     updateCheckHoursFromStep,
     updateCheckIntervalLabel,
     updateCheckMarkerLabel
-} from "../../src/updates/updateLogic";
-import { classifyVersionChannel } from "../../src/updates/versionChannel";
+} from "../../src/updates/logic";
+import { classifyVersionChannel } from "../../src/updates/channel";
 
 assert.equal(classifyVersionChannel("v1.1.2"), "stable");
 assert.equal(classifyVersionChannel("4.11.2"), "stable");

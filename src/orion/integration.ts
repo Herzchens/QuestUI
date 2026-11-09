@@ -1,24 +1,24 @@
 import { ApplicationCommandOptionType, commands } from "@api/Commands";
 import { isPluginEnabled, plugins } from "@api/PluginManager";
 
-import { getOrionSchedulerCapabilitySource } from "./orionCapabilities";
+import { getOrionSchedulerCapabilitySource } from "./capabilities";
 import {
     isCompatibleOrionCommand,
     isCompatibleOrionCompanion,
     readCompatibleOrionSnapshot
-} from "./orionCommandLogic";
+} from "./companion";
 import type {
     OrionCompanionSurface,
     OrionControlSnapshot,
     OrionEngineAction,
     OrionTaskAction
-} from "./orionCommandLogic";
-import { normalizeOrionSchedulerSnapshot } from "./orionSchedulerLogic";
+} from "./companion";
+import { normalizeOrionSchedulerSnapshot } from "./schedulerState";
 import {
     deriveOrionIntegrationHealth,
     isKnownOrionVersionIncompatible
-} from "./orionStatusLogic";
-import type { OrionIntegrationHealth } from "./orionStatusLogic";
+} from "./status";
+import type { OrionIntegrationHealth } from "./status";
 
 let controlPending = false;
 

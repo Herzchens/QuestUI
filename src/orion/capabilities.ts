@@ -1,6 +1,6 @@
 import { isPluginEnabled, plugins } from "@api/PluginManager";
 
-import { isKnownOrionVersionIncompatible } from "./orionStatusLogic";
+import { isKnownOrionVersionIncompatible } from "./status";
 
 export type OrionEventListener = (event: unknown) => void;
 

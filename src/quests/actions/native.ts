@@ -6,14 +6,14 @@ import {
     assessEnrollResponse,
     isQuestVerificationError,
     selectClaimTarget
-} from "./questActionLogic";
+} from "./responses";
 import {
     attachChangeListenerSafely,
     classifyOptionalTimestamp,
     questAccessSuspensionState,
     storeWaitTimeoutResult
-} from "./questActionRuntimeLogic";
-import type { NormalizedQuest } from "../questData";
+} from "./safety";
+import type { NormalizedQuest } from "../data";
 import { QuestsStore } from "../../plugin/stores";
 
 const QUEST_HOME_DESKTOP_LOCATION = 11;

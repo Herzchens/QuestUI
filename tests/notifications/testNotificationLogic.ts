@@ -6,7 +6,7 @@ import {
     newAvailableQuestTransitions,
     problemNotificationKey,
     type QuestNotificationSnapshot
-} from "../../src/notifications/notificationLogic";
+} from "../../src/notifications/logic";
 
 const quest = (
     id: string,

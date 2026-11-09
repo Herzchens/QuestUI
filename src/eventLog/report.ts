@@ -1,9 +1,9 @@
 import gitHash from "~git-hash";
 
-import { isLegacyUnscopedEvent, sameEventAccountScope } from "./eventLogAccountLogic";
-import { inferEventCategory, sanitizeEventText } from "./eventLogLogic";
-import type { EventLogCategory, EventLogEvent } from "./eventLogTypes";
-import { getOrionIntegrationHealth } from "../orion/orionIntegration";
+import { isLegacyUnscopedEvent, sameEventAccountScope } from "./account";
+import { inferEventCategory, sanitizeEventText } from "./logic";
+import type { EventLogCategory, EventLogEvent } from "./types";
+import { getOrionIntegrationHealth } from "../orion/integration";
 import { QUESTUI_VERSION } from "../plugin/version";
 
 function discordChannel(): string {

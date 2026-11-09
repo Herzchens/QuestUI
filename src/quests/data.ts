@@ -1,8 +1,8 @@
 import { findByCodeLazy } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
 
-import { orbRewardAmounts } from "../orbs/orbRewardLogic";
-import { sameQuestShortcutSnapshot } from "./questShortcutLogic";
+import { orbRewardAmounts } from "../orbs/rewards";
+import { sameQuestShortcutSnapshot } from "./shortcut";
 import { QuestsStore } from "../plugin/stores";
 
 export type QuestStatus = "available" | "in-progress" | "claimable" | "claimed" | "expired";

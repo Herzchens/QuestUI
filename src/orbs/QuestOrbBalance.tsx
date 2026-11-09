@@ -1,11 +1,11 @@
 import { NavigationRouter, UserStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
-import { fetchOrbBalance } from "./orbBalance";
+import { fetchOrbBalance } from "./balance";
 import {
     deriveOrbBalanceDisplayState,
     normalizeOrbBalance,
     shouldFetchOrbBalance
-} from "./orbBalanceLogic";
+} from "./balanceState";
 import { QuestOrbIcon } from "./QuestOrbIcon";
 import { VirtualCurrencyStore } from "../plugin/stores";
 

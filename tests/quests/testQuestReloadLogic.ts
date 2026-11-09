@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import { QUEST_RELOAD_MIN_ROTATIONS, shouldFinishReloadSpin } from "../../src/quests/reload/questReloadLogic";
+import { QUEST_RELOAD_MIN_ROTATIONS, shouldFinishReloadSpin } from "../../src/quests/reload/logic";
 
 assert.equal(QUEST_RELOAD_MIN_ROTATIONS, 3);
 assert.equal(shouldFinishReloadSpin(0, true), false);

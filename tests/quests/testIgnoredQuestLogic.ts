@@ -5,7 +5,7 @@ import {
     normalizeIgnoredQuestState,
     pruneIgnoredQuestState,
     updateIgnoredQuestState
-} from "../../src/quests/ignored/ignoredQuestLogic";
+} from "../../src/quests/ignored/logic";
 
 assert.deepEqual(normalizeIgnoredQuestState(null), { version: 1, accounts: {} });
 assert.deepEqual(normalizeIgnoredQuestState({ accounts: { a: ["q1", "q1", "", 7, "q2"] } }), {

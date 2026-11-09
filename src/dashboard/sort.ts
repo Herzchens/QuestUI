@@ -1,4 +1,4 @@
-import type { NormalizedQuest, NormalizedTask, QuestStatus } from "../quests/questData";
+import type { NormalizedQuest, NormalizedTask, QuestStatus } from "../quests/data";
 
 export type DashboardSortMode =
     | "recommended"

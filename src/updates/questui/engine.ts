@@ -4,7 +4,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { promisify } from "util";
 
-import { compareSemver, parseSemver } from "../updateLogic";
+import { compareSemver, parseSemver } from "../logic";
 
 export type QuestUIUpdateStatus =
     | "updated"

@@ -4,7 +4,7 @@ import {
     isCompatibleOrionCommand,
     isCompatibleOrionCompanion,
     readCompatibleOrionSnapshot
-} from "../../src/orion/orionCommandLogic";
+} from "../../src/orion/companion";
 
 const STRING = 3;
 

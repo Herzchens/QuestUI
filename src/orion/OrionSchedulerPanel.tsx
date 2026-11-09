@@ -1,6 +1,6 @@
 import { QuestsStore } from "../plugin/stores";
-import { useOrionSchedulerView } from "./orionScheduler";
-import { schedulerLaneCopy, schedulerQuestEntries, type OrionSchedulerLane } from "./orionSchedulerLogic";
+import { useOrionSchedulerView } from "./scheduler";
+import { schedulerLaneCopy, schedulerQuestEntries, type OrionSchedulerLane } from "./schedulerState";
 
 import "./styles/orionScheduler.css";
 

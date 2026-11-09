@@ -1,4 +1,4 @@
-import type { EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSource } from "./eventLogTypes";
+import type { EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSource } from "./types";
 
 const MAX_DETAIL_LENGTH = 32 * 1024;
 

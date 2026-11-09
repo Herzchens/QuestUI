@@ -2,16 +2,16 @@ import { app, IpcMainInvokeEvent, shell } from "electron";
 import { appendFile, mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
 import { join } from "path";
 
-import { eventBelongsToAccount, eventVisibleForAccount } from "./eventLogAccountLogic";
-import { eventSearchText, inferEventCategory } from "./eventLogLogic";
+import { eventBelongsToAccount, eventVisibleForAccount } from "./account";
+import { eventSearchText, inferEventCategory } from "./logic";
 import {
     pageSortedEventLogEvents,
     sortEventLogEvents,
     type EventLogPageQuery,
     type EventLogPageResult
-} from "./eventLogPaginationLogic";
-import type { EventLogEvent, EventLogSort } from "./eventLogTypes";
-import { normalizePersistedEvent } from "./eventLogValidation";
+} from "./pagination";
+import type { EventLogEvent, EventLogSort } from "./types";
+import { normalizePersistedEvent } from "./validation";
 
 
 const MAX_LOG_BYTES = 10 * 1024 * 1024;

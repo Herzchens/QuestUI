@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "@webpack/common";
 import type { ReactNode, RefObject } from "react";
 
-import { buildEventLogVirtualLayout, eventLogVirtualRange } from "./eventLogVirtualizationLogic";
+import { buildEventLogVirtualLayout, eventLogVirtualRange } from "./virtualization";
 
 const EVENT_LOG_OVERSCAN_PX = 180;
 const FALLBACK_VIEWPORT_HEIGHT = 410;
