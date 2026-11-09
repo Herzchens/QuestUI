@@ -18,6 +18,7 @@ import {
 } from "../quests/data";
 import type { AttentionCounts } from "../quests/data";
 import settings from "../plugin/settings";
+import { registerQuestDashboardOpener } from "./open";
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 // Match the same Discord header-bar button component VencordToolbox uses. The old
@@ -166,8 +167,13 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
     const detailed = settings.store.detailedStatus;
 
     useEffect(() => {
-        if (!dashboardMode) setDashboardOpen(false);
-    }, [dashboardMode]);
+        if (!dashboardMode) {
+            setDashboardOpen(false);
+            return;
+        }
+
+        return registerQuestDashboardOpener(type, () => setDashboardOpen(true));
+    }, [dashboardMode, type]);
 
     // Ignore is a QuestUI presentation preference, not a Discord Quest status. Wait for the
     // account-scoped preference store before showing attention so a persisted ignored Quest

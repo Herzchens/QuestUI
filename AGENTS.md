@@ -50,6 +50,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/dashboard/QuestDashboard.tsx` — Dashboard orchestration, summary/empty state, filtering/sorting application, and Orion/Orb composition.
 - `src/dashboard/QuestCard.tsx` — Quest card artwork, reward/progress presentation, expiry, and per-card Orion state.
 - `src/dashboard/DashboardToolbar.tsx`, `src/dashboard/state.ts` — Dashboard filter/sort/home controls plus shared filter/reset/partition state helpers.
+- `src/dashboard/open.ts` — registered Dashboard opener used by notification click-through; prefers the top-bar surface, falls back to the settings-bar surface, and leaves Quest Home as the no-Dashboard fallback.
 - `src/dashboard/QuestDashboardShell.tsx` — visible **Quest Dashboard** title/native Quest icon, Nitro/Xbox+ source tag, and fixed header tools.
 - `src/dashboard/sort.ts` — persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
 - `src/quests/ignored/runtime.ts`, `src/quests/ignored/logic.ts` — account-scoped persisted Ignore/Unignore presentation state and pure normalization/update logic.

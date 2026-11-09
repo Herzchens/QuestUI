@@ -86,6 +86,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/sort.test.ts
 
+      - name: Test Dashboard open routing logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/open.test.ts
+
       - name: Test ignored Quest logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
@@ -219,6 +223,8 @@ jobs:
           grep -Fq 'completedQuestTransitions' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'newAvailableQuestTransitions' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/src/notifications/runtime.ts
+          grep -Fq 'openQuestDashboard()' src/userplugins/QuestUI/src/notifications/runtime.ts
+          grep -Fq 'registerQuestDashboardOpener(type' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx
           grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/src/updates/managed.ts
           grep -Fq 'recordManagedUpdateEvent' src/userplugins/QuestUI/src/updates/managed.ts
           grep -Fq 'combinedAvailabilityCopy' src/userplugins/QuestUI/src/updates/status.tsx

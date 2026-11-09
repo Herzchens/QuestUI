@@ -1,6 +1,7 @@
 import { showNotification } from "@api/Notifications";
 import { NavigationRouter, UserStore } from "@webpack/common";
 
+import { openQuestDashboard } from "../dashboard/open";
 import { queryEventLog, subscribeEventLog } from "../eventLog/runtime";
 import type { EventLogEvent } from "../eventLog/types";
 import {
@@ -107,8 +108,8 @@ function readNotificationSnapshot(accountId: string, rawQuests = rawQuestValues(
         .filter((quest): quest is QuestNotificationSnapshot => quest !== null);
 }
 
-function openQuestHome(): void {
-    NavigationRouter.transitionTo("/quest-home");
+function openQuestNotificationTarget(): void {
+    if (!openQuestDashboard()) NavigationRouter.transitionTo("/quest-home");
 }
 
 function observeQuestState(): void {
@@ -149,7 +150,7 @@ function observeQuestState(): void {
             void showNotification({
                 title: "Quest ready to claim",
                 body: `${quest.questName} is ready to claim.`,
-                onClick: openQuestHome
+                onClick: openQuestNotificationTarget
             });
         }
     }
@@ -159,7 +160,7 @@ function observeQuestState(): void {
             void showNotification({
                 title: "New quest available",
                 body: `${quest.questName} is available to accept.`,
-                onClick: openQuestHome
+                onClick: openQuestNotificationTarget
             });
         }
     }
@@ -200,7 +201,7 @@ function showProblemNotification(event: EventLogEvent): void {
     void showNotification({
         title,
         body,
-        onClick: event.quest ? openQuestHome : undefined
+        onClick: openQuestNotificationTarget
     });
 }
 
