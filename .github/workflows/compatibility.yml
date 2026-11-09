@@ -225,6 +225,11 @@ jobs:
           grep -Fq 'dashboardAvailabilityLines' src/userplugins/QuestUI/src/updates/status.tsx
           grep -Fq 'quest-ui-dashboard-update-chip-copy' src/userplugins/QuestUI/src/updates/styles.css
           grep -Fq 'automaticChecksEnabled' src/userplugins/QuestUI/src/updates/runtime.ts
+          grep -Fq 'updateIncludeOrionPrereleases' src/userplugins/QuestUI/src/plugin/settings.ts
+          grep -Fq 'questUIIncludePrereleases: settings.store.updateIncludePrereleases' src/userplugins/QuestUI/index.tsx
+          grep -Fq 'orionIncludePrereleases: settings.store.updateIncludeOrionPrereleases' src/userplugins/QuestUI/index.tsx
+          grep -Fq 'resolvePluginState("questui", QUESTUI_VERSION, cachedQuestUIReleases, preferences.questUIIncludePrereleases' src/userplugins/QuestUI/src/updates/runtime.ts
+          grep -Fq 'resolvePluginState("orion", installedOrionVersion(), cachedOrionReleases, preferences.orionIncludePrereleases' src/userplugins/QuestUI/src/updates/runtime.ts
           grep -Fq 'updateTrace' src/userplugins/QuestUI/src/updates/managed.ts
           grep -Fq 'Update trace' src/userplugins/QuestUI/src/eventLog/presentation.tsx
           grep -Fq 'queryIdentityRef.current !== queryIdentity' src/userplugins/QuestUI/src/eventLog/EventLogViewer.tsx

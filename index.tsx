@@ -31,7 +31,8 @@ export default definePlugin({
         startQuestNotifications();
         startUpdateChecks(() => ({
             checkHours: updateCheckHoursFromStep(settings.store.updateCheckStep),
-            includePrereleases: settings.store.updateIncludePrereleases,
+            questUIIncludePrereleases: settings.store.updateIncludePrereleases,
+            orionIncludePrereleases: settings.store.updateIncludeOrionPrereleases,
             checkOrion: settings.store.updateCheckOrion
         }));
     },

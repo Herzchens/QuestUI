@@ -42,7 +42,8 @@ export interface UpdateSnapshot {
 
 export interface UpdatePreferences {
     checkHours: unknown;
-    includePrereleases: boolean;
+    questUIIncludePrereleases: boolean;
+    orionIncludePrereleases: boolean;
     checkOrion: boolean;
 }
 
@@ -207,12 +208,14 @@ function notify(): void {
 function readPreferences(): UpdatePreferences {
     const raw = preferenceReader?.() ?? {
         checkHours: 6,
-        includePrereleases: false,
+        questUIIncludePrereleases: false,
+        orionIncludePrereleases: false,
         checkOrion: true
     };
     return {
         checkHours: normalizeUpdateCheckHours(raw.checkHours),
-        includePrereleases: raw.includePrereleases === true,
+        questUIIncludePrereleases: raw.questUIIncludePrereleases === true,
+        orionIncludePrereleases: raw.orionIncludePrereleases === true,
         checkOrion: raw.checkOrion !== false
     };
 }
@@ -308,7 +311,7 @@ function recomputeCachedPolicy(now = Date.now()): void {
     if (cachedQuestUIReleases) {
         snapshot = {
             ...snapshot,
-            questUI: resolvePluginState("questui", QUESTUI_VERSION, cachedQuestUIReleases, preferences.includePrereleases, now)
+            questUI: resolvePluginState("questui", QUESTUI_VERSION, cachedQuestUIReleases, preferences.questUIIncludePrereleases, now)
         };
     }
 
@@ -319,7 +322,7 @@ function recomputeCachedPolicy(now = Date.now()): void {
     } else if (cachedOrionReleases) {
         snapshot = {
             ...snapshot,
-            orion: resolvePluginState("orion", installedOrionVersion(), cachedOrionReleases, preferences.includePrereleases, now)
+            orion: resolvePluginState("orion", installedOrionVersion(), cachedOrionReleases, preferences.orionIncludePrereleases, now)
         };
     } else {
         snapshot = { ...snapshot, orion: { kind: "idle", installed: installedOrionVersion() } };
@@ -385,7 +388,7 @@ function applyQuestUIReleaseResult(
         cachedQuestUIReleases = result.value;
         snapshot = {
             ...snapshot,
-            questUI: resolvePluginState("questui", QUESTUI_VERSION, result.value, preferences.includePrereleases, checkedAt)
+            questUI: resolvePluginState("questui", QUESTUI_VERSION, result.value, preferences.questUIIncludePrereleases, checkedAt)
         };
         return;
     }
@@ -417,7 +420,7 @@ function applyOrionReleaseResult(
         cachedOrionReleases = result.value;
         snapshot = {
             ...snapshot,
-            orion: resolvePluginState("orion", installedOrionVersion(), result.value, preferences.includePrereleases, checkedAt)
+            orion: resolvePluginState("orion", installedOrionVersion(), result.value, preferences.orionIncludePrereleases, checkedAt)
         };
         return;
     }

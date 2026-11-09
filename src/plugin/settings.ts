@@ -99,8 +99,15 @@ export default definePluginSettings({
     },
     updateIncludePrereleases: {
         type: OptionType.BOOLEAN,
-        displayName: "Updates • Include beta / pre-release",
-        description: "Include newer beta, release-candidate, and other pre-release versions when checking QuestUI and OrionQuests.",
+        displayName: "Updates • QuestUI pre-releases",
+        description: "Include newer QuestUI beta, release-candidate, and other pre-release versions.",
+        default: false,
+        onChange: notifyUpdateSettingsChanged
+    },
+    updateIncludeOrionPrereleases: {
+        type: OptionType.BOOLEAN,
+        displayName: "Updates • OrionQuests pre-releases",
+        description: "Include newer OrionQuests beta, release-candidate, and other pre-release versions independently from QuestUI.",
         default: false,
         onChange: notifyUpdateSettingsChanged
     },
