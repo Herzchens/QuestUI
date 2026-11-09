@@ -3,7 +3,7 @@ import gitHash from "~git-hash";
 import { isLegacyUnscopedEvent, sameEventAccountScope } from "./eventLogAccountLogic";
 import { inferEventCategory, sanitizeEventText } from "./eventLogLogic";
 import type { EventLogCategory, EventLogEvent } from "./eventLogTypes";
-import { getOrionIntegrationHealth } from "../../orionIntegration";
+import { getOrionIntegrationHealth } from "../orion/orionIntegration";
 import { QUESTUI_VERSION } from "../plugin/version";
 
 function discordChannel(): string {

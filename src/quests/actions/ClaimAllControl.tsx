@@ -14,7 +14,7 @@ import {
     updateClaimAllRuntimeProgress,
     type ClaimAllRuntimeState
 } from "./claimAllRuntimeState";
-import { recordQuestUIEvent } from "../../../eventLog";
+import { recordQuestUIEvent } from "../../eventLog/eventLog";
 import { useIgnoredQuests } from "../ignored/ignoredQuests";
 import { isQuestVerificationError } from "./questActionLogic";
 import { claimQuestReward, hasPendingClaimAction, QuestActionError } from "./questActions";

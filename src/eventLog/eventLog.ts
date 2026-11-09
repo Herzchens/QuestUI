@@ -19,14 +19,14 @@ import type {
     EventLogSource,
     EventLogSeverity
 } from "./eventLogTypes";
-import { getOrionEventCapabilitySource } from "../../orionCapabilities";
+import { getOrionEventCapabilitySource } from "../orion/orionCapabilities";
 import {
     findOrionConsoleShadowMatch,
     normalizeOrionCompanionEvent,
     type NormalizedOrionEvent,
     type OrionConsoleShadowCandidate
-} from "../../orionEventLogic";
-import { getOrionIntegrationHealth } from "../../orionIntegration";
+} from "../orion/orionEventLogic";
+import { getOrionIntegrationHealth } from "../orion/orionIntegration";
 
 const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>

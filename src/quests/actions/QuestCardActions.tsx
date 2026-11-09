@@ -1,15 +1,15 @@
 import { showToast, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
-import { recordQuestUIEvent } from "../../../eventLog";
+import { recordQuestUIEvent } from "../../eventLog/eventLog";
 import { setQuestIgnored } from "../ignored/ignoredQuests";
-import { shouldPauseOrionQuestBeforeIgnore } from "../../../orionControlLogic";
+import { shouldPauseOrionQuestBeforeIgnore } from "../../orion/orionControlLogic";
 import {
     getOrionControlSnapshot,
     invokeOrionEngineControl,
     invokeOrionQuestTaskControl,
     isOrionCommandReady
-} from "../../../orionIntegration";
-import { OrionQuestControl } from "../../../OrionQuestControl";
+} from "../../orion/orionIntegration";
+import { OrionQuestControl } from "../../orion/OrionQuestControl";
 import { claimQuestReward, enrollQuest, QuestActionError } from "./questActions";
 import { getClaimAllRuntimeState } from "./claimAllRuntimeState";
 import type { QuestActionResult } from "./questActions";

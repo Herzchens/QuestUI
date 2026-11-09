@@ -1,7 +1,7 @@
 import { findByCodeLazy } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
 
-import { orbRewardAmounts } from "../../orbRewardLogic";
+import { orbRewardAmounts } from "../orbs/orbRewardLogic";
 import { sameQuestShortcutSnapshot } from "./questShortcutLogic";
 import { QuestsStore } from "../plugin/stores";
 

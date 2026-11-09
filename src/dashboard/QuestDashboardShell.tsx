@@ -4,14 +4,14 @@ import { findByCodeLazy } from "@webpack";
 import { UserProfileStore, UserStore, useEffect, useStateFromStores } from "@webpack/common";
 
 import { ClaimAllControl } from "../quests/actions/ClaimAllControl";
-import { EventLogButton } from "../../EventLogViewer";
-import { isOrionCommandReady } from "../../orionIntegration";
-import { OrionGlobalControls } from "../../OrionControls";
+import { EventLogButton } from "../eventLog/EventLogViewer";
+import { isOrionCommandReady } from "../orion/orionIntegration";
+import { OrionGlobalControls } from "../orion/OrionControls";
 import { useQuestOrbMultiplierState } from "../orbs/orbMultiplier";
 import { QuestDashboard, QuestDashboardToolbar } from "./QuestDashboard";
 import { QuestReloadControl } from "../quests/reload/QuestReloadControl";
 import settings from "../plugin/settings";
-import { UpdateCenterIndicator } from "../../UpdateCenter";
+import { UpdateCenterIndicator } from "../updates/UpdateCenter";
 
 import "../orion/styles/orion.css";
 import "./styles/dashboardPolish.css";

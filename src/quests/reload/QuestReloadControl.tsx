@@ -1,6 +1,6 @@
 import { showToast, useEffect, useRef, useState } from "@webpack/common";
 
-import { recordQuestUIEvent } from "../../../eventLog";
+import { recordQuestUIEvent } from "../../eventLog/eventLog";
 import { reloadQuestList } from "./questReload";
 import { shouldFinishReloadSpin } from "./questReloadLogic";
 

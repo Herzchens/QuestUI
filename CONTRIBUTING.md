@@ -22,23 +22,23 @@ Run from the Vencord root:
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testClaimAllLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionEventLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionSchedulerLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestShortcutLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrbBalanceLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testDashboardSortLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testIgnoredQuestLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testNotificationLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateNative.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestActionLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestActionRuntimeLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testClaimAllLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionCommandLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionControlLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionEventLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionSchedulerLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestReloadLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestShortcutLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orbs/testOrbBalanceLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/testDashboardSortLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testIgnoredQuestLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/notifications/testNotificationLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/testEventLogLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/testVersionChannel.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/testUpdateLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/testUpdateNative.ts
 pnpm build
 pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
@@ -209,7 +209,7 @@ Discord internals are unstable. Treat every finder/patch as a compatibility boun
 - Prefer identifiable code fragments and meaningful properties.
 - Avoid broad minified-key lookups when safer anchors exist.
 - Review `WEBPACK_FIND_SIGNATURES` whenever a Discord webpack lookup changes.
-- Keep `scripts/checkQuestUIReporter.mjs` synchronized with lookup coverage.
+- Keep `scripts/checkQuestUIReporter.mjs` synchronized with lookup coverage; regression tests live under `tests/<feature>/`.
 - Vencord PluginManager/Commands and current-user/profile stores exposed through Vencord commons are not new Discord webpack finders.
 
 ## Testing

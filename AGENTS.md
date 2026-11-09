@@ -46,28 +46,29 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 ## Repository map
 
 - `index.tsx` — plugin metadata, lifecycle wiring, and Vencord patches.
-- `QuestButton.tsx` — shortcuts, status indicators, counters, dashboard/open-home behavior.
-- `QuestDashboard.tsx` — Dashboard cards, filters, artwork/rewards, native progress, summary, ignored catalogue, and expiry presentation.
-- `QuestDashboardShell.tsx` — visible **Quest Dashboard** title/native Quest icon, Nitro/Xbox+ source tag, and fixed header tools.
-- `dashboardSortLogic.ts` — persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
-- `ignoredQuests.ts`, `ignoredQuestLogic.ts` — account-scoped persisted Ignore/Unignore presentation state and pure normalization/update logic.
-- `notifications.ts`, `notificationLogic.ts` — QuestStore new-Available/completion observation, Event Log problem observation, notification deduplication, and pure transition/severity logic.
-- `QuestOrbBalance.tsx`, `orbBalance.ts`, `orbBalanceLogic.ts` — native VirtualCurrencyStore Orb balance and display state.
-- `OrionStatus.tsx`, `orionStatusLogic.ts`, `version.ts`, `versionChannel.ts` — runtime health/version metadata and release-channel styling.
-- `EventLogViewer.tsx`, `EventLogWindowedScroller.tsx`, `eventLog.ts`, `eventLogTypes.ts`, `eventLogLogic.ts`, `eventLogAccountLogic.ts`, `eventLogValidation.ts`, `eventLogPage.ts`, `eventLogPaginationLogic.ts`, `eventLogVirtualizationLogic.ts`, `native.ts`, `diagnosticReport.ts` — Event Log capture, account scoping, persistence/querying, stable pagination/windowing, detail UI, and sanitized reports.
+- `src/dashboard/QuestButton.tsx` — shortcuts, status indicators, counters, dashboard/open-home behavior.
+- `src/dashboard/QuestDashboard.tsx` — Dashboard cards, filters, artwork/rewards, native progress, summary, ignored catalogue, and expiry presentation.
+- `src/dashboard/QuestDashboardShell.tsx` — visible **Quest Dashboard** title/native Quest icon, Nitro/Xbox+ source tag, and fixed header tools.
+- `src/dashboard/dashboardSortLogic.ts` — persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
+- `src/quests/ignored/ignoredQuests.ts`, `src/quests/ignored/ignoredQuestLogic.ts` — account-scoped persisted Ignore/Unignore presentation state and pure normalization/update logic.
+- `src/notifications/notifications.ts`, `src/notifications/notificationLogic.ts` — QuestStore new-Available/completion observation, Event Log problem observation, notification deduplication, and pure transition/severity logic.
+- `src/orbs/QuestOrbBalance.tsx`, `src/orbs/orbBalance.ts`, `src/orbs/orbBalanceLogic.ts` — native VirtualCurrencyStore Orb balance and display state.
+- `src/orion/OrionStatus.tsx`, `src/orion/orionStatusLogic.ts`, `src/plugin/version.ts`, `src/updates/versionChannel.ts` — runtime health/version metadata and release-channel styling.
+- `src/eventLog/EventLogViewer.tsx`, `src/eventLog/EventLogWindowedScroller.tsx`, `src/eventLog/eventLog.ts`, `src/eventLog/eventLogTypes.ts`, `src/eventLog/eventLogLogic.ts`, `src/eventLog/eventLogAccountLogic.ts`, `src/eventLog/eventLogValidation.ts`, `src/eventLog/eventLogPage.ts`, `src/eventLog/eventLogPaginationLogic.ts`, `src/eventLog/eventLogVirtualizationLogic.ts`, `native.ts`, `src/eventLog/diagnosticReport.ts` — Event Log capture, account scoping, persistence/querying, stable pagination/windowing, detail UI, and sanitized reports.
 - `orionCapabilities.ts`, `orionEventLogic.ts` — optional Orion structured-event capability discovery, validation, semantic normalization, and console-shadow reconciliation.
 - `orionScheduler.ts`, `orionSchedulerLogic.ts` — optional Orion scheduler snapshot/subscription and unordered live-batch normalization used only for published scheduler state; no queue order is inferred.
 - `dashboardPolish.css` — title sweep, Nitro/Xbox+ source-badge surface, summary layout, and elapsed-progress tones.
-- `QuestCardActions.tsx` — explicit Accept/Claim, Ignore/Unignore with exact-ID Orion pause when active, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
-- `ClaimAllControl.tsx`, `claimAllLogic.ts`, `claimAllRuntimeState.ts` — bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
-- `questActions.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
-- `questData.ts` — normalization/filtering/sorting and live read-only QuestStore snapshot source.
-- `questReload.ts`, `questReloadLogic.ts`, `QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
-- `UpdateCenter.tsx`, `updates.ts`, `updateLogic.ts`, `updateNative.ts`, `updateNativeEngine.ts`, `orionUpdateNative.ts`, `orionUpdateNativeEngine.ts` — release discovery, cached scheduling, Dashboard/Settings update UI, signed fail-closed QuestUI updates, clean-official-checkout Orion updates, and injectable real-git updater engines.
-- `orionCommandLogic.ts`, `orionControlLogic.ts`, `orionIntegration.ts` — companion validation, state machine, scheduler-state refinement, and safe delegation.
-- `OrionControls.tsx`, `OrionQuestControl.tsx`, `orionIcons.tsx` — global/per-Quest controls and shared icons.
+- `src/quests/actions/QuestCardActions.tsx` — explicit Accept/Claim, Ignore/Unignore with exact-ID Orion pause when active, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
+- `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAllLogic.ts`, `src/quests/actions/claimAllRuntimeState.ts` — bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
+- `src/quests/actions/questActions.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
+- `src/quests/questData.ts` — normalization/filtering/sorting and live read-only QuestStore snapshot source.
+- `src/quests/reload/questReload.ts`, `src/quests/reload/questReloadLogic.ts`, `src/quests/reload/QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
+- `src/updates/UpdateCenter.tsx`, `src/updates/updates.ts`, `src/updates/updateLogic.ts`, `src/updates/questui/updateNative.ts`, `src/updates/questui/updateNativeEngine.ts`, `src/updates/orion/orionUpdateNative.ts`, `src/updates/orion/orionUpdateNativeEngine.ts` — release discovery, cached scheduling, Dashboard/Settings update UI, signed fail-closed QuestUI updates, clean-official-checkout Orion updates, and injectable real-git updater engines.
+- `src/orion/orionCommandLogic.ts`, `src/orion/orionControlLogic.ts`, `src/orion/orionIntegration.ts` — companion validation, state machine, scheduler-state refinement, and safe delegation.
+- `src/orion/OrionControls.tsx`, `src/orion/OrionQuestControl.tsx`, `src/orion/orionIcons.tsx` — global/per-Quest controls and shared icons.
 - `actions.css`, `orion.css`, `orionScheduler.css`, `reload.css` — action/control styling.
-- `scripts/` — pure regression tests and Stable/Canary reporter checks.
+- `tests/` — feature-grouped pure regression tests.
+- `scripts/` — Stable/Canary reporter tooling.
 - `.github/workflows/compatibility.yml` — build/type-check, pure tests, Orion matrix, bundle checks, reporters.
 - `docs/RELEASES.md` — release history, current Stable guidance, and publishing checklist.
 
@@ -83,24 +84,24 @@ Run from the Vencord root:
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestActionRuntimeLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testClaimAllLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionCommandLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionControlLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionEventLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionSchedulerLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestReloadLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testQuestShortcutLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrbBalanceLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testDashboardSortLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testIgnoredQuestLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testNotificationLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testEventLogLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testVersionChannel.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateLogic.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testUpdateNative.ts
-pnpm exec tsx src/userplugins/QuestUI/scripts/testOrionUpdateNative.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestActionLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestActionRuntimeLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testClaimAllLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionCommandLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionControlLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionEventLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/testOrionSchedulerLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestReloadLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testQuestShortcutLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orbs/testOrbBalanceLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/testDashboardSortLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/testIgnoredQuestLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/notifications/testNotificationLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/testEventLogLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/testVersionChannel.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/testUpdateLogic.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/testUpdateNative.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/testOrionUpdateNative.ts
 pnpm build
 pnpm testTsc
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test

@@ -6,15 +6,15 @@ import { useClaimAllBatchActive } from "../quests/actions/ClaimAllControl";
 import { useIgnoredQuests } from "../quests/ignored/ignoredQuests";
 import { useQuestOrbMultiplierState } from "../orbs/orbMultiplier";
 import { effectiveOrbRewardAmount } from "../orbs/orbRewardLogic";
-import type { OrionControlSnapshot } from "../../orionCommandLogic";
+import type { OrionControlSnapshot } from "../orion/orionCommandLogic";
 import {
     orionQuestProgressSource,
     orionQuestTagState,
     storedQuestTaskProgress,
     type OrionQuestTagState
-} from "../../orionControlLogic";
-import { getOrionControlSnapshot, getOrionIntegrationHealth, subscribeOrionControlState } from "../../orionIntegration";
-import { OrionIntegrationStatus } from "../../OrionStatus";
+} from "../orion/orionControlLogic";
+import { getOrionControlSnapshot, getOrionIntegrationHealth, subscribeOrionControlState } from "../orion/orionIntegration";
+import { OrionIntegrationStatus } from "../orion/OrionStatus";
 import { QuestCardActions } from "../quests/actions/QuestCardActions";
 import { QuestOrbBalance } from "../orbs/QuestOrbBalance";
 import { QuestOrbIcon } from "../orbs/QuestOrbIcon";
@@ -31,9 +31,9 @@ import {
 import type { NormalizedQuest, QuestTaskType } from "../quests/questData";
 import { normalizeDashboardSortMode, sortDashboardQuests, type DashboardSortMode } from "./dashboardSortLogic";
 import { QUESTUI_VERSION } from "../plugin/version";
-import { versionChannelClass } from "../../versionChannel";
+import { versionChannelClass } from "../updates/versionChannel";
 import settings from "../plugin/settings";
-import { DashboardUpdateNotice } from "../../UpdateCenter";
+import { DashboardUpdateNotice } from "../updates/UpdateCenter";
 
 interface DiscordQuestCompletion {
     completedRatio: number;
