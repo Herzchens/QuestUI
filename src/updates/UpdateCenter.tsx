@@ -1,7 +1,6 @@
 import { relaunch } from "@utils/native";
 import { Popout, useEffect, useRef, useState } from "@webpack/common";
 
-import type { QuestUIUpdateResult } from "./questui/native";
 import { checkForUpdates, getUpdateSnapshot, subscribeUpdateState, type PluginUpdateState, type UpdateProduct, type UpdateSnapshot } from "./runtime";
 import { managedNative as Native, runManagedReleaseUpdate, runOrionUpdateDecision, saveSkippedUpdate, saveUpdateReminder, toastFailure, type AvailableUpdateState, type ManagedReleaseUpdateResult, type UpdatePendingAction } from "./managed";
 import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, dashboardAvailabilityLines, formatCompactTimestamp, formatTimestamp, productLabel, safeOpenRelease, stateCopy, stateTone, visibleReleaseVersion, visibleUpdate } from "./status";
@@ -108,37 +107,40 @@ function UpdateReleaseCard({ product, state }: {
 }) {
     const [pending, setPending] = useState<UpdatePendingAction>(null);
     const [updateResult, setUpdateResult] = useState<ManagedReleaseUpdateResult | null>(null);
-    const [questUIInspection, setQuestUIInspection] = useState<QuestUIUpdateResult | null>(null);
-    const [questUIInspectionPending, setQuestUIInspectionPending] = useState(false);
+    const [checkoutInspection, setCheckoutInspection] = useState<ManagedReleaseUpdateResult | null>(null);
+    const [checkoutInspectionPending, setCheckoutInspectionPending] = useState(false);
     const label = productLabel(product);
     const nativeAvailable = Native !== null;
 
     useEffect(() => {
-        if (product !== "questui" || !Native) {
-            setQuestUIInspection(null);
-            setQuestUIInspectionPending(false);
+        if (!Native) {
+            setCheckoutInspection(null);
+            setCheckoutInspectionPending(false);
             return;
         }
 
         let cancelled = false;
-        setQuestUIInspection(null);
-        setQuestUIInspectionPending(true);
+        setCheckoutInspection(null);
+        setCheckoutInspectionPending(true);
+        const inspect = product === "questui"
+            ? Native.inspectQuestUICheckout
+            : Native.inspectOrionCheckout;
 
-        void Native.inspectQuestUICheckout()
+        void inspect()
             .then(result => {
-                if (!cancelled) setQuestUIInspection(result);
+                if (!cancelled) setCheckoutInspection(result);
             })
             .catch(error => {
                 if (cancelled) return;
-                setQuestUIInspection({
+                setCheckoutInspection({
                     ok: false,
                     status: "failed",
-                    message: "QuestUI could not inspect this managed checkout.",
+                    message: label + " could not inspect this managed checkout.",
                     diagnostic: error instanceof Error ? error.message : String(error)
                 });
             })
             .finally(() => {
-                if (!cancelled) setQuestUIInspectionPending(false);
+                if (!cancelled) setCheckoutInspectionPending(false);
             });
 
         return () => {
@@ -147,17 +149,18 @@ function UpdateReleaseCard({ product, state }: {
     }, [product, state.installed, state.release.tagName]);
 
     const canNativeUpdate = nativeAvailable
-        && (product !== "questui" || (!questUIInspectionPending && questUIInspection?.ok === true));
+        && !checkoutInspectionPending
+        && checkoutInspection?.ok === true;
     const awaitingDecision = product === "orion"
         && updateResult?.status === "decision-required"
         && updateResult.decision != null;
-    const questUIInspectionMessage = product !== "questui" || !nativeAvailable
+    const checkoutInspectionMessage = !nativeAvailable
         ? null
-        : questUIInspectionPending || questUIInspection == null
-            ? "Checking whether this QuestUI checkout can be updated safely…"
-            : questUIInspection.ok
+        : checkoutInspectionPending || checkoutInspection == null
+            ? "Checking whether this " + label + " checkout can be updated safely…"
+            : checkoutInspection.ok
                 ? null
-                : questUIInspection.message;
+                : checkoutInspection.message;
 
     const updateRelease = () => {
         if (!canNativeUpdate || pending) return;
@@ -196,8 +199,8 @@ function UpdateReleaseCard({ product, state }: {
             {!nativeAvailable && (
                 <span className="quest-ui-update-suppressed-copy">Managed source updates require Vencord desktop. Use View release.</span>
             )}
-            {questUIInspectionMessage && (
-                <span className="quest-ui-update-suppressed-copy">{questUIInspectionMessage}</span>
+            {checkoutInspectionMessage && (
+                <span className="quest-ui-update-suppressed-copy">{checkoutInspectionMessage}</span>
             )}
 
             <UpdateResultNotice result={updateResult} />

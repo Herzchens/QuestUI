@@ -169,6 +169,7 @@ jobs:
             'Managed source updates require Vencord desktop'
             'You are up to date'
             'You are turning off AutoUpdater, please check update manually'
+            'inspectOrionCheckout'
             'updateOrionRelease'
           )
           for marker in "${required_markers[@]}"; do
@@ -228,7 +229,9 @@ jobs:
           grep -Fq 'Update trace' src/userplugins/QuestUI/src/eventLog/presentation.tsx
           grep -Fq 'queryIdentityRef.current !== queryIdentity' src/userplugins/QuestUI/src/eventLog/EventLogViewer.tsx
           grep -Fq 'hardReset ? 120 : 0' src/userplugins/QuestUI/src/eventLog/EventLogViewer.tsx
+          grep -Fq 'inspectOrionCheckout' src/userplugins/QuestUI/native.ts
           grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/native.ts
+          grep -Fq 'Rollback dist: previous runtime restored successfully; no rebuild required' src/userplugins/QuestUI/src/updates/orion/engine.ts
           grep -Fq 'nyxxbit/discord-quest-completer' dist/vencordDesktopMain.js
           grep -Fq 'Automatic OrionQuests updates require the official main branch' dist/vencordDesktopMain.js
           grep -Fq 'decision-required' dist/vencordDesktopMain.js

@@ -46,6 +46,10 @@ const updater = createOrionUpdateEngine({
     buildCommand: BUILD_COMMAND
 });
 
+export async function inspectOrionCheckout(_: IpcMainInvokeEvent): Promise<OrionUpdateResult> {
+    return updater.inspectCheckout();
+}
+
 export async function updateOrionRelease(
     _: IpcMainInvokeEvent,
     runningVersionInput: string,

@@ -1,12 +1,14 @@
 import { execFile as execFileCallback } from "child_process";
 import { createHash } from "crypto";
-import { lstat, readFile, readlink, readdir, stat } from "fs/promises";
+import { cp, lstat, mkdtemp, readFile, readlink, readdir, rm, stat } from "fs/promises";
+import { tmpdir } from "os";
 import { join } from "path";
 import { promisify } from "util";
 
 import { compareSemver, parseSemver } from "../logic";
 
 export type OrionUpdateStatus =
+    | "ready"
     | "updated"
     | "kept"
     | "decision-required"
@@ -25,6 +27,7 @@ export type OrionUpdateStatus =
 
 export type OrionUpdatePhase =
     | "preflight"
+    | "snapshot"
     | "fetch"
     | "validate-target"
     | "decision"
@@ -90,6 +93,8 @@ interface OrionUpdateOperation {
     tagRef: string | null;
     phase: OrionUpdatePhase;
     trace: string[];
+    distSnapshot: VencordDistSnapshot | null;
+    preserveDistSnapshot: boolean;
 }
 
 interface PreparedOrionCheckout {
@@ -111,9 +116,15 @@ interface OrionUpdateStep<T> {
     value: T | null;
 }
 
+interface VencordDistSnapshot {
+    root: string;
+    dist: string;
+}
+
 const execFile = promisify(execFileCallback);
 const MAX_BUFFER = 16 * 1024 * 1024;
 const DECISION_TTL_MS = 10 * 60 * 1000;
+const VENCORD_RUNTIME_FILES = ["patcher.js", "preload.js", "renderer.js", "renderer.css"] as const;
 
 export function normalizeOrionUpdaterRepoUrl(value: string): string {
     return value.trim()
@@ -235,6 +246,70 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         }
     }
 
+    async function verifyVencordRuntimeDist(distPath: string): Promise<void> {
+        for (const name of VENCORD_RUNTIME_FILES) {
+            const path = join(distPath, name);
+            const info = await stat(path);
+            if (!info.isFile() || info.size <= 0) throw new Error("Vencord runtime file " + name + " is missing or empty.");
+        }
+    }
+
+    async function snapshotVencordDist(): Promise<VencordDistSnapshot> {
+        const currentDist = join(config.vencordSrcDir, "dist");
+        await verifyVencordRuntimeDist(currentDist);
+        const root = await mkdtemp(join(tmpdir(), "questui-orion-dist-rollback-"));
+        const snapshotDist = join(root, "dist");
+        try {
+            await cp(currentDist, snapshotDist, { recursive: true, force: true });
+            await verifyVencordRuntimeDist(snapshotDist);
+            return { root, dist: snapshotDist };
+        } catch (error) {
+            await rm(root, { recursive: true, force: true }).catch(() => undefined);
+            throw error;
+        }
+    }
+
+    async function restoreVencordDist(snapshot: VencordDistSnapshot): Promise<void> {
+        const currentDist = join(config.vencordSrcDir, "dist");
+        await rm(currentDist, { recursive: true, force: true });
+        await cp(snapshot.dist, currentDist, { recursive: true, force: true });
+        await verifyVencordRuntimeDist(currentDist);
+    }
+
+    async function cleanupVencordDistSnapshot(snapshot: VencordDistSnapshot | null): Promise<void> {
+        if (!snapshot) return;
+        await rm(snapshot.root, { recursive: true, force: true }).catch(() => undefined);
+    }
+
+    async function captureRuntimeSnapshot(operation: OrionUpdateOperation, runningVersion: string, targetVersion: string, currentHead: string, targetCommit: string, method: string): Promise<OrionUpdateStep<VencordDistSnapshot>> {
+        operation.phase = "snapshot";
+        operation.trace.push("Snapshot: preserve the current verified Vencord dist before checkout mutation");
+        try {
+            const snapshot = await snapshotVencordDist();
+            operation.distSnapshot = snapshot;
+            operation.trace.push("Snapshot: current Vencord dist preserved successfully");
+            return { blocked: null, value: snapshot };
+        } catch (error) {
+            operation.trace.push("Snapshot: failed; update cancelled before checkout mutation");
+            return {
+                blocked: {
+                    ok: false,
+                    status: "failed",
+                    phase: "snapshot",
+                    method,
+                    trace: [...operation.trace],
+                    diagnostic: diagnosticText(error),
+                    message: "OrionQuests could not preserve the current Vencord build for safe rollback. Nothing was changed.",
+                    fromVersion: runningVersion,
+                    toVersion: targetVersion,
+                    fromCommit: currentHead,
+                    toCommit: targetCommit
+                },
+                value: null
+            };
+        }
+    }
+
     async function isAncestor(dir: string, ancestor: string, descendant: string): Promise<boolean> {
         try {
             await git(dir, "merge-base", "--is-ancestor", ancestor, descendant);
@@ -337,7 +412,9 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         }
 
         const checkout = candidates[0];
-        if (!await exists(join(checkout, ".git"))) {
+        try {
+            if (await gitText(checkout, "rev-parse", "--is-inside-work-tree") !== "true") throw new Error("not a worktree");
+        } catch {
             return {
                 checkout: null,
                 blocked: {
@@ -400,8 +477,10 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         targetCommit: string,
         discardedLocalWork: boolean,
         method: string,
-        trace: string[]
+        operation: OrionUpdateOperation
     ): Promise<OrionUpdateResult> {
+        const trace = operation.trace;
+        const distSnapshot = operation.distSnapshot;
         let phase: OrionUpdatePhase = "build";
         const buildCommand = config.buildCommand ?? "Vencord build command";
         trace.push("Build: " + buildCommand);
@@ -416,42 +495,47 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
 
             if (!await checkoutStillMatches(checkout, targetCommit, "main")) {
                 trace.push("Rollback: refused because the checkout changed after the failed build");
+                operation.preserveDistSnapshot = distSnapshot != null;
                 return {
                     ok: false,
                     status: "rollback-failed",
                     phase,
                     method,
                     trace: [...trace],
-                    message: "The " + targetVersion + " build failed, and the OrionQuests checkout changed while the build was running. Automatic rollback refused to overwrite the newer local state.",
+                    message: "The " + targetVersion + " build failed, and the OrionQuests checkout changed while the build was running. Automatic rollback refused to overwrite the newer local state."
+                        + (distSnapshot ? " A recovery snapshot was retained in the system temp directory." : ""),
                     fromVersion: runningVersion,
                     toVersion: targetVersion,
                     fromCommit: currentHead,
                     toCommit: targetCommit,
-                    diagnostic: buildDiagnostic
+                    diagnostic: [buildDiagnostic, distSnapshot ? "Recovery snapshot retained in system temp: " + distSnapshot.dist : ""].filter(Boolean).join("\n\n")
                 };
             }
 
             try {
-                trace.push("Rollback: git reset --hard " + shortCommit(currentHead));
+                if (!distSnapshot) throw new Error("Pre-update Vencord dist snapshot is unavailable.");
+                trace.push("Rollback checkout: git reset --hard " + shortCommit(currentHead));
                 await git(checkout, "reset", "--hard", currentHead);
-                trace.push("Rollback build: " + buildCommand);
-                await config.buildVencord();
-                trace.push("Rollback build: completed successfully");
+                trace.push("Rollback dist: restore the pre-update Vencord runtime snapshot");
+                await restoreVencordDist(distSnapshot);
+                trace.push("Rollback dist: previous runtime restored successfully; no rebuild required");
             } catch (rollbackError) {
                 trace.push("Rollback: failed");
+                operation.preserveDistSnapshot = distSnapshot != null;
                 return {
                     ok: false,
                     status: "rollback-failed",
                     phase,
                     method,
                     trace: [...trace],
-                    message: "The update build failed and OrionQuests could not fully rebuild the previous checkout."
-                        + (discardedLocalWork ? " Uncommitted work that was explicitly discarded cannot be restored." : ""),
+                    message: "The update build failed and OrionQuests could not fully restore the previous Vencord runtime."
+                        + (discardedLocalWork ? " Uncommitted work that was explicitly discarded cannot be restored." : "")
+                        + (distSnapshot ? " A recovery snapshot was retained in the system temp directory." : ""),
                     fromVersion: runningVersion,
                     toVersion: targetVersion,
                     fromCommit: currentHead,
                     toCommit: targetCommit,
-                    diagnostic: [buildDiagnostic, diagnosticText(rollbackError)].filter(Boolean).join(" | ")
+                    diagnostic: [buildDiagnostic, diagnosticText(rollbackError), distSnapshot ? "Recovery snapshot retained in system temp: " + distSnapshot.dist : ""].filter(Boolean).join("\n\n")
                 };
             }
 
@@ -461,7 +545,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
                 phase: "build",
                 method,
                 trace: [...trace],
-                message: "The " + targetVersion + " build failed. OrionQuests restored the previous commit and rebuilt it successfully."
+                message: "The " + targetVersion + " build failed. OrionQuests restored the previous commit and the pre-update Vencord runtime."
                     + (discardedLocalWork ? " Uncommitted work that you explicitly discarded remains discarded." : ""),
                 fromVersion: runningVersion,
                 toVersion: targetVersion,
@@ -769,6 +853,10 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         operation: OrionUpdateOperation
     ): Promise<OrionUpdateResult> {
         const trace = operation.trace;
+        const snapshotStep = await captureRuntimeSnapshot(operation, runningVersion, targetVersion, pending.currentHead, pending.targetCommit, "discard-reset");
+        if (snapshotStep.blocked) return snapshotStep.blocked;
+
+        operation.phase = "checkout";
         trace.push("Checkout: git reset --hard " + shortCommit(pending.targetCommit));
         await git(checkout, "reset", "--hard", pending.targetCommit);
         trace.push("Cleanup: git clean -fd");
@@ -799,7 +887,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             pending.targetCommit,
             true,
             "discard-reset",
-            trace
+            operation
         );
     }
 
@@ -1033,6 +1121,9 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             };
         }
 
+        const snapshotStep = await captureRuntimeSnapshot(operation, runningVersion, targetVersion, currentHead, targetCommit, "fast-forward");
+        if (snapshotStep.blocked) return snapshotStep.blocked;
+
         operation.phase = "checkout";
         trace.push("Checkout: git merge --ff-only --quiet " + shortCommit(targetCommit));
         try {
@@ -1080,7 +1171,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             targetCommit,
             false,
             "fast-forward",
-            trace
+            operation
         );
     }
 
@@ -1118,6 +1209,9 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             return null;
         }
 
+        const snapshotStep = await captureRuntimeSnapshot(operation, runningVersion, targetVersion, currentHead, targetCommit, "rewrite-reset");
+        if (snapshotStep.blocked) return snapshotStep.blocked;
+
         operation.phase = "checkout";
         trace.push("Rewrite recovery proof: branch, HEAD, cleanliness and fetched upstream revalidated");
         trace.push("Checkout: git reset --hard " + shortCommit(targetCommit));
@@ -1148,7 +1242,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             targetCommit,
             false,
             "rewrite-reset",
-            trace
+            operation
         );
     }
 
@@ -1251,6 +1345,35 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         return createDecisionRequired(prepared, runningVersion, targetVersion, operation);
     }
 
+    async function inspectCheckout(): Promise<OrionUpdateResult> {
+        try {
+            if (!await exists(join(config.vencordSrcDir, "package.json")) || !await exists(join(config.vencordSrcDir, "scripts", "build", "build.mjs"))) {
+                return { ok: false, status: "unsupported-install", phase: "preflight", method: "inspect", message: "OrionQuests could not locate the Vencord source tree required for a managed rebuild." };
+            }
+            const located = await locateManagedCheckout();
+            if (located.blocked) return { ...located.blocked, method: "inspect" };
+            const checkout = located.checkout;
+            if (await currentBranch(checkout) !== "main") {
+                return { ok: false, status: "custom-checkout", phase: "preflight", method: "inspect", message: "OrionQuests managed updates require the checkout to stay on main." };
+            }
+            const head = await gitText(checkout, "rev-parse", "HEAD");
+            const source = await readFile(join(checkout, "index.tsx"), "utf8");
+            const version = sourceVersion(source);
+            const changes = await statusRows(checkout);
+            return {
+                ok: true,
+                status: "ready",
+                phase: "preflight",
+                method: "inspect",
+                message: changes.length > 0 ? "OrionQuests is a managed official checkout. Local work will require Keep or Discard & update." : "OrionQuests is a managed official checkout and is ready for a safe update.",
+                ...(version ? { fromVersion: version } : {}),
+                fromCommit: head
+            };
+        } catch (error) {
+            return { ok: false, status: "failed", phase: "preflight", method: "inspect", message: "OrionQuests checkout inspection failed.", diagnostic: diagnosticText(error) };
+        }
+    }
+
     async function updateRelease(
         runningVersionInput: string,
         targetVersionInput: string,
@@ -1287,7 +1410,9 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             checkout: null,
             tagRef: null,
             phase: decision ? "decision" : "preflight",
-            trace: []
+            trace: [],
+            distSnapshot: null,
+            preserveDistSnapshot: false
         };
 
         try {
@@ -1312,11 +1437,13 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             if (operation.checkout && operation.tagRef) {
                 await deleteRef(operation.checkout, operation.tagRef);
             }
+            if (!operation.preserveDistSnapshot) await cleanupVencordDistSnapshot(operation.distSnapshot);
             updateInFlight = false;
         }
     }
 
     return {
+        inspectCheckout,
         updateRelease
     };
 }
