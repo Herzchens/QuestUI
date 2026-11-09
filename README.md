@@ -59,7 +59,7 @@ The capture above is a real Discord runtime screenshot supplied by the maintaine
 
 - Persistent **Event Log** with account-aware searchable/filterable diagnostics, per-event details, sanitized one-click bug reports, complete pagination, and large-log windowed rendering
 
-- Dashboard/Settings **Update Center** with release checks, independent QuestUI/OrionQuests pre-release opt-ins, a pinned-signature managed QuestUI updater, and an explicit QuestUI-owned OrionQuests source updater. Clean official `main` checkouts update directly; dirty/divergent official-main checkouts present **Keep** or **Discard & update**, with destructive consent rebound to the exact checkout snapshot before reset/clean. Vencord rebuilds after update and rolls back the previous commit on build failure.
+- Dashboard/Settings **Update Center** with per-product release-check health and last-success timestamps, independent QuestUI/OrionQuests pre-release opt-ins, a pinned-signature managed QuestUI updater, and an explicit QuestUI-owned OrionQuests source updater. One release feed can fail without erasing the other product's successful state or cached release result. Clean official `main` checkouts update directly; dirty/divergent official-main checkouts present **Keep** or **Discard & update**, with destructive consent rebound to the exact checkout snapshot before reset/clean. Vencord rebuilds after update and rolls back the previous commit on build failure.
 
 - Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
 

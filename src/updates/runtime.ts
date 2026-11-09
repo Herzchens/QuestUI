@@ -2,10 +2,13 @@ import * as DataStore from "@api/DataStore";
 import { plugins } from "@api/PluginManager";
 
 import {
+    nextUpdateHealthTimestamps,
     normalizeUpdateCheckHours,
+    normalizeUpdateHealthTimestamps,
     parseSemver,
     selectLatestEligibleRelease,
     shouldRunScheduledUpdateCheck,
+    updateScheduleBaseline,
     type ReleaseLike
 } from "./logic";
 import { QUESTUI_VERSION } from "../plugin/version";
@@ -31,11 +34,17 @@ export type PluginUpdateState =
     | { kind: "available"; installed: string; release: UpdateRelease; suppression: UpdateSuppression; snoozeUntil: number | null; }
     | { kind: "error"; installed: string | null; message: string; };
 
+export interface ProductUpdateHealth {
+    lastSuccessfulCheckAt: number | null;
+    error: string | null;
+}
+
 export interface UpdateSnapshot {
     checking: boolean;
     checkedAt: number | null;
-    lastSuccessfulCheckAt: number | null;
     automaticChecksEnabled: boolean;
+    questUIHealth: ProductUpdateHealth;
+    orionHealth: ProductUpdateHealth;
     questUI: PluginUpdateState;
     orion: PluginUpdateState;
 }
@@ -48,8 +57,9 @@ export interface UpdatePreferences {
 }
 
 interface PersistedUpdateState {
-    version: 1;
-    lastSuccessfulCheckAt: number | null;
+    version: 2;
+    questUILastSuccessfulCheckAt: number | null;
+    orionLastSuccessfulCheckAt: number | null;
     skippedQuestUIVersion: string | null;
     skippedOrionVersion: string | null;
     snoozeQuestUIUntil: number | null;
@@ -92,16 +102,18 @@ let cachedOrionReleases: UpdateRelease[] | null = null;
 let snapshot: UpdateSnapshot = {
     checking: false,
     checkedAt: null,
-    lastSuccessfulCheckAt: null,
     automaticChecksEnabled: true,
+    questUIHealth: { lastSuccessfulCheckAt: null, error: null },
+    orionHealth: { lastSuccessfulCheckAt: null, error: null },
     questUI: { kind: "idle", installed: QUESTUI_VERSION },
     orion: { kind: "not-installed", installed: null }
 };
 
 function defaultPersistedState(): PersistedUpdateState {
     return {
-        version: 1,
-        lastSuccessfulCheckAt: null,
+        version: 2,
+        questUILastSuccessfulCheckAt: null,
+        orionLastSuccessfulCheckAt: null,
         skippedQuestUIVersion: null,
         skippedOrionVersion: null,
         snoozeQuestUIUntil: null,
@@ -112,6 +124,7 @@ function defaultPersistedState(): PersistedUpdateState {
 }
 
 function finiteTimestamp(value: unknown): number | null {
+    if (value == null || value === "") return null;
     const numeric = Number(value);
     return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
 }
@@ -148,9 +161,11 @@ function normalizeCachedReleaseList(value: unknown, product: UpdateProduct): Upd
 function normalizePersistedState(value: unknown): PersistedUpdateState {
     if (!value || typeof value !== "object" || Array.isArray(value)) return defaultPersistedState();
     const raw = value as Record<string, unknown>;
+    const health = normalizeUpdateHealthTimestamps(raw);
     return {
-        version: 1,
-        lastSuccessfulCheckAt: finiteTimestamp(raw.lastSuccessfulCheckAt),
+        version: 2,
+        questUILastSuccessfulCheckAt: health.questUI,
+        orionLastSuccessfulCheckAt: health.orion,
         skippedQuestUIVersion: normalizedString(raw.skippedQuestUIVersion),
         skippedOrionVersion: normalizedString(raw.skippedOrionVersion),
         snoozeQuestUIUntil: finiteTimestamp(raw.snoozeQuestUIUntil),
@@ -178,8 +193,14 @@ async function ensurePersistedState(): Promise<void> {
             hydrateCachesFromPersisted();
             snapshot = {
                 ...snapshot,
-                checkedAt: persisted.lastSuccessfulCheckAt,
-                lastSuccessfulCheckAt: persisted.lastSuccessfulCheckAt
+                questUIHealth: {
+                    lastSuccessfulCheckAt: persisted.questUILastSuccessfulCheckAt,
+                    error: null
+                },
+                orionHealth: {
+                    lastSuccessfulCheckAt: persisted.orionLastSuccessfulCheckAt,
+                    error: null
+                }
             };
             notify();
         });
@@ -199,6 +220,17 @@ async function reloadPersistedAfterFailure(): Promise<void> {
     try { persisted = normalizePersistedState(await DataStore.get(DATA_STORE_KEY)); }
     catch { persisted = defaultPersistedState(); }
     hydrateCachesFromPersisted();
+    snapshot = {
+        ...snapshot,
+        questUIHealth: {
+            ...snapshot.questUIHealth,
+            lastSuccessfulCheckAt: persisted.questUILastSuccessfulCheckAt
+        },
+        orionHealth: {
+            ...snapshot.orionHealth,
+            lastSuccessfulCheckAt: persisted.orionLastSuccessfulCheckAt
+        }
+    };
 }
 
 function notify(): void {
@@ -316,9 +348,17 @@ function recomputeCachedPolicy(now = Date.now()): void {
     }
 
     if (!orionInstalled()) {
-        snapshot = { ...snapshot, orion: { kind: "not-installed", installed: null } };
+        snapshot = {
+            ...snapshot,
+            orion: { kind: "not-installed", installed: null },
+            orionHealth: { ...snapshot.orionHealth, error: null }
+        };
     } else if (!preferences.checkOrion) {
-        snapshot = { ...snapshot, orion: { kind: "disabled", installed: installedOrionVersion() } };
+        snapshot = {
+            ...snapshot,
+            orion: { kind: "disabled", installed: installedOrionVersion() },
+            orionHealth: { ...snapshot.orionHealth, error: null }
+        };
     } else if (cachedOrionReleases) {
         snapshot = {
             ...snapshot,
@@ -336,11 +376,15 @@ function clearTimer(): void {
 }
 
 function nextScheduledDelay(now = Date.now()): number | null {
-    const hours = normalizeUpdateCheckHours(readPreferences().checkHours);
+    const preferences = readPreferences();
+    const hours = normalizeUpdateCheckHours(preferences.checkHours);
     if (hours === 0) return null;
 
     const interval = hours * 60 * 60 * 1000;
-    const lastSuccessful = persisted.lastSuccessfulCheckAt;
+    const lastSuccessful = updateScheduleBaseline({
+        questUI: persisted.questUILastSuccessfulCheckAt,
+        orion: persisted.orionLastSuccessfulCheckAt
+    }, preferences.checkOrion && orionInstalled());
     const dueAt = lastSuccessful == null ? now : lastSuccessful + interval;
     let delay = Math.max(0, dueAt - now);
 
@@ -388,17 +432,17 @@ function applyQuestUIReleaseResult(
         cachedQuestUIReleases = result.value;
         snapshot = {
             ...snapshot,
-            questUI: resolvePluginState("questui", QUESTUI_VERSION, result.value, preferences.questUIIncludePrereleases, checkedAt)
+            questUI: resolvePluginState("questui", QUESTUI_VERSION, result.value, preferences.questUIIncludePrereleases, checkedAt),
+            questUIHealth: { lastSuccessfulCheckAt: checkedAt, error: null }
         };
         return;
     }
 
     snapshot = {
         ...snapshot,
-        questUI: {
-            kind: "error",
-            installed: QUESTUI_VERSION,
-            message: result.error instanceof Error ? result.error.message : "QuestUI update check failed."
+        questUIHealth: {
+            ...snapshot.questUIHealth,
+            error: result.error instanceof Error ? result.error.message : "QuestUI update check failed."
         }
     };
 }
@@ -409,28 +453,36 @@ function applyOrionReleaseResult(
     checkedAt: number
 ): void {
     if (!orionInstalled()) {
-        snapshot = { ...snapshot, orion: { kind: "not-installed", installed: null } };
+        snapshot = {
+            ...snapshot,
+            orion: { kind: "not-installed", installed: null },
+            orionHealth: { ...snapshot.orionHealth, error: null }
+        };
         return;
     }
     if (!preferences.checkOrion) {
-        snapshot = { ...snapshot, orion: { kind: "disabled", installed: installedOrionVersion() } };
+        snapshot = {
+            ...snapshot,
+            orion: { kind: "disabled", installed: installedOrionVersion() },
+            orionHealth: { ...snapshot.orionHealth, error: null }
+        };
         return;
     }
     if (result?.ok) {
         cachedOrionReleases = result.value;
         snapshot = {
             ...snapshot,
-            orion: resolvePluginState("orion", installedOrionVersion(), result.value, preferences.orionIncludePrereleases, checkedAt)
+            orion: resolvePluginState("orion", installedOrionVersion(), result.value, preferences.orionIncludePrereleases, checkedAt),
+            orionHealth: { lastSuccessfulCheckAt: checkedAt, error: null }
         };
         return;
     }
 
     snapshot = {
         ...snapshot,
-        orion: {
-            kind: "error",
-            installed: installedOrionVersion(),
-            message: result?.error instanceof Error ? result.error.message : "Orion update check failed."
+        orionHealth: {
+            ...snapshot.orionHealth,
+            error: result?.error instanceof Error ? result.error.message : "Orion update check failed."
         }
     };
 }
@@ -441,12 +493,16 @@ async function persistUpdateCheck(
     wantsOrion: boolean,
     checkedAt: number
 ): Promise<void> {
-    const fullySuccessful = questResult.ok && (!wantsOrion || orionResult?.ok === true);
-    lastAttemptFailed = !fullySuccessful;
+    lastAttemptFailed = !questResult.ok || (wantsOrion && orionResult?.ok !== true);
+    const nextHealth = nextUpdateHealthTimestamps({
+        questUI: persisted.questUILastSuccessfulCheckAt,
+        orion: persisted.orionLastSuccessfulCheckAt
+    }, checkedAt, questResult.ok, wantsOrion, orionResult?.ok === true);
 
     const nextPersisted: PersistedUpdateState = {
         ...persisted,
-        lastSuccessfulCheckAt: fullySuccessful ? checkedAt : persisted.lastSuccessfulCheckAt,
+        questUILastSuccessfulCheckAt: nextHealth.questUI,
+        orionLastSuccessfulCheckAt: nextHealth.orion,
         questUIReleases: questResult.ok
             ? questResult.value.slice(0, MAX_CACHED_RELEASES)
             : persisted.questUIReleases,
@@ -477,8 +533,7 @@ async function runUpdateCheck(preferences: UpdatePreferences, startedAt: number)
     snapshot = {
         ...snapshot,
         checking: false,
-        checkedAt,
-        lastSuccessfulCheckAt: persisted.lastSuccessfulCheckAt
+        checkedAt
     };
     notify();
     scheduleNextCheck();
@@ -491,7 +546,11 @@ export async function checkForUpdates(manual = true): Promise<UpdateSnapshot> {
 
     const preferences = readPreferences();
     const now = Date.now();
-    if (!manual && !shouldRunScheduledUpdateCheck(persisted.lastSuccessfulCheckAt, now, preferences.checkHours)) {
+    const scheduleBaseline = updateScheduleBaseline({
+        questUI: persisted.questUILastSuccessfulCheckAt,
+        orion: persisted.orionLastSuccessfulCheckAt
+    }, preferences.checkOrion && orionInstalled());
+    if (!manual && !shouldRunScheduledUpdateCheck(scheduleBaseline, now, preferences.checkHours)) {
         scheduleNextCheck();
         return snapshot;
     }
@@ -560,8 +619,13 @@ export function startUpdateChecks(read: () => UpdatePreferences): void {
         if (!started) return;
         recomputeCachedPolicy();
         const preferences = readPreferences();
-        const needsOrionSeed = preferences.checkOrion && orionInstalled() && cachedOrionReleases == null;
-        if (needsOrionSeed || shouldRunScheduledUpdateCheck(persisted.lastSuccessfulCheckAt, Date.now(), preferences.checkHours)) {
+        const wantsOrion = preferences.checkOrion && orionInstalled();
+        const needsOrionSeed = wantsOrion && cachedOrionReleases == null;
+        const scheduleBaseline = updateScheduleBaseline({
+            questUI: persisted.questUILastSuccessfulCheckAt,
+            orion: persisted.orionLastSuccessfulCheckAt
+        }, wantsOrion);
+        if (needsOrionSeed || shouldRunScheduledUpdateCheck(scheduleBaseline, Date.now(), preferences.checkHours)) {
             await checkForUpdates(false);
         } else {
             scheduleNextCheck();

@@ -2,12 +2,15 @@ import assert from "node:assert/strict";
 
 import {
     compareSemver,
+    nextUpdateHealthTimestamps,
     normalizeUpdateCheckHours,
+    normalizeUpdateHealthTimestamps,
     normalizeUpdateCheckStep,
     parseSemver,
     selectLatestEligibleRelease,
     shouldRunScheduledUpdateCheck,
     updateCheckHoursFromStep,
+    updateScheduleBaseline,
     updateCheckIntervalLabel,
     updateCheckMarkerLabel
 } from "../../src/updates/logic";
@@ -96,6 +99,49 @@ function main() {
     assert.equal(shouldRunScheduledUpdateCheck(1000, 1000 + 6 * hour, 6), true);
     assert.equal(shouldRunScheduledUpdateCheck(1000, 1000 + 999 * hour, 0), false);
     assert.equal(shouldRunScheduledUpdateCheck(1000, Number.NaN, 6), false);
+
+    assert.deepEqual(
+        normalizeUpdateHealthTimestamps({ lastSuccessfulCheckAt: 1234 }),
+        { questUI: 1234, orion: 1234 }
+    );
+    assert.deepEqual(
+        normalizeUpdateHealthTimestamps({
+            lastSuccessfulCheckAt: 1234,
+            questUILastSuccessfulCheckAt: null,
+            orionLastSuccessfulCheckAt: 5678
+        }),
+        { questUI: null, orion: 5678 }
+    );
+    assert.deepEqual(
+        normalizeUpdateHealthTimestamps({ lastSuccessfulCheckAt: null }),
+        { questUI: null, orion: null }
+    );
+
+    const previousHealth = { questUI: 1000, orion: 2000 };
+    assert.deepEqual(
+        nextUpdateHealthTimestamps(previousHealth, 3000, true, true, true),
+        { questUI: 3000, orion: 3000 }
+    );
+    assert.deepEqual(
+        nextUpdateHealthTimestamps(previousHealth, 3000, true, true, false),
+        { questUI: 3000, orion: 2000 }
+    );
+    assert.deepEqual(
+        nextUpdateHealthTimestamps(previousHealth, 3000, false, true, true),
+        { questUI: 1000, orion: 3000 }
+    );
+    assert.deepEqual(
+        nextUpdateHealthTimestamps(previousHealth, 3000, false, true, false),
+        previousHealth
+    );
+    assert.deepEqual(
+        nextUpdateHealthTimestamps(previousHealth, 3000, true, false, false),
+        { questUI: 3000, orion: 2000 }
+    );
+
+    assert.equal(updateScheduleBaseline({ questUI: 3000, orion: 1000 }, true), 1000);
+    assert.equal(updateScheduleBaseline({ questUI: 3000, orion: null }, true), null);
+    assert.equal(updateScheduleBaseline({ questUI: 3000, orion: null }, false), 3000);
 
     console.log("QuestUI Update Center release logic tests — PASS");
 }

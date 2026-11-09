@@ -1,4 +1,4 @@
-import type { PluginUpdateState, UpdateProduct, UpdateRelease, UpdateSnapshot } from "./runtime";
+import type { PluginUpdateState, ProductUpdateHealth, UpdateProduct, UpdateRelease, UpdateSnapshot } from "./runtime";
 
 const RELEASE_URL_PREFIXES: Record<UpdateProduct, string> = {
     questui: "https://github.com/Herzchens/QuestUI/releases/",
@@ -73,9 +73,16 @@ export function stateTone(state: PluginUpdateState): UpdateVisualTone {
     return "muted";
 }
 
-function stateMark(state: PluginUpdateState): string {
+export function updateProductTone(state: PluginUpdateState, health: ProductUpdateHealth): UpdateVisualTone {
+    if (visibleUpdate(state)) return "available";
+    if (health.error) return "error";
+    return stateTone(state);
+}
+
+function stateMark(state: PluginUpdateState, health: ProductUpdateHealth): string {
+    if (visibleUpdate(state)) return "↑";
+    if (health.error) return "!";
     if (state.kind === "up-to-date") return "✓";
-    if (state.kind === "available" && state.suppression === null) return "↑";
     if (state.kind === "error") return "!";
     if (state.kind === "custom-version") return "•";
     if (state.kind === "disabled") return "–";
@@ -96,6 +103,15 @@ export function visibleReleaseVersion(state: PluginUpdateState): string | null {
         : null;
 }
 
+export function healthForProduct(snapshot: UpdateSnapshot, product: UpdateProduct): ProductUpdateHealth {
+    return product === "questui" ? snapshot.questUIHealth : snapshot.orionHealth;
+}
+
+function productCheckFailed(snapshot: UpdateSnapshot, product: UpdateProduct): boolean {
+    const state = product === "questui" ? snapshot.questUI : snapshot.orion;
+    return healthForProduct(snapshot, product).error != null || state.kind === "error";
+}
+
 export function combinedAvailabilityCopy(snapshot: UpdateSnapshot): string {
     const questUIVersion = visibleReleaseVersion(snapshot.questUI);
     const orionVersion = visibleReleaseVersion(snapshot.orion);
@@ -106,37 +122,48 @@ export function combinedAvailabilityCopy(snapshot: UpdateSnapshot): string {
     if (orionVersion) return `OrionQuest ${orionVersion} is available`;
     if (questUIVersion) return `QuestUI ${questUIVersion} is available`;
 
+    const questUIError = productCheckFailed(snapshot, "questui");
+    const orionError = productCheckFailed(snapshot, "orion");
+    if (questUIError && orionError) return "Update checks need attention";
+    if (questUIError) return "QuestUI update check needs attention";
+    if (orionError) return "OrionQuests update check needs attention";
+
     return "You are up to date";
 }
 
 export function dashboardAvailabilityLines(snapshot: UpdateSnapshot): readonly [string, string | null] {
     const questUIVersion = visibleReleaseVersion(snapshot.questUI);
     const orionVersion = visibleReleaseVersion(snapshot.orion);
-    const hasError = snapshot.questUI.kind === "error" || snapshot.orion.kind === "error";
 
     if (snapshot.checking) return ["Checking updates…", null];
-    if (hasError && !questUIVersion && !orionVersion) return ["Update check", "needs attention"];
     if (orionVersion && questUIVersion) {
         return [`OrionQuest ${orionVersion} and`, `QuestUI ${questUIVersion} are available`];
     }
     if (orionVersion) return [`OrionQuest ${orionVersion}`, "is available"];
     if (questUIVersion) return [`QuestUI ${questUIVersion}`, "is available"];
 
+    const questUIError = productCheckFailed(snapshot, "questui");
+    const orionError = productCheckFailed(snapshot, "orion");
+    if (questUIError && orionError) return ["Update checks", "need attention"];
+    if (questUIError) return ["QuestUI update check", "needs attention"];
+    if (orionError) return ["OrionQuests update check", "needs attention"];
+
     return ["You are up to date", null];
 }
 
-export function UpdateProductStatus({ product, state, compact = false }: {
+export function UpdateProductStatus({ product, state, health, compact = false }: {
     product: UpdateProduct;
     state: PluginUpdateState;
+    health: ProductUpdateHealth;
     compact?: boolean;
 }) {
-    const tone = stateTone(state);
+    const tone = updateProductTone(state, health);
     const target = targetVersion(state);
     const available = state.kind === "available" && state.suppression === null;
 
     return (
         <div className={`quest-ui-update-product-status is-${tone}${compact ? " is-compact" : ""}`}>
-            <span className="quest-ui-update-product-mark" aria-hidden="true">{stateMark(state)}</span>
+            <span className="quest-ui-update-product-mark" aria-hidden="true">{stateMark(state, health)}</span>
             <strong>{productLabel(product)}</strong>
             <span className="quest-ui-update-product-version">{installedVersion(state)}</span>
             {target && (

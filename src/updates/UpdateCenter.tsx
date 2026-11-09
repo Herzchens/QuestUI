@@ -3,7 +3,7 @@ import { Popout, useEffect, useRef, useState } from "@webpack/common";
 
 import { checkForUpdates, getUpdateSnapshot, subscribeUpdateState, type PluginUpdateState, type UpdateProduct, type UpdateSnapshot } from "./runtime";
 import { managedNative as Native, runManagedReleaseUpdate, runOrionUpdateDecision, saveSkippedUpdate, saveUpdateReminder, toastFailure, type AvailableUpdateState, type ManagedReleaseUpdateResult, type UpdatePendingAction } from "./managed";
-import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, dashboardAvailabilityLines, formatCompactTimestamp, formatTimestamp, productLabel, safeOpenRelease, stateCopy, stateTone, visibleReleaseVersion, visibleUpdate } from "./status";
+import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, dashboardAvailabilityLines, formatCompactTimestamp, formatTimestamp, healthForProduct, productLabel, safeOpenRelease, stateCopy, updateProductTone, visibleReleaseVersion, visibleUpdate } from "./status";
 
 import "./styles.css";
 
@@ -233,7 +233,11 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
     ];
     const available = states.filter((entry): entry is [UpdateProduct, Extract<PluginUpdateState, { kind: "available"; }>] => availableUpdate(entry[1]));
     const visibleCount = states.filter(([, state]) => visibleUpdate(state)).length;
-    const hasError = states.some(([, state]) => state.kind === "error");
+    const failedProducts = states.filter(([product, state]) =>
+        healthForProduct(snapshot, product).error != null || state.kind === "error"
+    );
+    const hasError = failedProducts.length > 0;
+    const failedProductCopy = failedProducts.map(([product]) => productLabel(product)).join(" and ");
     const availabilityCopy = combinedAvailabilityCopy(snapshot);
 
     return (
@@ -260,31 +264,41 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
                 <span className="quest-ui-update-overview-dot" aria-hidden="true" />
                 <div>
                     <strong>
-                        {snapshot.checking
-                            ? "Checking releases…"
-                            : hasError
-                                ? "Some checks need attention"
-                                : availabilityCopy}
+                        {snapshot.checking ? "Checking releases…" : availabilityCopy}
                     </strong>
                     <span>
                         {snapshot.checking
                             ? "Comparing installed versions with the configured release channels."
-                            : visibleCount > 0
-                                ? "Review the release below or update directly when supported."
-                                : hasError
-                                    ? "The last successful versions remain shown below."
-                                    : `Last checked ${formatCompactTimestamp(snapshot.lastSuccessfulCheckAt)}`}
+                            : visibleCount > 0 && hasError
+                                ? `${failedProductCopy} check needs attention; known updates remain actionable.`
+                                : visibleCount > 0
+                                    ? "Review the release below or update directly when supported."
+                                    : hasError
+                                        ? `${failedProductCopy} ${failedProducts.length === 1 ? "check needs" : "checks need"} attention; successful product state is preserved.`
+                                        : "Configured release feeds are current."}
                     </span>
                 </div>
             </div>
 
             <div className="quest-ui-update-status-grid">
-                {states.map(([product, state]) => (
-                    <div className={`quest-ui-update-status-row is-${stateTone(state)}`} key={product}>
-                        <UpdateProductStatus product={product} state={state} />
-                        <span className="quest-ui-update-status-copy">{stateCopy(product, state)}</span>
-                    </div>
-                ))}
+                {states.map(([product, state]) => {
+                    const health = healthForProduct(snapshot, product);
+                    const showHealth = state.kind !== "not-installed" && state.kind !== "disabled";
+                    return (
+                        <div className={`quest-ui-update-status-row is-${updateProductTone(state, health)}`} key={product}>
+                            <UpdateProductStatus product={product} state={state} health={health} />
+                            <div className="quest-ui-update-status-details">
+                                <span className="quest-ui-update-status-copy">{stateCopy(product, state)}</span>
+                                {health.error && <span className="quest-ui-update-status-error">{health.error}</span>}
+                                {showHealth && (
+                                    <span className="quest-ui-update-status-health">
+                                        Last successful check · {formatCompactTimestamp(health.lastSuccessfulCheckAt)}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
             {available.length > 0 && (
@@ -294,7 +308,10 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
             )}
 
             <div className="quest-ui-update-last-check">
-                <span>Last successful check · {formatTimestamp(snapshot.lastSuccessfulCheckAt)}</span>
+                <span>QuestUI last successful check · {formatTimestamp(snapshot.questUIHealth.lastSuccessfulCheckAt)}</span>
+                {snapshot.orion.kind !== "not-installed" && (
+                    <span>OrionQuests last successful check · {formatTimestamp(snapshot.orionHealth.lastSuccessfulCheckAt)}</span>
+                )}
                 {!snapshot.automaticChecksEnabled && (
                     <span className="quest-ui-update-manual-warning">
                         You are turning off AutoUpdater, please check update manually
@@ -347,7 +364,10 @@ export function DashboardUpdateNotice() {
     const questUIVersion = visibleReleaseVersion(snapshot.questUI);
     const orionVersion = visibleReleaseVersion(snapshot.orion);
     const hasUpdate = questUIVersion != null || orionVersion != null;
-    const hasError = snapshot.questUI.kind === "error" || snapshot.orion.kind === "error";
+    const hasError = snapshot.questUIHealth.error != null
+        || snapshot.orionHealth.error != null
+        || snapshot.questUI.kind === "error"
+        || snapshot.orion.kind === "error";
 
     const allCurrent = snapshot.questUI.kind === "up-to-date"
         && (
@@ -401,11 +421,19 @@ export function UpdateSettingsControl() {
     const questUpdate = visibleUpdate(snapshot.questUI);
     const orionUpdate = visibleUpdate(snapshot.orion);
     const activeCount = Number(questUpdate) + Number(orionUpdate);
+    const failedProducts = [
+        snapshot.questUIHealth.error != null || snapshot.questUI.kind === "error" ? "QuestUI" : null,
+        snapshot.orionHealth.error != null || snapshot.orion.kind === "error" ? "OrionQuests" : null
+    ].filter((value): value is string => value !== null);
     const headline = activeCount > 0
         ? `${activeCount} ${activeCount === 1 ? "update" : "updates"} available`
         : snapshot.checking
             ? "Checking releases…"
-            : `Checked ${formatCompactTimestamp(snapshot.lastSuccessfulCheckAt)}`;
+            : failedProducts.length === 1
+                ? `${failedProducts[0]} check needs attention`
+                : failedProducts.length > 1
+                    ? "Update checks need attention"
+                    : "Checks current";
 
     return (
         <div className={`quest-ui-update-settings-control${activeCount > 0 ? " has-update" : ""}`}>
@@ -415,9 +443,9 @@ export function UpdateSettingsControl() {
                     <span>{headline}</span>
                 </div>
                 <div className="quest-ui-update-settings-products">
-                    <UpdateProductStatus product="questui" state={snapshot.questUI} compact />
+                    <UpdateProductStatus product="questui" state={snapshot.questUI} health={snapshot.questUIHealth} compact />
                     {snapshot.orion.kind !== "not-installed" && (
-                        <UpdateProductStatus product="orion" state={snapshot.orion} compact />
+                        <UpdateProductStatus product="orion" state={snapshot.orion} health={snapshot.orionHealth} compact />
                     )}
                 </div>
             </div>

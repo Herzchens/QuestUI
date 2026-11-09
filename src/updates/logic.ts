@@ -138,6 +138,62 @@ export function shouldRunScheduledUpdateCheck(
     return elapsed >= hours * 60 * 60 * 1000;
 }
 
+export interface UpdateHealthTimestamps {
+    questUI: number | null;
+    orion: number | null;
+}
+
+function normalizeStoredTimestamp(value: unknown): number | null {
+    if (value == null || value === "") return null;
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
+}
+
+export function normalizeUpdateHealthTimestamps(value: unknown): UpdateHealthTimestamps {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return { questUI: null, orion: null };
+    }
+
+    const raw = value as Record<string, unknown>;
+    const legacy = normalizeStoredTimestamp(raw.lastSuccessfulCheckAt);
+    return {
+        questUI: Object.prototype.hasOwnProperty.call(raw, "questUILastSuccessfulCheckAt")
+            ? normalizeStoredTimestamp(raw.questUILastSuccessfulCheckAt)
+            : legacy,
+        orion: Object.prototype.hasOwnProperty.call(raw, "orionLastSuccessfulCheckAt")
+            ? normalizeStoredTimestamp(raw.orionLastSuccessfulCheckAt)
+            : legacy
+    };
+}
+
+export function nextUpdateHealthTimestamps(
+    current: UpdateHealthTimestamps,
+    checkedAt: number,
+    questUISucceeded: boolean,
+    orionAttempted: boolean,
+    orionSucceeded: boolean
+): UpdateHealthTimestamps {
+    const successfulAt = normalizeStoredTimestamp(checkedAt);
+    if (successfulAt == null) return { ...current };
+
+    return {
+        questUI: questUISucceeded ? successfulAt : current.questUI,
+        orion: orionAttempted && orionSucceeded ? successfulAt : current.orion
+    };
+}
+
+export function updateScheduleBaseline(
+    health: UpdateHealthTimestamps,
+    includeOrion: boolean
+): number | null {
+    const required = includeOrion
+        ? [health.questUI, health.orion]
+        : [health.questUI];
+
+    if (required.some(timestamp => !Number.isFinite(timestamp))) return null;
+    return Math.min(...required.map(Number));
+}
+
 function isReleasePrerelease(release: ReleaseLike, parsed: ParsedSemver): boolean {
     return release.prerelease === true || parsed.prerelease.length > 0;
 }
