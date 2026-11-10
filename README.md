@@ -7,11 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.4.7** is the current Stable release. It fixes #32 by restoring the Quest top-bar shortcut on current Discord Stable and Canary with a window-chrome-specific patch target and a semantic reporter gate. It also makes the managed QuestUI updater accept clean official-main-history checkouts while keeping signed release tags as the only update destination, and preflights managed checkout support before enabling in-app update. The updater also snapshots the current Vencord runtime before mutation, so a failed target build can restore the known-good `dist` without attempting a second build; copied update diagnostics now retain the full execution trace and native diagnostic.
+> **v1.5.0** is the current Stable release target. It reorganizes QuestUI into feature-local modules, hardens Orion managed-update recovery, separates QuestUI and OrionQuests release channels and update health, routes Quest notifications into the Dashboard, modernizes the Dashboard Sort/Filter controls, adds a direct QuestUI Settings shortcut, and adds enabled-by-default background Quest-list refresh with a 5-hour default interval.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
 > Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.5.0 release preparation includes maintainer live Discord/Vencord smoke validation of the final beta candidate before Stable promotion. Automated gates cover the full logic suite, background Quest reload scheduling, both managed updater integration suites, Vencord build/type-check, upstream Orion coexistence, and semantic Stable/Canary Patch Reporters.
 >
 > v1.4.7 release preparation verified the full logic and updater integration suites, Vencord build/type-check, upstream Orion coexistence, and semantic Stable/Canary Patch Reporter gates. Managed QuestUI updates now trust only clean official-main-history sources and still require a pinned-key signed target release.
 >

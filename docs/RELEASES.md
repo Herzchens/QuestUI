@@ -2,7 +2,21 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable - v1.4.7
+## Stable - v1.5.0
+
+- Source: `Herzchens/QuestUI` branch `main`.
+- Release target: **v1.5.0** (2026-11-10).
+- Reorganizes the plugin into feature-local modules without changing the standalone QuestUI/Orion source boundary.
+- Hardens Orion managed-update rollback with checkout preflight and known-good Vencord runtime snapshots while preserving fail-closed handling for unsafe or changed local state.
+- Separates QuestUI and OrionQuests pre-release opt-ins and tracks release-check health independently per product.
+- Routes New Quest, Ready to Claim, and actionable Problem notification clicks to the Quest Dashboard when a Dashboard surface is available, with Quest Home as the fallback.
+- Refreshes Dashboard utility controls with rounded-stroke Sort/Filter icons and a direct QuestUI Settings gear between Filter and Home.
+- Adds background native Quest-list refresh, enabled by default at **5h**, with **10m / 20m / 30m / 1h / 2h / 4h / 5h / 12h / 24h** choices. It runs with the Dashboard closed and relies on the existing QuestStore notification observer for newly discovered Quests.
+- Keeps Orion core control compatibility at **v4.10.7+** and does not merge QuestUI with Orion farming logic.
+- Normalizes tracked text to ASCII hyphens and gates against reintroducing en/em dashes.
+- Release preparation includes maintainer live Discord/Vencord smoke validation plus the full logic/updater suites, Vencord build/type-check, upstream Orion coexistence, and Stable/Canary Patch Reporter gates.
+
+## Previous Stable - v1.4.7
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.7** (2026-11-06).
@@ -15,7 +29,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
 - Release preparation verified the full logic/updater integration suites, Vencord build/type-check, upstream Orion coexistence, and semantic Stable/Canary Patch Reporter gates.
 
-## Previous Stable - v1.4.6
+## Earlier Stable - v1.4.6
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.6** (2026-11-05).

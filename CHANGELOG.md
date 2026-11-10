@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.5.0 - 2026-11-10
+
+- Reorganized QuestUI into feature-local dashboard, Quest, notification, Event Log, Orion, update, and plugin modules while preserving the compatibility surfaces required by existing Vencord integration points.
+- Hardened Orion managed updates with checkout preflight and a known-good Vencord runtime snapshot so target-build failures can restore the previous Orion checkout and runtime without requiring a second rebuild. Unsafe or changed rollback state still fails closed and preserves recovery evidence.
+- Split QuestUI and OrionQuests pre-release preferences while preserving the existing QuestUI setting key, and split release-check health so a failed feed no longer erases the other product's successful timestamp, cached release state, or available update.
+- Changed New Quest, Ready to Claim, and actionable Problem notification clicks to open the Quest Dashboard when a Dashboard surface is available, with Quest Home retained as the fallback.
+- Replaced the old filled Filter/Sort glyphs with lighter rounded-stroke toolbar icons and added a compact gear shortcut that opens QuestUI's native Vencord plugin settings modal directly.
+- Added enabled-by-default background Quest-list refresh. It uses Discord's existing native current-Quest fetch path without requiring the Dashboard to be open, defaults to 5 hours, and supports 10m, 20m, 30m, 1h, 2h, 4h, 5h, 12h, and 24h intervals. Newly discovered Quests continue through the existing notification observer.
+- Normalized repository text to ASCII hyphens instead of en/em dashes and added a CI contract that rejects their reintroduction in tracked text files.
+- Maintainer live Discord/Vencord smoke validation passed on the final beta candidate before Stable promotion. Automated validation covers the full logic suite, background Quest reload scheduling, both managed updater integration suites, Vencord build/type-check, upstream Orion coexistence, and Stable/Canary Patch Reporter gates.
+
 ## v1.4.7 - 2026-11-06
 
 - Fixed #32 by restoring the optional Quest top-bar shortcut on current Discord Stable and Canary. The patch now locates Discord's actual window-chrome module through the `"data-window-chrome"` marker and matches the exact `leading/title/trailing/windowKey/className/growLeading` header shape instead of the generic `let{leading` function shape.
