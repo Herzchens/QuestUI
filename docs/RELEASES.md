@@ -2,7 +2,17 @@
 
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
-## Stable - v1.5.0
+## Stable - v1.5.1
+
+- Source: `Herzchens/QuestUI` branch `main`.
+- Release target: **v1.5.1** (2026-11-11).
+- Fixes #34 by restoring root `version.ts` only as legacy managed-updater compatibility metadata while keeping `src/plugin/version.ts` canonical.
+- The current updater reads the refactored canonical path first, falls back to legacy metadata for older official releases, and rejects conflicting canonical/legacy version declarations.
+- Clean official-history v1.5.0 checkouts manually recovered with Git are valid upgrade sources even though they do not contain the legacy bridge.
+- Release metadata failures are separated from SSH signature failures so diagnostics identify the actual failed contract.
+- Stable candidates must remain valid targets for the oldest managed updater still declared supported. The current compatibility floor is the updater shipped in v1.4.7.
+
+## Previous Stable - v1.5.0
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.5.0** (2026-11-10).

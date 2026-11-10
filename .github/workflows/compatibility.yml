@@ -19,6 +19,34 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: questui
+          fetch-depth: 0
+
+      - name: Verify managed updater release compatibility
+        working-directory: questui
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f src/plugin/version.ts
+          test -f version.ts
+
+          node <<'NODE'
+          const fs = require("fs");
+          const extract = path => {
+              const source = fs.readFileSync(path, "utf8");
+              const match = source.match(/QUESTUI_VERSION\s*=\s*["']([^"']+)["']/);
+              if (!match) throw new Error("Missing QUESTUI_VERSION in " + path);
+              return match[1];
+          };
+          const canonical = extract("src/plugin/version.ts");
+          const legacy = extract("version.ts");
+          if (canonical !== legacy) {
+              throw new Error("Canonical and legacy QuestUI versions disagree: " + canonical + " vs " + legacy);
+          }
+          NODE
+
+          git merge-base --is-ancestor v1.4.7 HEAD
+          git show v1.4.7:updateNativeEngine.ts | grep -Fq '${commit}:version.ts'
+          git show v1.4.7:updateNativeEngine.ts | grep -Fq 'join(config.questUIDir, "version.ts")'
 
       - name: Checkout Vencord
         uses: actions/checkout@v7
@@ -199,7 +227,7 @@ jobs:
             'Quest list refreshed.'
             'OrionQuests'
             'Orion Quest Version Incompatible'
-            'v1.5.0'
+            'v1.5.1'
             'Highest Orb Reward'
             'Shortest Required Time'
             'Event Log'

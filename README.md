@@ -7,11 +7,13 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.5.0** is the current Stable release target. It reorganizes QuestUI into feature-local modules, hardens Orion managed-update recovery, separates QuestUI and OrionQuests release channels and update health, routes Quest notifications into the Dashboard, modernizes the Dashboard Sort/Filter controls, adds a direct QuestUI Settings shortcut, and adds enabled-by-default background Quest-list refresh with a 5-hour default interval.
+> **v1.5.1** is the current Stable release target. It fixes #34 by restoring legacy managed-updater compatibility after the v1.5.0 source-layout refactor. The runtime version remains canonical at `src/plugin/version.ts`; root `version.ts` exists only as compatibility metadata for supported older updaters.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
 > Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
+>
+> v1.5.1 release preparation adds managed-updater layout-transition regression coverage and a compatibility contract for the v1.4.7 updater target format. Clean v1.5.0 checkouts manually recovered with Git are also covered as valid modern-only update sources.
 >
 > v1.5.0 release preparation includes maintainer live Discord/Vencord smoke validation of the final beta candidate before Stable promotion. Automated gates cover the full logic suite, background Quest reload scheduling, both managed updater integration suites, Vencord build/type-check, upstream Orion coexistence, and semantic Stable/Canary Patch Reporters.
 >

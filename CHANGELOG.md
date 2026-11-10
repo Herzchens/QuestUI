@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.5.1 - 2026-11-11
+
+- Fixed #34 by restoring root `version.ts` as legacy updater compatibility metadata so managed updaters shipped before the v1.5.0 refactor can verify and install the current Stable target without a reclone.
+- Kept `src/plugin/version.ts` as the canonical runtime source. The managed updater now prefers the refactored canonical path, falls back to the legacy root path for older official history, and fails closed when both paths exist but disagree.
+- Accepted clean official-history checkouts that were manually recovered to the modern-only v1.5.0 layout through Git before this hotfix, while retaining the existing dirty/local-divergence protections.
+- Split signed-tag verification from release-version identity validation so missing or mismatched version metadata is reported as a release mismatch instead of an invalid SSH signature.
+- Added regression coverage for legacy-only, modern-only, matching bridge, mismatched metadata, missing metadata, and the v1.4.7 legacy target-verification contract.
+
 ## v1.5.0 - 2026-11-10
 
 - Reorganized QuestUI into feature-local dashboard, Quest, notification, Event Log, Orion, update, and plugin modules while preserving the compatibility surfaces required by existing Vencord integration points.
