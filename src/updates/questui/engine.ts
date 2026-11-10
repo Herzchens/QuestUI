@@ -71,6 +71,7 @@ interface VencordDistSnapshot {
 const execFile = promisify(execFileCallback);
 const MAX_BUFFER = 16 * 1024 * 1024;
 const VENCORD_RUNTIME_FILES = ["patcher.js", "preload.js", "renderer.js", "renderer.css"] as const;
+const VERSION_SOURCE_PATHS = ["src/plugin/version.ts", "version.ts"] as const;
 
 export function normalizeUpdaterRepoUrl(value: string): string {
     return value.trim()
@@ -238,12 +239,6 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
         const commitType = await gitText("cat-file", "-t", commit);
         if (commitType !== "commit") throw new Error("Release tag does not peel to a commit.");
 
-        const versionSource = (await git("show", `${commit}:version.ts`)).stdout;
-        const escapedTag = tag.replace(/[.*+?^\${}()|[\]\\]/g, "\\$&");
-        if (!new RegExp(`QUESTUI_VERSION\\s*=\\s*["']${escapedTag}["']`).test(versionSource)) {
-            throw new Error("Release tag and version.ts disagree.");
-        }
-
         return { tag, ref, object, commit };
     }
 
@@ -283,14 +278,37 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
         }
     }
 
-    async function versionAtCommit(commit: string): Promise<string | null> {
+    async function versionSourceAtCommit(commit: string, path: string): Promise<string | null> {
         try {
-            const source = (await git("show", `${commit}:version.ts`)).stdout;
-            const match = source.match(/QUESTUI_VERSION\s*=\s*["']([^"']+)["']/);
-            return normalizeUpdaterReleaseTag(match?.[1]) ?? null;
+            return (await git("show", `${commit}:${path}`)).stdout;
         } catch {
             return null;
         }
+    }
+
+    function versionFromSource(source: string): string | null {
+        const match = source.match(/QUESTUI_VERSION\s*=\s*["']([^"']+)["']/);
+        return normalizeUpdaterReleaseTag(match?.[1]) ?? null;
+    }
+
+    async function versionAtCommit(commit: string): Promise<string | null> {
+        const [canonicalSource, legacySource] = await Promise.all(
+            VERSION_SOURCE_PATHS.map(path => versionSourceAtCommit(commit, path))
+        );
+        const canonicalVersion = canonicalSource == null ? null : versionFromSource(canonicalSource);
+        const legacyVersion = legacySource == null ? null : versionFromSource(legacySource);
+
+        if (canonicalSource != null && !canonicalVersion) {
+            throw new Error("QuestUI canonical version metadata is invalid.");
+        }
+        if (legacySource != null && !legacyVersion) {
+            throw new Error("QuestUI legacy version metadata is invalid.");
+        }
+        if (canonicalVersion && legacyVersion && canonicalVersion !== legacyVersion) {
+            throw new Error("QuestUI canonical and legacy version metadata disagree.");
+        }
+
+        return canonicalVersion ?? legacyVersion;
     }
 
     async function installVerifiedLocalTag(tag: VerifiedTag): Promise<void> {
@@ -314,9 +332,11 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
     }
 
     async function localPreflight(): Promise<QuestUIUpdateResult | null> {
+        const hasVersionSource = await exists(join(config.questUIDir, "src", "plugin", "version.ts"))
+            || await exists(join(config.questUIDir, "version.ts"));
         if (!await exists(join(config.vencordSrcDir, "package.json"))
             || !await exists(join(config.vencordSrcDir, "scripts", "build", "build.mjs"))
-            || !await exists(join(config.questUIDir, "version.ts"))) {
+            || !hasVersionSource) {
             return {
                 ok: false,
                 status: "unsupported-install",
@@ -458,9 +478,25 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
 
             const currentHead = await gitText("rev-parse", "HEAD");
             const branch = await currentBranch();
-            const currentVersion = await versionAtCommit(currentHead);
+            let currentVersion: string | null;
+            try {
+                currentVersion = await versionAtCommit(currentHead);
+            } catch (error) {
+                trace.push("Preflight: installed version metadata is inconsistent");
+                return {
+                    ok: false,
+                    status: "invalid-version",
+                    phase,
+                    method: "none",
+                    trace,
+                    diagnostic: diagnosticText(error),
+                    message: "QuestUI found inconsistent installed version metadata. Nothing was changed.",
+                    fromCommit: currentHead,
+                    toVersion: targetVersion
+                };
+            }
             if (!currentVersion) {
-                trace.push("Preflight: version.ts at current HEAD is not a valid QuestUI release version");
+                trace.push("Preflight: current HEAD has no valid QuestUI version metadata");
                 return {
                     ok: false,
                     status: "invalid-version",
@@ -473,7 +509,7 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                 };
             }
             if ((compareSemver(targetVersion, currentVersion) ?? 0) <= 0) {
-                trace.push("Preflight: target is not newer than version.ts at current HEAD");
+                trace.push("Preflight: target is not newer than version metadata at current HEAD");
                 return {
                     ok: false,
                     status: "invalid-version",
@@ -492,7 +528,7 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                 + " reports " + currentVersion);
             if (requestedInstalledVersion && requestedInstalledVersion !== currentVersion) {
                 trace.push("Preflight: renderer reported " + requestedInstalledVersion
-                    + ", but native version.ts reports " + currentVersion + "; native checkout identity wins");
+                    + ", but native version metadata reports " + currentVersion + "; native checkout identity wins");
             }
 
             phase = "verify-source";
@@ -524,10 +560,9 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                 try {
                     trace.push("Verify target release: fetch signed annotated tag " + targetVersion + " from origin");
                     targetTag = await fetchVerifiedTag(targetVersion, "target", allowedSignersPath);
-                    trace.push("Verify target release: SSH signature, tag name and version.ts accepted; commit "
-                        + shortCommit(targetTag.commit));
+                    trace.push("Verify target release: SSH signature and tag name accepted");
                 } catch (error) {
-                    trace.push("Verify target release: signature or release identity failed");
+                    trace.push("Verify target release: signature verification failed");
                     return {
                         ok: false,
                         status: "invalid-signature",
@@ -544,6 +579,45 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                         ...sourceProvenance
                     };
                 }
+
+                phase = "verify-release";
+                let targetCommitVersion: string | null;
+                try {
+                    targetCommitVersion = await versionAtCommit(targetTag.commit);
+                } catch (error) {
+                    trace.push("Verify target release: version metadata is inconsistent");
+                    return {
+                        ok: false,
+                        status: "tag-mismatch",
+                        phase,
+                        method,
+                        trace: [...trace],
+                        diagnostic: diagnosticText(error),
+                        message: "The signed target release has inconsistent QuestUI version metadata.",
+                        fromVersion: currentVersion,
+                        toVersion: targetVersion,
+                        fromCommit: currentHead,
+                        toCommit: targetTag.commit,
+                        ...sourceProvenance
+                    };
+                }
+                if (targetCommitVersion !== targetVersion) {
+                    trace.push("Verify target release: tag and version metadata disagree");
+                    return {
+                        ok: false,
+                        status: "tag-mismatch",
+                        phase,
+                        method,
+                        trace: [...trace],
+                        message: "The signed target release tag does not match its QuestUI version metadata.",
+                        fromVersion: currentVersion,
+                        toVersion: targetVersion,
+                        fromCommit: currentHead,
+                        toCommit: targetTag.commit,
+                        ...sourceProvenance
+                    };
+                }
+                trace.push("Verify target release: version metadata accepted; commit " + shortCommit(targetTag.commit));
 
                 if (!await isAncestor(targetTag.commit, officialMain!.commit)) {
                     trace.push("Verify target release: signed target is not in official main history");

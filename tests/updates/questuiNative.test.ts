@@ -60,17 +60,40 @@ async function createKey(root: string, name: string): Promise<{ privateKey: stri
     };
 }
 
-async function writeVersion(repo: string, version: string): Promise<void> {
-    await writeFile(
-        join(repo, "version.ts"),
-        `export const QUESTUI_VERSION = "${version}";\n`,
-        "utf8"
-    );
+type VersionLayout = "legacy" | "modern" | "bridge";
+
+async function writeVersion(repo: string, version: string, layout: VersionLayout = "legacy"): Promise<void> {
+    const legacyPath = join(repo, "version.ts");
+    const canonicalPath = join(repo, "src", "plugin", "version.ts");
+    await rm(legacyPath, { force: true });
+    await rm(canonicalPath, { force: true });
+
+    if (layout !== "modern") {
+        await writeFile(
+            legacyPath,
+            `export const QUESTUI_VERSION = "${version}";\n`,
+            "utf8"
+        );
+    }
+    if (layout !== "legacy") {
+        await mkdir(join(repo, "src", "plugin"), { recursive: true });
+        await writeFile(
+            canonicalPath,
+            `export const QUESTUI_VERSION = "${version}";\n`,
+            "utf8"
+        );
+    }
 }
 
-async function commitRelease(repo: string, version: string, signingKey: string, signed = true): Promise<string> {
-    await writeVersion(repo, version);
-    await git(repo, "add", "version.ts");
+async function commitRelease(
+    repo: string,
+    version: string,
+    signingKey: string,
+    signed = true,
+    layout: VersionLayout = "legacy"
+): Promise<string> {
+    await writeVersion(repo, version, layout);
+    await git(repo, "add", "-A");
     await git(repo, "commit", "-m", `release ${version}`);
     await git(repo, "config", "gpg.format", "ssh");
     await git(repo, "config", "user.signingkey", signingKey);
@@ -147,6 +170,7 @@ async function setupFixture() {
         mainSnapshot,
         v141,
         v142,
+        trustedKey,
         cloneInstalled,
         engine,
         cleanup: () => rm(root, { recursive: true, force: true })
@@ -361,6 +385,110 @@ async function main() {
             const firstResult = await first;
             assert.equal(firstResult.status, "updated");
             assert.equal(firstResult.ok, true);
+            await assertNoTemporaryRefs(checkout);
+        }
+
+        const v150 = await commitRelease(
+            fixture.source,
+            "v1.5.0",
+            fixture.trustedKey.privateKey,
+            true,
+            "modern"
+        );
+        const v151 = await commitRelease(
+            fixture.source,
+            "v1.5.1",
+            fixture.trustedKey.privateKey,
+            true,
+            "bridge"
+        );
+
+        {
+            const checkout = await fixture.cloneInstalled("terminal-recovered-modern", v150);
+            const updater = fixture.engine(checkout, async () => undefined);
+            const inspected = await updater.inspectCheckout();
+            assert.equal(inspected.ok, true);
+            assert.equal(inspected.fromVersion, "v1.5.0");
+
+            const result = await updater.updateRelease("v1.5.0", "v1.5.1");
+            assert.equal(result.ok, true);
+            assert.equal(result.status, "updated");
+            assert.equal(result.fromCommit, v150);
+            assert.equal(result.toCommit, v151);
+            assert.match(await readFile(join(checkout, "src", "plugin", "version.ts"), "utf8"), /v1\.5\.1/);
+            assert.match(await readFile(join(checkout, "version.ts"), "utf8"), /v1\.5\.1/);
+            await assertNoTemporaryRefs(checkout);
+        }
+
+        {
+            const checkout = await fixture.cloneInstalled("legacy-to-bridge", fixture.v140);
+            const updater = fixture.engine(checkout, async () => undefined);
+            const result = await updater.updateRelease("v1.4.0", "v1.5.1");
+            assert.equal(result.ok, true);
+            assert.equal(result.status, "updated");
+            assert.equal(result.toCommit, v151);
+            await assertNoTemporaryRefs(checkout);
+        }
+
+        {
+            const allowedSigners = join(fixture.root, "legacy-v147-allowed-signers");
+            await writeFile(
+                allowedSigners,
+                `${TEST_PRINCIPAL} ${fixture.trustedKey.publicKey}\n`,
+                "utf8"
+            );
+            await git(
+                fixture.source,
+                "-c", "gpg.format=ssh",
+                "-c", `gpg.ssh.allowedSignersFile=${allowedSigners}`,
+                "verify-tag", "v1.5.1"
+            );
+            const targetCommit = await git(fixture.source, "rev-parse", "v1.5.1^{}");
+            const legacySource = await git(fixture.source, "show", `${targetCommit}:version.ts`);
+            assert.match(legacySource, /QUESTUI_VERSION\s*=\s*["']v1\.5\.1["']/);
+        }
+
+        let mismatchCommit: string;
+        await writeVersion(fixture.source, "v1.5.2", "bridge");
+        await writeFile(
+            join(fixture.source, "version.ts"),
+            'export const QUESTUI_VERSION = "v1.5.1";\n',
+            "utf8"
+        );
+        await git(fixture.source, "add", "-A");
+        await git(fixture.source, "commit", "-m", "release v1.5.2 mismatch fixture");
+        mismatchCommit = await git(fixture.source, "rev-parse", "HEAD");
+        await git(fixture.source, "tag", "-s", "v1.5.2", "-m", "v1.5.2");
+
+        {
+            const checkout = await fixture.cloneInstalled("mismatched-target-metadata", v151);
+            const updater = fixture.engine(checkout, async () => undefined);
+            const result = await updater.updateRelease("v1.5.1", "v1.5.2");
+            assert.equal(result.ok, false);
+            assert.equal(result.status, "tag-mismatch");
+            assert.equal(result.phase, "verify-release");
+            assert.equal(result.toCommit, mismatchCommit);
+            assert.match(result.diagnostic ?? "", /canonical and legacy version metadata disagree/);
+            assert.equal(await git(checkout, "rev-parse", "HEAD"), v151);
+            await assertNoTemporaryRefs(checkout);
+        }
+
+        await rm(join(fixture.source, "version.ts"), { force: true });
+        await rm(join(fixture.source, "src", "plugin", "version.ts"), { force: true });
+        await git(fixture.source, "add", "-A");
+        await git(fixture.source, "commit", "-m", "release v1.5.3 missing metadata fixture");
+        const missingMetadataCommit = await git(fixture.source, "rev-parse", "HEAD");
+        await git(fixture.source, "tag", "-s", "v1.5.3", "-m", "v1.5.3");
+
+        {
+            const checkout = await fixture.cloneInstalled("missing-target-metadata", v151);
+            const updater = fixture.engine(checkout, async () => undefined);
+            const result = await updater.updateRelease("v1.5.1", "v1.5.3");
+            assert.equal(result.ok, false);
+            assert.equal(result.status, "tag-mismatch");
+            assert.equal(result.phase, "verify-release");
+            assert.equal(result.toCommit, missingMetadataCommit);
+            assert.equal(await git(checkout, "rev-parse", "HEAD"), v151);
             await assertNoTemporaryRefs(checkout);
         }
 
