@@ -43,4 +43,4 @@ assert.equal(isQuestVerificationError({ body: { captcha_key: ["required"] } }), 
 assert.equal(isQuestVerificationError({ captchaFields: { captcha_sitekey: "site" } }), true);
 assert.equal(isQuestVerificationError(new Error("ordinary")), false);
 
-console.log("QuestUI quest-action logic tests — PASS");
+console.log("QuestUI quest-action logic tests - PASS");

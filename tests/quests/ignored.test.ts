@@ -95,4 +95,4 @@ assert.deepEqual(
     prunedExpiryState
 );
 
-console.log("QuestUI ignored Quest logic tests — PASS");
+console.log("QuestUI ignored Quest logic tests - PASS");

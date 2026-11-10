@@ -28,4 +28,4 @@ assert.deepEqual(deriveOrbBalanceDisplayState(null, false, false, true), { kind:
 assert.deepEqual(deriveOrbBalanceDisplayState(0, false, false), { kind: "ready", balance: 0 });
 assert.deepEqual(deriveOrbBalanceDisplayState(2450, false, true), { kind: "ready", balance: 2450 });
 
-console.log("QuestUI Orb balance logic tests — PASS");
+console.log("QuestUI Orb balance logic tests - PASS");

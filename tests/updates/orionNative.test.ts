@@ -475,7 +475,7 @@ async function main(): Promise<void> {
 
         await testRewriteRecovery();
 
-        console.log("QuestUI Orion managed updater integration tests — PASS");
+        console.log("QuestUI Orion managed updater integration tests - PASS");
     } finally {
         await fixture.cleanup();
     }

@@ -27,4 +27,4 @@ assert.deepEqual(calls, ["settings", "top", "settings", "replacement"]);
 removeReplacement();
 assert.equal(openQuestDashboard(), false);
 
-console.log("QuestUI Dashboard open routing logic tests — PASS");
+console.log("QuestUI Dashboard open routing logic tests - PASS");

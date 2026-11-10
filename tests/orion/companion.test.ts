@@ -81,4 +81,4 @@ assert.equal(readCompatibleOrionSnapshot({ ...companion, getControlSnapshot: () 
 assert.equal(readCompatibleOrionSnapshot({ ...companion, getControlSnapshot: () => ({ running: false, quests: { a: "mystery" } }) } as any), null);
 assert.equal(readCompatibleOrionSnapshot({ ...companion, getControlSnapshot: () => { throw new Error("boom"); } } as any), null);
 
-console.log("QuestUI Orion command/companion logic tests — PASS");
+console.log("QuestUI Orion command/companion logic tests - PASS");

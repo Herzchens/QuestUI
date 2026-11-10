@@ -1,3 +1,5 @@
+import { plugins } from "@api/PluginManager";
+import { openPluginModal } from "@components/settings";
 import { NavigationRouter, Popout, useRef, useState } from "@webpack/common";
 
 import settings from "../plugin/settings";
@@ -17,11 +19,37 @@ function openQuestHome(closePopout?: () => void): void {
     NavigationRouter.transitionTo("/quest-home");
 }
 
+function openQuestUISettings(closePopout?: () => void): void {
+    const plugin = plugins["QuestUI"];
+    if (!plugin) return;
+
+    closePopout?.();
+    openPluginModal(plugin);
+}
+
 function QuestHomeIcon() {
     return (
         <svg className="quest-ui-home-glyph" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3.2 10.6 12 2.8l8.8 7.8" />
             <path d="M5.7 13.7v3.4A3.9 3.9 0 0 0 9.6 21h4.8a3.9 3.9 0 0 0 3.9-3.9v-3.4" />
+        </svg>
+    );
+}
+
+function QuestUISettingsIcon() {
+    return (
+        <svg
+            className="quest-ui-plugin-settings-glyph"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37c1 .608 2.296.07 2.572-1.065" />
+            <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0-6 0" />
         </svg>
     );
 }
@@ -294,6 +322,16 @@ export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => voi
                     </button>
                 )}
             </Popout>
+
+            <button
+                type="button"
+                className="quest-ui-toolbar-button quest-ui-plugin-settings-button"
+                onClick={() => openQuestUISettings(closePopout)}
+                aria-label="Open QuestUI settings"
+                title="QuestUI Settings"
+            >
+                <QuestUISettingsIcon />
+            </button>
 
             <button
                 type="button"

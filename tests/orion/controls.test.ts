@@ -120,4 +120,4 @@ assert.equal(storedQuestTaskProgress({ userStatus: { progress: new Map([["PLAY_O
 assert.equal(storedQuestTaskProgress({ userStatus: { streamProgressSeconds: 77 } }, { key: "STREAM_ON_DESKTOP", type: "stream", target: 900 }), 77);
 assert.equal(storedQuestTaskProgress({ userStatus: { completedAt: "now" } }, timedTask), 900);
 
-console.log("QuestUI Orion control state tests — PASS");
+console.log("QuestUI Orion control state tests - PASS");

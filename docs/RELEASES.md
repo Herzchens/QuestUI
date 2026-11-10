@@ -34,7 +34,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
 - Release preparation included maintainer live Discord validation of the repaired Claim Reward path on the current Stable desktop client. The reward claim completed successfully. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks also passed.
 
-## Earlier Stable — v1.4.4
+## Earlier Stable - v1.4.4
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.4** (2026-10-21).
@@ -44,7 +44,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
 - Release preparation included maintainer live Discord validation of the Orb balance Shop shortcut and automatic Dashboard dismissal. The final v1.4.4 target is gated on build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks.
 
-## Earlier Stable — v1.4.3
+## Earlier Stable - v1.4.3
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.3** (2026-10-10).
@@ -56,7 +56,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Orion companion controls continue to require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**; this release does not raise that baseline.
 - Release preparation included maintainer live Discord validation of the reported Claim Reward path. The final v1.4.3 target is gated on build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks.
 
-## Earlier Stable — v1.4.2
+## Earlier Stable - v1.4.2
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.2** (2026-09-22).
@@ -69,7 +69,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Adds temporary real-Git Orion updater regression coverage plus native-bundle assertions alongside the signed QuestUI updater tests.
 - Release preparation included maintainer live Discord validation of the final Dashboard update-status presentation. Build/type-check, upstream Orion coexistence, Stable/Canary reporters, and temporary real-Git updater suites were exercised in CI. A destructive Orion managed update against a real user checkout was not performed as live release evidence.
 
-## Earlier Stable — v1.4.1
+## Earlier Stable - v1.4.1
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.1** (2026-09-21).
@@ -81,7 +81,7 @@ QuestUI publishes Stable from `main`. Historical beta/fork pairings are document
 - Adds the Dashboard/Settings Update Center for manual checks, configurable release-check cadence, prerelease policy, optional Orion checks, and managed fail-closed update execution.
 - Release preparation included maintainer live Discord Stable validation of the final Dashboard/header presentation, including the title/Quest-icon layout, Claim All placement/count badge, and Orb balance styling. The sequential Claim All mutation path itself was not separately exercised in that final UI pass; automated regression/CI coverage must not be described as live mutation evidence.
 
-## Earlier Stable — v1.4.0
+## Earlier Stable - v1.4.0
 
 - Source: `Herzchens/QuestUI` branch `main`.
 - Release target: **v1.4.0** (2026-09-15).
@@ -113,35 +113,35 @@ Ignored Quest state is stored separately per Discord account. Unignore restores 
 
 ## Previous releases
 
-### v1.3.0 — previous feature release
+### v1.3.0 - previous feature release
 
 Promoted **Event Log** to a supported Stable surface, added account-aware persistent history with complete cursor pagination and windowed rendering, consumed optional structured Orion events, and used optional Orion scheduler metadata without raising the v4.10.7 core-control minimum.
 
-### v1.2.1 — previous hotfix
+### v1.2.1 - previous hotfix
 
 Fixed Orion-owned timed Quest cards retaining Discord's optimistic active-desktop projection after Orion paused/stopped them, and distinguished connected Orion **Running** from **Idle**.
 
-### v1.2.0 — previous feature release
+### v1.2.0 - previous feature release
 
 Expanded the Dashboard with persistent sorting/expired-history controls, native Orb/runtime metadata, and the initial persistent Event Log diagnostic surface.
 
-### v1.1.2 — previous hotfix
+### v1.1.2 - previous hotfix
 
 Fixed the remaining intermittent shortcut activation issue reported in #11 and removed the deprecated duplicate OrionQuests v4.10.7 CI leg while retaining upstream-main coexistence coverage.
 
-### v1.1.1 — previous hotfix
+### v1.1.1 - previous hotfix
 
 Restored Quest shortcut compatibility after Discord changed the shared Header Bar component identity.
 
-### v1.1.0 — previous feature release
+### v1.1.0 - previous feature release
 
 Promoted the full Dashboard, explicit manual Accept/Claim, native Quest-list Reload, and upstream Orion companion controls to Stable.
 
-### v1.1.0-beta.1 — historical prerelease
+### v1.1.0-beta.1 - historical prerelease
 
 The old beta paired QuestUI's experimental Orion controls with `Herzchens/discord-quest-completer:feat/per-quest-pause-resume`. That pairing is historical; the companion contract is available upstream.
 
-### v1.0.1 — historical Stable
+### v1.0.1 - historical Stable
 
 The earlier Stable release contained the Dashboard/read-only-era feature set before manual Accept/Claim, native Reload, and upstream Orion companion controls were promoted.
 

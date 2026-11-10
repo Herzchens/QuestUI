@@ -364,7 +364,7 @@ async function main() {
             await assertNoTemporaryRefs(checkout);
         }
 
-        console.log("QuestUI managed updater integration tests — PASS");
+        console.log("QuestUI managed updater integration tests - PASS");
     } finally {
         await fixture.cleanup();
     }

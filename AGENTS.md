@@ -45,41 +45,41 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 
 ## Repository map
 
-- `index.tsx` — plugin metadata, lifecycle wiring, and Vencord patches.
-- `src/dashboard/QuestButton.tsx` — shortcuts, status indicators, counters, dashboard/open-home behavior.
-- `src/dashboard/QuestDashboard.tsx` — Dashboard orchestration, summary/empty state, filtering/sorting application, and Orion/Orb composition.
-- `src/dashboard/QuestCard.tsx` — Quest card artwork, reward/progress presentation, expiry, and per-card Orion state.
-- `src/dashboard/DashboardToolbar.tsx`, `src/dashboard/state.ts` — Dashboard filter/sort/home controls plus shared filter/reset/partition state helpers.
-- `src/dashboard/open.ts` — registered Dashboard opener used by notification click-through; prefers the top-bar surface, falls back to the settings-bar surface, and leaves Quest Home as the no-Dashboard fallback.
-- `src/dashboard/QuestDashboardShell.tsx` — visible **Quest Dashboard** title/native Quest icon, Nitro/Xbox+ source tag, and fixed header tools.
-- `src/dashboard/sort.ts` — persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
-- `src/quests/ignored/runtime.ts`, `src/quests/ignored/logic.ts` — account-scoped persisted Ignore/Unignore presentation state and pure normalization/update logic.
-- `src/notifications/runtime.ts`, `src/notifications/logic.ts` — QuestStore new-Available/completion observation, Event Log problem observation, notification deduplication, and pure transition/severity logic.
-- `src/orbs/QuestOrbBalance.tsx`, `src/orbs/balance.ts`, `src/orbs/balanceState.ts` — native VirtualCurrencyStore Orb balance and display state.
-- `src/orion/OrionStatus.tsx`, `src/orion/status.ts`, `src/plugin/version.ts`, `src/updates/channel.ts` — runtime health/version metadata and release-channel styling.
-- `src/eventLog/EventLogViewer.tsx`, `src/eventLog/EventLogWindowedScroller.tsx` — Event Log query lifecycle, stable pagination/windowing, live refresh, and virtualized list orchestration.
-- `src/eventLog/presentation.tsx`, `src/eventLog/controls.tsx` — Event/detail rendering, semantic highlighting, filter choices, and sort controls.
-- `src/eventLog/runtime.ts`, `src/eventLog/types.ts`, `src/eventLog/logic.ts`, `src/eventLog/account.ts`, `src/eventLog/validation.ts`, `src/eventLog/page.ts`, `src/eventLog/pagination.ts`, `src/eventLog/virtualization.ts`, `native.ts`, `src/eventLog/report.ts` — Event capture, account scoping, persistence/querying, validation, and sanitized reports.
-- `src/orion/capabilities.ts`, `src/orion/events.ts` — optional Orion structured-event capability discovery, validation, semantic normalization, and console-shadow reconciliation.
-- `src/orion/scheduler.ts`, `src/orion/schedulerState.ts` — optional Orion scheduler snapshot/subscription and unordered live-batch normalization used only for published scheduler state; no queue order is inferred.
-- `dashboardPolish.css` — title sweep, Nitro/Xbox+ source-badge surface, summary layout, and elapsed-progress tones.
-- `src/quests/actions/QuestCardActions.tsx` — explicit Accept/Claim, Ignore/Unignore with exact-ID Orion pause when active, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
-- `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAll.ts`, `src/quests/actions/claimAllState.ts` — bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
-- `src/quests/actions/native.ts` — manual Enroll/Claim orchestration delegating to Discord native actions.
-- `src/quests/data.ts` — normalization/filtering/sorting and live read-only QuestStore snapshot source.
-- `src/quests/reload/native.ts`, `src/quests/reload/logic.ts`, `src/quests/reload/QuestReloadControl.tsx` — native current-Quest refresh and whole-rotation spinner state.
-- `src/quests/reload/auto.ts`, `src/quests/reload/autoLogic.ts` — background native Quest-list refresh lifecycle plus persisted freshness scheduling. It runs independently of Dashboard visibility and reuses the same Discord-native fetch path so existing QuestStore notifications remain authoritative.
-- `src/updates/UpdateCenter.tsx` — update-center UI orchestration, release cards, restart handling, and dashboard/settings surfaces.
-- `src/updates/managed.ts` — managed-update invocation, Orion local-work decisions, snooze/skip persistence, and update diagnostic events.
-- `src/updates/status.tsx` — update status copy, release visibility, channel/version presentation, dashboard availability copy, and status components.
-- `src/updates/runtime.ts`, `src/updates/logic.ts`, `src/updates/questui/native.ts`, `src/updates/questui/engine.ts`, `src/updates/orion/native.ts`, `src/updates/orion/engine.ts` — release discovery/cached scheduling plus signed fail-closed QuestUI updates and managed Orion updates. Both native updaters preflight managed checkouts; Orion preserves explicit Keep/Discard consent and snapshots the known-good Vencord runtime before checkout mutation so build failures restore `dist` without a second build. QuestUI and OrionQuests pre-release opt-ins and release-check health are independent; the legacy `updateIncludePrereleases` key remains the QuestUI channel for migration compatibility, and the existing update-state key migrates its legacy shared successful-check timestamp into both product histories before future checks diverge.
-- `src/orion/companion.ts`, `src/orion/controls.ts`, `src/orion/integration.ts` — companion validation, state machine, scheduler-state refinement, and safe delegation.
-- `src/orion/OrionControls.tsx`, `src/orion/OrionQuestControl.tsx`, `src/orion/icons.tsx` — global/per-Quest controls and shared icons.
-- `actions.css`, `orion.css`, `orionScheduler.css`, `reload.css` — action/control styling.
-- `tests/` — feature-grouped pure regression tests.
-- `scripts/` — Stable/Canary reporter tooling.
-- `.github/workflows/compatibility.yml` — build/type-check, pure tests, Orion matrix, bundle checks, reporters.
-- `docs/RELEASES.md` — release history, current Stable guidance, and publishing checklist.
+- `index.tsx` - plugin metadata, lifecycle wiring, and Vencord patches.
+- `src/dashboard/QuestButton.tsx` - shortcuts, status indicators, counters, dashboard/open-home behavior.
+- `src/dashboard/QuestDashboard.tsx` - Dashboard orchestration, summary/empty state, filtering/sorting application, and Orion/Orb composition.
+- `src/dashboard/QuestCard.tsx` - Quest card artwork, reward/progress presentation, expiry, and per-card Orion state.
+- `src/dashboard/DashboardToolbar.tsx`, `src/dashboard/state.ts` - Dashboard sort/filter/QuestUI-settings/home controls plus shared filter/reset/partition state helpers.
+- `src/dashboard/open.ts` - registered Dashboard opener used by notification click-through; prefers the top-bar surface, falls back to the settings-bar surface, and leaves Quest Home as the no-Dashboard fallback.
+- `src/dashboard/QuestDashboardShell.tsx` - visible **Quest Dashboard** title/native Quest icon, Nitro/Xbox+ source tag, and fixed header tools.
+- `src/dashboard/sort.ts` - persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
+- `src/quests/ignored/runtime.ts`, `src/quests/ignored/logic.ts` - account-scoped persisted Ignore/Unignore presentation state and pure normalization/update logic.
+- `src/notifications/runtime.ts`, `src/notifications/logic.ts` - QuestStore new-Available/completion observation, Event Log problem observation, notification deduplication, and pure transition/severity logic.
+- `src/orbs/QuestOrbBalance.tsx`, `src/orbs/balance.ts`, `src/orbs/balanceState.ts` - native VirtualCurrencyStore Orb balance and display state.
+- `src/orion/OrionStatus.tsx`, `src/orion/status.ts`, `src/plugin/version.ts`, `src/updates/channel.ts` - runtime health/version metadata and release-channel styling.
+- `src/eventLog/EventLogViewer.tsx`, `src/eventLog/EventLogWindowedScroller.tsx` - Event Log query lifecycle, stable pagination/windowing, live refresh, and virtualized list orchestration.
+- `src/eventLog/presentation.tsx`, `src/eventLog/controls.tsx` - Event/detail rendering, semantic highlighting, filter choices, and sort controls.
+- `src/eventLog/runtime.ts`, `src/eventLog/types.ts`, `src/eventLog/logic.ts`, `src/eventLog/account.ts`, `src/eventLog/validation.ts`, `src/eventLog/page.ts`, `src/eventLog/pagination.ts`, `src/eventLog/virtualization.ts`, `native.ts`, `src/eventLog/report.ts` - Event capture, account scoping, persistence/querying, validation, and sanitized reports.
+- `src/orion/capabilities.ts`, `src/orion/events.ts` - optional Orion structured-event capability discovery, validation, semantic normalization, and console-shadow reconciliation.
+- `src/orion/scheduler.ts`, `src/orion/schedulerState.ts` - optional Orion scheduler snapshot/subscription and unordered live-batch normalization used only for published scheduler state; no queue order is inferred.
+- `dashboardPolish.css` - title sweep, Nitro/Xbox+ source-badge surface, summary layout, and elapsed-progress tones.
+- `src/quests/actions/QuestCardActions.tsx` - explicit Accept/Claim, Ignore/Unignore with exact-ID Orion pause when active, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
+- `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAll.ts`, `src/quests/actions/claimAllState.ts` - bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
+- `src/quests/actions/native.ts` - manual Enroll/Claim orchestration delegating to Discord native actions.
+- `src/quests/data.ts` - normalization/filtering/sorting and live read-only QuestStore snapshot source.
+- `src/quests/reload/native.ts`, `src/quests/reload/logic.ts`, `src/quests/reload/QuestReloadControl.tsx` - native current-Quest refresh and whole-rotation spinner state.
+- `src/quests/reload/auto.ts`, `src/quests/reload/autoLogic.ts` - background native Quest-list refresh lifecycle plus persisted freshness scheduling. It runs independently of Dashboard visibility and reuses the same Discord-native fetch path so existing QuestStore notifications remain authoritative.
+- `src/updates/UpdateCenter.tsx` - update-center UI orchestration, release cards, restart handling, and dashboard/settings surfaces.
+- `src/updates/managed.ts` - managed-update invocation, Orion local-work decisions, snooze/skip persistence, and update diagnostic events.
+- `src/updates/status.tsx` - update status copy, release visibility, channel/version presentation, dashboard availability copy, and status components.
+- `src/updates/runtime.ts`, `src/updates/logic.ts`, `src/updates/questui/native.ts`, `src/updates/questui/engine.ts`, `src/updates/orion/native.ts`, `src/updates/orion/engine.ts` - release discovery/cached scheduling plus signed fail-closed QuestUI updates and managed Orion updates. Both native updaters preflight managed checkouts; Orion preserves explicit Keep/Discard consent and snapshots the known-good Vencord runtime before checkout mutation so build failures restore `dist` without a second build. QuestUI and OrionQuests pre-release opt-ins and release-check health are independent; the legacy `updateIncludePrereleases` key remains the QuestUI channel for migration compatibility, and the existing update-state key migrates its legacy shared successful-check timestamp into both product histories before future checks diverge.
+- `src/orion/companion.ts`, `src/orion/controls.ts`, `src/orion/integration.ts` - companion validation, state machine, scheduler-state refinement, and safe delegation.
+- `src/orion/OrionControls.tsx`, `src/orion/OrionQuestControl.tsx`, `src/orion/icons.tsx` - global/per-Quest controls and shared icons.
+- `actions.css`, `orion.css`, `orionScheduler.css`, `reload.css` - action/control styling.
+- `tests/` - feature-grouped pure regression tests.
+- `scripts/` - Stable/Canary reporter tooling.
+- `.github/workflows/compatibility.yml` - build/type-check, pure tests, Orion matrix, bundle checks, reporters.
+- `docs/RELEASES.md` - release history, current Stable guidance, and publishing checklist.
 
 ## Development environment
 
@@ -228,6 +228,7 @@ Use Vencord's native toast API for explicit success/failure feedback.
 - The header source badge is **Nitro** for Nitro eligibility and **Xbox+** for Xbox Game Pass eligibility, using an Xbox brand mark rather than a hand-drawn approximation. Prefer Discord's native classifier; if that exact webpack surface is unavailable, read Discord's `MORE_QUEST_ORBS` perk source directly. Nitro wins if both perk sources are present. Preserve the legacy Nitro identity badge for Nitro tiers that are not multiplier-eligible, and never infer Xbox from `!Nitro`.
 - Read Discord's explicit `premiumOrbQuantity` reward value instead of multiplying locally. Show it only when native eligibility says the account receives the multiplier; otherwise show base `orbQuantity`.
 - Title sweep is a seamless linear right-to-left loop with an exact repeat period; no reset/transition frame.
+- Toolbar order keeps **Sort → Filter → QuestUI Settings → Home** together at the right edge. The QuestUI Settings gear opens Vencord's native plugin settings modal for QuestUI and closes the Dashboard first.
 - Summary stays on one row and always renders Available, Ready, In Progress, Claimed, Expired, Ignored, and Hidden, including zero values.
 - The five Discord status counts come from the full non-ignored live Quest snapshot; Ignored is a separate local-presentation count; Hidden counts only non-ignored cards removed by Dashboard filters.
 - In Progress and Ready are the accepted-active bucket and remain above Available/Claimed/Expired under every sort mode.

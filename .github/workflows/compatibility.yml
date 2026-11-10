@@ -152,6 +152,38 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const root = "src/userplugins/QuestUI";
+          const textExtensions = new Set([
+              ".css", ".html", ".js", ".json", ".md", ".mjs", ".ps1", ".sh",
+              ".ts", ".tsx", ".txt", ".yaml", ".yml"
+          ]);
+          const textNames = new Set(["AGENTS.md", "LICENSE"]);
+          const forbidden = [String.fromCodePoint(0x2013), String.fromCodePoint(0x2014)];
+          const offenders = [];
+          const walk = dir => {
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                  const full = path.join(dir, entry.name);
+                  if (entry.isDirectory()) {
+                      walk(full);
+                      continue;
+                  }
+                  const relative = path.relative(root, full).replaceAll("\\", "/");
+                  const ext = path.extname(entry.name).toLowerCase();
+                  if (!textExtensions.has(ext) && !textNames.has(relative)) continue;
+                  const source = fs.readFileSync(full, "utf8");
+                  if (forbidden.some(char => source.includes(char))) offenders.push(relative);
+              }
+          };
+          walk(root);
+          if (offenders.length) {
+              console.error("QuestUI text files must use ASCII hyphens instead of en/em dashes:");
+              for (const file of offenders) console.error(" - " + file);
+              process.exit(1);
+          }
+          NODE
           required_markers=(
             'QuestUI'
             'Adds Discord Quest shortcuts'
@@ -229,6 +261,8 @@ jobs:
           grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'openQuestDashboard()' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'registerQuestDashboardOpener(type' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx
+          grep -Fq 'openPluginModal(plugin)' src/userplugins/QuestUI/src/dashboard/DashboardToolbar.tsx
+          grep -Fq 'aria-label="Open QuestUI settings"' src/userplugins/QuestUI/src/dashboard/DashboardToolbar.tsx
           grep -Fq 'QUEST_AUTO_RELOAD_MINUTES = [10, 20, 30, 60, 120, 240, 300, 720, 1440]' src/userplugins/QuestUI/src/quests/reload/autoLogic.ts
           grep -Fq 'startQuestAutoReload(() => ({' src/userplugins/QuestUI/index.tsx
           grep -Fq 'animation: quest-ui-dashboard-title-sweep 3.8s linear infinite' src/userplugins/QuestUI/src/dashboard/styles/dashboardPolish.css

@@ -58,4 +58,4 @@ assert.equal(deriveOrionIntegrationHealth({ ...compatibleFacts, version: "dev-ma
 // Officially old versions stay incompatible even if somebody backports the surface under the old version.
 assert.equal(deriveOrionIntegrationHealth({ ...compatibleFacts, version: "v4.10.6" }).kind, "version-incompatible");
 
-console.log("QuestUI Orion status/version logic tests — PASS");
+console.log("QuestUI Orion status/version logic tests - PASS");

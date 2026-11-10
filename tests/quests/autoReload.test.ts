@@ -37,4 +37,4 @@ assert.equal(nextQuestAutoReloadDelay(1_000, 1_000 + 100 * minute, 1_000 + 200 *
 assert.equal(nextQuestAutoReloadDelay(null, 1_000, 1_000 + 9 * minute, 10), minute);
 assert.equal(nextQuestAutoReloadDelay(null, 1_000, 1_000 + 10 * minute, 10), 0);
 
-console.log("QuestUI background Quest reload scheduling tests — PASS");
+console.log("QuestUI background Quest reload scheduling tests - PASS");

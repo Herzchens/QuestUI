@@ -85,12 +85,12 @@ function stateMark(state: PluginUpdateState, health: ProductUpdateHealth): strin
     if (state.kind === "up-to-date") return "✓";
     if (state.kind === "error") return "!";
     if (state.kind === "custom-version") return "•";
-    if (state.kind === "disabled") return "–";
+    if (state.kind === "disabled") return "-";
     return "•";
 }
 
 function installedVersion(state: PluginUpdateState): string {
-    return state.installed ?? "—";
+    return state.installed ?? "-";
 }
 
 function targetVersion(state: PluginUpdateState): string | null {

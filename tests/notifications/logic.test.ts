@@ -102,4 +102,4 @@ const keyC = problemNotificationKey({
 assert.equal(keyA, keyB);
 assert.notEqual(keyA, keyC);
 
-console.log("QuestUI notification logic tests — PASS");
+console.log("QuestUI notification logic tests - PASS");

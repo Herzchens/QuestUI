@@ -80,4 +80,4 @@ assert.equal(storeWaitTimeoutResult("user-a", null), "account-changed");
     assert.equal(listeners.has(listener), false);
 }
 
-console.log("QuestUI quest-action runtime logic tests — PASS");
+console.log("QuestUI quest-action runtime logic tests - PASS");

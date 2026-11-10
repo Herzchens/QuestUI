@@ -138,7 +138,7 @@ function runSelfTest() {
         ).problems.join("\n"),
         /targeted a non-window-chrome module/
     );
-    console.log("checkQuestUIReporter self-test — PASS");
+    console.log("checkQuestUIReporter self-test - PASS");
 }
 
 if (process.argv[2] === "--self-test") {
@@ -180,4 +180,4 @@ if (problems.length) {
     process.exit(1);
 }
 
-console.log("QuestUI Patch Reporter checks — PASS");
+console.log("QuestUI Patch Reporter checks - PASS");

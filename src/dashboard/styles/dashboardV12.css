@@ -218,6 +218,13 @@
     width: 18px;
 }
 
+.quest-ui-plugin-settings-glyph {
+    fill: none;
+    height: 18px;
+    stroke: currentColor;
+    width: 18px;
+}
+
 .quest-ui-home-glyph {
     fill: currentColor;
     height: 18px;
@@ -769,6 +776,7 @@
 
 .quest-ui-sort-icon,
 .quest-ui-filter-icon,
+.quest-ui-plugin-settings-glyph,
 .quest-ui-home-glyph,
 .quest-ui-reload-icon-button svg {
     color: #fff;

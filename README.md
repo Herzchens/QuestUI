@@ -199,13 +199,13 @@ The title uses a seamless right-to-left color sweep. `prefers-reduced-motion` di
 
 The summary row always renders all seven counters, including zero values:
 
-- **Red** — Available
-- **Green** — Ready
-- **Yellow** — In Progress
-- **Blue / Blurple** — Claimed
-- **Gray** — Expired
-- **Magenta / Purple** — Ignored
-- **Muted gray** — Hidden
+- **Red** - Available
+- **Green** - Ready
+- **Yellow** - In Progress
+- **Blue / Blurple** - Claimed
+- **Gray** - Expired
+- **Magenta / Purple** - Ignored
+- **Muted gray** - Hidden
 
 The five Discord-status counts come from the full non-ignored live Quest snapshot. **Ignored** is a separate account-scoped local-presentation count. **Hidden** counts only non-ignored cards removed by normal Dashboard filters, including expired-age filtering, so Ignore never inflates Hidden.
 
@@ -222,6 +222,8 @@ The Filter popout supports:
 **Recommended** shows Available, In Progress, and Ready while hiding Claimed and Expired cards and restores the 15-day expired-history default. **Clear all** enables every supported normal status/category and removes the expired-history age limit; Ignored remains a separate explicit catalogue rather than a Discord Quest status.
 
 The Sort popout supports **Recommended**, **Expiring Soon**, **Highest Orb Reward**, **Shortest Required Time**, **Longest Required Time**, **Name A → Z**, and **Name Z → A**. In Progress and Ready Quests are an active accepted bucket and stay above Available, Claimed, and Expired history under every sort mode. Required-time sorting compares normalized timed-task seconds; achievement/count objectives are not misread as durations.
+
+The gear button between Filter and Home opens QuestUI's Vencord plugin settings modal directly, without routing through the general Plugins page.
 
 ### Ignore / Unignore
 
@@ -267,9 +269,9 @@ If the native classifier says the account receives the multiplier, the card disp
 
 QuestUI has three separately configurable notification categories in the QuestUI plugin settings, and all three default to enabled:
 
-- **Notifications • New Quest Available** — one notification when a previously unseen same-account Quest is first observed as real Discord **Available** after the initial QuestStore baseline.
-- **Notifications • Ready to Claim** — one notification when an observed same-account Quest transitions from real Discord **In Progress** to **Ready to Claim**.
-- **Notifications • Problems** — actionable QuestUI/Orion runtime problems from the sanitized Event Log. User-facing terminal outcomes notify; Orion's structured request-layer `network.failed` stays diagnostic so the owning terminal task/enroll/claim/bypass outcome produces the alert instead of a duplicate.
+- **Notifications • New Quest Available** - one notification when a previously unseen same-account Quest is first observed as real Discord **Available** after the initial QuestStore baseline.
+- **Notifications • Ready to Claim** - one notification when an observed same-account Quest transitions from real Discord **In Progress** to **Ready to Claim**.
+- **Notifications • Problems** - actionable QuestUI/Orion runtime problems from the sanitized Event Log. User-facing terminal outcomes notify; Orion's structured request-layer `network.failed` stays diagnostic so the owning terminal task/enroll/claim/bypass outcome produces the alert instead of a duplicate.
 
 QuestUI uses Vencord's Notifications API instead of a companion bot, backend, DM relay, or parallel OS-notification system. Delivery therefore follows Vencord's notification configuration: Vencord in-app notification, native desktop notification when Discord is unfocused, or native desktop notification always. Vencord also persists normal notifications into its Notification Log according to the user's global log settings.
 
@@ -303,7 +305,7 @@ OrionQuests **v4.10.7+** exposes the core source-of-truth engine/task control st
 Global header order:
 
 ```text
-Smart Start/Pause/Resume → Stop → Claim All → Reload → Update → Event Log → Sort → Filter → Home
+Smart Start/Pause/Resume → Stop → Claim All → Reload → Update → Event Log → Sort → Filter → Settings → Home
 ```
 
 State rules:
@@ -368,9 +370,9 @@ Reload uses Discord's own current-Quest fetch-and-dispatch action located by `QU
 
 Detailed Status shows one attention state at a time with this priority:
 
-1. Yellow — In Progress
-2. Green — Ready to Claim
-3. Red — Available
+1. Yellow - In Progress
+2. Green - Ready to Claim
+3. Red - Available
 
 Ignored Quests are excluded before this priority is calculated, so an ignored In Progress Quest cannot mask a newly Available Quest.
 
@@ -378,10 +380,10 @@ The numeric badge belongs to the displayed state, not the sum of all statuses.
 
 Quest Home counters use:
 
-- Red — Available
-- Yellow — In Progress
-- Green — Ready to Claim
-- Blurple — Claimed
+- Red - Available
+- Yellow - In Progress
+- Green - Ready to Claim
+- Blurple - Claimed
 
 Ignored Quests are excluded from these QuestUI-added counters.
 

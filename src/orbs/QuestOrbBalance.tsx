@@ -90,14 +90,14 @@ export function QuestOrbBalance({ closePopout }: { closePopout?: () => void; }) 
         ? String(state.balance)
         : state.kind === "loading"
             ? "•••"
-            : "—";
+            : "-";
 
     const shopLabel = state.kind === "ready"
-        ? `Open Shop — ${state.balance} Orbs`
+        ? `Open Shop - ${state.balance} Orbs`
         : state.kind === "loading"
-            ? "Open Shop — loading Orb balance"
+            ? "Open Shop - loading Orb balance"
             : currentUserId
-                ? "Open Shop — Orb balance unavailable"
+                ? "Open Shop - Orb balance unavailable"
                 : "Orb balance unavailable";
 
     return (

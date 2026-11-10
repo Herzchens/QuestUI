@@ -16,4 +16,4 @@ assert.equal(shouldFinishReloadSpin(5, true, 5), true);
 assert.equal(shouldFinishReloadSpin(Number.NaN, true), false);
 assert.equal(shouldFinishReloadSpin(3, true, Number.NaN), false);
 
-console.log("QuestUI reload rotation tests — PASS");
+console.log("QuestUI reload rotation tests - PASS");

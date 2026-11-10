@@ -143,7 +143,7 @@ function main() {
     assert.equal(updateScheduleBaseline({ questUI: 3000, orion: null }, true), null);
     assert.equal(updateScheduleBaseline({ questUI: 3000, orion: null }, false), 3000);
 
-    console.log("QuestUI Update Center release logic tests — PASS");
+    console.log("QuestUI Update Center release logic tests - PASS");
 }
 
 main();

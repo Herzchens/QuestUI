@@ -53,4 +53,4 @@ assert.equal(
     "quest-list changes must update counts"
 );
 
-console.log("Quest shortcut snapshot logic — PASS");
+console.log("Quest shortcut snapshot logic - PASS");

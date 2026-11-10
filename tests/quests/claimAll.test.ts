@@ -163,7 +163,7 @@ async function main() {
         assert.deepEqual(result, { total: 1, claimed: 1, skipped: 0 });
     }
 
-    console.log("QuestUI Claim all logic tests — PASS");
+    console.log("QuestUI Claim all logic tests - PASS");
 }
 
 void main().catch(error => {
