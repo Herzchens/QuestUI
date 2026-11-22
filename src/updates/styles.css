@@ -1648,3 +1648,35 @@
     stroke-width: 1.7;
     width: 10px;
 }
+
+
+/* v1.6 fallback update path in plugin settings. */
+.quest-ui-update-panel-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.quest-ui-update-panel-settings-hint {
+    color: #747983;
+    font-size: 8.5px;
+    line-height: 11px;
+    padding-left: 42px;
+    white-space: nowrap;
+}
+
+.quest-ui-update-panel-settings-hint > button {
+    background: transparent;
+    border: 0;
+    color: #aeb7ff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    padding: 0;
+}
+
+.quest-ui-update-panel-settings-hint > button:hover {
+    color: #d0d5ff;
+    text-decoration: underline;
+}

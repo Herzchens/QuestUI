@@ -1,4 +1,5 @@
 import type { PluginUpdateState, ProductUpdateHealth, UpdateProduct, UpdateRelease, UpdateSnapshot } from "./runtime";
+import { parseSemver } from "./logic";
 
 const RELEASE_URL_PREFIXES: Record<UpdateProduct, string> = {
     questui: "https://github.com/Herzchens/QuestUI/releases/",
@@ -11,6 +12,33 @@ export function productLabel(product: UpdateProduct): string {
 
 export function visibleUpdate(state: PluginUpdateState): boolean {
     return state.kind === "available" && state.suppression === null;
+}
+
+export type UpdateAttentionLevel = "none" | "routine" | "recommended" | "critical";
+
+const CRITICAL_UPDATE_TITLE = /\b(critical|required|security|compatibility)\b/i;
+
+function stateAttentionLevel(state: PluginUpdateState): UpdateAttentionLevel {
+    if (!visibleUpdate(state) || state.kind !== "available") return "none";
+
+    const releaseTitle = [state.release.name, state.release.tagName].filter(Boolean).join(" ");
+    if (CRITICAL_UPDATE_TITLE.test(releaseTitle)) return "critical";
+    if (state.release.prerelease) return "routine";
+
+    const installed = parseSemver(state.installed);
+    const target = parseSemver(state.release.tagName);
+    if (installed && target && (target.major > installed.major || target.minor > installed.minor)) {
+        return "recommended";
+    }
+    return "routine";
+}
+
+export function updateAttentionLevel(snapshot: UpdateSnapshot): UpdateAttentionLevel {
+    const levels = [stateAttentionLevel(snapshot.questUI), stateAttentionLevel(snapshot.orion)];
+    if (levels.includes("critical")) return "critical";
+    if (levels.includes("recommended")) return "recommended";
+    if (levels.includes("routine")) return "routine";
+    return "none";
 }
 
 export function availableUpdate(state: PluginUpdateState): state is Extract<PluginUpdateState, { kind: "available"; }> {

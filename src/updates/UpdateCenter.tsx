@@ -1,7 +1,9 @@
 import { relaunch } from "@utils/native";
+import { plugins } from "@api/PluginManager";
+import { openPluginModal } from "@components/settings";
 import { Popout, useEffect, useRef, useState } from "@webpack/common";
 
-import { checkForUpdates, getUpdateSnapshot, subscribeUpdateState, type PluginUpdateState, type UpdateProduct, type UpdateSnapshot } from "./runtime";
+import { checkForUpdates, getInstalledRelease, getUpdateSnapshot, subscribeUpdateState, type PluginUpdateState, type UpdateProduct, type UpdateSnapshot } from "./runtime";
 import { managedNative as Native, runManagedReleaseUpdate, runOrionUpdateDecision, saveSkippedUpdate, saveUpdateReminder, toastFailure, type AvailableUpdateState, type ManagedReleaseUpdateResult, type UpdatePendingAction } from "./managed";
 import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, dashboardAvailabilityLines, formatCompactTimestamp, healthForProduct, productLabel, safeOpenRelease, updateProductTone, visibleReleaseVersion, visibleUpdate } from "./status";
 import { pushDashboardNotice } from "../dashboard/notifications";
@@ -88,6 +90,33 @@ function latestSuccessfulCheck(snapshot: UpdateSnapshot): number | null {
         snapshot.orionHealth.lastSuccessfulCheckAt
     ].filter((value): value is number => Number.isFinite(value));
     return values.length > 0 ? Math.max(...values) : null;
+}
+
+function formatReleaseDate(value: string | null | undefined): string {
+    if (!value) return "Release date unavailable";
+    const timestamp = Date.parse(value);
+    if (!Number.isFinite(timestamp)) return "Release date unavailable";
+    return `Released ${new Date(timestamp).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    })}`;
+}
+
+function openQuestUIPluginSettings(): void {
+    const plugin = plugins.QuestUI;
+    if (!plugin) return;
+    openPluginModal(plugin);
+}
+
+export function DashboardProductReleaseDate({ product }: { product: UpdateProduct; }) {
+    useUpdateSnapshot();
+    const release = getInstalledRelease(product);
+    return (
+        <span className="quest-ui-product-release-date" title={release?.publishedAt ?? undefined}>
+            {formatReleaseDate(release?.publishedAt)}
+        </span>
+    );
 }
 
 
@@ -351,9 +380,15 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
     return (
         <div className="quest-ui-update-panel quest-ui-update-panel-v16" role="group" aria-label="Plugin updates">
             <header className="quest-ui-update-panel-heading">
-                <div className="quest-ui-update-panel-title">
-                    <span className="quest-ui-update-panel-title-icon"><UpdateCenterIcon /></span>
-                    <strong>Update Center</strong>
+                <div className="quest-ui-update-panel-title-block">
+                    <div className="quest-ui-update-panel-title">
+                        <span className="quest-ui-update-panel-title-icon"><UpdateCenterIcon /></span>
+                        <strong>Update Center</strong>
+                    </div>
+                    <span className="quest-ui-update-panel-settings-hint">
+                        You can also update plugins from{" "}
+                        <button type="button" onClick={openQuestUIPluginSettings}>QuestUI settings</button>.
+                    </span>
                 </div>
                 <div className="quest-ui-update-panel-heading-actions">
                     <button

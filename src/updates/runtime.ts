@@ -411,6 +411,20 @@ export function getUpdateSnapshot(): UpdateSnapshot {
     return snapshot;
 }
 
+function normalizedReleaseVersion(value: string | null): string | null {
+    if (!value) return null;
+    return value.trim().toLowerCase().replace(/^v/, "");
+}
+
+export function getInstalledRelease(product: UpdateProduct): UpdateRelease | null {
+    const installed = product === "questui" ? QUESTUI_VERSION : installedOrionVersion();
+    const key = normalizedReleaseVersion(installed);
+    if (!key) return null;
+
+    const releases = product === "questui" ? cachedQuestUIReleases : cachedOrionReleases;
+    return releases?.find(release => normalizedReleaseVersion(release.tagName) === key) ?? null;
+}
+
 type ReleaseFetchResult =
     | { ok: true; value: UpdateRelease[]; }
     | { ok: false; error: unknown; };
