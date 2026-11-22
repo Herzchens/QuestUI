@@ -376,6 +376,7 @@ export function EventLogButton() {
             {(_, { isShown }) => (
                 <button ref={buttonRef} type="button" className={`quest-ui-toolbar-button quest-ui-event-log-button${isShown ? " is-open" : ""}`} onClick={() => setOpen(value => !value)} aria-label="Open QuestUI Event Log" aria-expanded={isShown} title="Event Log">
                     <BugLogIcon />
+                    <span className="quest-ui-event-log-label">Event Log</span>
                 </button>
             )}
         </Popout>

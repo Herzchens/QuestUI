@@ -402,6 +402,52 @@ export function DashboardUpdateNotice() {
     );
 }
 
+export function DashboardProductUpdateNotice({ product }: { product: UpdateProduct; }) {
+    const snapshot = useUpdateSnapshot();
+    const state = product === "questui" ? snapshot.questUI : snapshot.orion;
+    const health = healthForProduct(snapshot, product);
+    const target = visibleReleaseVersion(state);
+
+    // Orion's integration status already owns the "not installed" state in the
+    // Dashboard strip. Avoid rendering the same semantic state twice.
+    if (product === "orion" && state.kind === "not-installed") return null;
+
+    let tone = "muted";
+    let mark = "•";
+    let copy = "Not checked yet";
+
+    if (snapshot.checking) {
+        tone = "checking";
+        copy = "Checking updates…";
+    } else if (target) {
+        tone = "available";
+        mark = "↑";
+        copy = `${target} available`;
+    } else if (health.error || state.kind === "error") {
+        tone = "error";
+        mark = "!";
+        copy = "Update check failed";
+    } else if (state.kind === "up-to-date") {
+        tone = "current";
+        mark = "✓";
+        copy = "You are up to date";
+    } else if (state.kind === "disabled") {
+        copy = "Updates disabled";
+    } else if (state.kind === "custom-version") {
+        tone = "warning";
+        copy = "Custom version";
+    } else if (state.kind === "not-installed") {
+        copy = "Not installed";
+    }
+
+    return (
+        <span className={`quest-ui-product-update-chip is-${tone}`} title={copy}>
+            <span className="quest-ui-product-update-mark" aria-hidden="true">{mark}</span>
+            <span>{copy}</span>
+        </span>
+    );
+}
+
 export function UpdateSettingsControl() {
     const snapshot = useUpdateSnapshot();
     const [manualPending, setManualPending] = useState(false);

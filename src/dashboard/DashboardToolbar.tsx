@@ -19,8 +19,8 @@ function openQuestHome(closePopout?: () => void): void {
     NavigationRouter.transitionTo("/quest-home");
 }
 
-function openQuestUISettings(closePopout?: () => void): void {
-    const plugin = plugins["QuestUI"];
+function openPluginSettings(pluginName: "QuestUI" | "OrionQuests", closePopout?: () => void): void {
+    const plugin = plugins[pluginName];
     if (!plugin) return;
 
     closePopout?.();
@@ -246,7 +246,7 @@ function DashboardSorts({ mode, onChange }: { mode: DashboardSortMode; onChange:
 }
 
 
-export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => void; }) {
+export function QuestDashboardFilterSortControls() {
     const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
     const quests = useQuestSnapshot();
     const { ids: ignoredIds } = useIgnoredQuests();
@@ -260,6 +260,7 @@ export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => voi
     const sortButtonRef = useRef<HTMLButtonElement | null>(null);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [sortOpen, setSortOpen] = useState(false);
+    const sortLabel = DASHBOARD_SORT_OPTIONS.find(option => option.value === sortMode)?.label ?? "Recommended";
 
     const selectSort = (mode: DashboardSortMode) => {
         settings.store.dashboardSortMode = mode;
@@ -267,37 +268,10 @@ export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => voi
     };
 
     return (
-        <div className="quest-ui-dashboard-local-tools">
+        <div className="quest-ui-dashboard-filter-tools">
             <Popout
                 position="bottom"
-                align="right"
-                animation={Popout.Animation.NONE}
-                shouldShow={sortOpen}
-                onRequestClose={() => setSortOpen(false)}
-                targetElementRef={sortButtonRef}
-                renderPopout={() => <DashboardSorts mode={sortMode} onChange={selectSort} />}
-            >
-                {(_, { isShown }) => (
-                    <button
-                        ref={sortButtonRef}
-                        type="button"
-                        className={`quest-ui-toolbar-button quest-ui-sort-button${isShown ? " is-open" : ""}${sortMode !== "recommended" ? " is-active" : ""}`}
-                        onClick={() => {
-                            setFiltersOpen(false);
-                            setSortOpen(open => !open);
-                        }}
-                        aria-label={`Sort quests: ${DASHBOARD_SORT_OPTIONS.find(option => option.value === sortMode)?.label ?? "Recommended"}`}
-                        aria-expanded={isShown}
-                        title={`Sort: ${DASHBOARD_SORT_OPTIONS.find(option => option.value === sortMode)?.label ?? "Recommended"}`}
-                    >
-                        <SortIcon />
-                    </button>
-                )}
-            </Popout>
-
-            <Popout
-                position="bottom"
-                align="right"
+                align="left"
                 animation={Popout.Animation.NONE}
                 shouldShow={filtersOpen}
                 onRequestClose={() => setFiltersOpen(false)}
@@ -308,7 +282,7 @@ export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => voi
                     <button
                         ref={filterButtonRef}
                         type="button"
-                        className={`quest-ui-toolbar-button quest-ui-filter-button${isShown ? " is-open" : ""}${activeFilterCount > 0 ? " is-active" : ""}`}
+                        className={`quest-ui-dashboard-filter-control quest-ui-filter-button${isShown ? " is-open" : ""}${activeFilterCount > 0 ? " is-active" : ""}`}
                         onClick={() => {
                             setSortOpen(false);
                             setFiltersOpen(open => !open);
@@ -318,31 +292,86 @@ export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => voi
                         title={activeFilterCount > 0 ? `${activeFilterCount} active filters` : "Filters off"}
                     >
                         <FilterIcon />
-                        {activeFilterCount > 0 && <span className="quest-ui-filter-count" aria-hidden="true">{activeFilterCount > 9 ? "9+" : activeFilterCount}</span>}
+                        <span>Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span>
                     </button>
                 )}
             </Popout>
 
-            <button
-                type="button"
-                className="quest-ui-toolbar-button quest-ui-plugin-settings-button"
-                onClick={() => openQuestUISettings(closePopout)}
-                aria-label="Open QuestUI settings"
-                title="QuestUI Settings"
+            <Popout
+                position="bottom"
+                align="left"
+                animation={Popout.Animation.NONE}
+                shouldShow={sortOpen}
+                onRequestClose={() => setSortOpen(false)}
+                targetElementRef={sortButtonRef}
+                renderPopout={() => <DashboardSorts mode={sortMode} onChange={selectSort} />}
             >
-                <QuestUISettingsIcon />
-            </button>
-
-            <button
-                type="button"
-                className="quest-ui-toolbar-button quest-ui-home-button"
-                onClick={() => openQuestHome(closePopout)}
-                aria-label="Open Quest Home"
-                title="Open Quest Home"
-            >
-                <QuestHomeIcon />
-            </button>
+                {(_, { isShown }) => (
+                    <button
+                        ref={sortButtonRef}
+                        type="button"
+                        className={`quest-ui-dashboard-filter-control quest-ui-sort-button${isShown ? " is-open" : ""}${sortMode !== "recommended" ? " is-active" : ""}`}
+                        onClick={() => {
+                            setFiltersOpen(false);
+                            setSortOpen(open => !open);
+                        }}
+                        aria-label={`Sort quests: ${sortLabel}`}
+                        aria-expanded={isShown}
+                        title={`Sort: ${sortLabel}`}
+                    >
+                        <SortIcon />
+                        <span>Sort: {sortLabel}</span>
+                    </button>
+                )}
+            </Popout>
         </div>
     );
 }
 
+export function QuestPluginSettingsControl({
+    pluginName,
+    title,
+    closePopout
+}: {
+    pluginName: "QuestUI" | "OrionQuests";
+    title: string;
+    closePopout?: () => void;
+}) {
+    if (!plugins[pluginName]) return null;
+
+    return (
+        <button
+            type="button"
+            className="quest-ui-status-settings-button"
+            onClick={() => openPluginSettings(pluginName, closePopout)}
+            aria-label={title}
+            title={title}
+        >
+            <QuestUISettingsIcon />
+        </button>
+    );
+}
+
+export function QuestDashboardHomeControl({ closePopout }: { closePopout?: () => void; }) {
+    return (
+        <button
+            type="button"
+            className="quest-ui-toolbar-button quest-ui-home-button"
+            onClick={() => openQuestHome(closePopout)}
+            aria-label="Open Quest Home"
+            title="Open Quest Home"
+        >
+            <QuestHomeIcon />
+        </button>
+    );
+}
+
+export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => void; }) {
+    return (
+        <div className="quest-ui-dashboard-local-tools">
+            <QuestDashboardFilterSortControls />
+            <QuestPluginSettingsControl pluginName="QuestUI" title="QuestUI Settings" closePopout={closePopout} />
+            <QuestDashboardHomeControl closePopout={closePopout} />
+        </div>
+    );
+}

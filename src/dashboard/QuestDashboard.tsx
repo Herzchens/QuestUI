@@ -6,16 +6,16 @@ import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { effectiveOrbRewardAmount } from "../orbs/rewards";
 import { OrionIntegrationStatus } from "../orion/OrionStatus";
 import { getOrionControlSnapshot, getOrionIntegrationHealth, subscribeOrionControlState } from "../orion/integration";
-import { QuestOrbBalance } from "../orbs/QuestOrbBalance";
 import { QUESTUI_VERSION } from "../plugin/version";
 import settings from "../plugin/settings";
 import { useClaimAllBatchActive } from "../quests/actions/ClaimAllControl";
 import { useIgnoredQuests } from "../quests/ignored/runtime";
 import { dashboardScopeFromSettings, filterQuests, questStatusCounts, useQuestSnapshot } from "../quests/data";
 import type { NormalizedQuest } from "../quests/data";
-import { DashboardUpdateNotice } from "../updates/UpdateCenter";
+import { DashboardProductUpdateNotice } from "../updates/UpdateCenter";
 import { versionChannelClass } from "../updates/channel";
 import { QuestCard } from "./QuestCard";
+import { QuestDashboardFilterSortControls, QuestPluginSettingsControl } from "./DashboardToolbar";
 import { normalizeDashboardSortMode, sortDashboardQuests } from "./sort";
 import { DASHBOARD_SETTING_KEYS, clearDashboardFilters, partitionIgnored } from "./state";
 
@@ -30,13 +30,14 @@ function DashboardSummary({ quests, hiddenCount, ignoredCount }: {
 
     return (
         <div className="quest-ui-dashboard-summary" aria-label="Quest status summary">
-            <span className="quest-ui-summary-available">{counts.available} Available</span>
-            <span className="quest-ui-summary-claimable">{counts.claimable} Ready</span>
-            <span className="quest-ui-summary-in-progress">{counts.inProgress} In Progress</span>
-            <span className="quest-ui-summary-claimed">{counts.claimed} Claimed</span>
-            <span className="quest-ui-summary-expired">{counts.expired} Expired</span>
-            <span className="quest-ui-summary-ignored">{ignoredCount} Ignored</span>
-            <span className="quest-ui-summary-hidden">{hiddenCount} Hidden</span>
+            <span className="quest-ui-summary-all">All {quests.length}</span>
+            <span className="quest-ui-summary-available">Available {counts.available}</span>
+            <span className="quest-ui-summary-claimable">Ready {counts.claimable}</span>
+            <span className="quest-ui-summary-in-progress">In Progress {counts.inProgress}</span>
+            <span className="quest-ui-summary-claimed">Claimed {counts.claimed}</span>
+            <span className="quest-ui-summary-expired">Expired {counts.expired}</span>
+            <span className="quest-ui-summary-ignored">Ignored {ignoredCount}</span>
+            <span className="quest-ui-summary-hidden">Hidden {hiddenCount}</span>
         </div>
     );
 }
@@ -91,25 +92,31 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     return (
         <section className="quest-ui-dashboard" role="dialog" aria-label="Quest dashboard">
             <header className="quest-ui-dashboard-header">
-                <div className="quest-ui-dashboard-header-row">
-                    <div className="quest-ui-dashboard-heading">
-                        <div className="quest-ui-dashboard-title-row">
-                            <strong className="quest-ui-dashboard-title">Quests</strong>
-                        </div>
-                        <DashboardSummary quests={partition.normal} hiddenCount={hiddenCount} ignoredCount={ignoredCount} />
+                <div className="quest-ui-default-status-strip">
+                    <div className="quest-ui-default-status-product is-orion">
+                        <strong className="quest-ui-default-status-name">Orion Quest</strong>
+                        <OrionIntegrationStatus health={orionHealth} engineRunning={orionSnapshot?.running ?? null} compact />
+                        <DashboardProductUpdateNotice product="orion" />
+                        <QuestPluginSettingsControl
+                            pluginName="OrionQuests"
+                            title="Orion Quest Settings"
+                            closePopout={closePopout}
+                        />
+                    </div>
+                    <span className="quest-ui-default-status-separator" aria-hidden="true" />
+                    <div className="quest-ui-default-status-product is-questui">
+                        <strong className="quest-ui-default-status-name">QuestUI</strong>
+                        <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>{QUESTUI_VERSION}</span>
+                        <DashboardProductUpdateNotice product="questui" />
+                        <QuestPluginSettingsControl
+                            pluginName="QuestUI"
+                            title="QuestUI Settings"
+                            closePopout={closePopout}
+                        />
                     </div>
                 </div>
-                <div className="quest-ui-dashboard-meta-row">
-                    <div className="quest-ui-dashboard-meta-primary">
-                        <OrionIntegrationStatus health={orionHealth} engineRunning={orionSnapshot?.running ?? null} />
-                        <div className="quest-ui-meta-product">
-                            <span>QuestUI</span>
-                            <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>{QUESTUI_VERSION}</span>
-                            <DashboardUpdateNotice />
-                        </div>
-                    </div>
-                    <QuestOrbBalance closePopout={closePopout} />
-                </div>
+                <DashboardSummary quests={partition.normal} hiddenCount={hiddenCount} ignoredCount={ignoredCount} />
+                <QuestDashboardFilterSortControls />
             </header>
 
             <div className="quest-ui-dashboard-content">

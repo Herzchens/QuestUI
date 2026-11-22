@@ -107,6 +107,43 @@ function ProgressRing({
     );
 }
 
+function AchievementProgress({
+    current,
+    total,
+    complete
+}: {
+    current: number;
+    total: number;
+    complete: boolean;
+}) {
+    const safeTotal = Math.max(1, Math.floor(total));
+    const safeCurrent = complete
+        ? safeTotal
+        : Math.max(0, Math.min(safeTotal, Math.floor(current)));
+
+    return (
+        <div
+            className="quest-ui-achievement-progress"
+            role="img"
+            aria-label={`${safeCurrent} of ${safeTotal} achievement tasks complete`}
+        >
+            <div className="quest-ui-achievement-progress-copy">
+                <strong>{safeCurrent}/{safeTotal}</strong>
+                <span>tasks done</span>
+            </div>
+            <div
+                className="quest-ui-achievement-progress-segments"
+                style={{ gridTemplateColumns: `repeat(${safeTotal}, minmax(0, 1fr))` }}
+                aria-hidden="true"
+            >
+                {Array.from({ length: safeTotal }, (_, index) => (
+                    <span key={index} className={index < safeCurrent ? "is-filled" : ""} />
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function TaskTypeGlyph({ type }: { type: QuestTaskType; }) {
     return (
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -298,12 +335,14 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
         ? storedQuestTaskProgress(quest.rawQuest, primaryTask)
         : null;
     const timedProgress = timedProgressParts(quest, storedCurrent);
+    const isAchievement = primaryTask?.key?.includes("ACHIEVEMENT") === true && (primaryTask?.target ?? 0) > 0;
+    const achievementCurrent = primaryTask ? (storedCurrent ?? primaryTask.current) : 0;
     const progressRatioOverride = timedProgress != null && storedCurrent != null && primaryTask && primaryTask.target > 0
         ? Math.min(storedCurrent / primaryTask.target, 1)
         : null;
     const progressCopy = timedProgress == null ? formatQuestProgress(quest) : null;
     const progressTone = questProgressTone(completion, quest, progressRatioOverride);
-    const showProgressCopy = quest.status !== "claimable" && quest.status !== "claimed";
+    const showProgressCopy = !isAchievement && quest.status !== "claimable" && quest.status !== "claimed";
     const displayedOrbQuantity = effectiveOrbRewardAmount(
         { base: quest.reward.orbQuantity, boosted: quest.reward.boostedOrbQuantity },
         receivesOrbBoost
@@ -317,7 +356,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
         : null;
 
     return (
-        <article className={`quest-ui-card quest-ui-card-${quest.status}${ignored ? " quest-ui-card-ignored" : ""}`}>
+        <article className={`quest-ui-card quest-ui-card-${quest.status}${isAchievement ? " quest-ui-card-achievement" : ""}${ignored ? " quest-ui-card-ignored" : ""}`}>
             <QuestArtwork quest={quest} type={taskType} />
 
             <div className="quest-ui-card-main">
@@ -358,8 +397,16 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                 </div>
             </div>
 
-            <div className="quest-ui-card-side">
-                <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} />
+            <div className={`quest-ui-card-side${isAchievement ? " is-achievement" : ""}`}>
+                {isAchievement && primaryTask ? (
+                    <AchievementProgress
+                        current={achievementCurrent}
+                        total={primaryTask.target}
+                        complete={quest.status === "claimable" || quest.status === "claimed"}
+                    />
+                ) : (
+                    <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} />
+                )}
                 {expiry && (
                     <span className={`quest-ui-card-expiry quest-ui-expiry-${urgency}`} title={expiry}>
                         {expiry}

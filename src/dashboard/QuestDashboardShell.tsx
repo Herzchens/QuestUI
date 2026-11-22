@@ -9,7 +9,8 @@ import { isOrionCommandReady } from "../orion/integration";
 import { OrionGlobalControls } from "../orion/OrionControls";
 import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { QuestDashboard } from "./QuestDashboard";
-import { QuestDashboardToolbar } from "./DashboardToolbar";
+import { QuestDashboardHomeControl } from "./DashboardToolbar";
+import { QuestOrbBalance } from "../orbs/QuestOrbBalance";
 import { QuestReloadControl } from "../quests/reload/QuestReloadControl";
 import settings from "../plugin/settings";
 import { UpdateCenterIndicator } from "../updates/UpdateCenter";
@@ -18,6 +19,7 @@ import "../orion/styles/orion.css";
 import "./styles/dashboardPolish.css";
 import "./styles/dashboardV12.css";
 import "./styles/dashboardTuning.css";
+import "../themes/default/dashboard.css";
 
 const NativeQuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 
@@ -106,8 +108,8 @@ function QuestOrbMultiplierSourceTag() {
 function QuestDashboardDisplayTitle() {
     return (
         <div className="quest-ui-dashboard-display-title" aria-hidden="true">
-            <strong>Quest Dashboard</strong>
             <span className="quest-ui-dashboard-display-title-icon"><NativeQuestIcon /></span>
+            <strong>Quest Dashboard</strong>
             <QuestOrbMultiplierSourceTag />
         </div>
     );
@@ -119,17 +121,21 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
     const showOrionControls = orionIntegration === true && isOrionCommandReady();
 
     return (
-        <div className={`quest-ui-dashboard-shell has-dashboard-tools${showOrionControls ? " has-orion-control" : ""}`}>
+        <div className={`quest-ui-dashboard-shell quest-ui-theme-default has-dashboard-tools${showOrionControls ? " has-orion-control" : ""}`}>
             <div className="quest-ui-dashboard-topbar">
                 <QuestDashboardDisplayTitle />
-                <div className="quest-ui-dashboard-header-tools">
+                <QuestOrbBalance closePopout={closePopout} />
+            </div>
+            <div className="quest-ui-dashboard-actionbar" aria-label="Quest Dashboard controls">
+                <div className="quest-ui-dashboard-actionbar-primary">
                     {showOrionControls && <OrionGlobalControls />}
                     <ClaimAllControl />
+                    <span className="quest-ui-dashboard-action-divider" aria-hidden="true" />
                     <QuestReloadControl />
                     <UpdateCenterIndicator />
                     <EventLogButton />
-                    <QuestDashboardToolbar closePopout={closePopout} />
                 </div>
+                <QuestDashboardHomeControl closePopout={closePopout} />
             </div>
             <QuestDashboard closePopout={closePopout} />
         </div>

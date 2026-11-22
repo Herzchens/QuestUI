@@ -87,6 +87,9 @@ export function OrionGlobalControls() {
                 onClick={() => void runSmart()}
             >
                 {control.action === "pause" ? <OrionPauseIcon /> : <OrionPlayIcon />}
+                <span className="quest-ui-orion-control-label">
+                    {control.action === "pause" ? "Pause" : control.action === "resume" ? "Resume" : "Start"}
+                </span>
             </button>
             <button
                 type="button"
@@ -98,6 +101,7 @@ export function OrionGlobalControls() {
                 onClick={() => void runStop()}
             >
                 <OrionStopIcon />
+                <span className="quest-ui-orion-control-label">Stop</span>
             </button>
         </span>
     );

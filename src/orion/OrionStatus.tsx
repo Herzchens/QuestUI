@@ -36,10 +36,12 @@ function healthTitle(health: OrionIntegrationHealth, engineRunning: boolean | nu
 
 export function OrionIntegrationStatus({
     health,
-    engineRunning = null
+    engineRunning = null,
+    compact = false
 }: {
     health: OrionIntegrationHealth;
     engineRunning?: boolean | null;
+    compact?: boolean;
 }) {
     const warning = health.kind === "version-incompatible" || health.kind === "integration-unavailable";
     const notInstalled = health.kind === "not-installed";
@@ -47,7 +49,43 @@ export function OrionIntegrationStatus({
     const engineStateClass = health.kind === "connected" && runtime.state != null
         ? ` is-engine-${runtime.state}`
         : "";
-    const copy = health.kind === "connected" ? runtime.copy : HEALTH_COPY[health.kind];
+    const copy = health.kind === "connected"
+        ? compact
+            ? runtime.state === "running"
+                ? "Running"
+                : runtime.state === "idle"
+                    ? "Idle"
+                    : "Connected"
+            : runtime.copy
+        : compact
+            ? {
+                "not-installed": "Not installed",
+                "disabled": "Disabled",
+                "integration-off": "Integration off",
+                "version-incompatible": "Version incompatible",
+                "starting": "Starting",
+                "integration-unavailable": "Unavailable",
+                "connected": "Connected"
+            }[health.kind]
+            : HEALTH_COPY[health.kind];
+
+    if (compact) {
+        return (
+            <span className={`quest-ui-orion-status is-compact is-${health.kind}${engineStateClass}`} title={healthTitle(health, engineRunning)}>
+                {health.installedVersion && (
+                    <span className={`quest-ui-version-chip quest-ui-version-chip-orion ${versionChannelClass(health.installedVersion)}`}>{health.installedVersion}</span>
+                )}
+                <span className="quest-ui-orion-runtime-chip">
+                    {warning
+                        ? <span className="quest-ui-orion-status-warning" aria-hidden="true">⚠</span>
+                        : notInstalled
+                            ? <span className="quest-ui-orion-status-question" aria-hidden="true">?</span>
+                            : <span className="quest-ui-orion-status-dot" aria-hidden="true" />}
+                    <span className="quest-ui-orion-status-copy">{copy}</span>
+                </span>
+            </span>
+        );
+    }
 
     return (
         <span className={`quest-ui-orion-status is-${health.kind}${engineStateClass}`} title={healthTitle(health, engineRunning)}>
