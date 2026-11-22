@@ -3,7 +3,7 @@ import { Popout, useEffect, useRef, useState } from "@webpack/common";
 
 import { checkForUpdates, getUpdateSnapshot, subscribeUpdateState, type PluginUpdateState, type UpdateProduct, type UpdateSnapshot } from "./runtime";
 import { managedNative as Native, runManagedReleaseUpdate, runOrionUpdateDecision, saveSkippedUpdate, saveUpdateReminder, toastFailure, type AvailableUpdateState, type ManagedReleaseUpdateResult, type UpdatePendingAction } from "./managed";
-import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, dashboardAvailabilityLines, formatCompactTimestamp, formatTimestamp, healthForProduct, productLabel, safeOpenRelease, stateCopy, updateProductTone, visibleReleaseVersion, visibleUpdate } from "./status";
+import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, dashboardAvailabilityLines, formatCompactTimestamp, healthForProduct, productLabel, safeOpenRelease, updateProductTone, visibleReleaseVersion, visibleUpdate } from "./status";
 import { pushDashboardNotice } from "../dashboard/notifications";
 
 import "./styles.css";
@@ -15,6 +15,81 @@ function useUpdateSnapshot(): UpdateSnapshot {
 }
 
 let lastDashboardUpdateNoticeSignature = "";
+
+const UPDATE_REPOSITORY_URLS: Record<UpdateProduct, string> = {
+    questui: "https://github.com/Herzchens/QuestUI",
+    orion: "https://github.com/nyxxbit/discord-quest-completer"
+};
+
+function openUpdateRepository(product: UpdateProduct): void {
+    const url = UPDATE_REPOSITORY_URLS[product];
+    if (IS_WEB) {
+        window.open(url, "_blank", "noopener,noreferrer");
+        return;
+    }
+    VencordNative.native.openExternal(url);
+}
+
+function GitHubIcon() {
+    return (
+        <svg className="quest-ui-update-github-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+                fill="currentColor"
+                d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49 0-.24-.01-1.05-.02-1.9-2.78.62-3.37-1.2-3.37-1.2-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .08 1.53 1.06 1.53 1.06.9 1.56 2.35 1.11 2.92.85.09-.67.35-1.11.64-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.4 9.4 0 0 1 12 6.93a9.3 9.3 0 0 1 2.5.35c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.8-4.57 5.05.36.32.68.95.68 1.92 0 1.39-.01 2.5-.01 2.84 0 .27.18.6.69.49A10.25 10.25 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"
+            />
+        </svg>
+    );
+}
+
+function UpdateStateIcon({ kind }: { kind: "current" | "available" | "error" | "checking" | "muted"; }) {
+    if (kind === "current") {
+        return (
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m3.3 8.2 2.8 2.8 6.6-6.6" />
+            </svg>
+        );
+    }
+    if (kind === "available") {
+        return (
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 12V4M4.8 7.2 8 4l3.2 3.2" />
+            </svg>
+        );
+    }
+    if (kind === "error") {
+        return (
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 4.2v4.7M8 11.8v.1" />
+            </svg>
+        );
+    }
+    if (kind === "checking") {
+        return (
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M13 8a5 5 0 1 1-1.4-3.46M13 3.5v3.2H9.8" />
+            </svg>
+        );
+    }
+    return <span aria-hidden="true">•</span>;
+}
+
+function ExternalLinkIcon() {
+    return (
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M6.2 3.3H3.8a1.5 1.5 0 0 0-1.5 1.5v7.4a1.5 1.5 0 0 0 1.5 1.5h7.4a1.5 1.5 0 0 0 1.5-1.5V9.8" />
+            <path d="M9 2.3h4.7V7M13.5 2.5 7.7 8.3" />
+        </svg>
+    );
+}
+
+function latestSuccessfulCheck(snapshot: UpdateSnapshot): number | null {
+    const values = [
+        snapshot.questUIHealth.lastSuccessfulCheckAt,
+        snapshot.orionHealth.lastSuccessfulCheckAt
+    ].filter((value): value is number => Number.isFinite(value));
+    return values.length > 0 ? Math.max(...values) : null;
+}
+
 
 function UpdateResultNotice({ result }: { result: ManagedReleaseUpdateResult | null; }) {
     if (!result) return null;
@@ -63,7 +138,6 @@ function OrionUpdateDecisionPanel({
 }
 
 function UpdateCardActions({
-    product,
     state,
     pending,
     updateResult,
@@ -73,7 +147,6 @@ function UpdateCardActions({
     onSnooze,
     onSkip
 }: {
-    product: UpdateProduct;
     state: AvailableUpdateState;
     pending: UpdatePendingAction;
     updateResult: ManagedReleaseUpdateResult | null;
@@ -93,7 +166,6 @@ function UpdateCardActions({
             {updateResult?.ok && updateResult.restartRequired && (
                 <button type="button" className="quest-ui-update-restart" onClick={relaunch}>Restart Discord</button>
             )}
-            <button type="button" onClick={() => safeOpenRelease(product, state.release)}>View release</button>
             <button type="button" disabled={pending !== null} onClick={onSnooze}>
                 {pending === "snooze" ? "Saving…" : "Remind me later"}
             </button>
@@ -215,7 +287,6 @@ function UpdateReleaseCard({ product, state }: {
                 />
             )}
             <UpdateCardActions
-                product={product}
                 state={state}
                 pending={pending}
                 updateResult={updateResult}
@@ -229,98 +300,188 @@ function UpdateReleaseCard({ product, state }: {
     );
 }
 
+function conciseProductState(state: PluginUpdateState, healthError: string | null): string {
+    if (healthError || state.kind === "error") return "Check failed";
+    if (state.kind === "available") {
+        if (state.suppression === "skipped") return "Skipped";
+        if (state.suppression === "snoozed") return "Snoozed";
+        return "Update available";
+    }
+    if (state.kind === "up-to-date") return "Up to date";
+    if (state.kind === "disabled") return "Checks disabled";
+    if (state.kind === "custom-version") return "Custom version";
+    if (state.kind === "not-installed") return "Not installed";
+    if (state.kind === "idle") return "Not checked";
+    return "Unknown";
+}
+
 function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
     const states: Array<[UpdateProduct, PluginUpdateState]> = [
         ["questui", snapshot.questUI],
         ["orion", snapshot.orion]
     ];
-    const available = states.filter((entry): entry is [UpdateProduct, Extract<PluginUpdateState, { kind: "available"; }>] => availableUpdate(entry[1]));
     const visibleCount = states.filter(([, state]) => visibleUpdate(state)).length;
-    const failedProducts = states.filter(([product, state]) =>
+    const hasError = states.some(([product, state]) =>
         healthForProduct(snapshot, product).error != null || state.kind === "error"
     );
-    const hasError = failedProducts.length > 0;
-    const failedProductCopy = failedProducts.map(([product]) => productLabel(product)).join(" and ");
     const availabilityCopy = combinedAvailabilityCopy(snapshot);
+    const lastCheckAt = latestSuccessfulCheck(snapshot);
+    const bannerTone = snapshot.checking
+        ? "is-checking"
+        : visibleCount > 0
+            ? "has-update"
+            : hasError
+                ? "has-error"
+                : "is-current";
+    const bannerIconKind = snapshot.checking
+        ? "checking"
+        : visibleCount > 0
+            ? "available"
+            : hasError
+                ? "error"
+                : "current";
+    const bannerDetail = snapshot.checking
+        ? "Checking QuestUI and OrionQuest release feeds."
+        : visibleCount > 0
+            ? availabilityCopy
+            : hasError
+                ? "QuestUI or OrionQuest update checks need attention."
+                : "OrionQuest and QuestUI are up to dated.";
 
     return (
-        <div className="quest-ui-update-panel" role="group" aria-label="Plugin updates">
-            <div className="quest-ui-update-panel-heading">
+        <div className="quest-ui-update-panel quest-ui-update-panel-v16" role="group" aria-label="Plugin updates">
+            <header className="quest-ui-update-panel-heading">
                 <div className="quest-ui-update-panel-title">
                     <span className="quest-ui-update-panel-title-icon"><UpdateCenterIcon /></span>
-                    <div>
-                        <strong>Updates</strong>
-                        <span>QuestUI · OrionQuests</span>
-                    </div>
+                    <strong>Update Center</strong>
                 </div>
-                <button
-                    type="button"
-                    className="quest-ui-update-check-button"
-                    disabled={snapshot.checking}
-                    onClick={() => { void checkForUpdates(true); }}
-                >
-                    {snapshot.checking ? "Checking…" : "Check now"}
-                </button>
-            </div>
-
-            <div className={`quest-ui-update-overview${visibleCount > 0 ? " has-update" : hasError ? " has-error" : " is-current"}`}>
-                <span className="quest-ui-update-overview-dot" aria-hidden="true" />
-                <div>
-                    <strong>
-                        {snapshot.checking ? "Checking releases…" : availabilityCopy}
-                    </strong>
-                    <span>
-                        {snapshot.checking
-                            ? "Comparing installed versions with the configured release channels."
-                            : visibleCount > 0 && hasError
-                                ? `${failedProductCopy} check needs attention; known updates remain actionable.`
-                                : visibleCount > 0
-                                    ? "Review the release below or update directly when supported."
-                                    : hasError
-                                        ? `${failedProductCopy} ${failedProducts.length === 1 ? "check needs" : "checks need"} attention; successful product state is preserved.`
-                                        : "Configured release feeds are current."}
+                <div className="quest-ui-update-panel-heading-actions">
+                    <button
+                        type="button"
+                        className="quest-ui-update-check-button"
+                        disabled={snapshot.checking}
+                        onClick={() => { void checkForUpdates(true); }}
+                    >
+                        {snapshot.checking ? "Checking…" : "Check now"}
+                    </button>
+                    <span className="quest-ui-update-panel-last-check">
+                        Last check · {formatCompactTimestamp(lastCheckAt)}
                     </span>
                 </div>
+            </header>
+
+            <div className={`quest-ui-update-banner ${bannerTone}`}>
+                <span className="quest-ui-update-banner-mark" aria-hidden="true">
+                    <UpdateStateIcon kind={bannerIconKind} />
+                </span>
+                <div>
+                    <strong>
+                        {snapshot.checking
+                            ? "Checking releases…"
+                            : visibleCount > 0
+                                ? `${visibleCount} ${visibleCount === 1 ? "update is" : "updates are"} available`
+                                : hasError
+                                    ? "Update check needs attention"
+                                    : "You are up to date"}
+                    </strong>
+                    <span>{bannerDetail}</span>
+                </div>
             </div>
 
-            <div className="quest-ui-update-status-grid">
+            <div className="quest-ui-update-product-list">
                 {states.map(([product, state]) => {
                     const health = healthForProduct(snapshot, product);
-                    const showHealth = state.kind !== "not-installed" && state.kind !== "disabled";
+                    if (product === "orion" && state.kind === "not-installed") return null;
+
+                    const tone = updateProductTone(state, health);
+                    const healthError = health.error ?? (state.kind === "error" ? state.message : null);
+                    const target = state.kind === "available" ? state.release.tagName : null;
+                    const stateIconKind = healthError || state.kind === "error"
+                        ? "error"
+                        : state.kind === "available"
+                            ? "available"
+                            : state.kind === "up-to-date"
+                                ? "current"
+                                : "muted";
+
                     return (
-                        <div className={`quest-ui-update-status-row is-${updateProductTone(state, health)}`} key={product}>
-                            <UpdateProductStatus product={product} state={state} health={health} />
-                            <div className="quest-ui-update-status-details">
-                                <span className="quest-ui-update-status-copy">{stateCopy(product, state)}</span>
-                                {health.error && <span className="quest-ui-update-status-error">{health.error}</span>}
-                                {showHealth && (
-                                    <span className="quest-ui-update-status-health">
-                                        Last successful check · {formatCompactTimestamp(health.lastSuccessfulCheckAt)}
-                                    </span>
-                                )}
+                        <div className={`quest-ui-update-product-entry is-${tone}`} key={product}>
+                            <div className="quest-ui-update-product-row">
+                                <div className="quest-ui-update-product-identity">
+                                    <div>
+                                        <strong>{productLabel(product)}</strong>
+                                        <span className={`quest-ui-update-row-version${target ? " is-old-version" : ""}`}>
+                                            {state.installed ?? "-"}
+                                        </span>
+                                        {target && (
+                                            <>
+                                                <span className="quest-ui-update-row-arrow" aria-hidden="true">→</span>
+                                                <span className="quest-ui-update-row-target">{target}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="quest-ui-update-product-row-meta">
+                                    <strong>
+                                        <span className="quest-ui-update-row-state-mark" aria-hidden="true">
+                                            <UpdateStateIcon kind={stateIconKind} />
+                                        </span>
+                                        {conciseProductState(state, healthError)}
+                                    </strong>
+                                    {healthError && <span>{healthError}</span>}
+                                    {state.kind === "available" && (
+                                        <button
+                                            type="button"
+                                            className="quest-ui-update-release-link"
+                                            onClick={() => safeOpenRelease(product, state.release)}
+                                        >
+                                            <span>View release note</span>
+                                            <ExternalLinkIcon />
+                                        </button>
+                                    )}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="quest-ui-update-github-button"
+                                    onClick={() => openUpdateRepository(product)}
+                                    aria-label={`Open ${productLabel(product)} on GitHub`}
+                                    title={`Open ${productLabel(product)} on GitHub`}
+                                >
+                                    <GitHubIcon />
+                                </button>
                             </div>
+
+                            {availableUpdate(state) && (
+                                <div className="quest-ui-update-product-expanded">
+                                    <UpdateReleaseCard product={product} state={state} />
+                                </div>
+                            )}
                         </div>
                     );
                 })}
             </div>
 
-            {available.length > 0 && (
-                <div className="quest-ui-update-list">
-                    {available.map(([product, state]) => <UpdateReleaseCard key={product} product={product} state={state} />)}
+            {!snapshot.automaticChecksEnabled && (
+                <div className="quest-ui-update-manual-warning">
+                    AutoUpdater is off · check updates manually
                 </div>
             )}
 
-            <div className="quest-ui-update-last-check">
-                <span>QuestUI last successful check · {formatTimestamp(snapshot.questUIHealth.lastSuccessfulCheckAt)}</span>
-                {snapshot.orion.kind !== "not-installed" && (
-                    <span>OrionQuests last successful check · {formatTimestamp(snapshot.orionHealth.lastSuccessfulCheckAt)}</span>
-                )}
-                {!snapshot.automaticChecksEnabled && (
-                    <span className="quest-ui-update-manual-warning">
-                        You are turning off AutoUpdater, please check update manually
-                    </span>
-                )}
-            </div>
+            <footer className="quest-ui-update-support-footer">
+                <span>Enjoying QuestUI?</span>
+                <button
+                    type="button"
+                    onClick={() => openUpdateRepository("questui")}
+                    aria-label="Star QuestUI on GitHub"
+                    title="Open QuestUI on GitHub"
+                >
+                    Give us a star on GitHub
+                    <ExternalLinkIcon />
+                </button>
+                <span>to support the project.</span>
+            </footer>
         </div>
     );
 }

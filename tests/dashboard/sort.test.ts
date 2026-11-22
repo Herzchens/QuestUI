@@ -59,9 +59,9 @@ assert.equal(effectiveOrbRewardAmount({ base: 200, boosted: 240 }, false), 200);
 assert.equal(effectiveOrbRewardAmount({ base: 200, boosted: 240 }, true), 240);
 assert.equal(effectiveOrbRewardAmount({ base: 200, boosted: 200 }, true), 200);
 
-assert.equal(normalizeDashboardSortMode("bogus"), "recommended");
+assert.equal(normalizeDashboardSortMode("bogus"), "expiring");
 assert.equal(normalizeDashboardSortMode("required-time-desc"), "required-time-desc");
-assert.deepEqual(sortDashboardQuests(sample).map(q => q.id), ["b", "c", "a", "e", "d"]);
+assert.deepEqual(sortDashboardQuests(sample).map(q => q.id), ["c", "b", "a", "e", "d"]);
 assert.deepEqual(sortDashboardQuests(sample, "expiring").map(q => q.id), ["c", "b", "a", "e", "d"]);
 assert.deepEqual(sortDashboardQuests(sample, "name-asc").map(q => q.name), ["Alpha", "Beta", "Delta", "Gamma", "Zulu"]);
 assert.deepEqual(sortDashboardQuests(sample, "name-desc").map(q => q.name), ["Beta", "Alpha", "Zulu", "Gamma", "Delta"]);

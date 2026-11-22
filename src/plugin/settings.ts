@@ -19,8 +19,7 @@ const rewardOptions = [
 ] as const;
 
 const dashboardSortOptions = [
-    { label: "Recommended", value: "recommended", default: true },
-    { label: "Expiring Soon", value: "expiring" },
+    { label: "Expiring Soon", value: "expiring", default: true },
     { label: "Highest Orb Reward", value: "orb-reward" },
     { label: "Shortest Required Time", value: "required-time-asc" },
     { label: "Longest Required Time", value: "required-time-desc" },

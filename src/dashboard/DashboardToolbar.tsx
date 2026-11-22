@@ -323,7 +323,6 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
 }
 
 const DASHBOARD_SORT_OPTIONS: ReadonlyArray<{ value: DashboardSortMode; label: string; }> = [
-    { value: "recommended", label: "Recommended" },
     { value: "expiring", label: "Expiring Soon" },
     { value: "orb-reward", label: "Highest Orb Reward" },
     { value: "required-time-asc", label: "Shortest Required Time" },
@@ -371,7 +370,7 @@ export function QuestDashboardFilterSortControls() {
     const sortButtonRef = useRef<HTMLButtonElement | null>(null);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const [sortOpen, setSortOpen] = useState(false);
-    const sortLabel = DASHBOARD_SORT_OPTIONS.find(option => option.value === sortMode)?.label ?? "Recommended";
+    const sortLabel = DASHBOARD_SORT_OPTIONS.find(option => option.value === sortMode)?.label ?? "Expiring Soon";
 
     const selectSort = (mode: DashboardSortMode) => {
         settings.store.dashboardSortMode = mode;
@@ -393,7 +392,7 @@ export function QuestDashboardFilterSortControls() {
                     <button
                         ref={sortButtonRef}
                         type="button"
-                        className={`quest-ui-dashboard-filter-control quest-ui-sort-button${isShown ? " is-open" : ""}${sortMode !== "recommended" ? " is-active" : ""}`}
+                        className={`quest-ui-dashboard-filter-control quest-ui-sort-button${isShown ? " is-open" : ""}${sortMode !== "expiring" ? " is-active" : ""}`}
                         onClick={() => {
                             setFiltersOpen(false);
                             setSortOpen(open => !open);
