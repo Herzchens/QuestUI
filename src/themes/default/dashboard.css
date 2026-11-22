@@ -3068,3 +3068,1645 @@
 .quest-ui-theme-default .quest-ui-card:hover .quest-ui-card-backdrop > img {
     opacity: .39;
 }
+
+
+/* v1.6 dropdown refinement.
+ * One floating surface, quiet separators, and compact controls instead of nested cards/pill soup.
+ */
+.quest-ui-filter-panel,
+.quest-ui-sort-panel {
+    background: #17171c !important;
+    border: 1px solid rgba(255,255,255,.09) !important;
+    box-shadow: 0 16px 42px rgba(0,0,0,.46) !important;
+    color: #dbdee1;
+}
+
+.quest-ui-filter-panel {
+    border-radius: 12px !important;
+    gap: 0 !important;
+    padding: 10px 12px 12px !important;
+    width: 404px !important;
+}
+
+.quest-ui-filter-panel-heading {
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,.075) !important;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 1px 2px 10px !important;
+}
+
+.quest-ui-filter-panel-heading > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.quest-ui-filter-panel-heading strong {
+    color: #f2f3f5;
+    font-size: 13px !important;
+    font-weight: 700;
+    line-height: 17px !important;
+}
+
+.quest-ui-filter-panel-heading span {
+    color: #8f939c;
+    font-size: 10px !important;
+    line-height: 13px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-filter-panel-actions {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 2px !important;
+}
+
+.quest-ui-filter-reset,
+.quest-ui-filter-clear {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    color: #a9adb6;
+    font-size: 10px !important;
+    font-weight: 600;
+    min-height: 26px !important;
+    padding: 4px 7px !important;
+}
+
+.quest-ui-filter-reset:hover,
+.quest-ui-filter-clear:hover {
+    background: rgba(255,255,255,.055) !important;
+    color: #f2f3f5;
+}
+
+.quest-ui-filter-clear {
+    color: #aeb4ff;
+}
+
+.quest-ui-filter-section,
+.quest-ui-filter-section.quest-ui-filter-section-row {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+    padding: 10px 2px 9px !important;
+}
+
+.quest-ui-filter-section + .quest-ui-filter-section {
+    border-top: 1px solid rgba(255,255,255,.065) !important;
+}
+
+.quest-ui-filter-label {
+    color: #777c86 !important;
+    font-size: 9px !important;
+    font-weight: 700;
+    letter-spacing: .08em !important;
+    line-height: 11px !important;
+    padding: 0 !important;
+    text-transform: uppercase;
+}
+
+.quest-ui-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px !important;
+}
+
+.quest-ui-filter-chip {
+    align-items: center;
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,.075) !important;
+    border-radius: 6px !important;
+    color: #969ba4 !important;
+    display: inline-flex;
+    font-size: 10.5px !important;
+    font-weight: 600;
+    gap: 6px !important;
+    min-height: 27px !important;
+    padding: 4px 8px !important;
+}
+
+.quest-ui-filter-chip:hover {
+    background: rgba(255,255,255,.045) !important;
+    border-color: rgba(255,255,255,.13) !important;
+    color: #d7d9de !important;
+}
+
+.quest-ui-filter-chip.is-selected {
+    background: rgba(255,255,255,.055) !important;
+    border-color: rgba(255,255,255,.13) !important;
+    color: #e5e7eb !important;
+}
+
+.quest-ui-filter-chip-check {
+    background: currentColor;
+    border-radius: 999px;
+    display: block !important;
+    flex: 0 0 5px !important;
+    height: 5px;
+    opacity: 0 !important;
+    width: 5px !important;
+}
+
+.quest-ui-filter-chip.is-selected .quest-ui-filter-chip-check {
+    opacity: .9 !important;
+}
+
+/* Semantic color is carried by the tiny state indicator, not a colored pill border. */
+.quest-ui-filter-chip-danger.is-selected .quest-ui-filter-chip-check { color: #f23f42; }
+.quest-ui-filter-chip-warning.is-selected .quest-ui-filter-chip-check { color: #f0b232; }
+.quest-ui-filter-chip-positive.is-selected .quest-ui-filter-chip-check { color: #23a55a; }
+.quest-ui-filter-chip-brand.is-selected .quest-ui-filter-chip-check { color: #6d7cff; }
+
+.quest-ui-filter-chip:not(.quest-ui-filter-chip-danger):not(.quest-ui-filter-chip-warning):not(.quest-ui-filter-chip-positive):not(.quest-ui-filter-chip-brand).is-selected .quest-ui-filter-chip-check {
+    color: #aeb4ff;
+}
+
+.quest-ui-filter-chip-label {
+    line-height: 1;
+}
+
+/* Expired age custom input belongs to the option row instead of becoming its own mini-card. */
+.quest-ui-expired-age-custom {
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,.075) !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    color: #aeb2ba !important;
+    min-height: 27px !important;
+    padding: 3px 4px 3px 8px !important;
+}
+
+.quest-ui-expired-age-custom:hover,
+.quest-ui-expired-age-custom:focus-within,
+.quest-ui-expired-age-custom.is-selected {
+    background: rgba(255,255,255,.045) !important;
+    border-color: rgba(255,255,255,.14) !important;
+    color: #eceef1 !important;
+}
+
+.quest-ui-expired-age-custom input {
+    background: #111115 !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    color: #e4e6e9 !important;
+    height: 20px;
+    padding: 0 5px !important;
+    width: 44px !important;
+}
+
+/* Sort becomes a real menu: no nested card feel, no big selected pill. */
+.quest-ui-sort-panel {
+    border-radius: 11px !important;
+    padding: 8px !important;
+    width: 246px !important;
+}
+
+.quest-ui-sort-panel-heading {
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    gap: 1px !important;
+    margin-bottom: 4px;
+    padding: 2px 7px 8px !important;
+}
+
+.quest-ui-sort-panel-heading strong {
+    color: #f2f3f5 !important;
+    font-size: 12px !important;
+    font-weight: 700;
+}
+
+.quest-ui-sort-panel-heading span {
+    color: #777c86 !important;
+    font-size: 9.5px !important;
+}
+
+.quest-ui-sort-options {
+    gap: 1px !important;
+}
+
+.quest-ui-sort-options > button {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    color: #b6bac2 !important;
+    font-size: 11px !important;
+    min-height: 31px !important;
+    padding: 6px 8px 6px 10px !important;
+    position: relative;
+}
+
+.quest-ui-sort-options > button::before {
+    background: transparent;
+    border-radius: 999px;
+    content: "";
+    height: 16px;
+    left: 2px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+}
+
+.quest-ui-sort-options > button:hover {
+    background: rgba(255,255,255,.045) !important;
+    color: #e4e6e9 !important;
+}
+
+.quest-ui-sort-options > button.is-selected {
+    background: rgba(109,124,255,.075) !important;
+    color: #f2f3f5 !important;
+}
+
+.quest-ui-sort-options > button.is-selected::before {
+    background: #7d8cff;
+}
+
+.quest-ui-sort-check {
+    fill: none;
+    height: 14px;
+    stroke: #8d9aff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    width: 14px;
+}
+
+@media (max-width: 520px) {
+    .quest-ui-filter-panel {
+        width: min(404px, calc(100vw - 24px)) !important;
+    }
+}
+
+
+/* v1.6 Filter Deck / Sort Deck
+ * Control-surface layout: tracks, rails and segmented selectors instead of settings cards.
+ */
+.quest-ui-theme-default .quest-ui-filter-panel.quest-ui-filter-deck {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.018), transparent 26%),
+        #141419 !important;
+    border: 1px solid rgba(255,255,255,.085) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 18px 48px rgba(0,0,0,.52) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0 !important;
+    overflow: hidden;
+    padding: 0 !important;
+    width: 468px !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-header {
+    align-items: center;
+    background: rgba(255,255,255,.018);
+    border-bottom: 1px solid rgba(255,255,255,.065);
+    display: flex;
+    justify-content: space-between;
+    min-height: 54px;
+    padding: 9px 12px 9px 14px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-heading {
+    display: grid;
+    gap: 0;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-kicker {
+    color: #686d77;
+    font-size: 8px;
+    font-weight: 800;
+    grid-column: 1 / -1;
+    letter-spacing: .14em;
+    line-height: 10px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-heading strong {
+    color: #f2f3f5;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-scope {
+    align-self: center;
+    color: #777c86;
+    font-size: 9px;
+    margin-left: 8px;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-actions {
+    display: inline-flex;
+    gap: 3px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-actions > button {
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: #858a94;
+    cursor: pointer;
+    font-size: 9.5px;
+    font-weight: 650;
+    min-height: 26px;
+    padding: 4px 7px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-actions > button:hover {
+    background: rgba(255,255,255,.05);
+    color: #e3e5e8;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-actions > button.is-primary {
+    color: #aeb4ff;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-track {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: 82px minmax(0,1fr);
+    min-height: 48px;
+    padding: 0 12px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-track + .quest-ui-filter-deck-track {
+    border-top: 1px solid rgba(255,255,255,.055);
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-track-label {
+    align-content: center;
+    border-right: 1px solid rgba(255,255,255,.055);
+    display: grid;
+    padding-right: 10px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-track-label strong {
+    color: #b7bbc3;
+    font-size: 9.5px;
+    line-height: 12px;
+    text-transform: uppercase;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-track-label span {
+    color: #5f646d;
+    font-size: 8.5px;
+    line-height: 10px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-segments,
+.quest-ui-theme-default .quest-ui-filter-deck-switch {
+    align-items: center;
+    display: grid;
+    gap: 0;
+    padding: 8px 0 8px 10px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-segments {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    row-gap: 5px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-switch {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-switch.is-five {
+    grid-template-columns: repeat(5, minmax(0,1fr));
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-option {
+    --quest-ui-filter-deck-tone: #858b96;
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-left: 1px solid rgba(255,255,255,.06);
+    color: #777d87;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 9.5px;
+    font-weight: 650;
+    gap: 5px;
+    justify-content: center;
+    min-height: 28px;
+    padding: 5px 6px;
+    position: relative;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-option:first-child {
+    border-left: 0;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-segments .quest-ui-filter-deck-option {
+    background: rgba(255,255,255,.018);
+    border: 0;
+    border-radius: 5px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-option:hover {
+    background: rgba(255,255,255,.04);
+    color: #cfd2d7;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-option.is-selected {
+    color: #eef0f2;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-option.is-danger { --quest-ui-filter-deck-tone: #f23f42; }
+.quest-ui-theme-default .quest-ui-filter-deck-option.is-warning { --quest-ui-filter-deck-tone: #f0b232; }
+.quest-ui-theme-default .quest-ui-filter-deck-option.is-positive { --quest-ui-filter-deck-tone: #23a55a; }
+.quest-ui-theme-default .quest-ui-filter-deck-option.is-brand { --quest-ui-filter-deck-tone: #7289ff; }
+
+.quest-ui-theme-default .quest-ui-filter-deck-option-dot {
+    background: var(--quest-ui-filter-deck-tone);
+    border-radius: 999px;
+    height: 4px;
+    opacity: .18;
+    width: 4px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-option.is-selected .quest-ui-filter-deck-option-dot {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--quest-ui-filter-deck-tone) 42%, transparent);
+    opacity: 1;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-option.is-selected::after {
+    background: var(--quest-ui-filter-deck-tone);
+    border-radius: 999px;
+    bottom: 1px;
+    content: "";
+    height: 2px;
+    left: 22%;
+    opacity: .8;
+    position: absolute;
+    right: 22%;
+}
+
+.quest-ui-theme-default .quest-ui-filter-deck-track.is-age {
+    min-height: 62px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-line {
+    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(5, 42px) minmax(86px,1fr);
+    padding: 7px 0 7px 10px;
+    position: relative;
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-line::before {
+    background: rgba(255,255,255,.08);
+    content: "";
+    height: 1px;
+    left: 21px;
+    position: absolute;
+    right: 112px;
+    top: 19px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-line > button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: #737882;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    font-size: 9px;
+    gap: 5px;
+    min-height: 42px;
+    padding: 3px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-node {
+    background: #3b3e45;
+    border: 2px solid #141419;
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.09);
+    height: 7px;
+    width: 7px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-line > button.is-selected {
+    color: #eceef1;
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-line > button.is-selected .quest-ui-filter-age-node {
+    background: #8995ff;
+    box-shadow: 0 0 0 1px rgba(137,149,255,.38), 0 0 8px rgba(137,149,255,.2);
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-custom {
+    align-items: center;
+    align-self: center;
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 6px;
+    color: #7d828b;
+    display: flex;
+    gap: 5px;
+    height: 30px;
+    justify-content: space-between;
+    margin-left: 8px;
+    padding: 0 4px 0 8px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-custom.is-selected {
+    border-color: rgba(137,149,255,.34);
+    color: #dfe2e7;
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-custom > span {
+    font-size: 9px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-age-custom input {
+    background: #101014;
+    border: 0;
+    border-radius: 4px;
+    color: #e5e7ea;
+    height: 22px;
+    outline: 0;
+    padding: 0 5px;
+    width: 42px;
+}
+
+/* Sort Deck */
+.quest-ui-theme-default .quest-ui-sort-panel.quest-ui-sort-deck {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.018), transparent 30%),
+        #141419 !important;
+    border: 1px solid rgba(255,255,255,.085) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 16px 42px rgba(0,0,0,.5) !important;
+    overflow: hidden;
+    padding: 0 !important;
+    width: 286px !important;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-header {
+    background: rgba(255,255,255,.018);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    display: flex;
+    flex-direction: column;
+    padding: 9px 11px 8px;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-header > span {
+    color: #646973;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-header > strong {
+    color: #f2f3f5;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-groups {
+    display: flex;
+    flex-direction: column;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-group {
+    display: grid;
+    grid-template-columns: 58px minmax(0,1fr);
+    min-height: 42px;
+    padding: 0 8px;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-group + .quest-ui-sort-deck-group {
+    border-top: 1px solid rgba(255,255,255,.055);
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-group-label {
+    align-self: stretch;
+    border-right: 1px solid rgba(255,255,255,.055);
+    color: #666b74;
+    display: flex;
+    font-size: 8.5px;
+    font-weight: 700;
+    align-items: center;
+    text-transform: uppercase;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-options {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0 4px 8px;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-options > button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: #8d929c;
+    cursor: pointer;
+    display: flex;
+    font-size: 9.5px;
+    justify-content: space-between;
+    min-height: 27px;
+    padding: 4px 6px 4px 8px;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-options > button:hover {
+    background: rgba(255,255,255,.04);
+    color: #d9dce0;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-options > button.is-selected {
+    background: rgba(114,137,255,.065);
+    color: #f0f2f4;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-indicator {
+    background: #343740;
+    border-radius: 999px;
+    height: 5px;
+    width: 5px;
+}
+
+.quest-ui-theme-default .quest-ui-sort-deck-options > button.is-selected .quest-ui-sort-deck-indicator {
+    background: #8995ff;
+    box-shadow: 0 0 7px rgba(137,149,255,.3);
+}
+
+@media (max-width: 520px) {
+    .quest-ui-theme-default .quest-ui-filter-panel.quest-ui-filter-deck {
+        width: min(468px, calc(100vw - 24px)) !important;
+    }
+
+    .quest-ui-theme-default .quest-ui-filter-deck-track {
+        grid-template-columns: 68px minmax(0,1fr);
+    }
+
+    .quest-ui-theme-default .quest-ui-filter-deck-switch.is-five {
+        grid-template-columns: repeat(3, minmax(0,1fr));
+        row-gap: 4px;
+    }
+}
+
+
+/* Portal scope fix: Discord mounts popouts outside the Dashboard subtree.
+ * The popout root carries quest-ui-theme-default itself, so root-level deck styles
+ * must match the same element instead of assuming a themed ancestor.
+ */
+.quest-ui-theme-default.quest-ui-filter-panel.quest-ui-filter-deck {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.018), transparent 26%),
+        #141419 !important;
+    border: 1px solid rgba(255,255,255,.085) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 18px 48px rgba(0,0,0,.52) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    width: 468px !important;
+}
+
+.quest-ui-theme-default.quest-ui-sort-panel.quest-ui-sort-deck {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.018), transparent 30%),
+        #141419 !important;
+    border: 1px solid rgba(255,255,255,.085) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 16px 42px rgba(0,0,0,.5) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    width: 286px !important;
+}
+
+@media (max-width: 520px) {
+    .quest-ui-theme-default.quest-ui-filter-panel.quest-ui-filter-deck {
+        width: min(468px, calc(100vw - 24px)) !important;
+    }
+}
+
+
+/* v1.6 dropdown reset: intentionally plain, Discord-like checklist/menu surfaces. */
+.quest-ui-theme-default.quest-ui-filter-list,
+.quest-ui-theme-default.quest-ui-sort-list {
+    background: #202126;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 9px;
+    box-shadow: 0 14px 36px rgba(0,0,0,.45);
+    box-sizing: border-box;
+    color: #dbdee1;
+}
+
+.quest-ui-theme-default.quest-ui-filter-list {
+    display: flex;
+    flex-direction: column;
+    max-height: min(560px, calc(100vh - 110px));
+    overflow: hidden;
+    width: 300px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-scroll {
+    overflow-y: auto;
+    padding: 10px 10px 0;
+    scrollbar-width: thin;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section {
+    padding: 8px 0 10px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section:first-child {
+    padding-top: 4px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section + .quest-ui-filter-list-section {
+    border-top: 1px solid rgba(255,255,255,.07);
+    padding-top: 12px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section h3 {
+    color: #9ea2aa;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    margin: 0 8px 6px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: #e3e5e8;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 10px;
+    min-height: 34px;
+    padding: 5px 8px;
+    text-align: left;
+    width: 100%;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row:hover:not(:disabled) {
+    background: rgba(255,255,255,.055);
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row:disabled {
+    color: #676b73;
+    cursor: default;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-box {
+    align-items: center;
+    border: 1px solid #666b75;
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: inline-flex;
+    flex: 0 0 19px;
+    height: 19px;
+    justify-content: center;
+    width: 19px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-checked .quest-ui-filter-list-box {
+    background: #5865f2;
+    border-color: #5865f2;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-danger.is-checked .quest-ui-filter-list-box {
+    background: #da373c;
+    border-color: #da373c;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-warning.is-checked .quest-ui-filter-list-box {
+    background: #b8860b;
+    border-color: #b8860b;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-positive.is-checked .quest-ui-filter-list-box {
+    background: #248046;
+    border-color: #248046;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-brand.is-checked .quest-ui-filter-list-box {
+    background: #5865f2;
+    border-color: #5865f2;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-box svg {
+    fill: none;
+    height: 13px;
+    stroke: #fff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.3;
+    width: 13px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box {
+    border-radius: 50%;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-box {
+    background: transparent;
+    border-color: #858cff;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-radio-dot {
+    background: #858cff;
+    border-radius: 50%;
+    height: 9px;
+    width: 9px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-custom {
+    align-items: center;
+    color: #9da1aa;
+    display: flex;
+    font-size: 11px;
+    gap: 8px;
+    justify-content: space-between;
+    margin: 5px 8px 0 37px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-custom input {
+    background: #17181c;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 5px;
+    color: #e3e5e8;
+    font: inherit;
+    height: 26px;
+    outline: none;
+    padding: 0 7px;
+    width: 64px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-custom:focus-within input,
+.quest-ui-theme-default .quest-ui-filter-list-custom.is-active input {
+    border-color: #6974d9;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-footer {
+    align-items: center;
+    background: #1b1c20;
+    border-top: 1px solid rgba(255,255,255,.07);
+    display: grid;
+    gap: 6px;
+    grid-template-columns: 1fr 1fr;
+    padding: 9px 10px 10px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-footer > button {
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 650;
+    height: 31px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-secondary {
+    background: #2a2b31;
+    color: #b8bbc2;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-primary {
+    background: #5865f2;
+    color: #fff;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-footer > button:hover {
+    filter: brightness(1.08);
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-footer > span {
+    color: #777b84;
+    font-size: 9px;
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+/* Sort is the same plain menu language, not a separate visual concept. */
+.quest-ui-theme-default.quest-ui-sort-list {
+    padding: 7px;
+    width: 238px;
+}
+
+.quest-ui-theme-default .quest-ui-sort-list-title {
+    color: #8f939c;
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 8px 6px;
+}
+
+.quest-ui-theme-default .quest-ui-sort-list > button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: #d7d9dd;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-size: 11.5px;
+    justify-content: space-between;
+    min-height: 32px;
+    padding: 5px 8px;
+    text-align: left;
+    width: 100%;
+}
+
+.quest-ui-theme-default .quest-ui-sort-list > button:hover {
+    background: rgba(255,255,255,.055);
+}
+
+.quest-ui-theme-default .quest-ui-sort-list > button.is-selected {
+    background: rgba(88,101,242,.12);
+    color: #fff;
+}
+
+.quest-ui-theme-default .quest-ui-sort-list-radio {
+    align-items: center;
+    border: 1px solid #666b75;
+    border-radius: 50%;
+    display: inline-flex;
+    flex: 0 0 16px;
+    height: 16px;
+    justify-content: center;
+    width: 16px;
+}
+
+.quest-ui-theme-default .quest-ui-sort-list > button.is-selected .quest-ui-sort-list-radio {
+    border-color: #858cff;
+}
+
+.quest-ui-theme-default .quest-ui-sort-list-radio > span {
+    background: #858cff;
+    border-radius: 50%;
+    height: 8px;
+    width: 8px;
+}
+
+@media (max-width: 520px) {
+    .quest-ui-theme-default.quest-ui-filter-list {
+        width: min(300px, calc(100vw - 24px));
+    }
+}
+
+
+/* v1.6 horizontal filter menu: multi-select lanes stay compact; radio groups remain single-choice. */
+.quest-ui-theme-default.quest-ui-filter-list {
+    max-height: min(430px, calc(100vh - 110px));
+    width: 650px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-scroll {
+    padding: 8px 12px 0;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section {
+    align-items: start;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 94px minmax(0, 1fr);
+    padding: 10px 0;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section:first-child {
+    padding-top: 7px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section + .quest-ui-filter-list-section {
+    padding-top: 10px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section h3 {
+    align-self: center;
+    margin: 0;
+    padding-left: 3px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-options {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 7px;
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row {
+    flex: 0 0 auto;
+    min-height: 32px;
+    padding: 4px 7px;
+    width: auto;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row > span:last-child {
+    white-space: nowrap;
+}
+
+/* Exact colors used by the Dashboard summary chips. */
+.quest-ui-theme-default .quest-ui-filter-list-row.is-available.is-checked .quest-ui-filter-list-box {
+    background: #f23f42;
+    border-color: #f23f42;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-ready.is-checked .quest-ui-filter-list-box {
+    background: #3ddc84;
+    border-color: #3ddc84;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-progress.is-checked .quest-ui-filter-list-box {
+    background: #f0b232;
+    border-color: #f0b232;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-claimed.is-checked .quest-ui-filter-list-box {
+    background: #49a9f8;
+    border-color: #49a9f8;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-expired.is-checked .quest-ui-filter-list-box {
+    background: #a9abb4;
+    border-color: #a9abb4;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-ignored.is-checked .quest-ui-filter-list-box {
+    background: #f06ac8;
+    border-color: #f06ac8;
+}
+
+/* Single-choice groups use Discord-like radio circles, matching the supplied reference. */
+.quest-ui-theme-default .quest-ui-filter-list-options.is-radio-options .quest-ui-filter-list-row {
+    padding-right: 10px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-box {
+    background: #5865f2;
+    border-color: #5865f2;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-radio-dot {
+    background: #fff;
+    height: 7px;
+    width: 7px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-custom {
+    grid-column: 2;
+    justify-self: start;
+    margin: 3px 0 0;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-footer {
+    grid-template-columns: auto auto 1fr;
+    padding: 8px 12px 9px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-footer > button {
+    min-width: 108px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-footer > span {
+    align-self: center;
+    grid-column: auto;
+    justify-self: end;
+    text-align: right;
+}
+
+@media (max-width: 720px) {
+    .quest-ui-theme-default.quest-ui-filter-list {
+        width: min(650px, calc(100vw - 24px));
+    }
+
+    .quest-ui-theme-default .quest-ui-filter-list-section {
+        grid-template-columns: 82px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 520px) {
+    .quest-ui-theme-default .quest-ui-filter-list-section {
+        display: block;
+    }
+
+    .quest-ui-theme-default .quest-ui-filter-list-section h3 {
+        margin-bottom: 6px;
+    }
+
+    .quest-ui-theme-default .quest-ui-filter-list-custom {
+        margin-left: 0;
+    }
+}
+
+
+/* v1.6 expired-history slider; the filter footer is intentionally gone. */
+.quest-ui-theme-default .quest-ui-filter-history-slider-wrap {
+    min-width: 0;
+    padding: 4px 8px 1px;
+    width: 100%;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(
+        90deg,
+        #5865f2 0%,
+        #5865f2 var(--quest-ui-history-slider-fill, 100%),
+        rgba(255,255,255,.11) var(--quest-ui-history-slider-fill, 100%),
+        rgba(255,255,255,.11) 100%
+    );
+    border-radius: 999px;
+    cursor: pointer;
+    display: block;
+    height: 4px;
+    margin: 7px 0 0;
+    outline: 0;
+    width: 100%;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #fff;
+    border: 3px solid #5865f2;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0,0,0,.35);
+    height: 16px;
+    width: 16px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider::-moz-range-track {
+    background: rgba(255,255,255,.11);
+    border: 0;
+    border-radius: 999px;
+    height: 4px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider::-moz-range-progress {
+    background: #5865f2;
+    border-radius: 999px;
+    height: 4px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider::-moz-range-thumb {
+    background: #fff;
+    border: 3px solid #5865f2;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0,0,0,.35);
+    height: 12px;
+    width: 12px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-labels {
+    color: #767b84;
+    display: grid;
+    font-size: 9px;
+    grid-template-columns: repeat(5, 1fr);
+    margin-top: 8px;
+    user-select: none;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-labels > span {
+    text-align: center;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-labels > span:first-child {
+    text-align: left;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-labels > span:last-child {
+    color: #aeb4ff;
+    text-align: right;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-footer {
+    display: none !important;
+}
+
+
+/* v1.6 dropdown stabilization: no scrollbars in this compact Filter popout. */
+.quest-ui-theme-default.quest-ui-filter-list {
+    max-height: none !important;
+    overflow: hidden !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-scroll {
+    overflow: visible !important;
+    padding: 10px 14px !important;
+    scrollbar-width: none !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-scroll::-webkit-scrollbar {
+    display: none !important;
+    height: 0 !important;
+    width: 0 !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section {
+    align-items: center !important;
+    gap: 12px !important;
+    grid-template-columns: 96px minmax(0, 1fr) !important;
+    padding: 11px 0 !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section:first-child {
+    padding-top: 0 !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section:last-child {
+    padding-bottom: 0 !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-section h3 {
+    align-self: center !important;
+    margin: 0 !important;
+    padding: 0 0 0 2px !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-options {
+    gap: 6px 10px !important;
+}
+
+/* Five fixed nodes sit over the draggable range. The native thumb is invisible. */
+.quest-ui-theme-default .quest-ui-filter-history-slider-wrap {
+    box-sizing: border-box;
+    padding: 5px 4px 1px !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-track {
+    height: 18px;
+    position: relative;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider {
+    background: linear-gradient(
+        90deg,
+        #5865f2 0%,
+        #5865f2 var(--quest-ui-history-slider-fill, 100%),
+        rgba(255,255,255,.12) var(--quest-ui-history-slider-fill, 100%),
+        rgba(255,255,255,.12) 100%
+    ) !important;
+    cursor: pointer;
+    height: 4px !important;
+    left: 0;
+    margin: 0 !important;
+    position: absolute;
+    top: 7px;
+    width: 100%;
+    z-index: 2;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    height: 18px !important;
+    width: 18px !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider::-moz-range-thumb {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    height: 18px !important;
+    width: 18px !important;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-nodes {
+    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 3;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-nodes > span {
+    background: #5865f2;
+    border: 0;
+    border-radius: 50%;
+    box-shadow:
+        inset 0 0 0 5px #5865f2,
+        inset 0 0 0 7px #fff;
+    height: 18px;
+    justify-self: center;
+    opacity: .82;
+    width: 18px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-nodes > span:first-child {
+    justify-self: start;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-nodes > span:last-child {
+    justify-self: end;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-nodes > span.is-active {
+    box-shadow:
+        0 0 0 1px rgba(88,101,242,.28),
+        0 0 9px rgba(88,101,242,.28),
+        inset 0 0 0 5px #5865f2,
+        inset 0 0 0 7px #fff;
+    opacity: 1;
+}
+
+.quest-ui-theme-default .quest-ui-filter-history-slider-labels {
+    margin-top: 5px !important;
+    padding: 0 1px;
+}
+
+/* Sort lives in a Discord portal. Scope styles to the root element itself. */
+.quest-ui-theme-default.quest-ui-sort-list {
+    background: #202126 !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    border-radius: 9px !important;
+    box-shadow: 0 14px 36px rgba(0,0,0,.45) !important;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+    overflow: hidden !important;
+    padding: 7px !important;
+    width: 250px !important;
+}
+
+.quest-ui-theme-default.quest-ui-sort-list > .quest-ui-sort-list-title {
+    color: #8f939c !important;
+    display: block !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 14px;
+    padding: 5px 8px 7px !important;
+}
+
+.quest-ui-theme-default.quest-ui-sort-list > button {
+    align-items: center !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    box-sizing: border-box;
+    color: #d7d9dd !important;
+    cursor: pointer;
+    display: flex !important;
+    flex: 0 0 auto !important;
+    font: inherit !important;
+    font-size: 11.5px !important;
+    gap: 10px;
+    justify-content: space-between !important;
+    min-height: 34px !important;
+    padding: 6px 8px !important;
+    text-align: left !important;
+    width: 100% !important;
+}
+
+.quest-ui-theme-default.quest-ui-sort-list > button > span:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default.quest-ui-sort-list > button:hover {
+    background: rgba(255,255,255,.055) !important;
+}
+
+.quest-ui-theme-default.quest-ui-sort-list > button.is-selected {
+    background: rgba(88,101,242,.12) !important;
+    color: #fff !important;
+}
+
+.quest-ui-theme-default.quest-ui-sort-list > button > .quest-ui-sort-list-radio {
+    align-items: center !important;
+    border: 1px solid #666b75 !important;
+    border-radius: 50% !important;
+    box-sizing: border-box;
+    display: inline-flex !important;
+    flex: 0 0 18px !important;
+    height: 18px !important;
+    justify-content: center !important;
+    margin-left: auto;
+    position: static !important;
+    width: 18px !important;
+}
+
+.quest-ui-theme-default.quest-ui-sort-list > button.is-selected > .quest-ui-sort-list-radio {
+    background: #5865f2 !important;
+    border-color: #5865f2 !important;
+}
+
+.quest-ui-theme-default.quest-ui-sort-list > button > .quest-ui-sort-list-radio > span {
+    background: #fff !important;
+    border-radius: 50%;
+    display: block !important;
+    height: 7px !important;
+    width: 7px !important;
+}
+
+
+/* v1.6 custom stepped expired-history control.
+ * No native range input and no overlaid fake nodes: track, fill and nodes are one control.
+ */
+.quest-ui-theme-default .quest-ui-history-steps {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 2px 4px 0;
+    width: 100%;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-track {
+    height: 42px;
+    position: relative;
+    touch-action: none;
+    user-select: none;
+    width: 100%;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-line,
+.quest-ui-theme-default .quest-ui-history-steps-fill {
+    border-radius: 999px;
+    height: 3px;
+    left: 9px;
+    pointer-events: none;
+    position: absolute;
+    right: 9px;
+    top: 8px;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-line {
+    background: rgba(255,255,255,.12);
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-fill {
+    background: #5865f2;
+    right: auto;
+    width: calc((100% - 18px) * var(--quest-ui-history-step) / 4);
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    inset: 0;
+    position: absolute;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: #747983;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    font: inherit;
+    gap: 6px;
+    min-width: 0;
+    padding: 0;
+    position: relative;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button:first-child {
+    align-items: flex-start;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button:last-child {
+    align-items: flex-end;
+}
+
+.quest-ui-theme-default .quest-ui-history-step-node {
+    align-items: center;
+    background: #202126;
+    border: 2px solid #666b75;
+    border-radius: 50%;
+    box-sizing: border-box;
+    display: inline-flex;
+    flex: 0 0 18px;
+    height: 18px;
+    justify-content: center;
+    transition:
+        background-color 100ms ease,
+        border-color 100ms ease,
+        box-shadow 100ms ease;
+    width: 18px;
+}
+
+.quest-ui-theme-default .quest-ui-history-step-node > span {
+    background: transparent;
+    border-radius: 50%;
+    height: 7px;
+    width: 7px;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button:hover .quest-ui-history-step-node {
+    border-color: #8c91a0;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button.is-selected {
+    color: #e7e9ec;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button.is-selected .quest-ui-history-step-node {
+    background: #5865f2;
+    border-color: #5865f2;
+    box-shadow: 0 0 0 1px rgba(88,101,242,.22);
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button.is-selected .quest-ui-history-step-node > span {
+    background: #fff;
+}
+
+.quest-ui-theme-default .quest-ui-history-step-label {
+    font-size: 9px;
+    line-height: 11px;
+    white-space: nowrap;
+}
+
+/* Explicitly retire the old range-slider implementation. */
+.quest-ui-theme-default .quest-ui-filter-history-slider-wrap,
+.quest-ui-theme-default .quest-ui-filter-history-slider-track,
+.quest-ui-theme-default .quest-ui-filter-history-slider,
+.quest-ui-theme-default .quest-ui-filter-history-slider-nodes,
+.quest-ui-theme-default .quest-ui-filter-history-slider-labels {
+    display: none !important;
+}
+
+
+/* v1.6 expired-history geometry correction.
+ * Five 18px controls use space-between across the same 9px-inset track, so their
+ * centers land exactly at 0 / 25 / 50 / 75 / 100 percent of the usable line.
+ */
+.quest-ui-theme-default .quest-ui-history-steps-nodes {
+    display: flex !important;
+    grid-template-columns: none !important;
+    justify-content: space-between;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button {
+    align-items: center !important;
+    flex: 0 0 18px;
+    width: 18px;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button:first-child,
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button:last-child {
+    align-items: center !important;
+}
+
+/* The history window is cumulative: every earlier milestone is contained by the
+ * selected window, while only the current endpoint gets the stronger focus treatment.
+ */
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button.is-reached {
+    color: #b8bcc5;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button.is-reached .quest-ui-history-step-node {
+    background: #5865f2;
+    border-color: #5865f2;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button.is-reached .quest-ui-history-step-node > span {
+    background: #fff;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button.is-selected {
+    color: #f2f3f5;
+}
+
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button.is-selected .quest-ui-history-step-node {
+    background: #5865f2;
+    border-color: #5865f2;
+    box-shadow:
+        0 0 0 1px rgba(88,101,242,.28),
+        0 0 9px rgba(88,101,242,.30);
+}
+
+/* Keep labels centered under the true node center even though the button itself is only 18px. */
+.quest-ui-theme-default .quest-ui-history-step-label {
+    overflow: visible;
+    text-align: center;
+    width: max-content;
+}

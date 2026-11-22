@@ -4,14 +4,12 @@ import { NavigationRouter, Popout, useRef, useState } from "@webpack/common";
 
 import settings from "../plugin/settings";
 import { useIgnoredQuests } from "../quests/ignored/runtime";
-import { dashboardScopeFromSettings, filterQuests, useQuestSnapshot } from "../quests/data";
+import { useQuestSnapshot } from "../quests/data";
 import { normalizeDashboardSortMode, type DashboardSortMode } from "./sort";
 import {
     DASHBOARD_SETTING_KEYS,
-    clearDashboardFilters,
     dashboardFilterCount,
-    partitionIgnored,
-    restoreRecommendedFilters
+    partitionIgnored
 } from "./state";
 
 function openQuestHome(closePopout?: () => void): void {
@@ -116,110 +114,209 @@ function SortIcon() {
     );
 }
 
-function FilterChip({ active, label, tone, onClick }: {
-    active: boolean;
+function FilterCheckRow({ checked, label, tone, onClick, disabled = false }: {
+    checked: boolean;
     label: string;
-    tone?: "danger" | "warning" | "positive" | "brand";
+    tone?: "available" | "ready" | "progress" | "claimed" | "expired" | "ignored";
+    onClick: () => void;
+    disabled?: boolean;
+}) {
+    return (
+        <button
+            type="button"
+            className={`quest-ui-filter-list-row${checked ? " is-checked" : ""}${tone ? ` is-${tone}` : ""}`}
+            aria-pressed={checked}
+            disabled={disabled}
+            onClick={onClick}
+        >
+            <span className="quest-ui-filter-list-box" aria-hidden="true">
+                {checked && (
+                    <svg viewBox="0 0 16 16">
+                        <path d="m3.2 8.2 3 3 6.6-6.6" />
+                    </svg>
+                )}
+            </span>
+            <span>{label}</span>
+        </button>
+    );
+}
+
+function FilterRadioRow({ checked, label, onClick }: {
+    checked: boolean;
+    label: string;
     onClick: () => void;
 }) {
     return (
         <button
             type="button"
-            className={`quest-ui-filter-chip${active ? " is-selected" : ""}${tone ? ` quest-ui-filter-chip-${tone}` : ""}`}
-            aria-pressed={active}
+            className={`quest-ui-filter-list-row is-radio${checked ? " is-checked" : ""}`}
+            role="radio"
+            aria-checked={checked}
             onClick={onClick}
         >
-            <span className="quest-ui-filter-chip-check" aria-hidden="true">✓</span>
-            {label}
+            <span className="quest-ui-filter-list-box" aria-hidden="true">
+                {checked && <span className="quest-ui-filter-list-radio-dot" />}
+            </span>
+            <span>{label}</span>
         </button>
     );
 }
 
+function ExpiredHistorySteps({ value, onChange }: {
+    value: number;
+    onChange: (index: number) => void;
+}) {
+    const trackRef = useRef<HTMLDivElement | null>(null);
+    const labels = ["7d", "15d", "30d", "90d", "All"] as const;
 
-function DashboardFilters({ hiddenCount, ignoredCount }: { hiddenCount: number; ignoredCount: number; }) {
-    const store = settings.store;
-    const expiredAgeDays = Math.max(0, Math.floor(Number(store.dashboardExpiredAgeDays ?? 15)) || 0);
-    const expiredAgePresets = [7, 15, 30, 90, 0] as const;
-    const customExpiredAge = expiredAgeDays > 0 && !expiredAgePresets.includes(expiredAgeDays as any)
-        ? String(expiredAgeDays)
-        : "";
-    const visibilityCopy = hiddenCount > 0 || ignoredCount > 0
-        ? `${hiddenCount} hidden by filters · ${ignoredCount} ignored`
-        : "All matching quests are visible";
+    const indexFromPointer = (clientX: number): number => {
+        const rect = trackRef.current?.getBoundingClientRect();
+        if (!rect || rect.width <= 0) return value;
+
+        const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        return Math.max(0, Math.min(4, Math.round(ratio * 4)));
+    };
+
+    const updateFromPointer = (clientX: number) => {
+        const next = indexFromPointer(clientX);
+        if (next !== value) onChange(next);
+    };
 
     return (
-        <div className="quest-ui-filter-panel" role="group" aria-label="Quest filters">
-            <div className="quest-ui-filter-panel-heading">
-                <div>
-                    <strong>Filters</strong>
-                    <span>{visibilityCopy}</span>
-                </div>
-                <div className="quest-ui-filter-panel-actions">
-                    <button type="button" className="quest-ui-filter-reset" onClick={restoreRecommendedFilters}>Recommended</button>
-                    <button type="button" className="quest-ui-filter-clear" onClick={clearDashboardFilters}>Clear all</button>
-                </div>
-            </div>
-
-            <div className="quest-ui-filter-section">
-                <span className="quest-ui-filter-label">Status</span>
-                <div className="quest-ui-filter-chips">
-                    <FilterChip active={store.dashboardShowAvailable !== false} label="Available" tone="danger" onClick={() => { store.dashboardShowAvailable = store.dashboardShowAvailable === false; }} />
-                    <FilterChip active={store.dashboardShowClaimable !== false} label="Ready" tone="positive" onClick={() => { store.dashboardShowClaimable = store.dashboardShowClaimable === false; }} />
-                    <FilterChip active={store.dashboardShowInProgress !== false} label="In Progress" tone="warning" onClick={() => { store.dashboardShowInProgress = store.dashboardShowInProgress === false; }} />
-                    <FilterChip active={store.dashboardShowClaimed === true} label="Claimed" tone="brand" onClick={() => { store.dashboardShowClaimed = store.dashboardShowClaimed !== true; }} />
-                    <FilterChip active={store.dashboardShowExpired === true} label="Expired" onClick={() => { store.dashboardShowExpired = store.dashboardShowExpired !== true; }} />
-                    <FilterChip active={store.dashboardShowIgnored === true} label={`Ignored (${ignoredCount})`} onClick={() => { store.dashboardShowIgnored = store.dashboardShowIgnored !== true; }} />
-                </div>
-            </div>
-
-            {store.dashboardShowExpired === true && (
-                <div className="quest-ui-filter-section quest-ui-expired-age-section">
-                    <span className="quest-ui-filter-label">Expired age</span>
-                    <div className="quest-ui-filter-chips quest-ui-expired-age-chips">
-                        <FilterChip active={expiredAgeDays === 7} label="7d" onClick={() => { store.dashboardExpiredAgeDays = 7; }} />
-                        <FilterChip active={expiredAgeDays === 15} label="15d" onClick={() => { store.dashboardExpiredAgeDays = 15; }} />
-                        <FilterChip active={expiredAgeDays === 30} label="30d" onClick={() => { store.dashboardExpiredAgeDays = 30; }} />
-                        <FilterChip active={expiredAgeDays === 90} label="90d" onClick={() => { store.dashboardExpiredAgeDays = 90; }} />
-                        <FilterChip active={expiredAgeDays === 0} label="All" onClick={() => { store.dashboardExpiredAgeDays = 0; }} />
-                        <label className={`quest-ui-expired-age-custom${customExpiredAge ? " is-selected" : ""}`}>
-                            <span>Custom</span>
-                            <input
-                                type="number"
-                                min={1}
-                                step={1}
-                                inputMode="numeric"
-                                placeholder="days"
-                                value={customExpiredAge}
-                                onChange={event => {
-                                    const days = Math.floor(Number(event.currentTarget.value));
-                                    if (Number.isFinite(days) && days > 0) store.dashboardExpiredAgeDays = days;
+        <div
+            className="quest-ui-history-steps"
+            style={{ "--quest-ui-history-step": value } as any}
+        >
+            <div
+                ref={trackRef}
+                className="quest-ui-history-steps-track"
+                onPointerDown={event => {
+                    if (event.button !== 0) return;
+                    event.currentTarget.setPointerCapture?.(event.pointerId);
+                    updateFromPointer(event.clientX);
+                }}
+                onPointerMove={event => {
+                    if (!event.currentTarget.hasPointerCapture?.(event.pointerId)) return;
+                    updateFromPointer(event.clientX);
+                }}
+                onPointerUp={event => {
+                    event.currentTarget.releasePointerCapture?.(event.pointerId);
+                }}
+                onPointerCancel={event => {
+                    event.currentTarget.releasePointerCapture?.(event.pointerId);
+                }}
+            >
+                <span className="quest-ui-history-steps-line" aria-hidden="true" />
+                <span className="quest-ui-history-steps-fill" aria-hidden="true" />
+                <div className="quest-ui-history-steps-nodes" role="radiogroup" aria-label="Expired Quest history">
+                    {labels.map((label, index) => {
+                        const selected = index === value;
+                        const reached = index <= value;
+                        return (
+                            <button
+                                key={label}
+                                type="button"
+                                className={`${reached ? "is-reached" : ""}${reached && selected ? " " : ""}${selected ? "is-selected" : ""}`}
+                                role="radio"
+                                aria-checked={selected}
+                                aria-label={label === "All" ? "All expired Quest history" : `Expired Quests from the last ${label}`}
+                                onClick={() => onChange(index)}
+                                onKeyDown={event => {
+                                    if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+                                        event.preventDefault();
+                                        onChange(Math.max(0, value - 1));
+                                    } else if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+                                        event.preventDefault();
+                                        onChange(Math.min(4, value + 1));
+                                    } else if (event.key === "Home") {
+                                        event.preventDefault();
+                                        onChange(0);
+                                    } else if (event.key === "End") {
+                                        event.preventDefault();
+                                        onChange(4);
+                                    }
                                 }}
-                                aria-label="Custom expired Quest age in days"
-                            />
-                        </label>
+                            >
+                                <span className="quest-ui-history-step-node" aria-hidden="true">
+                                    <span />
+                                </span>
+                                <span className="quest-ui-history-step-label">{label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
+    const store = settings.store;
+    const expiredAgeDays = Math.max(0, Math.floor(Number(store.dashboardExpiredAgeDays ?? 0)) || 0);
+    const expiredAgePresets = [7, 15, 30, 90, 0] as const;
+    const expiredAgeSliderIndex = (() => {
+        const exact = expiredAgePresets.indexOf(expiredAgeDays as any);
+        if (exact >= 0) return exact;
+        if (expiredAgeDays <= 7) return 0;
+        if (expiredAgeDays <= 15) return 1;
+        if (expiredAgeDays <= 30) return 2;
+        if (expiredAgeDays <= 90) return 3;
+        return 4;
+    })();
+
+    return (
+        <div className="quest-ui-filter-list quest-ui-theme-default" role="group" aria-label="Quest filters">
+            <div className="quest-ui-filter-list-scroll">
+                <section className="quest-ui-filter-list-section">
+                    <h3>Status</h3>
+                    <div className="quest-ui-filter-list-options is-status">
+                    <FilterCheckRow checked={store.dashboardShowAvailable !== false} label="Available" tone="available" onClick={() => { store.dashboardShowAvailable = store.dashboardShowAvailable === false; }} />
+                    <FilterCheckRow checked={store.dashboardShowClaimable !== false} label="Ready" tone="ready" onClick={() => { store.dashboardShowClaimable = store.dashboardShowClaimable === false; }} />
+                    <FilterCheckRow checked={store.dashboardShowInProgress !== false} label="In Progress" tone="progress" onClick={() => { store.dashboardShowInProgress = store.dashboardShowInProgress === false; }} />
+                    <FilterCheckRow checked={store.dashboardShowClaimed === true} label="Claimed" tone="claimed" onClick={() => { store.dashboardShowClaimed = store.dashboardShowClaimed !== true; }} />
+                    <FilterCheckRow checked={store.dashboardShowExpired === true} label="Expired" tone="expired" onClick={() => { store.dashboardShowExpired = store.dashboardShowExpired !== true; }} />
+                    <FilterCheckRow
+                        checked={store.dashboardShowIgnored === true}
+                        label={`Ignored (${ignoredCount})`}
+                        tone="ignored"
+                        onClick={() => { store.dashboardShowIgnored = store.dashboardShowIgnored !== true; }}
+                    />
                     </div>
-                </div>
-            )}
+                </section>
 
-            <div className="quest-ui-filter-section quest-ui-filter-section-row">
-                <span className="quest-ui-filter-label">Reward</span>
-                <div className="quest-ui-filter-chips">
-                    <FilterChip active={store.dashboardRewardFilter === "all"} label="All" onClick={() => { store.dashboardRewardFilter = "all"; }} />
-                    <FilterChip active={store.dashboardRewardFilter === "orbs"} label="Orbs" tone="brand" onClick={() => { store.dashboardRewardFilter = "orbs"; }} />
-                    <FilterChip active={store.dashboardRewardFilter === "non-orbs"} label="Other" onClick={() => { store.dashboardRewardFilter = "non-orbs"; }} />
-                </div>
+                {store.dashboardShowExpired === true && (
+                    <section className="quest-ui-filter-list-section">
+                        <h3>Expired History</h3>
+                        <ExpiredHistorySteps
+                            value={expiredAgeSliderIndex}
+                            onChange={index => {
+                                store.dashboardExpiredAgeDays = expiredAgePresets[index];
+                            }}
+                        />
+                    </section>
+                )}
+
+                <section className="quest-ui-filter-list-section">
+                    <h3>Reward</h3>
+                    <div className="quest-ui-filter-list-options is-radio-options" role="radiogroup" aria-label="Reward type">
+                        <FilterRadioRow checked={store.dashboardRewardFilter === "all"} label="All Rewards" onClick={() => { store.dashboardRewardFilter = "all"; }} />
+                        <FilterRadioRow checked={store.dashboardRewardFilter === "orbs"} label="Orbs" onClick={() => { store.dashboardRewardFilter = "orbs"; }} />
+                        <FilterRadioRow checked={store.dashboardRewardFilter === "non-orbs"} label="Other Rewards" onClick={() => { store.dashboardRewardFilter = "non-orbs"; }} />
+                    </div>
+                </section>
+
+                <section className="quest-ui-filter-list-section">
+                    <h3>Quest Type</h3>
+                    <div className="quest-ui-filter-list-options is-quest-type">
+                    <FilterCheckRow checked={store.dashboardShowPlay !== false} label="Play" onClick={() => { store.dashboardShowPlay = store.dashboardShowPlay === false; }} />
+                    <FilterCheckRow checked={store.dashboardShowStream !== false} label="Stream" onClick={() => { store.dashboardShowStream = store.dashboardShowStream === false; }} />
+                    <FilterCheckRow checked={store.dashboardShowVideo !== false} label="Video" onClick={() => { store.dashboardShowVideo = store.dashboardShowVideo === false; }} />
+                    <FilterCheckRow checked={store.dashboardShowActivity !== false} label="Activity" onClick={() => { store.dashboardShowActivity = store.dashboardShowActivity === false; }} />
+                    <FilterCheckRow checked={store.dashboardShowOther !== false} label="Other" onClick={() => { store.dashboardShowOther = store.dashboardShowOther === false; }} />
+                    </div>
+                </section>
             </div>
 
-            <div className="quest-ui-filter-section">
-                <span className="quest-ui-filter-label">Quest type</span>
-                <div className="quest-ui-filter-chips">
-                    <FilterChip active={store.dashboardShowPlay !== false} label="Play" onClick={() => { store.dashboardShowPlay = store.dashboardShowPlay === false; }} />
-                    <FilterChip active={store.dashboardShowStream !== false} label="Stream" onClick={() => { store.dashboardShowStream = store.dashboardShowStream === false; }} />
-                    <FilterChip active={store.dashboardShowVideo !== false} label="Video" onClick={() => { store.dashboardShowVideo = store.dashboardShowVideo === false; }} />
-                    <FilterChip active={store.dashboardShowActivity !== false} label="Activity" onClick={() => { store.dashboardShowActivity = store.dashboardShowActivity === false; }} />
-                    <FilterChip active={store.dashboardShowOther !== false} label="Other" onClick={() => { store.dashboardShowOther = store.dashboardShowOther === false; }} />
-                </div>
-            </div>
 
         </div>
     );
@@ -237,26 +334,26 @@ const DASHBOARD_SORT_OPTIONS: ReadonlyArray<{ value: DashboardSortMode; label: s
 
 function DashboardSorts({ mode, onChange }: { mode: DashboardSortMode; onChange: (mode: DashboardSortMode) => void; }) {
     return (
-        <div className="quest-ui-sort-panel" role="menu" aria-label="Sort quests">
-            <div className="quest-ui-sort-panel-heading">
-                <strong>Sort Quests</strong>
-                <span>Choose how cards are ordered</span>
-            </div>
-            <div className="quest-ui-sort-options">
-                {DASHBOARD_SORT_OPTIONS.map(option => (
+        <div className="quest-ui-sort-list quest-ui-theme-default" role="menu" aria-label="Sort quests">
+            <span className="quest-ui-sort-list-title">Sort by</span>
+            {DASHBOARD_SORT_OPTIONS.map(option => {
+                const selected = option.value === mode;
+                return (
                     <button
                         key={option.value}
                         type="button"
-                        className={option.value === mode ? "is-selected" : ""}
+                        className={selected ? "is-selected" : ""}
                         role="menuitemradio"
-                        aria-checked={option.value === mode}
+                        aria-checked={selected}
                         onClick={() => onChange(option.value)}
                     >
                         <span>{option.label}</span>
-                        {option.value === mode && <span className="quest-ui-sort-check" aria-hidden="true">✓</span>}
+                        <span className="quest-ui-sort-list-radio" aria-hidden="true">
+                            {selected && <span />}
+                        </span>
                     </button>
-                ))}
-            </div>
+                );
+            })}
         </div>
     );
 }
@@ -267,8 +364,6 @@ export function QuestDashboardFilterSortControls() {
     const quests = useQuestSnapshot();
     const { ids: ignoredIds } = useIgnoredQuests();
     const partition = partitionIgnored(quests, ignoredIds);
-    const filtered = filterQuests(partition.normal, dashboardScopeFromSettings(dashboardSettings));
-    const hiddenCount = Math.max(0, partition.normal.length - filtered.length);
     const ignoredCount = partition.ignored.length;
     const activeFilterCount = dashboardFilterCount(dashboardSettings);
     const sortMode = normalizeDashboardSortMode(dashboardSettings.dashboardSortMode);
@@ -320,7 +415,7 @@ export function QuestDashboardFilterSortControls() {
                 shouldShow={filtersOpen}
                 onRequestClose={() => setFiltersOpen(false)}
                 targetElementRef={filterButtonRef}
-                renderPopout={() => <DashboardFilters hiddenCount={hiddenCount} ignoredCount={ignoredCount} />}
+                renderPopout={() => <DashboardFilters ignoredCount={ignoredCount} />}
             >
                 {(_, { isShown }) => (
                     <button
