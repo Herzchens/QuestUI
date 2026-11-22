@@ -1680,3 +1680,86 @@
     color: #d0d5ff;
     text-decoration: underline;
 }
+
+
+/* v1.6 Update Center header separation and product release metadata. */
+.quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
+    align-items: start !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) max-content !important;
+    column-gap: 21px !important;
+    min-height: 72px !important;
+    padding: 13px !important;
+}
+
+.quest-ui-update-panel-title-block {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    overflow: hidden;
+}
+
+.quest-ui-update-panel-settings-hint {
+    box-sizing: border-box;
+    display: block !important;
+    max-width: 300px;
+    padding-left: 42px !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+}
+
+.quest-ui-update-panel-heading-actions {
+    align-items: flex-end !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    min-width: max-content;
+}
+
+.quest-ui-update-panel-last-check {
+    display: block !important;
+    max-width: 160px;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap !important;
+}
+
+.quest-ui-update-product-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.quest-ui-update-product-release-date {
+    color: #6f747d;
+    display: block;
+    font-size: 8.8px;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+    .quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
+        grid-template-columns: 1fr !important;
+        row-gap: 8px !important;
+    }
+
+    .quest-ui-update-panel-heading-actions {
+        align-items: flex-start !important;
+        min-width: 0;
+    }
+
+    .quest-ui-update-panel-last-check {
+        max-width: 100%;
+        text-align: left;
+    }
+
+    .quest-ui-update-panel-settings-hint {
+        max-width: none;
+    }
+}

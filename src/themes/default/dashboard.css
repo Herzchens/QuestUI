@@ -4710,3 +4710,112 @@
     text-align: center;
     width: max-content;
 }
+
+
+/* v1.6 beta-safe plugin status cards. */
+.quest-ui-theme-default .quest-ui-default-status-strip {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.05fr) 38px minmax(0, .95fr) !important;
+    gap: 10px !important;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product {
+    align-items: center !important;
+    display: grid !important;
+    gap: 8px !important;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr) 31px !important;
+    min-height: 50px;
+    padding: 6px 8px !important;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-identity-row {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-name {
+    flex: 0 1 auto !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quest-ui-theme-default .quest-ui-version-chip {
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-product-release-date {
+    color: #6f747e;
+    display: block;
+    font-size: 8.5px;
+    line-height: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-state {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    gap: 6px;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-status,
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-runtime-chip {
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-status-copy {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-product-update-chip {
+    flex: 0 1 auto;
+    max-width: 150px;
+    overflow: hidden;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-product-update-chip > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quest-ui-theme-default .quest-ui-status-settings-button {
+    justify-self: end;
+}
+
+.quest-ui-theme-default .quest-ui-link-status {
+    display: none !important;
+}
+
+@media (max-width: 720px) {
+    .quest-ui-theme-default .quest-ui-default-status-strip {
+        grid-template-columns: 1fr !important;
+    }
+
+    .quest-ui-theme-default .quest-ui-status-bridge {
+        justify-self: center;
+        transform: rotate(90deg);
+    }
+}
+
+
+/* Release dates live in Update Center, not Dashboard product cards. */
+.quest-ui-theme-default .quest-ui-product-release-date {
+    display: none !important;
+}

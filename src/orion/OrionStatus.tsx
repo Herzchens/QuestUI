@@ -37,11 +37,13 @@ function healthTitle(health: OrionIntegrationHealth, engineRunning: boolean | nu
 export function OrionIntegrationStatus({
     health,
     engineRunning = null,
-    compact = false
+    compact = false,
+    hideVersion = false
 }: {
     health: OrionIntegrationHealth;
     engineRunning?: boolean | null;
     compact?: boolean;
+    hideVersion?: boolean;
 }) {
     const warning = health.kind === "version-incompatible" || health.kind === "integration-unavailable";
     const notInstalled = health.kind === "not-installed";
@@ -72,7 +74,7 @@ export function OrionIntegrationStatus({
     if (compact) {
         return (
             <span className={`quest-ui-orion-status is-compact is-${health.kind}${engineStateClass}`} title={healthTitle(health, engineRunning)}>
-                {health.installedVersion && (
+                {!hideVersion && health.installedVersion && (
                     <span className={`quest-ui-version-chip quest-ui-version-chip-orion ${versionChannelClass(health.installedVersion)}`}>{health.installedVersion}</span>
                 )}
                 <span className="quest-ui-orion-runtime-chip">

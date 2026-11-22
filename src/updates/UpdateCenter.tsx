@@ -109,17 +109,6 @@ function openQuestUIPluginSettings(): void {
     openPluginModal(plugin);
 }
 
-export function DashboardProductReleaseDate({ product }: { product: UpdateProduct; }) {
-    useUpdateSnapshot();
-    const release = getInstalledRelease(product);
-    return (
-        <span className="quest-ui-product-release-date" title={release?.publishedAt ?? undefined}>
-            {formatReleaseDate(release?.publishedAt)}
-        </span>
-    );
-}
-
-
 function UpdateResultNotice({ result }: { result: ManagedReleaseUpdateResult | null; }) {
     if (!result) return null;
     const tone = result.status === "decision-required" || result.status === "kept"
@@ -430,6 +419,8 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
 
                     const tone = updateProductTone(state, health);
                     const healthError = health.error ?? (state.kind === "error" ? state.message : null);
+                    const installedRelease = getInstalledRelease(product);
+                    const releaseDateCopy = formatReleaseDate(installedRelease?.publishedAt);
                     const target = state.kind === "available" ? state.release.tagName : null;
                     const stateIconKind = healthError || state.kind === "error"
                         ? "error"
@@ -455,6 +446,12 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
                                             </>
                                         )}
                                     </div>
+                                    <span
+                                        className="quest-ui-update-product-release-date"
+                                        title={installedRelease?.publishedAt ?? undefined}
+                                    >
+                                        {releaseDateCopy}
+                                    </span>
                                 </div>
 
                                 <div className="quest-ui-update-product-row-meta">

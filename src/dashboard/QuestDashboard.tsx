@@ -207,34 +207,54 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
             <header className="quest-ui-dashboard-header">
                 <div className="quest-ui-default-status-strip">
                     <div className="quest-ui-default-status-product is-orion">
-                        <strong className="quest-ui-default-status-name">Orion Quest</strong>
-                        <OrionIntegrationStatus health={orionHealth} engineRunning={orionSnapshot?.running ?? null} compact />
-                        <DashboardProductUpdateNotice product="orion" />
+                        <div className="quest-ui-default-status-identity">
+                            <div className="quest-ui-default-status-identity-row">
+                                <strong className="quest-ui-default-status-name">Orion Quest</strong>
+                                {orionHealth.installedVersion && (
+                                    <span className={`quest-ui-version-chip quest-ui-version-chip-orion ${versionChannelClass(orionHealth.installedVersion)}`}>
+                                        {orionHealth.installedVersion}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="quest-ui-default-status-state">
+                            <OrionIntegrationStatus
+                                health={orionHealth}
+                                engineRunning={orionSnapshot?.running ?? null}
+                                compact
+                                hideVersion
+                            />
+                            <DashboardProductUpdateNotice product="orion" />
+                        </div>
                         <QuestPluginSettingsControl
                             pluginName="OrionQuests"
                             title="Orion Quest Settings"
                             closePopout={closePopout}
                         />
                     </div>
+
                     <span
                         className={`quest-ui-status-bridge ${orionHealth.kind === "connected" ? "is-connected" : "is-disconnected"}`}
-                        aria-hidden="true"
+                        role="img"
+                        aria-label={orionHealth.kind === "connected" ? "QuestUI is linked to OrionQuests" : "QuestUI is not linked to OrionQuests"}
                     >
                         <span className="quest-ui-status-bridge-line" />
                         <span className="quest-ui-status-bridge-node" />
                         <span className="quest-ui-status-bridge-line" />
                     </span>
+
                     <div className="quest-ui-default-status-product is-questui">
-                        <strong className="quest-ui-default-status-name">QuestUI</strong>
-                        <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>{QUESTUI_VERSION}</span>
-                        <span
-                            className={`quest-ui-link-status ${orionHealth.kind === "connected" ? "is-connected" : "is-disconnected"}`}
-                            title={orionHealth.kind === "connected" ? "QuestUI is connected to OrionQuests" : "QuestUI is not connected to OrionQuests"}
-                        >
-                            <span className="quest-ui-link-status-dot" aria-hidden="true" />
-                            <span>{orionHealth.kind === "connected" ? "Connected" : "Disconnected"}</span>
-                        </span>
-                        <DashboardProductUpdateNotice product="questui" />
+                        <div className="quest-ui-default-status-identity">
+                            <div className="quest-ui-default-status-identity-row">
+                                <strong className="quest-ui-default-status-name">QuestUI</strong>
+                                <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>
+                                    {QUESTUI_VERSION}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="quest-ui-default-status-state">
+                            <DashboardProductUpdateNotice product="questui" />
+                        </div>
                         <QuestPluginSettingsControl
                             pluginName="QuestUI"
                             title="QuestUI Settings"

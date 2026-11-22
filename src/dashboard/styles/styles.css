@@ -1116,3 +1116,48 @@
         max-width: 72px;
     }
 }
+
+
+/* v1.6 update attention on the Quest shortcut. */
+.quest-ui-update-attention-badge {
+    align-items: center;
+    border: 2px solid var(--background-base-lowest, var(--background-primary, #111214));
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: #fff;
+    display: inline-flex;
+    font-size: 8px;
+    font-weight: 900;
+    height: 13px;
+    justify-content: center;
+    line-height: 1;
+    pointer-events: none;
+    position: absolute;
+    right: -5px;
+    top: -5px;
+    width: 13px;
+    z-index: 3;
+}
+
+.quest-ui-update-attention-badge.is-routine {
+    background: #7d8cff;
+}
+
+.quest-ui-update-attention-badge.is-recommended {
+    background: var(--status-warning, #f0b232);
+    color: var(--background-base-lowest, #111214);
+}
+
+.quest-ui-critical-update-icon-wrap {
+    color: var(--status-danger, #f23f42);
+}
+
+.quest-ui-critical-update-icon {
+    fill: none;
+    height: 20px !important;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    width: 20px !important;
+}

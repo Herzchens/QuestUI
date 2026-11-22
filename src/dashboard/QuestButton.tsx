@@ -19,6 +19,8 @@ import {
 import type { AttentionCounts } from "../quests/data";
 import settings from "../plugin/settings";
 import { registerQuestDashboardOpener } from "./open";
+import { getUpdateSnapshot, subscribeUpdateState } from "../updates/runtime";
+import { updateAttentionLevel, type UpdateAttentionLevel } from "../updates/status";
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 // Match the same Discord header-bar button component VencordToolbox uses. The old
@@ -78,17 +80,48 @@ function detailClass(status: "available" | "in-progress" | "claimable"): string 
     return "quest-ui-detail-available";
 }
 
-function DetailedQuestIcon({ count, status, iconProps }: {
+function UpdateAttentionBadge({ level }: { level: Exclude<UpdateAttentionLevel, "none" | "critical">; }) {
+    return <span className={`quest-ui-update-attention-badge is-${level}`} aria-hidden="true">!</span>;
+}
+
+function CriticalUpdateIcon({ iconProps }: { iconProps: any; }) {
+    return (
+        <span className="quest-ui-icon-wrap quest-ui-critical-update-icon-wrap">
+            <svg {...iconProps} className="quest-ui-critical-update-icon" viewBox="0 0 20 20" aria-hidden="true">
+                <circle cx="10" cy="10" r="8" />
+                <path d="M10 5.7v5.5M10 14.2v.1" />
+            </svg>
+        </span>
+    );
+}
+
+function DetailedQuestIcon({ count, status, iconProps, updateAttention = "none" }: {
     count: number;
     status: "available" | "in-progress" | "claimable";
+    iconProps: any;
+    updateAttention?: UpdateAttentionLevel;
+}) {
+    return (
+        <span className="quest-ui-icon-wrap">
+            <QuestIcon {...iconProps} />
+            {updateAttention !== "none" && updateAttention !== "critical" && (
+                <UpdateAttentionBadge level={updateAttention} />
+            )}
+            <span className={`quest-ui-detailed-count ${detailClass(status)}`} aria-hidden="true">
+                {count > 99 ? "99+" : count}
+            </span>
+        </span>
+    );
+}
+
+function QuestIconWithUpdateAttention({ level, iconProps }: {
+    level: Exclude<UpdateAttentionLevel, "none" | "critical">;
     iconProps: any;
 }) {
     return (
         <span className="quest-ui-icon-wrap">
             <QuestIcon {...iconProps} />
-            <span className={`quest-ui-detailed-count ${detailClass(status)}`} aria-hidden="true">
-                {count > 99 ? "99+" : count}
-            </span>
+            <UpdateAttentionBadge level={level} />
         </span>
     );
 }
@@ -164,7 +197,11 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const dashboardMode = settings.store.dashboardMode;
     const [dashboardOpen, setDashboardOpen] = useState(false);
+    const [, setUpdateRevision] = useState(0);
     const detailed = settings.store.detailedStatus;
+
+    useEffect(() => subscribeUpdateState(() => setUpdateRevision(revision => revision + 1)), []);
+    const updateAttention = updateAttentionLevel(getUpdateSnapshot());
 
     useEffect(() => {
         if (!dashboardMode) {
@@ -193,9 +230,20 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
     const expiry = nearestExpiry(attentionQuests);
     const tooltip = <QuestStatusTooltip counts={counts} total={attentionQuests.length} expiry={expiry} />;
 
-    const icon = detailed && priority
-        ? (iconProps: any) => <DetailedQuestIcon count={priority.count} status={priority.status} iconProps={iconProps} />
-        : QuestIcon;
+    const icon = updateAttention === "critical"
+        ? (iconProps: any) => <CriticalUpdateIcon iconProps={iconProps} />
+        : detailed && priority
+            ? (iconProps: any) => (
+                <DetailedQuestIcon
+                    count={priority.count}
+                    status={priority.status}
+                    iconProps={iconProps}
+                    updateAttention={updateAttention}
+                />
+            )
+            : updateAttention !== "none"
+                ? (iconProps: any) => <QuestIconWithUpdateAttention level={updateAttention} iconProps={iconProps} />
+                : QuestIcon;
 
     const buttonClassName = [type === "settings-bar" ? "quest-ui-settings-button" : "", className]
         .filter(Boolean)
@@ -207,7 +255,7 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
             className={buttonClassName}
             iconClassName={undefined}
             disabled={false}
-            showBadge={!detailed && priority != null}
+            showBadge={updateAttention !== "critical" && !detailed && priority != null}
             badgePosition="bottom"
             icon={icon}
             iconSize={20}
