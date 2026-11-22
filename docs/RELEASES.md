@@ -1,5 +1,15 @@
 # Release channels
 
+## Beta - v1.6.0-beta1
+
+- Stable remains **v1.5.1** until v1.6 is promoted.
+- Beta release target: **v1.6.0-beta1** (2026-11-22).
+- Beta publication still follows the managed updater trust model: the reviewed candidate must be promoted to official `main` before the signed annotated tag is created. A feature-branch-only tag is not a valid managed-update target.
+- Users receive this release through Update Center only when QuestUI pre-release updates are enabled.
+- This beta introduces the v1.6 default Dashboard redesign, compact Dashboard notices, split Orion Quest / QuestUI status cards, rebuilt Filter and Sort controls, achievement segmented progress, and the redesigned Update Center with release metadata and severity-aware update attention.
+- Normal Quest cards retain the v1.5 card geometry. Event Log refinement, Quest Home theming, additional built-in themes, and further updater source/runtime hardening are not claimed as complete in this beta.
+- Automated beta validation must include Vencord build/type-check, upstream OrionQuests `main` coexistence, and Stable/Canary Patch Reporter gates for the exact candidate commit.
+
 QuestUI publishes Stable from `main`. Historical beta/fork pairings are documented only for old release context and are not current installation targets.
 
 ## Stable - v1.5.1

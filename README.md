@@ -7,7 +7,9 @@ QuestUI is UI-focused rather than a Quest-completion engine. It performs only ex
 ## Release status
 
 > [!IMPORTANT]
-> **v1.5.1** is the current Stable release target. It fixes #34 by restoring legacy managed-updater compatibility after the v1.5.0 source-layout refactor. The runtime version remains canonical at `src/plugin/version.ts`; root `version.ts` exists only as compatibility metadata for supported older updaters.
+> **v1.6.0-beta1** is the current Beta candidate. **v1.5.1** remains the current Stable release. Beta users must enable QuestUI pre-release updates; managed in-app installation still requires the signed Beta tag to target an official `main` commit.
+>
+> v1.6.0-beta1 introduces the redesigned default Dashboard, compact action feedback, split Orion Quest / QuestUI status cards, rebuilt Filter and Sort controls, achievement segmented progress, and the redesigned Update Center. The runtime version remains canonical at `src/plugin/version.ts`; root `version.ts` remains compatibility metadata for supported older updaters.
 >
 > Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
 >
@@ -72,8 +74,6 @@ The capture above is a real Discord runtime screenshot supplied by the maintaine
 - Account-scoped duplicate-submission guards and Vencord-native toast feedback
 
 - Floating filters for status, reward category, Quest type, expired history, and the separate Ignored catalogue
-
-- **Recommended** and **Clear all** filter shortcuts
 
 - Optional numeric **Detailed Status** badge and basic attention dot
 
@@ -219,15 +219,13 @@ The Filter popout supports:
 
 - Status: Available, Ready, In Progress, Claimed, Expired
 - Ignored catalogue: show locally ignored Quests separately from normal status filtering
-- Expired age (when Expired is enabled): 7d, 15d, 30d, 90d, All, or a custom number of days
+- Expired history (when Expired is enabled): stepped 7d, 15d, 30d, 90d, or All history
 - Reward: All rewards, Orbs only, Non-Orb rewards
 - Quest type: Play, Stream, Video, Activity, Other / Unknown
 
-**Recommended** shows Available, In Progress, and Ready while hiding Claimed and Expired cards and restores the 15-day expired-history default. **Clear all** enables every supported normal status/category and removes the expired-history age limit; Ignored remains a separate explicit catalogue rather than a Discord Quest status.
+The Sort popout supports **Expiring Soon**, **Highest Orb Reward**, **Shortest Required Time**, **Longest Required Time**, **Name A → Z**, and **Name Z → A**. Expiring Soon is the default/fallback sort mode. Required-time sorting compares normalized timed-task seconds; achievement/count objectives are not misread as durations.
 
-The Sort popout supports **Recommended**, **Expiring Soon**, **Highest Orb Reward**, **Shortest Required Time**, **Longest Required Time**, **Name A → Z**, and **Name Z → A**. In Progress and Ready Quests are an active accepted bucket and stay above Available, Claimed, and Expired history under every sort mode. Required-time sorting compares normalized timed-task seconds; achievement/count objectives are not misread as durations.
-
-The gear button between Filter and Home opens QuestUI's Vencord plugin settings modal directly, without routing through the general Plugins page.
+QuestUI and OrionQuests settings are available directly from their product status cards.
 
 ### Ignore / Unignore
 

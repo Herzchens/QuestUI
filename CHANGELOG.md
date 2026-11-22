@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.6.0-beta1 - 2026-11-22
+
+- Introduced the v1.6 default Dashboard redesign with a fixed floating layout, compact toolbar, split Orion Quest and QuestUI status cards, live integration bridge, clickable status summaries, and compact in-Dashboard action feedback while preserving the proven v1.5 normal Quest card geometry.
+- Rebuilt Dashboard filtering and sorting around a wide Discord-style filter surface, multi-select status and Quest-type controls, single-choice reward controls, and a stepped cumulative Expired History selector for 7d, 15d, 30d, 90d, and All. Removed the near-duplicate Recommended sort mode and made Expiring Soon the default fallback.
+- Added segmented task progress for achievement-style Quests while normal Quests keep the existing progress ring and expiry layout. Refined completed, expired, ignored, and themed Quest-card presentation without changing Discord's underlying Quest state.
+- Redesigned Update Center around independent QuestUI and OrionQuests product rows, release dates, release-note and GitHub links, managed update actions, a fallback link to QuestUI settings, and severity-aware update attention on the Quest shortcut.
+- Kept managed updater safety behavior intact, including QuestUI signed-release verification, Orion checkout inspection, Keep / Discard and update decisions, build rollback, skip, snooze, and restart flows.
+- Updated Dashboard compatibility contracts for the current v1.6 renderer wording and generic settings control, and verified Vencord build/type-check, upstream Orion coexistence, and Stable/Canary Patch Reporter gates on the beta candidate.
+
 ## v1.5.1 - 2026-11-11
 
 - Fixed #34 by restoring root `version.ts` as legacy updater compatibility metadata so managed updaters shipped before the v1.5.0 refactor can verify and install the current Stable target without a reclone.
