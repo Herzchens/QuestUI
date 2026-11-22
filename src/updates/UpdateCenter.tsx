@@ -4,6 +4,7 @@ import { Popout, useEffect, useRef, useState } from "@webpack/common";
 import { checkForUpdates, getUpdateSnapshot, subscribeUpdateState, type PluginUpdateState, type UpdateProduct, type UpdateSnapshot } from "./runtime";
 import { managedNative as Native, runManagedReleaseUpdate, runOrionUpdateDecision, saveSkippedUpdate, saveUpdateReminder, toastFailure, type AvailableUpdateState, type ManagedReleaseUpdateResult, type UpdatePendingAction } from "./managed";
 import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, dashboardAvailabilityLines, formatCompactTimestamp, formatTimestamp, healthForProduct, productLabel, safeOpenRelease, stateCopy, updateProductTone, visibleReleaseVersion, visibleUpdate } from "./status";
+import { pushDashboardNotice } from "../dashboard/notifications";
 
 import "./styles.css";
 
@@ -12,6 +13,8 @@ function useUpdateSnapshot(): UpdateSnapshot {
     useEffect(() => subscribeUpdateState(() => setRevision(value => value + 1)), []);
     return getUpdateSnapshot();
 }
+
+let lastDashboardUpdateNoticeSignature = "";
 
 function UpdateResultNotice({ result }: { result: ManagedReleaseUpdateResult | null; }) {
     if (!result) return null;
@@ -327,6 +330,24 @@ export function UpdateCenterIndicator() {
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const [open, setOpen] = useState(false);
     const count = Number(visibleUpdate(snapshot.questUI)) + Number(visibleUpdate(snapshot.orion));
+    const updateNoticeSignature = [
+        visibleReleaseVersion(snapshot.questUI),
+        visibleReleaseVersion(snapshot.orion)
+    ].filter((value): value is string => value != null).join("|");
+
+    useEffect(() => {
+        if (!updateNoticeSignature) {
+            lastDashboardUpdateNoticeSignature = "";
+            return;
+        }
+        if (lastDashboardUpdateNoticeSignature === updateNoticeSignature) return;
+        lastDashboardUpdateNoticeSignature = updateNoticeSignature;
+        pushDashboardNotice({
+            tone: "info",
+            text: "Update ready",
+            duration: 2400
+        });
+    }, [updateNoticeSignature]);
     const updateCopy = count > 0
         ? `${count} ${count === 1 ? "update" : "updates"} available`
         : "Open update center";

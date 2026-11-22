@@ -15,6 +15,7 @@ import {
     type ClaimAllRuntimeState
 } from "./claimAllState";
 import { recordQuestUIEvent } from "../../eventLog/runtime";
+import { pushDashboardNotice } from "../../dashboard/notifications";
 import { useIgnoredQuests } from "../ignored/runtime";
 import { isQuestVerificationError } from "./responses";
 import { claimQuestReward, hasPendingClaimAction, QuestActionError } from "./native";
@@ -114,12 +115,10 @@ export function ClaimAllControl() {
                 progress => updateClaimAllRuntimeProgress(progress.position)
             );
 
-            const skippedCopy = result.skipped > 0
-                ? `; skipped ${result.skipped} already claimed`
-                : "";
-            showToast({
-                text: `Claimed ${result.claimed} ${result.claimed === 1 ? "reward" : "rewards"}${skippedCopy}.`,
-                variant: "success"
+            pushDashboardNotice({
+                tone: "success",
+                text: "All claimed",
+                duration: 2200
             });
             void recordQuestUIEvent({
                 severity: "success",

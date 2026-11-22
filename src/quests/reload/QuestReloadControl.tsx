@@ -1,6 +1,7 @@
 import { showToast, useEffect, useRef, useState } from "@webpack/common";
 
 import { recordQuestUIEvent } from "../../eventLog/runtime";
+import { pushDashboardNotice } from "../../dashboard/notifications";
 import { markQuestReloadSuccessful } from "./auto";
 import { reloadQuestList } from "./native";
 import { shouldFinishReloadSpin } from "./logic";
@@ -15,8 +16,17 @@ function ReloadIcon({ onIteration }: { onIteration: () => void; }) {
     );
 }
 
+function ReloadSuccessIcon() {
+    return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m9.2 16.4-4.4-4.4 1.5-1.5 2.9 2.9 8.5-8.5 1.5 1.5Z" />
+        </svg>
+    );
+}
+
 export function QuestReloadControl() {
     const [pending, setPending] = useState(false);
+    const [succeeded, setSucceeded] = useState(false);
     const pendingRef = useRef(false);
     const requestSettledRef = useRef(false);
     const completedRotationsRef = useRef(0);
@@ -89,7 +99,15 @@ export function QuestReloadControl() {
                 });
             } else {
                 void recordQuestUIEvent({ severity: "success", eventCode: "QUEST_RELOAD_SUCCEEDED", summary: "Quest list refreshed" });
-                showToast({ text: "Quest list refreshed.", variant: "success" });
+                setSucceeded(true);
+                pushDashboardNotice({
+                    tone: "success",
+                    text: "Refreshed",
+                    duration: 2100
+                });
+                window.setTimeout(() => {
+                    if (mountedRef.current) setSucceeded(false);
+                }, 1200);
             }
         } finally {
             pendingRef.current = false;
@@ -100,14 +118,14 @@ export function QuestReloadControl() {
     return (
         <button
             type="button"
-            className={`quest-ui-filter-button quest-ui-reload-icon-button${pending ? " is-spinning" : ""}`}
+            className={`quest-ui-filter-button quest-ui-reload-icon-button${pending ? " is-spinning" : ""}${succeeded ? " is-success" : ""}`}
             disabled={pending}
             aria-busy={pending}
-            aria-label="Refresh Quest list"
-            title="Refresh Quest list"
+            aria-label={succeeded ? "Quest list refreshed" : "Refresh Quest list"}
+            title={succeeded ? "Quest list refreshed" : "Refresh Quest list"}
             onClick={() => void run()}
         >
-            <ReloadIcon onIteration={onIteration} />
+            {succeeded ? <ReloadSuccessIcon /> : <ReloadIcon onIteration={onIteration} />}
         </button>
     );
 }

@@ -19,12 +19,28 @@ function openQuestHome(closePopout?: () => void): void {
     NavigationRouter.transitionTo("/quest-home");
 }
 
+function openDiscordShop(closePopout?: () => void): void {
+    closePopout?.();
+    NavigationRouter.transitionTo("/shop");
+}
+
 function openPluginSettings(pluginName: "QuestUI" | "OrionQuests", closePopout?: () => void): void {
     const plugin = plugins[pluginName];
     if (!plugin) return;
 
     closePopout?.();
     openPluginModal(plugin);
+}
+
+function MarketIcon() {
+    return (
+        <svg className="quest-ui-market-glyph" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9.2V20h16V9.2" />
+            <path d="M3 9.2 5.2 4h13.6L21 9.2" />
+            <path d="M3 9.2c0 1.55 1.15 2.8 2.6 2.8s2.6-1.25 2.6-2.8c0 1.55 1.15 2.8 2.6 2.8s2.6-1.25 2.6-2.8c0 1.55 1.15 2.8 2.6 2.8s2.6-1.25 2.6-2.8" />
+            <path d="M9 20v-5h6v5" />
+        </svg>
+    );
 }
 
 function QuestHomeIcon() {
@@ -348,6 +364,20 @@ export function QuestPluginSettingsControl({
             title={title}
         >
             <QuestUISettingsIcon />
+        </button>
+    );
+}
+
+export function QuestDashboardMarketControl({ closePopout }: { closePopout?: () => void; }) {
+    return (
+        <button
+            type="button"
+            className="quest-ui-toolbar-button quest-ui-market-button"
+            onClick={() => openDiscordShop(closePopout)}
+            aria-label="Open Discord Shop"
+            title="Open Discord Shop"
+        >
+            <MarketIcon />
         </button>
     );
 }

@@ -39,3 +39,15 @@
         animation-duration: 1.6s;
     }
 }
+
+
+.quest-ui-reload-icon-button.is-success {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 14%, var(--background-base-low, #1e1f22));
+    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 52%, transparent);
+    color: var(--status-positive, #23a55a);
+}
+
+.quest-ui-reload-icon-button.is-success:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 18%, var(--background-base-low, #1e1f22));
+    color: var(--status-positive, #23a55a);
+}

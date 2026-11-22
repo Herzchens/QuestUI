@@ -1,6 +1,7 @@
 import { showToast, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { recordQuestUIEvent } from "../../eventLog/runtime";
+import { pushDashboardNotice } from "../../dashboard/notifications";
 import { setQuestIgnored } from "../ignored/runtime";
 import { shouldPauseOrionQuestBeforeIgnore } from "../../orion/controls";
 import {
@@ -23,18 +24,6 @@ type SubmittedState = { action: QuestAction; userId: string; releaseAt: number; 
 
 function actionLabel(action: QuestAction): string {
     return action === "enroll" ? "Accept Quest" : "Claim Reward";
-}
-
-function successMessage(action: QuestAction, quest: NormalizedQuest, result: QuestActionResult): string {
-    if (result.storeConfirmed) {
-        return action === "enroll"
-            ? `Accepted ${quest.name}`
-            : `Claimed reward for ${quest.name}`;
-    }
-
-    return action === "enroll"
-        ? `Enrollment submitted for ${quest.name}; waiting for Discord to refresh.`
-        : `Claim submitted for ${quest.name}; waiting for Discord to refresh.`;
 }
 
 function submittedState(action: QuestAction, userId: string, delayMs: number): SubmittedState {
@@ -101,7 +90,11 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
             setSubmitted(result.resubmitAfterMs == null
                 ? null
                 : submittedState(action, userIdAtClick, result.resubmitAfterMs));
-            showToast({ text: successMessage(action, quest, result), variant: "success" });
+            pushDashboardNotice({
+                tone: "success",
+                text: action === "enroll" ? "Accepted" : "Claimed",
+                duration: 2100
+            });
             void recordQuestUIEvent({
                 severity: "success",
                 eventCode: action === "enroll" ? "QUEST_ACCEPT_SUCCEEDED" : "QUEST_CLAIM_SUCCEEDED",

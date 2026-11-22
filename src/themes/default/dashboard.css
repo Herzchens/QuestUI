@@ -1770,3 +1770,598 @@
 .quest-ui-theme-default .quest-ui-default-status-product.is-questui {
     justify-content: flex-start;
 }
+
+
+/* v1.6 default header/action polish: restore QuestUI identity and remove the full-width action band. */
+.quest-ui-theme-default .quest-ui-dashboard-display-title > strong {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: quest-ui-dashboard-title-sweep 3.8s linear infinite;
+    background-clip: text;
+    background-image: repeating-linear-gradient(
+        90deg,
+        #7f86ff 0,
+        #7f86ff 64px,
+        #f4f5ff 104px,
+        #72e4ff 132px,
+        #f3a8ff 162px,
+        #9a8cff 208px,
+        #7f86ff 256px,
+        #7f86ff 320px
+    );
+    background-position: 0 0;
+    background-size: 320px 100%;
+    color: transparent;
+}
+
+/* Do not make the controls sit on a second full-width panel. */
+.quest-ui-theme-default .quest-ui-dashboard-actionbar {
+    background: transparent;
+    border-bottom: 0;
+    min-height: 48px;
+    padding: 7px 12px;
+}
+
+/* One compact control capsule keeps the toolbar visually grouped without adding another band. */
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-primary {
+    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 76%, #18131f 24%);
+    border: 1px solid color-mix(in srgb, var(--interactive-normal, #b5bac1) 13%, transparent);
+    border-radius: 999px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+    gap: 6px;
+    padding: 5px 7px;
+}
+
+/* Text actions read as pills. */
+.quest-ui-theme-default .quest-ui-orion-icon-button,
+.quest-ui-theme-default .quest-ui-toolbar-button.quest-ui-claim-all-button,
+.quest-ui-theme-default .quest-ui-event-log-button {
+    border-radius: 999px;
+}
+
+/* Utility actions read as circular icon pills. */
+.quest-ui-theme-default .quest-ui-reload-icon-button,
+.quest-ui-theme-default .quest-ui-update-center-button,
+.quest-ui-theme-default .quest-ui-home-button {
+    border-radius: 999px;
+    flex-basis: 34px;
+    height: 34px;
+    min-height: 34px;
+    width: 34px;
+}
+
+/* Home belongs to the same visual family but remains a separate destination action. */
+.quest-ui-theme-default .quest-ui-dashboard-actionbar > .quest-ui-home-button {
+    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 76%, #18131f 24%);
+    border-color: color-mix(in srgb, var(--interactive-normal, #b5bac1) 15%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-action-divider {
+    height: 18px;
+    margin: 0 1px;
+    opacity: .65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-theme-default .quest-ui-dashboard-display-title > strong {
+        -webkit-text-fill-color: currentColor;
+        animation: none;
+        background-image: none;
+        color: var(--text-strong, var(--header-primary));
+    }
+}
+
+
+/* v1.6 default actionbar: use spare width as an inline notice lane. */
+.quest-ui-theme-default .quest-ui-dashboard-actionbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-primary {
+    flex: 0 0 auto;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--text-muted, #949ba4);
+    display: inline-flex;
+    flex: 1 1 auto;
+    gap: 7px;
+    height: 34px;
+    min-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0 10px;
+    pointer-events: none;
+    transition: opacity 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible {
+    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 78%, #19141f 22%);
+    border-color: rgba(255,255,255,.09);
+    opacity: 1;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-success {
+    color: var(--status-positive, #23a55a);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-warning {
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-error {
+    color: var(--status-danger, #f23f42);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-icon {
+    align-items: center;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    display: inline-flex;
+    flex: 0 0 18px;
+    font-size: 10px;
+    font-weight: 800;
+    height: 18px;
+    justify-content: center;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-text {
+    color: var(--text-default, #dbdee1);
+    font-size: 11px;
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-destinations {
+    align-items: center;
+    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 76%, #18131f 24%);
+    border: 1px solid color-mix(in srgb, var(--interactive-normal, #b5bac1) 13%, transparent);
+    border-radius: 999px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 5px;
+    padding: 5px 6px;
+}
+
+.quest-ui-theme-default .quest-ui-market-button,
+.quest-ui-theme-default .quest-ui-home-button {
+    border-radius: 999px;
+    flex: 0 0 34px;
+    height: 34px;
+    min-height: 34px;
+    width: 34px;
+}
+
+.quest-ui-theme-default .quest-ui-market-glyph {
+    fill: none;
+    height: 17px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+    width: 17px;
+}
+
+
+/* v1.6 default action feedback polish. */
+.quest-ui-theme-default .quest-ui-dashboard-actionbar .quest-ui-event-log-button {
+    border-radius: 999px;
+    flex: 0 0 34px;
+    gap: 0;
+    height: 34px;
+    justify-content: center;
+    min-height: 34px;
+    min-width: 34px;
+    padding: 0;
+    width: 34px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-actionbar .quest-ui-event-log-button svg {
+    height: 16px;
+    width: 16px;
+}
+
+/* The notice starts as a centered dot and expands symmetrically into a compact island. */
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane {
+    --quest-ui-notice-width: 118px;
+    align-items: center;
+    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 82%, #19141f 18%);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 999px;
+    box-sizing: border-box;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+    height: 32px;
+    justify-content: center;
+    max-width: 0;
+    min-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0;
+    pointer-events: none;
+    transform-origin: center center;
+    width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering {
+    animation: quest-ui-notice-expand 180ms cubic-bezier(.2,.85,.25,1) forwards;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible {
+    max-width: var(--quest-ui-notice-width);
+    opacity: 1;
+    padding: 0 9px;
+    width: var(--quest-ui-notice-width);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting {
+    animation: quest-ui-notice-collapse 200ms cubic-bezier(.4,0,.25,1) forwards;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-icon {
+    align-items: center;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    display: inline-flex;
+    flex: 0 0 17px;
+    font-size: 9px;
+    font-weight: 800;
+    height: 17px;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(.7);
+    width: 17px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-text {
+    color: var(--text-default, #dbdee1);
+    font-size: 10px;
+    font-weight: 700;
+    max-width: 78px;
+    min-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering .quest-ui-dashboard-notice-icon,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible .quest-ui-dashboard-notice-icon {
+    animation: quest-ui-notice-content-in 110ms ease 70ms forwards;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering .quest-ui-dashboard-notice-text,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible .quest-ui-dashboard-notice-text {
+    animation: quest-ui-notice-content-in 110ms ease 90ms forwards;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting .quest-ui-dashboard-notice-icon,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting .quest-ui-dashboard-notice-text {
+    animation: quest-ui-notice-content-out 90ms ease forwards;
+}
+
+@keyframes quest-ui-notice-expand {
+    0% {
+        max-width: 10px;
+        opacity: .7;
+        width: 10px;
+    }
+    35% {
+        max-width: 24px;
+        opacity: 1;
+        width: 24px;
+    }
+    100% {
+        max-width: var(--quest-ui-notice-width);
+        opacity: 1;
+        padding: 0 9px;
+        width: var(--quest-ui-notice-width);
+    }
+}
+
+@keyframes quest-ui-notice-collapse {
+    0% {
+        max-width: var(--quest-ui-notice-width);
+        opacity: 1;
+        padding: 0 9px;
+        width: var(--quest-ui-notice-width);
+    }
+    72% {
+        max-width: 18px;
+        opacity: .85;
+        padding: 0;
+        width: 18px;
+    }
+    100% {
+        max-width: 0;
+        opacity: 0;
+        padding: 0;
+        width: 0;
+    }
+}
+
+@keyframes quest-ui-notice-content-in {
+    from { opacity: 0; transform: scale(.82); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes quest-ui-notice-content-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(.82); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering .quest-ui-dashboard-notice-icon,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible .quest-ui-dashboard-notice-icon,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering .quest-ui-dashboard-notice-text,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible .quest-ui-dashboard-notice-text,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting .quest-ui-dashboard-notice-icon,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting .quest-ui-dashboard-notice-text {
+        animation-duration: 1ms;
+    }
+}
+
+
+/* Center the animated notice island inside the otherwise-unused actionbar space. */
+.quest-ui-theme-default .quest-ui-dashboard-notice-slot {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 40px;
+    overflow: visible;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-slot > .quest-ui-dashboard-notice-lane {
+    flex: 0 0 auto;
+}
+
+
+/* v1.6 notice motion pass:
+ * grow from the exact center first, reveal text only after the pill has mostly expanded.
+ */
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane {
+    --quest-ui-notice-width: 112px;
+    gap: 0;
+    height: 30px;
+}
+
+/* Normal dashboard notifications are green; warning/error override below. */
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-info,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-success {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 16%, #111714);
+    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 62%, transparent);
+    color: var(--status-positive, #23a55a);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-warning {
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 15%, #18150d);
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 62%, transparent);
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-error {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 15%, #1a1012);
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 62%, transparent);
+    color: var(--status-danger, #f23f42);
+}
+
+/* No status glyph: the pill itself carries the semantic state. */
+.quest-ui-theme-default .quest-ui-dashboard-notice-icon {
+    display: none;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-text {
+    color: currentColor;
+    font-size: 10px;
+    font-weight: 750;
+    max-width: 92px;
+    opacity: 0;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: clip;
+    transform: none;
+    white-space: nowrap;
+}
+
+/* Expansion is deliberately slower than before. */
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering {
+    animation: quest-ui-notice-expand-slow 340ms cubic-bezier(.18,.82,.24,1) forwards;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible {
+    max-width: var(--quest-ui-notice-width);
+    opacity: 1;
+    padding: 0 10px;
+    width: var(--quest-ui-notice-width);
+}
+
+/* Text waits until the island has visibly formed, then fades in without moving. */
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering .quest-ui-dashboard-notice-text {
+    animation: quest-ui-notice-text-in 130ms ease 220ms forwards;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible .quest-ui-dashboard-notice-text {
+    opacity: 1;
+}
+
+/* On exit: text fades first, then the two ends close back toward the center. */
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting {
+    animation: quest-ui-notice-collapse-slow 300ms cubic-bezier(.4,0,.25,1) 70ms forwards;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting .quest-ui-dashboard-notice-text {
+    animation: quest-ui-notice-text-out 70ms ease forwards;
+}
+
+@keyframes quest-ui-notice-expand-slow {
+    0% {
+        max-width: 8px;
+        opacity: .55;
+        padding: 0;
+        width: 8px;
+    }
+    20% {
+        max-width: 14px;
+        opacity: .85;
+        padding: 0;
+        width: 14px;
+    }
+    62% {
+        max-width: 68px;
+        opacity: 1;
+        padding: 0 5px;
+        width: 68px;
+    }
+    100% {
+        max-width: var(--quest-ui-notice-width);
+        opacity: 1;
+        padding: 0 10px;
+        width: var(--quest-ui-notice-width);
+    }
+}
+
+@keyframes quest-ui-notice-collapse-slow {
+    0% {
+        max-width: var(--quest-ui-notice-width);
+        opacity: 1;
+        padding: 0 10px;
+        width: var(--quest-ui-notice-width);
+    }
+    45% {
+        max-width: 60px;
+        opacity: .95;
+        padding: 0 4px;
+        width: 60px;
+    }
+    82% {
+        max-width: 14px;
+        opacity: .72;
+        padding: 0;
+        width: 14px;
+    }
+    100% {
+        max-width: 0;
+        opacity: 0;
+        padding: 0;
+        width: 0;
+    }
+}
+
+@keyframes quest-ui-notice-text-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes quest-ui-notice-text-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-entering .quest-ui-dashboard-notice-text,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting .quest-ui-dashboard-notice-text {
+        animation-duration: 1ms;
+        animation-delay: 0ms;
+    }
+}
+
+
+/* v1.6 notice motion stabilization.
+ * Override the earlier keyframe experiments with one continuous transition model.
+ */
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-mounted,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting {
+    animation: none;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane {
+    --quest-ui-notice-width: 112px;
+    box-sizing: border-box;
+    height: 30px;
+    max-width: 8px;
+    opacity: 0;
+    padding-left: 0;
+    padding-right: 0;
+    transition:
+        max-width 300ms cubic-bezier(.2,.82,.24,1),
+        width 300ms cubic-bezier(.2,.82,.24,1),
+        padding-left 300ms cubic-bezier(.2,.82,.24,1),
+        padding-right 300ms cubic-bezier(.2,.82,.24,1),
+        opacity 140ms ease;
+    width: 8px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-mounted {
+    max-width: 8px;
+    opacity: .7;
+    padding-left: 0;
+    padding-right: 0;
+    width: 8px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible {
+    max-width: var(--quest-ui-notice-width);
+    opacity: 1;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: var(--quest-ui-notice-width);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting {
+    max-width: 8px;
+    opacity: 0;
+    padding-left: 0;
+    padding-right: 0;
+    transition-delay: 70ms, 70ms, 70ms, 70ms, 210ms;
+    width: 8px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-text,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-mounted .quest-ui-dashboard-notice-text,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible .quest-ui-dashboard-notice-text,
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting .quest-ui-dashboard-notice-text {
+    animation: none;
+    opacity: 0;
+    transform: none;
+    transition: opacity 110ms ease;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-mounted .quest-ui-dashboard-notice-text {
+    opacity: 0;
+    transition-delay: 0ms;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-visible .quest-ui-dashboard-notice-text {
+    opacity: 1;
+    transition-delay: 185ms;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notice-lane.is-exiting .quest-ui-dashboard-notice-text {
+    opacity: 0;
+    transition-delay: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-theme-default .quest-ui-dashboard-notice-lane,
+    .quest-ui-theme-default .quest-ui-dashboard-notice-text {
+        transition-duration: 1ms;
+        transition-delay: 0ms;
+    }
+}

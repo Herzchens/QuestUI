@@ -9,8 +9,9 @@ import { isOrionCommandReady } from "../orion/integration";
 import { OrionGlobalControls } from "../orion/OrionControls";
 import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { QuestDashboard } from "./QuestDashboard";
-import { QuestDashboardHomeControl } from "./DashboardToolbar";
+import { QuestDashboardHomeControl, QuestDashboardMarketControl } from "./DashboardToolbar";
 import { QuestOrbBalance } from "../orbs/QuestOrbBalance";
+import { DashboardNoticeLane } from "./DashboardNoticeLane";
 import { QuestReloadControl } from "../quests/reload/QuestReloadControl";
 import settings from "../plugin/settings";
 import { UpdateCenterIndicator } from "../updates/UpdateCenter";
@@ -135,7 +136,11 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
                     <UpdateCenterIndicator />
                     <EventLogButton />
                 </div>
-                <QuestDashboardHomeControl closePopout={closePopout} />
+                <DashboardNoticeLane />
+                <div className="quest-ui-dashboard-actionbar-destinations">
+                    <QuestDashboardMarketControl closePopout={closePopout} />
+                    <QuestDashboardHomeControl closePopout={closePopout} />
+                </div>
             </div>
             <QuestDashboard closePopout={closePopout} />
         </div>
