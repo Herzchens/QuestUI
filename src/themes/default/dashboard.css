@@ -1251,3 +1251,522 @@
         padding: 11px;
     }
 }
+
+
+/* v1.6 default status quick views: restore the colorful clickable chip language. */
+.quest-ui-theme-default .quest-ui-dashboard-summary {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    grid-template-columns: none;
+    margin-top: 7px;
+    width: 100%;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+    --quest-ui-summary-color: var(--interactive-normal, #b5bac1);
+    --quest-ui-summary-tint: rgba(181, 186, 193, 0.08);
+    align-items: center;
+    appearance: none;
+    background: var(--quest-ui-summary-tint);
+    border: 1px solid color-mix(in srgb, var(--quest-ui-summary-color) 42%, transparent);
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: var(--quest-ui-summary-color);
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font: inherit;
+    font-size: 10.5px;
+    font-weight: 750;
+    gap: 6px;
+    grid-column: auto;
+    justify-content: flex-start;
+    min-height: 29px;
+    min-width: 0;
+    outline: 0;
+    overflow: visible;
+    padding: 4px 7px 4px 9px;
+    transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip:hover {
+    background: color-mix(in srgb, var(--quest-ui-summary-color) 15%, transparent);
+    border-color: color-mix(in srgb, var(--quest-ui-summary-color) 68%, transparent);
+    transform: translateY(-1px);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip:focus-visible {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--quest-ui-summary-color) 34%, transparent);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.is-selected {
+    background: color-mix(in srgb, var(--quest-ui-summary-color) 18%, transparent);
+    border-color: color-mix(in srgb, var(--quest-ui-summary-color) 82%, transparent);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--quest-ui-summary-color) 20%, transparent),
+        0 0 12px color-mix(in srgb, var(--quest-ui-summary-color) 18%, transparent);
+}
+
+.quest-ui-theme-default .quest-ui-summary-chip-dot {
+    background: currentColor;
+    border-radius: 999px;
+    flex: 0 0 6px;
+    height: 6px;
+    width: 6px;
+}
+
+.quest-ui-theme-default .quest-ui-summary-chip-label {
+    color: currentColor;
+}
+
+.quest-ui-theme-default .quest-ui-summary-chip-count {
+    align-items: center;
+    background: color-mix(in srgb, var(--quest-ui-summary-color) 18%, rgba(255,255,255,.04));
+    border: 1px solid color-mix(in srgb, var(--quest-ui-summary-color) 22%, transparent);
+    border-radius: 999px;
+    color: currentColor;
+    display: inline-flex;
+    font-size: 9.5px;
+    font-variant-numeric: tabular-nums;
+    height: 18px;
+    justify-content: center;
+    line-height: 1;
+    min-width: 18px;
+    padding: 0 5px;
+}
+
+.quest-ui-theme-default .quest-ui-summary-all {
+    --quest-ui-summary-color: #f4f5f7;
+    --quest-ui-summary-tint: rgba(255,255,255,.055);
+}
+
+.quest-ui-theme-default .quest-ui-summary-available {
+    --quest-ui-summary-color: #f23f42;
+    --quest-ui-summary-tint: rgba(242,63,66,.075);
+}
+
+.quest-ui-theme-default .quest-ui-summary-claimable {
+    --quest-ui-summary-color: #3ddc84;
+    --quest-ui-summary-tint: rgba(61,220,132,.075);
+}
+
+.quest-ui-theme-default .quest-ui-summary-in-progress {
+    --quest-ui-summary-color: #f0b232;
+    --quest-ui-summary-tint: rgba(240,178,50,.075);
+}
+
+.quest-ui-theme-default .quest-ui-summary-claimed {
+    --quest-ui-summary-color: #49a9f8;
+    --quest-ui-summary-tint: rgba(73,169,248,.075);
+}
+
+.quest-ui-theme-default .quest-ui-summary-expired {
+    --quest-ui-summary-color: #a9abb4;
+    --quest-ui-summary-tint: rgba(169,171,180,.07);
+}
+
+.quest-ui-theme-default .quest-ui-summary-ignored {
+    --quest-ui-summary-color: #c77dff;
+    --quest-ui-summary-tint: rgba(199,125,255,.075);
+}
+
+.quest-ui-theme-default .quest-ui-summary-hidden {
+    --quest-ui-summary-color: #c77dff;
+    --quest-ui-summary-tint: rgba(199,125,255,.075);
+}
+
+@media (max-width: 760px) {
+    .quest-ui-theme-default .quest-ui-dashboard-summary {
+        display: flex;
+        row-gap: 7px;
+    }
+}
+
+
+/* Compact colored status chips - match the approved reference proportions.
+ * Status-specific selectors intentionally match/exceed the base specificity so
+ * semantic custom properties cannot fall back to the neutral gray defaults.
+ */
+.quest-ui-theme-default .quest-ui-dashboard-summary {
+    gap: 6px;
+    margin-top: 7px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+    font-size: 10px;
+    gap: 5px;
+    min-height: 25px;
+    padding: 2px 5px 2px 7px;
+}
+
+.quest-ui-theme-default .quest-ui-summary-chip-dot {
+    flex-basis: 5px;
+    height: 5px;
+    width: 5px;
+}
+
+.quest-ui-theme-default .quest-ui-summary-chip-count {
+    font-size: 9px;
+    height: 16px;
+    min-width: 16px;
+    padding: 0 4px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-all {
+    --quest-ui-summary-color: #f4f5f7;
+    --quest-ui-summary-tint: rgba(255,255,255,.05);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-available {
+    --quest-ui-summary-color: #f23f42;
+    --quest-ui-summary-tint: rgba(242,63,66,.09);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimable {
+    --quest-ui-summary-color: #3ddc84;
+    --quest-ui-summary-tint: rgba(61,220,132,.09);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-in-progress {
+    --quest-ui-summary-color: #f0b232;
+    --quest-ui-summary-tint: rgba(240,178,50,.09);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimed {
+    --quest-ui-summary-color: #49a9f8;
+    --quest-ui-summary-tint: rgba(73,169,248,.09);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-expired {
+    --quest-ui-summary-color: #a9abb4;
+    --quest-ui-summary-tint: rgba(169,171,180,.075);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-ignored,
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-hidden {
+    --quest-ui-summary-color: #c77dff;
+    --quest-ui-summary-tint: rgba(199,125,255,.09);
+}
+
+
+/* Keep all eight status chips on one row at the fixed 820px dashboard width. */
+.quest-ui-theme-default .quest-ui-dashboard-summary {
+    flex-wrap: nowrap;
+    gap: 5px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+    flex: 0 1 auto;
+}
+
+@media (max-width: 760px) {
+    .quest-ui-theme-default .quest-ui-dashboard-summary {
+        flex-wrap: wrap;
+    }
+}
+
+
+/* Distinguish Ignored from Hidden while keeping Hidden violet as approved. */
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-ignored {
+    --quest-ui-summary-color: #f06ac8;
+    --quest-ui-summary-tint: rgba(240,106,200,.09);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-hidden {
+    --quest-ui-summary-color: #c77dff;
+    --quest-ui-summary-tint: rgba(199,125,255,.09);
+}
+
+
+/* v1.6 default polish: simplify plugin status chrome and tighten category counts. */
+
+/* Category chips: no leading status dot. The semantic color already lives on the pill. */
+.quest-ui-theme-default .quest-ui-summary-chip-dot {
+    display: none;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+    gap: 5px;
+    padding: 2px 5px 2px 8px;
+}
+
+/* Keep the count as a compact rounded capsule with the number optically centered. */
+.quest-ui-theme-default .quest-ui-summary-chip-count {
+    align-items: center;
+    box-sizing: border-box;
+    display: inline-flex;
+    font-variant-numeric: tabular-nums;
+    height: 18px;
+    justify-content: center;
+    line-height: 18px;
+    min-width: 20px;
+    padding: 0 5px;
+    text-align: center;
+}
+
+/* Plugin strip: keep product identity strong, reduce nested pill-on-pill styling. */
+.quest-ui-theme-default .quest-ui-default-status-strip {
+    min-height: 36px;
+    padding: 4px 8px;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product {
+    gap: 7px;
+}
+
+/* Versions behave as compact tags, not full rounded pills. */
+.quest-ui-theme-default .quest-ui-version-chip {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 42%, transparent);
+    border-radius: 6px;
+    font-size: 9.5px;
+    min-height: 20px;
+    padding: 3px 6px;
+}
+
+/* Runtime state is metadata: retain dot + text, remove the large capsule. */
+.quest-ui-theme-default .quest-ui-orion-runtime-chip {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    gap: 5px;
+    min-height: 20px;
+    padding: 0 2px;
+}
+
+/* Updater status remains the one prominent status capsule, but make it more compact. */
+.quest-ui-theme-default .quest-ui-product-update-chip {
+    border-radius: 8px;
+    font-size: 9.75px;
+    min-height: 23px;
+    padding: 4px 8px;
+}
+
+/* Settings is a real action, so its hit target must not be visually tiny. */
+.quest-ui-theme-default .quest-ui-status-settings-button {
+    border-radius: 7px;
+    flex: 0 0 28px;
+    height: 28px;
+    width: 28px;
+}
+
+.quest-ui-theme-default .quest-ui-status-settings-button .quest-ui-plugin-settings-glyph {
+    height: 16px;
+    width: 16px;
+}
+
+
+/* Split the plugin status strip into two clear halves and reduce updater-chip weight. */
+.quest-ui-theme-default .quest-ui-default-status-strip {
+    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion {
+    justify-content: flex-start;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    justify-content: flex-end;
+}
+
+.quest-ui-theme-default .quest-ui-product-update-chip {
+    border-radius: 7px;
+    font-size: 9px;
+    min-height: 20px;
+    padding: 3px 6px;
+}
+
+.quest-ui-theme-default .quest-ui-product-update-mark {
+    font-size: 9px;
+}
+
+
+/* v1.6 default plugin strip: each half owns its identity and controls. */
+.quest-ui-theme-default .quest-ui-default-status-strip {
+    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+    column-gap: 10px;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product {
+    display: grid;
+    grid-template-columns: max-content max-content minmax(0, 1fr) max-content max-content;
+    align-items: center;
+    column-gap: 7px;
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    justify-content: stretch;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    grid-template-columns: max-content max-content minmax(0, 1fr) max-content max-content;
+}
+
+/* Identity stays at the left edge of each half. */
+.quest-ui-theme-default .quest-ui-default-status-name {
+    justify-self: start;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-version-chip,
+.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-orion-status {
+    justify-self: start;
+}
+
+/* Updater + settings form the right-side anchor for each half. */
+.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-product-update-chip {
+    justify-self: end;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-status-settings-button {
+    justify-self: end;
+}
+
+/* QuestUI has no runtime chip, so let the flexible middle track absorb the space. */
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-product-update-chip {
+    grid-column: 4;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-status-settings-button {
+    grid-column: 5;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-separator {
+    align-self: center;
+    background: rgba(255,255,255,.10);
+    height: 18px;
+}
+
+/* Keep update state secondary to product identity. */
+.quest-ui-theme-default .quest-ui-product-update-chip {
+    font-size: 8.75px;
+    min-height: 19px;
+    padding: 3px 6px;
+}
+
+
+/* QuestUI integration health mirrors Orion runtime density without duplicating runtime semantics. */
+.quest-ui-theme-default .quest-ui-link-status {
+    align-items: center;
+    color: var(--interactive-normal, #b5bac1);
+    display: inline-flex;
+    font-size: 9.75px;
+    font-weight: 650;
+    gap: 5px;
+    justify-self: start;
+    min-height: 20px;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-link-status-dot {
+    background: currentColor;
+    border-radius: 999px;
+    flex: 0 0 6px;
+    height: 6px;
+    width: 6px;
+}
+
+.quest-ui-theme-default .quest-ui-link-status.is-connected {
+    color: #57d68d;
+}
+
+.quest-ui-theme-default .quest-ui-link-status.is-disconnected {
+    color: #f06a6c;
+}
+
+
+/* Match QuestUI connection state to Orion runtime styling: neutral label, colored dot only. */
+.quest-ui-theme-default .quest-ui-link-status {
+    align-items: center;
+    color: var(--text-default, #dbdee1);
+    display: inline-flex;
+    font-size: 9.75px;
+    font-weight: 650;
+    gap: 5px;
+    justify-self: start;
+    min-height: 20px;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-link-status.is-connected,
+.quest-ui-theme-default .quest-ui-link-status.is-disconnected {
+    color: var(--text-default, #dbdee1);
+}
+
+.quest-ui-theme-default .quest-ui-link-status.is-connected .quest-ui-link-status-dot {
+    background: var(--status-positive, #23a55a);
+}
+
+.quest-ui-theme-default .quest-ui-link-status.is-disconnected .quest-ui-link-status-dot {
+    background: var(--status-danger, #f23f42);
+}
+
+
+/* v1.6 default status-strip balance pass.
+ * Match QuestUI integration typography to Orion runtime and anchor updater controls symmetrically.
+ */
+.quest-ui-theme-default .quest-ui-default-status-product,
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    align-items: center;
+    display: flex;
+    gap: 7px;
+    justify-content: flex-start;
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-product-update-chip {
+    margin-left: auto;
+    justify-self: auto;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-status-settings-button {
+    justify-self: auto;
+}
+
+/* Undo the previous grid-column placement for QuestUI. */
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-product-update-chip,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-status-settings-button {
+    grid-column: auto;
+}
+
+/* Running and Connected/Disconnected must read as equivalent secondary states. */
+.quest-ui-theme-default .quest-ui-link-status {
+    color: var(--text-default, #dbdee1);
+    font-size: 11.5px;
+    font-weight: 650;
+    gap: 5px;
+    line-height: 1;
+    min-height: 20px;
+}
+
+.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
+    font-size: 11.5px;
+    font-weight: 650;
+    line-height: 1;
+}
+
+.quest-ui-theme-default .quest-ui-link-status-dot,
+.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-dot {
+    flex-basis: 6px;
+    height: 6px;
+    width: 6px;
+}
+
+
+/* Keep each plugin half as one compact left-aligned group.
+ * Any spare width belongs after the controls, before the center separator.
+ */
+.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-product-update-chip {
+    margin-left: 0;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product,
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    justify-content: flex-start;
+}
