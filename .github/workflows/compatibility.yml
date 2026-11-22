@@ -224,7 +224,7 @@ jobs:
             'QUESTS_FETCH_CURRENT_QUESTS_BEGIN'
             'VIRTUAL_CURRENCY_USER_BALANCE'
             'VirtualCurrencyStore'
-            'Quest list refreshed.'
+            'text:"Refreshed"'
             'OrionQuests'
             'Orion Quest Version Incompatible'
             'v1.5.1'
@@ -236,7 +236,7 @@ jobs:
             'New quest available'
             'Managed source updates require Vencord desktop'
             'You are up to date'
-            'You are turning off AutoUpdater, please check update manually'
+            'AutoUpdater is off'
             'inspectOrionCheckout'
             'updateOrionRelease'
           )
@@ -290,7 +290,7 @@ jobs:
           grep -Fq 'openQuestDashboard()' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'registerQuestDashboardOpener(type' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx
           grep -Fq 'openPluginModal(plugin)' src/userplugins/QuestUI/src/dashboard/DashboardToolbar.tsx
-          grep -Fq 'aria-label="Open QuestUI settings"' src/userplugins/QuestUI/src/dashboard/DashboardToolbar.tsx
+          grep -Fq 'aria-label={title}' src/userplugins/QuestUI/src/dashboard/DashboardToolbar.tsx
           grep -Fq 'QUEST_AUTO_RELOAD_MINUTES = [10, 20, 30, 60, 120, 240, 300, 720, 1440]' src/userplugins/QuestUI/src/quests/reload/autoLogic.ts
           grep -Fq 'startQuestAutoReload(() => ({' src/userplugins/QuestUI/index.tsx
           grep -Fq 'animation: quest-ui-dashboard-title-sweep 3.8s linear infinite' src/userplugins/QuestUI/src/dashboard/styles/dashboardPolish.css

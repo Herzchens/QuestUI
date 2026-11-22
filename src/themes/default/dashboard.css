@@ -4819,3 +4819,43 @@
 .quest-ui-theme-default .quest-ui-product-release-date {
     display: none !important;
 }
+
+
+/* v1.6 beta status strip clipping fix.
+ * Runtime text and update chips must remain fully visible even when the product half is tight.
+ */
+.quest-ui-theme-default .quest-ui-default-status-product,
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    overflow: visible !important;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-state {
+    overflow: visible !important;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-status,
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-runtime-chip,
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-status-copy {
+    overflow: visible !important;
+}
+
+.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
+    line-height: 1.2 !important;
+    min-height: auto !important;
+    padding: 1px 0 !important;
+    text-overflow: clip !important;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-product-update-chip {
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-product-update-chip > span,
+.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-product-update-chip > span:last-child {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
