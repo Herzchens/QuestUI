@@ -107,8 +107,8 @@ function SortIcon() {
             strokeLinejoin="round"
             aria-hidden="true"
         >
-            <path d="M5 20V4" />
-            <path d="m2.5 6.5 2.5-2.5 2.5 2.5" />
+            <path d="M5 4v16" />
+            <path d="m2.5 17.5 2.5 2.5 2.5-2.5" />
             <path d="M11 7h9" />
             <path d="M11 12h7" />
             <path d="M11 17h5" />
@@ -287,35 +287,7 @@ export function QuestDashboardFilterSortControls() {
         <div className="quest-ui-dashboard-filter-tools">
             <Popout
                 position="bottom"
-                align="left"
-                animation={Popout.Animation.NONE}
-                shouldShow={filtersOpen}
-                onRequestClose={() => setFiltersOpen(false)}
-                targetElementRef={filterButtonRef}
-                renderPopout={() => <DashboardFilters hiddenCount={hiddenCount} ignoredCount={ignoredCount} />}
-            >
-                {(_, { isShown }) => (
-                    <button
-                        ref={filterButtonRef}
-                        type="button"
-                        className={`quest-ui-dashboard-filter-control quest-ui-filter-button${isShown ? " is-open" : ""}${activeFilterCount > 0 ? " is-active" : ""}`}
-                        onClick={() => {
-                            setSortOpen(false);
-                            setFiltersOpen(open => !open);
-                        }}
-                        aria-label={activeFilterCount > 0 ? `Quest filters, ${activeFilterCount} active` : "Quest filters, off"}
-                        aria-expanded={isShown}
-                        title={activeFilterCount > 0 ? `${activeFilterCount} active filters` : "Filters off"}
-                    >
-                        <FilterIcon />
-                        <span>Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span>
-                    </button>
-                )}
-            </Popout>
-
-            <Popout
-                position="bottom"
-                align="left"
+                align="right"
                 animation={Popout.Animation.NONE}
                 shouldShow={sortOpen}
                 onRequestClose={() => setSortOpen(false)}
@@ -337,6 +309,34 @@ export function QuestDashboardFilterSortControls() {
                     >
                         <SortIcon />
                         <span>Sort: {sortLabel}</span>
+                    </button>
+                )}
+            </Popout>
+
+            <Popout
+                position="bottom"
+                align="right"
+                animation={Popout.Animation.NONE}
+                shouldShow={filtersOpen}
+                onRequestClose={() => setFiltersOpen(false)}
+                targetElementRef={filterButtonRef}
+                renderPopout={() => <DashboardFilters hiddenCount={hiddenCount} ignoredCount={ignoredCount} />}
+            >
+                {(_, { isShown }) => (
+                    <button
+                        ref={filterButtonRef}
+                        type="button"
+                        className={`quest-ui-dashboard-filter-control quest-ui-filter-button${isShown ? " is-open" : ""}${activeFilterCount > 0 ? " is-active" : ""}`}
+                        onClick={() => {
+                            setSortOpen(false);
+                            setFiltersOpen(open => !open);
+                        }}
+                        aria-label={activeFilterCount > 0 ? `Quest filters, ${activeFilterCount} active` : "Quest filters, off"}
+                        aria-expanded={isShown}
+                        title={activeFilterCount > 0 ? `${activeFilterCount} active filters` : "Filters off"}
+                    >
+                        <FilterIcon />
+                        <span>Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span>
                     </button>
                 )}
             </Popout>

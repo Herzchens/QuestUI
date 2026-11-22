@@ -78,7 +78,15 @@ function ProgressRing({
         >
             <svg viewBox="0 0 56 56" aria-hidden="true">
                 <circle className="quest-ui-progress-track" cx="28" cy="28" r="21" pathLength="100" />
-                {!isClaimed && !isExpired && (
+                {(isClaimed || isExpired) ? (
+                    <circle
+                        className="quest-ui-progress-state-ring"
+                        cx="28"
+                        cy="28"
+                        r="21"
+                        pathLength="100"
+                    />
+                ) : (
                     <circle
                         className="quest-ui-progress-value"
                         cx="28"
@@ -93,12 +101,12 @@ function ProgressRing({
             </svg>
 
             {isClaimed ? (
-                <svg className="quest-ui-progress-state-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M9.2 16.4 4.8 12l1.5-1.5 2.9 2.9 8.5-8.5 1.5 1.5Z" />
+                <svg className="quest-ui-progress-state-icon is-claimed" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6.5 12.4 10.1 16 17.7 8.4" />
                 </svg>
             ) : isExpired ? (
-                <svg className="quest-ui-progress-state-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m7.1 5.7 4.9 4.9 4.9-4.9 1.4 1.4-4.9 4.9 4.9 4.9-1.4 1.4-4.9-4.9-4.9 4.9-1.4-1.4 4.9-4.9-4.9-4.9Z" />
+                <svg className="quest-ui-progress-state-icon is-expired" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7.2 7.2 16.8 16.8M16.8 7.2 7.2 16.8" />
                 </svg>
             ) : (
                 <span>{display}</span>
@@ -184,10 +192,7 @@ function resolveQuestArtwork(quest: NormalizedQuest, theme: QuestTheme): string 
     return null;
 }
 
-function QuestArtwork({ quest, type }: { quest: NormalizedQuest; type: QuestTaskType; }) {
-    const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
-    const imageUrl = resolveQuestArtwork(quest, theme);
-
+function QuestArtwork({ imageUrl, type }: { imageUrl: string | null; type: QuestTaskType; }) {
     return (
         <div className="quest-ui-artwork" aria-hidden="true">
             <div className="quest-ui-artwork-fallback"><TaskTypeGlyph type={type} /></div>
@@ -325,6 +330,8 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     claimBatchActive: boolean;
 }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
+    const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
+    const artworkUrl = resolveQuestArtwork(quest, theme);
     const now = Date.now();
     const expiry = dashboardExpiry(quest, now);
     const urgency = expiryUrgency(quest.expiresAt, now);
@@ -357,7 +364,18 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
 
     return (
         <article className={`quest-ui-card quest-ui-card-${quest.status}${isAchievement ? " quest-ui-card-achievement" : ""}${ignored ? " quest-ui-card-ignored" : ""}`}>
-            <QuestArtwork quest={quest} type={taskType} />
+            {artworkUrl && (
+                <span className="quest-ui-card-backdrop" aria-hidden="true">
+                    <img
+                        src={artworkUrl}
+                        alt=""
+                        loading="lazy"
+                        draggable={false}
+                        onError={event => { event.currentTarget.parentElement?.remove(); }}
+                    />
+                </span>
+            )}
+            <QuestArtwork imageUrl={artworkUrl} type={taskType} />
 
             <div className="quest-ui-card-main">
                 <div className="quest-ui-card-title-cluster">

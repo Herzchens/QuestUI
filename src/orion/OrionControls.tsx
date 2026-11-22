@@ -1,5 +1,7 @@
 import { showToast, useEffect, useState } from "@webpack/common";
 
+import { pushDashboardNotice } from "../dashboard/notifications";
+
 import { deriveGlobalOrionControl, farmableQuestIds } from "./controls";
 import { OrionPauseIcon, OrionPlayIcon, OrionStopIcon } from "./icons";
 import {
@@ -16,8 +18,18 @@ function smartLabel(action: "start" | "pause" | "resume"): string {
     return "Start all Orion Quest farming";
 }
 
-function showControlSuccess(response: string): void {
-    showToast({ text: `Orion: ${response}`, variant: "success" });
+function showControlSuccess(action: "start" | "pause" | "resume" | "stop"): void {
+    pushDashboardNotice({
+        tone: "success",
+        text: action === "start"
+            ? "Started"
+            : action === "pause"
+                ? "Paused"
+                : action === "resume"
+                    ? "Resumed"
+                    : "Stopped",
+        duration: 2100
+    });
 }
 
 function showControlFailure(error: unknown): void {
@@ -51,10 +63,12 @@ export function OrionGlobalControls() {
         if (pending || control.smartDisabled) return;
         setPending(true);
         try {
-            const response = control.action === "start"
-                ? await invokeOrionEngineControl("start")
-                : await invokeOrionGlobalTaskControl(control.action);
-            showControlSuccess(response);
+            if (control.action === "start") {
+                await invokeOrionEngineControl("start");
+            } else {
+                await invokeOrionGlobalTaskControl(control.action);
+            }
+            showControlSuccess(control.action);
         } catch (error) {
             showControlFailure(error);
         } finally {
@@ -66,8 +80,8 @@ export function OrionGlobalControls() {
         if (pending || control.stopDisabled) return;
         setPending(true);
         try {
-            const response = await invokeOrionEngineControl("stop");
-            showControlSuccess(response);
+            await invokeOrionEngineControl("stop");
+            showControlSuccess("stop");
         } catch (error) {
             showControlFailure(error);
         } finally {

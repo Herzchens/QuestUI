@@ -2365,3 +2365,706 @@
         transition-delay: 0ms;
     }
 }
+
+
+/* v1.6 plugin status cards: separate the products while keeping a living integration bridge. */
+.quest-ui-theme-default .quest-ui-default-status-strip {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    column-gap: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) 44px minmax(0, .92fr);
+    min-height: 0;
+    padding: 0;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product,
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    align-items: center;
+    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 84%, #21172d 16%);
+    border: 1px solid color-mix(in srgb, var(--quest-ui-default-accent) 25%, rgba(255,255,255,.08));
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+    display: flex;
+    gap: 6px;
+    justify-content: flex-start;
+    min-height: 44px;
+    min-width: 0;
+    overflow: hidden;
+    padding: 6px 8px;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    gap: 5px;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-product-update-chip {
+    margin-left: 0;
+}
+
+/* The old center separator is replaced by a semantic integration bridge. */
+.quest-ui-theme-default .quest-ui-default-status-separator {
+    display: none;
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge {
+    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
+    min-width: 44px;
+    pointer-events: none;
+    position: relative;
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge-line {
+    background: color-mix(in srgb, var(--interactive-muted, #949ba4) 24%, transparent);
+    border-radius: 999px;
+    height: 1px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge-line::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255,255,255,.04) 20%,
+        currentColor 50%,
+        rgba(255,255,255,.04) 80%,
+        transparent 100%
+    );
+    content: "";
+    height: 1px;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    width: 55%;
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge-node {
+    background: var(--interactive-muted, #949ba4);
+    border: 2px solid var(--background-base-lowest, #111214);
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--interactive-muted, #949ba4) 24%, transparent);
+    height: 7px;
+    justify-self: center;
+    position: relative;
+    transform: rotate(45deg);
+    width: 7px;
+    z-index: 1;
+}
+
+/* Connected: both sides visibly feed the center node, then the node gives a restrained heartbeat. */
+.quest-ui-theme-default .quest-ui-status-bridge.is-connected {
+    color: color-mix(in srgb, var(--status-positive, #23a55a) 85%, white 15%);
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 38%, transparent);
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line:first-child::after {
+    animation: quest-ui-bridge-pulse-left 2.25s ease-in-out infinite;
+    left: -58%;
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line:last-child::after {
+    animation: quest-ui-bridge-pulse-right 2.25s ease-in-out infinite;
+    right: -58%;
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-node {
+    animation: quest-ui-bridge-heartbeat 2.25s ease-in-out infinite;
+    background: var(--status-positive, #23a55a);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--status-positive, #23a55a) 38%, transparent),
+        0 0 7px color-mix(in srgb, var(--status-positive, #23a55a) 18%, transparent);
+}
+
+/* Disconnected: broken line, red node, no motion. */
+.quest-ui-theme-default .quest-ui-status-bridge.is-disconnected .quest-ui-status-bridge-line {
+    background: repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--status-danger, #f23f42) 50%, transparent) 0 3px,
+        transparent 3px 6px
+    );
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge.is-disconnected .quest-ui-status-bridge-line::after {
+    animation: none;
+    display: none;
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge.is-disconnected .quest-ui-status-bridge-node {
+    animation: none;
+    background: var(--status-danger, #f23f42);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--status-danger, #f23f42) 38%, transparent);
+}
+
+/* Settings is intentionally larger than the status metadata around it. */
+.quest-ui-theme-default .quest-ui-status-settings-button {
+    border-radius: 8px;
+    flex: 0 0 34px;
+    height: 34px;
+    min-height: 34px;
+    width: 34px;
+}
+
+.quest-ui-theme-default .quest-ui-status-settings-button .quest-ui-plugin-settings-glyph {
+    height: 18px;
+    width: 18px;
+}
+
+@keyframes quest-ui-bridge-pulse-left {
+    0%, 12% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+    24% {
+        opacity: .25;
+    }
+    48% {
+        opacity: .95;
+    }
+    62% {
+        opacity: 0;
+        transform: translateX(210%);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(210%);
+    }
+}
+
+@keyframes quest-ui-bridge-pulse-right {
+    0%, 12% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+    24% {
+        opacity: .25;
+    }
+    48% {
+        opacity: .95;
+    }
+    62% {
+        opacity: 0;
+        transform: translateX(-210%);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-210%);
+    }
+}
+
+@keyframes quest-ui-bridge-heartbeat {
+    0%, 54%, 100% {
+        transform: rotate(45deg) scale(1);
+    }
+    62% {
+        transform: rotate(45deg) scale(1.16);
+    }
+    69% {
+        transform: rotate(45deg) scale(1.02);
+    }
+    76% {
+        transform: rotate(45deg) scale(1.10);
+    }
+    84% {
+        transform: rotate(45deg) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line::after,
+    .quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-node {
+        animation: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .quest-ui-theme-default .quest-ui-default-status-strip {
+        column-gap: 7px;
+        grid-template-columns: minmax(0, 1.06fr) 30px minmax(0, .94fr);
+    }
+
+    .quest-ui-theme-default .quest-ui-status-bridge {
+        grid-template-columns: minmax(0, 1fr) 8px minmax(0, 1fr);
+        min-width: 30px;
+    }
+
+    .quest-ui-theme-default .quest-ui-default-status-product,
+    .quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+    .quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+        gap: 5px;
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+}
+
+
+/* v1.6 bridge/card correction: keep QuestUI slightly smaller without clipping its controls. */
+.quest-ui-theme-default .quest-ui-default-status-strip {
+    column-gap: 8px;
+    grid-template-columns: minmax(0, 1.04fr) 40px minmax(0, .96fr);
+}
+
+.quest-ui-theme-default .quest-ui-status-bridge {
+    grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
+    min-width: 40px;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    gap: 5px;
+    min-width: 0;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+/* Keep every fixed control inside the QuestUI card instead of letting the final gear get clipped. */
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-version-chip,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-link-status,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-product-update-chip,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-status-settings-button {
+    flex-shrink: 0;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-default-status-name {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+/* One restrained heartbeat after the incoming bridge pulse reaches the node. */
+.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-node {
+    animation: quest-ui-bridge-heartbeat-single 2.25s ease-in-out infinite;
+}
+
+@keyframes quest-ui-bridge-heartbeat-single {
+    0%, 56%, 100% {
+        transform: rotate(45deg) scale(1);
+    }
+    67% {
+        transform: rotate(45deg) scale(1.15);
+    }
+    78% {
+        transform: rotate(45deg) scale(1);
+    }
+}
+
+@media (max-width: 760px) {
+    .quest-ui-theme-default .quest-ui-default-status-strip {
+        column-gap: 6px;
+        grid-template-columns: minmax(0, 1.03fr) 28px minmax(0, .97fr);
+    }
+
+    .quest-ui-theme-default .quest-ui-status-bridge {
+        grid-template-columns: minmax(0, 1fr) 8px minmax(0, 1fr);
+        min-width: 28px;
+    }
+}
+
+
+/* Golden-ratio status layout:
+ * each card first gets the width its content actually needs, then spare width is split 1.618:1.
+ */
+.quest-ui-theme-default .quest-ui-default-status-strip {
+    align-items: center;
+    column-gap: 8px;
+    display: flex;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion {
+    flex: 1.618 1 max-content;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    flex: 1 1 max-content;
+}
+
+/* Keep the bridge fixed so only true spare card space follows the golden ratio. */
+.quest-ui-theme-default .quest-ui-status-bridge {
+    flex: 0 0 36px;
+    min-width: 36px;
+}
+
+/* Reduce visual mass after the cards stopped being forced into equal halves. */
+.quest-ui-theme-default .quest-ui-default-status-product,
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    border-radius: 10px;
+    min-height: 40px;
+    padding-bottom: 4px;
+    padding-top: 4px;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+/* Settings stays readable but no longer dominates the more compact cards. */
+.quest-ui-theme-default .quest-ui-status-settings-button {
+    border-radius: 7px;
+    flex-basis: 30px;
+    height: 30px;
+    min-height: 30px;
+    width: 30px;
+}
+
+.quest-ui-theme-default .quest-ui-status-settings-button .quest-ui-plugin-settings-glyph {
+    height: 17px;
+    width: 17px;
+}
+
+@media (max-width: 760px) {
+    .quest-ui-theme-default .quest-ui-default-status-strip {
+        column-gap: 6px;
+    }
+
+    .quest-ui-theme-default .quest-ui-default-status-product.is-orion {
+        flex-grow: 1.35;
+    }
+
+    .quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+        flex-grow: 1;
+    }
+
+    .quest-ui-theme-default .quest-ui-status-bridge {
+        flex-basis: 28px;
+        min-width: 28px;
+    }
+}
+
+
+/* v1.6 header rhythm: give plugin status cards more breathing room from summary,
+ * and keep Sort/Filter as a right-aligned utility pair.
+ */
+.quest-ui-theme-default .quest-ui-dashboard-summary {
+    margin-top: 12px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-filter-tools {
+    justify-content: flex-end;
+    margin-top: 8px;
+    width: 100%;
+}
+
+
+/* v1.6 completed/expired progress states. */
+.quest-ui-theme-default .quest-ui-progress-state-ring {
+    fill: none;
+    stroke-width: 4.5;
+}
+
+/* Claimed: a complete violet ring with a cleaner blue check. */
+.quest-ui-theme-default .quest-ui-progress-claimed .quest-ui-progress-state-ring {
+    stroke: var(--brand-500, #5865f2);
+}
+
+.quest-ui-theme-default .quest-ui-progress-state-icon.is-claimed {
+    color: var(--blue-345, #00a8fc);
+    fill: none;
+    height: 28px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.6;
+    width: 28px;
+}
+
+/* Expired: neutral completed ring, semantic red X. */
+.quest-ui-theme-default .quest-ui-progress-expired .quest-ui-progress-state-ring {
+    stroke: color-mix(in srgb, var(--interactive-muted, #949ba4) 45%, transparent);
+}
+
+.quest-ui-theme-default .quest-ui-progress-state-icon.is-expired {
+    color: var(--status-danger, #f23f42);
+    fill: none;
+    height: 25px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.35;
+    width: 25px;
+}
+
+/* The state icons own their colors now; do not inherit the old filled accent glyph. */
+.quest-ui-theme-default .quest-ui-progress-state-icon.is-claimed,
+.quest-ui-theme-default .quest-ui-progress-state-icon.is-expired {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* v1.6: make the right-side Sort/Filter pair easier to hit and read. */
+.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-sort-button,
+.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-filter-button {
+    border-radius: 10px;
+    font-size: 12px;
+    height: 36px;
+    padding: 0 12px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-sort-button svg,
+.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-filter-button svg {
+    flex-basis: 18px;
+    height: 18px;
+    width: 18px;
+}
+
+
+/* v1.6 custom-theme surface normalization.
+ * Keep the Dashboard inside Discord's active surface palette instead of mixing fixed red/violet blacks.
+ */
+.quest-ui-theme-default.quest-ui-dashboard-shell,
+.quest-ui-theme-default .quest-ui-dashboard {
+    --quest-ui-dashboard-base: var(--background-base-lowest, var(--background-primary, #111214));
+    --quest-ui-dashboard-raised: var(--background-base-low, var(--background-secondary, #1e1f22));
+}
+
+.quest-ui-theme-default.quest-ui-dashboard-shell {
+    --quest-ui-default-surface: var(--quest-ui-dashboard-base);
+    background: var(--quest-ui-dashboard-base);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard,
+.quest-ui-theme-default .quest-ui-dashboard-topbar,
+.quest-ui-theme-default .quest-ui-dashboard-actionbar,
+.quest-ui-theme-default .quest-ui-dashboard-header {
+    background: transparent;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-topbar {
+    border-bottom-color: color-mix(in srgb, var(--text-muted, #949ba4) 12%, transparent);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-primary,
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-destinations,
+.quest-ui-theme-default .quest-ui-default-status-product,
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui,
+.quest-ui-theme-default .quest-ui-dashboard-filter-control {
+    background: color-mix(in srgb, var(--quest-ui-dashboard-raised) 84%, var(--quest-ui-dashboard-base) 16%);
+}
+
+/* Cards stay theme-aware, but remain visually related to the Dashboard shell. */
+.quest-ui-theme-default .quest-ui-card,
+.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement) {
+    --quest-ui-card-surface: color-mix(
+        in srgb,
+        var(--quest-ui-dashboard-base) 70%,
+        var(--quest-ui-dashboard-raised) 30%
+    );
+    background: var(--quest-ui-card-surface);
+    position: relative;
+}
+
+.quest-ui-theme-default .quest-ui-card:hover,
+.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement):hover {
+    background: color-mix(
+        in srgb,
+        var(--quest-ui-dashboard-base) 62%,
+        var(--quest-ui-dashboard-raised) 38%
+    );
+}
+
+/* Per-Quest ambient artwork. The clipping wrapper keeps blur inside the card while
+ * preserving the card's existing overflow for badges and action controls.
+ */
+.quest-ui-theme-default .quest-ui-card-backdrop {
+    border-radius: inherit;
+    inset: 1px;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+}
+
+.quest-ui-theme-default .quest-ui-card-backdrop > img {
+    filter: blur(26px) saturate(1.18);
+    height: 150%;
+    left: -4%;
+    object-fit: cover;
+    opacity: .16;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) scale(1.12);
+    width: 42%;
+}
+
+.quest-ui-theme-default .quest-ui-card-backdrop::after {
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--quest-ui-card-surface) 38%, transparent) 0%,
+        color-mix(in srgb, var(--quest-ui-card-surface) 64%, transparent) 24%,
+        color-mix(in srgb, var(--quest-ui-card-surface) 92%, transparent) 58%,
+        var(--quest-ui-card-surface) 100%
+    );
+    content: "";
+    inset: 0;
+    position: absolute;
+}
+
+.quest-ui-theme-default .quest-ui-card > :not(.quest-ui-card-backdrop) {
+    position: relative;
+    z-index: 1;
+}
+
+.quest-ui-theme-default .quest-ui-card:hover .quest-ui-card-backdrop > img {
+    opacity: .19;
+}
+
+/* Discord's own premium badge is the preferred fallback while the user's tier badge loads.
+ * Keep the local SVG only as a last-resort when Discord's badge registry is unavailable.
+ */
+.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag.is-nitro img {
+    object-fit: contain;
+}
+
+
+/* v1.6 default-theme isolation.
+ * Default is intentionally a neutral QuestUI skin; Discord account themes may tint the
+ * surrounding client, but must not recolor the Dashboard into a different palette.
+ */
+.quest-ui-theme-default.quest-ui-dashboard-shell {
+    --quest-ui-dashboard-base: #121216;
+    --quest-ui-dashboard-raised: #1a1a20;
+    --quest-ui-dashboard-card: #19191e;
+    --quest-ui-default-surface: var(--quest-ui-dashboard-base);
+    background: var(--quest-ui-dashboard-base);
+}
+
+.quest-ui-theme-default .quest-ui-dashboard,
+.quest-ui-theme-default .quest-ui-dashboard-topbar,
+.quest-ui-theme-default .quest-ui-dashboard-actionbar,
+.quest-ui-theme-default .quest-ui-dashboard-header {
+    background: transparent;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-primary,
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-destinations {
+    background: #19191f;
+}
+
+.quest-ui-theme-default .quest-ui-default-status-product,
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    background: #1a1a20;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-filter-control {
+    background: #1b1b21;
+}
+
+.quest-ui-theme-default .quest-ui-card,
+.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement) {
+    --quest-ui-card-surface: var(--quest-ui-dashboard-card);
+    background: var(--quest-ui-dashboard-card);
+}
+
+.quest-ui-theme-default .quest-ui-card:hover,
+.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement):hover {
+    background: #1d1d23;
+}
+
+/* Make the ambient Quest artwork readable enough to identify the card without competing
+ * with the actual thumbnail or text. The fade still returns to the neutral card surface.
+ */
+.quest-ui-theme-default .quest-ui-card-backdrop > img {
+    filter: blur(24px) saturate(1.28);
+    height: 165%;
+    left: -2%;
+    opacity: .24;
+    width: 52%;
+}
+
+.quest-ui-theme-default .quest-ui-card-backdrop::after {
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--quest-ui-card-surface) 18%, transparent) 0%,
+        color-mix(in srgb, var(--quest-ui-card-surface) 48%, transparent) 28%,
+        color-mix(in srgb, var(--quest-ui-card-surface) 84%, transparent) 58%,
+        var(--quest-ui-card-surface) 88%
+    );
+}
+
+.quest-ui-theme-default .quest-ui-card:hover .quest-ui-card-backdrop > img {
+    opacity: .28;
+}
+
+
+/* v1.6 hard isolation pass for custom Discord themes.
+ * The Default theme owns its own surfaces; account/profile themes must not tint them.
+ */
+.quest-ui-theme-default.quest-ui-dashboard-shell {
+    background-color: #121216 !important;
+    background-image: none !important;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard,
+.quest-ui-theme-default .quest-ui-dashboard-topbar,
+.quest-ui-theme-default .quest-ui-dashboard-actionbar,
+.quest-ui-theme-default .quest-ui-dashboard-header,
+.quest-ui-theme-default .quest-ui-dashboard-content {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-primary,
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-destinations,
+.quest-ui-theme-default .quest-ui-default-status-product,
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui,
+.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-sort-button,
+.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-filter-button {
+    background-color: #19191f !important;
+    background-image: none !important;
+}
+
+.quest-ui-theme-default .quest-ui-card,
+.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement) {
+    --quest-ui-card-surface: #1a1a20;
+    background-color: #1a1a20 !important;
+    background-image: none !important;
+}
+
+.quest-ui-theme-default .quest-ui-card:hover,
+.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement):hover {
+    background-color: #1e1e25 !important;
+    background-image: none !important;
+}
+
+/* Stronger ambient art: brighter and more saturated, while still reading as a backdrop. */
+.quest-ui-theme-default .quest-ui-card-backdrop > img {
+    filter: blur(22px) saturate(1.55) brightness(1.18);
+    height: 175%;
+    left: -3%;
+    opacity: .34;
+    top: 50%;
+    width: 60%;
+}
+
+.quest-ui-theme-default .quest-ui-card-backdrop::after {
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, #1a1a20 10%, transparent) 0%,
+        color-mix(in srgb, #1a1a20 30%, transparent) 26%,
+        color-mix(in srgb, #1a1a20 70%, transparent) 58%,
+        #1a1a20 90%
+    );
+}
+
+.quest-ui-theme-default .quest-ui-card:hover .quest-ui-card-backdrop > img {
+    opacity: .39;
+}

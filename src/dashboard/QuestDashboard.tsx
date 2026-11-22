@@ -17,7 +17,7 @@ import { versionChannelClass } from "../updates/channel";
 import { QuestCard } from "./QuestCard";
 import { QuestDashboardFilterSortControls, QuestPluginSettingsControl } from "./DashboardToolbar";
 import { normalizeDashboardSortMode, sortDashboardQuests } from "./sort";
-import { DASHBOARD_SETTING_KEYS, clearDashboardFilters, partitionIgnored } from "./state";
+import { DASHBOARD_SETTING_KEYS, clearDashboardFilters, ensureDashboardV16FilterDefaults, partitionIgnored } from "./state";
 
 const QuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 
@@ -111,6 +111,10 @@ function EmptyStateIllustration() {
 }
 
 export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
+    useEffect(() => {
+        ensureDashboardV16FilterDefaults();
+    }, []);
+
     const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
     const { orionIntegration } = settings.use(["orionIntegration"]);
     useSettings(["plugins.OrionQuests.enabled"]);
@@ -212,7 +216,14 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                             closePopout={closePopout}
                         />
                     </div>
-                    <span className="quest-ui-default-status-separator" aria-hidden="true" />
+                    <span
+                        className={`quest-ui-status-bridge ${orionHealth.kind === "connected" ? "is-connected" : "is-disconnected"}`}
+                        aria-hidden="true"
+                    >
+                        <span className="quest-ui-status-bridge-line" />
+                        <span className="quest-ui-status-bridge-node" />
+                        <span className="quest-ui-status-bridge-line" />
+                    </span>
                     <div className="quest-ui-default-status-product is-questui">
                         <strong className="quest-ui-default-status-name">QuestUI</strong>
                         <span className={`quest-ui-version-chip quest-ui-version-chip-questui ${versionChannelClass(QUESTUI_VERSION)}`}>{QUESTUI_VERSION}</span>

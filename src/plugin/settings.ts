@@ -179,13 +179,13 @@ export default definePluginSettings({
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Claimed",
         description: "Show claimed quests.",
-        default: false
+        default: true
     },
     dashboardShowExpired: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Expired",
         description: "Show expired quests.",
-        default: false
+        default: true
     },
     dashboardShowIgnored: {
         type: OptionType.BOOLEAN,
@@ -197,7 +197,13 @@ export default definePluginSettings({
         type: OptionType.NUMBER,
         displayName: "Dashboard • Expired Age",
         description: "Only show expired quests from the last N days. Zero means all history.",
-        default: 15
+        default: 0
+    },
+    dashboardFiltersV16Initialized: {
+        type: OptionType.BOOLEAN,
+        displayName: "Dashboard • v1.6 filter defaults initialized",
+        description: "Internal migration marker for the v1.6 Dashboard filter baseline.",
+        default: false
     },
     dashboardRewardFilter: {
         type: OptionType.SELECT,
@@ -334,6 +340,7 @@ export default definePluginSettings({
     dashboardShowExpired: { hidden: true },
     dashboardShowIgnored: { hidden: true },
     dashboardExpiredAgeDays: { hidden: true },
+    dashboardFiltersV16Initialized: { hidden: true },
     dashboardRewardFilter: { hidden: true },
     dashboardIncludeUnknownRewards: { hidden: true },
     dashboardShowPlay: { hidden: true },

@@ -1,5 +1,7 @@
 import { showToast, useEffect, useState } from "@webpack/common";
 
+import { pushDashboardNotice } from "../dashboard/notifications";
+
 import { deriveQuestOrionControl } from "./controls";
 import { OrionPauseIcon, OrionPlayIcon } from "./icons";
 import {
@@ -37,10 +39,20 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
         if (pending || control.disabled) return;
         setPending(true);
         try {
-            const response = control.action === "start"
-                ? await invokeOrionEngineControl("start")
-                : await invokeOrionQuestTaskControl(quest.id, control.action);
-            showToast({ text: `Orion: ${response}`, variant: "success" });
+            if (control.action === "start") {
+                await invokeOrionEngineControl("start");
+            } else {
+                await invokeOrionQuestTaskControl(quest.id, control.action);
+            }
+            pushDashboardNotice({
+                tone: "success",
+                text: control.action === "start"
+                    ? "Started"
+                    : control.action === "pause"
+                        ? "Paused"
+                        : "Resumed",
+                duration: 2100
+            });
         } catch (error) {
             showToast({
                 text: error instanceof Error ? error.message : "Orion rejected the requested Quest control action.",

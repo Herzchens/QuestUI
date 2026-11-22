@@ -1,6 +1,6 @@
 import { useSettings } from "@api/Settings";
 import { fetchUserProfile } from "@utils/discord";
-import { findByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { UserProfileStore, UserStore, useEffect, useStateFromStores } from "@webpack/common";
 
 import { ClaimAllControl } from "../quests/actions/ClaimAllControl";
@@ -24,10 +24,30 @@ import "../themes/default/dashboard.css";
 
 const NativeQuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 
+const ProfileBadgeUtils = findByPropsLazy("getBadges") as {
+    getBadges?: () => Array<{ id?: string; description?: string; icon?: string; }>;
+};
+
 function nitroBadgeIconSrc(icon: string): string {
     return /^https?:\/\//i.test(icon)
         ? icon
         : `https://cdn.discordapp.com/badge-icons/${icon}.png`;
+}
+
+function defaultDiscordNitroBadgeIcon(): string | null {
+    try {
+        const badges = ProfileBadgeUtils?.getBadges?.() ?? [];
+
+        // Discord's plain "premium" badge is the generic Nitro mark. Do not pick
+        // premium_* first here: those are tenure/tier variants and can briefly show
+        // the wrong artwork while the real profile badge is still loading.
+        const badge = badges.find(candidate => String(candidate.id ?? "").trim().toLowerCase() === "premium")
+            ?? badges.find(candidate => String(candidate.description ?? "").trim().toLowerCase() === "discord nitro");
+
+        return badge?.icon ? nitroBadgeIconSrc(badge.icon) : null;
+    } catch {
+        return null;
+    }
 }
 
 function isCurrentNitroBadge(id: string, description: string): boolean {
@@ -96,10 +116,12 @@ function QuestOrbMultiplierSourceTag() {
 
     if (!showNitro) return null;
 
+    const fallbackNitroBadge = defaultDiscordNitroBadgeIcon();
+
     return (
         <span className="quest-ui-dashboard-boost-source-tag is-nitro" title="Discord Nitro">
-            {nitroBadge
-                ? <img src={nitroBadge} alt="" aria-hidden="true" />
+            {nitroBadge || fallbackNitroBadge
+                ? <img src={nitroBadge ?? fallbackNitroBadge ?? undefined} alt="" aria-hidden="true" />
                 : <NitroFallbackIcon />}
             <span className="quest-ui-dashboard-boost-source-wordmark">Nitro</span>
         </span>

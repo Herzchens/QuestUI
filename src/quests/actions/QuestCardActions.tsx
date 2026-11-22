@@ -39,6 +39,24 @@ function currentUserId(): string | null {
     }
 }
 
+function IgnoreGlyph({ ignored }: { ignored: boolean; }) {
+    return (
+        <svg
+            className="quest-ui-card-action-ignore-glyph"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+        >
+            {ignored ? (
+                <path d="M2.5 12C4.7 7.55 8 5 12 5s7.3 2.55 9.5 7C19.3 16.45 16 19 12 19S4.7 16.45 2.5 12Zm6.5 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z" />
+            ) : (
+                <path d="M3 3 21 21M9.8 4.35A10.2 10.2 0 0 1 12 4c4.2 0 7.6 2.65 9.5 8a16.2 16.2 0 0 1-2.25 3.35M6.7 6.7A16.4 16.4 0 0 0 2.5 12c1.9 5.35 5.3 8 9.5 8 1.9 0 3.6-.55 5.05-1.55M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+            )}
+        </svg>
+    );
+}
+
+
 export function QuestCardActions({ quest, ignored = false, claimBatchActive = false }: {
     quest: NormalizedQuest;
     ignored?: boolean;
@@ -285,7 +303,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                         ? "Show this Quest normally again; Orion stays paused"
                         : "Pause this Quest in Orion if active, then hide it from normal QuestUI views"}
                 >
-                    {ignorePending ? "Saving…" : ignored ? "Unignore" : "Ignore"}
+                    <IgnoreGlyph ignored={ignored} />
                 </button>
             )}
         </span>
