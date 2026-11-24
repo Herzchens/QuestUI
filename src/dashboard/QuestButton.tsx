@@ -1,5 +1,5 @@
-import "./styles/styles.css";
-import "./styles/scrollbar.css";
+import "../themes/default/dashboard-components.css";
+import "../themes/default/scrollbar.css";
 
 import { Flex } from "@components/Flex";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";

@@ -20,7 +20,7 @@ import {
     subscribeNotificationCenterState
 } from "./centerRuntime";
 
-import "./center.css";
+import "../themes/default/notifications.css";
 
 const CENTER_QUERY_LIMIT = 300;
 const EVENT_SETTLE_DELAY_MS = 160;

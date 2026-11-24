@@ -87,46 +87,6 @@ function stripJsComments(source) {
     return out;
 }
 
-const THEME_STRUCTURAL_PROPERTIES = new Set([
-    "display", "position", "width", "min-width", "max-width", "height", "min-height", "max-height",
-    "padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "padding-inline",
-    "margin", "margin-top", "margin-right", "margin-bottom", "margin-left",
-    "gap", "row-gap", "column-gap", "align-items", "align-self", "align-content",
-    "justify-content", "justify-items", "justify-self",
-    "flex", "flex-grow", "flex-shrink", "flex-basis", "flex-direction", "flex-wrap", "order",
-    "grid", "grid-template-columns", "grid-template-rows", "grid-column", "grid-row",
-    "grid-auto-flow", "grid-auto-columns", "grid-auto-rows",
-    "top", "right", "bottom", "left", "inset", "overflow", "overflow-x", "overflow-y",
-    "box-sizing", "z-index", "pointer-events", "object-fit", "object-position",
-    "white-space", "text-overflow",
-    "transform", "visibility", "touch-action", "user-select", "x", "y",
-    "content", "cursor", "appearance"
-]);
-
-const SIMPLE_COLOR = "(?:#[0-9a-fA-F]{3,8}\\b|rgba?\\([^()]*\\)|hsla?\\([^()]*\\)|white\\b|black\\b)";
-const VAR_FALLBACK_COLOR = new RegExp("(var\\(\\s*--(?!quest-ui-)[A-Za-z0-9_-]+\\s*,\\s*)" + SIMPLE_COLOR + "(\\s*\\))", "gi");
-
-function maskSimpleVarFallbackColors(source) {
-    let current = source;
-    while (true) {
-        const next = current.replace(VAR_FALLBACK_COLOR, "$1QUESTUI_ALLOWED_FALLBACK$2");
-        if (next === current) return current;
-        current = next;
-    }
-}
-
-function visualLiteralMatches(source) {
-    const clean = maskSimpleVarFallbackColors(maskCssComments(source));
-    const pattern = /#[0-9a-fA-F]{3,8}\b|rgba?\s*\(|hsla?\s*\(|(^|[^A-Za-z0-9_-])(white|black)(?=$|[^A-Za-z0-9_-])/gim;
-    const hits = [];
-    let match;
-    while ((match = pattern.exec(clean))) {
-        const index = match.index + (match[1]?.length ?? 0);
-        hits.push({ index, line: lineAt(clean, index), value: match[2] ?? match[0].trim() });
-    }
-    return hits;
-}
-
 function splitSelectorList(selector) {
     const parts = [];
     let start = 0;
@@ -159,10 +119,6 @@ function splitSelectorList(selector) {
     }
     parts.push(selector.slice(start).trim());
     return parts.filter(Boolean);
-}
-
-function isNamedThemeSelector(selector) {
-    return /\.quest-ui-theme-[A-Za-z0-9_-]+/.test(selector);
 }
 
 function parseDeclarations(source, masked, start, end) {
@@ -318,38 +274,73 @@ function parseCssRules(source) {
 
 function shadowedDeclarations(source) {
     const rules = parseCssRules(source);
-    const groups = new Map();
-
-    for (const rule of rules) {
-        const key = rule.context + "@@" + rule.selector;
-        const group = groups.get(key) ?? [];
-        group.push(rule);
-        groups.set(key, group);
-    }
-
+    const later = new Map();
     const shadowed = [];
-    for (const group of groups.values()) {
-        for (let i = 0; i < group.length - 1; i++) {
-            for (const declaration of group[i].declarations) {
-                if (declaration.property.startsWith("--")) continue;
-                for (let j = i + 1; j < group.length; j++) {
-                    const later = [...group[j].declarations].reverse().find(candidate =>
-                        candidate.property === declaration.property
-                    );
-                    if (later && (!declaration.important || later.important)) {
-                        shadowed.push({
-                            line: group[i].line,
-                            selector: group[i].selector,
-                            property: declaration.property,
-                            context: group[i].context || "top-level"
-                        });
-                        break;
-                    }
+    const key = (rule, selector, property) => JSON.stringify([rule.context, selector, property]);
+
+    // A grouped declaration is redundant only when every selector arm has
+    // a later winner in the same conditional context.
+    for (let i = rules.length - 1; i >= 0; i--) {
+        const rule = rules[i];
+        const selectors = splitSelectorList(rule.selector);
+        const exactDeclarations = new Set();
+
+        for (const declaration of rule.declarations) {
+            const signature = JSON.stringify([declaration.property, declaration.value]);
+            const duplicate = exactDeclarations.has(signature);
+            exactDeclarations.add(signature);
+            const fullyShadowed = selectors.length > 0 && selectors.every(selector => {
+                const winner = later.get(key(rule, selector, declaration.property));
+                return winner && (!declaration.important || winner.important);
+            });
+            if (duplicate || fullyShadowed) {
+                shadowed.push({
+                    line: rule.line,
+                    selector: rule.selector,
+                    property: declaration.property,
+                    context: rule.context || "top-level"
+                });
+            }
+        }
+
+        // Preserve intentional syntax fallbacks within one rule.
+        for (const declaration of rule.declarations) {
+            for (const selector of selectors) {
+                const id = key(rule, selector, declaration.property);
+                const winner = later.get(id);
+                if (!winner || (declaration.important && !winner.important)) {
+                    later.set(id, declaration);
                 }
             }
         }
     }
-    return shadowed;
+    return shadowed.reverse();
+}
+
+// Ownership is checked independently of import order, within one theme.
+// Keep same-context overrides and syntax fallbacks in the same owner stylesheet.
+// Distinct selectors and conditional contexts remain independent.
+function crossFileDeclarationOwners(stylesheets) {
+    const owners = new Map();
+    for (const { file, source } of stylesheets) {
+        for (const rule of parseCssRules(source)) {
+            for (const selector of splitSelectorList(rule.selector)) {
+                for (const declaration of rule.declarations) {
+                    const property = declaration.property.startsWith("--")
+                        ? declaration.property
+                        : declaration.property.toLowerCase();
+                    const key = JSON.stringify([rule.context, selector, property]);
+                    let entry = owners.get(key);
+                    if (!entry) {
+                        entry = { context: rule.context, selector, property, locations: new Map() };
+                        owners.set(key, entry);
+                    }
+                    if (!entry.locations.has(file)) entry.locations.set(file, rule.line);
+                }
+            }
+        }
+    }
+    return [...owners.values()].filter(entry => entry.locations.size > 1);
 }
 
 function emptyRules(source) {
@@ -487,21 +478,8 @@ function validateRepository() {
         const source = fs.readFileSync(file, "utf8");
         const rel = relative(file);
 
-        if (!rel.startsWith("src/themes/")) {
-            for (const hit of visualLiteralMatches(source)) {
-                failures.push(`${rel}:${hit.line}: component CSS owns raw color ${hit.value}`);
-            }
-        } else {
-            for (const rule of parseCssRules(source)) {
-                const selectorParts = splitSelectorList(rule.selector);
-                if (selectorParts.length > 0 && selectorParts.every(isNamedThemeSelector)) continue;
-                for (const declaration of rule.declarations) {
-                    if (visualLiteralMatches(declaration.value).length === 0) continue;
-                    failures.push(
-                        `${rel}:${rule.line}: raw theme color outside named theme in ${rule.selector} (${declaration.property})`
-                    );
-                }
-            }
+        if (!/^src\/themes\/[^/]+\/.+\.css$/.test(rel)) {
+            failures.push(`${rel}: stylesheet must belong to a self-contained theme folder`);
         }
 
         for (const hit of emptyRules(source)) {
@@ -525,17 +503,7 @@ function validateRepository() {
             }
         }
 
-        if (rel.startsWith("src/themes/")) {
-            for (const rule of parseCssRules(source)) {
-                if (!splitSelectorList(rule.selector).some(isNamedThemeSelector)) continue;
-                for (const declaration of rule.declarations) {
-                    if (!THEME_STRUCTURAL_PROPERTIES.has(declaration.property)) continue;
-                    failures.push(
-                        `${rel}:${rule.line}: named theme owns shared geometry ${declaration.property} in ${rule.selector}`
-                    );
-                }
-            }
-        }
+
     }
 
     const inlineColorPattern = /#[0-9a-fA-F]{3,8}\b|rgba?\s*\(|hsla?\s*\(/g;
@@ -555,44 +523,44 @@ function validateRepository() {
     for (const file of sourceFiles) {
         if (relative(file) === "src/themes/runtime.ts") continue;
         const source = stripJsComments(fs.readFileSync(file, "utf8"));
-        if (/\bquest-ui-theme(?:-default)?\b/.test(source)) {
+        if (/\bquest-ui-theme(?:-[A-Za-z0-9_-]+)?\b/.test(source)) {
             failures.push(`${relative(file)}: theme root classes must be applied through dashboardThemeClassName()`);
         }
     }
 
-    const { definitions, uses, edges } = collectTokenGraph(cssFiles, sourceFiles);
-    const canonicalTokenFile = "src/themes/default/tokens.css";
-    const canonicalTokens = new Set(
-        [...definitions.entries()]
-            .filter(([, locations]) => locations.some(location => location.file === canonicalTokenFile))
-            .map(([token]) => token)
-    );
-    for (const [token, locations] of definitions) {
-        if (!canonicalTokens.has(token)) continue;
-        for (const location of locations) {
-            if (location.file === canonicalTokenFile) continue;
-            if (/^src\/themes\/[^/]+\/tokens\.css$/.test(location.file)) continue;
-            failures.push(
-                `${location.file}:${location.line}: canonical theme token ${token} must only be overridden by a theme tokens.css`
-            );
+    // Validate each theme independently: a token from another theme cannot hide a missing definition.
+    const themeGroups = new Map();
+    for (const file of cssFiles) {
+        const match = /^src\/themes\/([^/]+)\//.exec(relative(file));
+        if (!match) continue;
+        const files = themeGroups.get(match[1]) ?? [];
+        files.push(file);
+        themeGroups.set(match[1], files);
+    }
+    let tokenCount = 0;
+    for (const [theme, files] of themeGroups) {
+        const stylesheets = files.map(file => ({ file: relative(file), source: fs.readFileSync(file, "utf8") }));
+        for (const hit of crossFileDeclarationOwners(stylesheets)) {
+            const locations = [...hit.locations].map(([file, line]) => `${file}:${line}`).join(", ");
+            failures.push(`${theme}: cross-file declaration ownership for ${hit.property} in ${hit.selector} [${hit.context || "top-level"}]: ${locations}`);
         }
-    }
-
-    for (const cycle of customPropertyCycles(edges)) {
-        if (cycle.length <= 2) continue; // direct self-cycles are reported with selector context above.
-        failures.push(`indirect custom-property cycle ${cycle.join(" -> ")}`);
-    }
-
-    for (const [token, locations] of uses) {
-        if (definitions.has(token)) continue;
-        for (const location of locations) {
-            failures.push(`${location.file}:${location.line}: undefined QuestUI token ${token}`);
+        const { definitions, uses, edges } = collectTokenGraph(files, sourceFiles);
+        tokenCount += definitions.size;
+        for (const cycle of customPropertyCycles(edges)) {
+            if (cycle.length <= 2) continue;
+            failures.push(`${theme}: indirect custom-property cycle ${cycle.join(" -> ")}`);
         }
-    }
-    for (const [token, locations] of definitions) {
-        if (uses.has(token)) continue;
-        for (const location of locations) {
-            failures.push(`${location.file}:${location.line}: unused QuestUI token ${token}`);
+        for (const [token, locations] of uses) {
+            if (definitions.has(token)) continue;
+            for (const location of locations) {
+                failures.push(`${location.file}:${location.line}: undefined QuestUI token ${token} in theme ${theme}`);
+            }
+        }
+        for (const [token, locations] of definitions) {
+            if (uses.has(token)) continue;
+            for (const location of locations) {
+                failures.push(`${location.file}:${location.line}: unused QuestUI token ${token} in theme ${theme}`);
+            }
         }
     }
 
@@ -602,33 +570,23 @@ function validateRepository() {
         process.exit(1);
     }
 
-    console.log(`QuestUI theme contract OK: ${cssFiles.length} CSS files, ${sourceFiles.length} TS/TSX files, ${definitions.size} QuestUI tokens.`);
+    console.log(`QuestUI theme contract OK: ${cssFiles.length} CSS files, ${sourceFiles.length} TS/TSX files, ${tokenCount} QuestUI tokens across ${themeGroups.size} theme(s).`);
 }
 
 function selfTest() {
-    const fallbackOnly = ".x { color: var(--text-default, #fff); background: var(--surface, rgba(1, 2, 3, .5)); }";
-    if (visualLiteralMatches(fallbackOnly).length !== 0) throw new Error("self-test: host var fallbacks must be allowed");
-
-    const questFallback = ".x { color: var(--quest-ui-test, #fff); }";
-    if (visualLiteralMatches(questFallback).length !== 1) throw new Error("self-test: QuestUI token color fallbacks must be rejected");
-
-    const raw = ".x { color: #fff; background: rgba(1, 2, 3, .5); }";
-    if (visualLiteralMatches(raw).length !== 2) throw new Error("self-test: raw component colors must be detected");
-
-    const named = ".x { color: white; white-space: nowrap; }";
-    if (visualLiteralMatches(named).length !== 1) throw new Error("self-test: named colors must not confuse white-space");
-
-    const themeScoped = ".quest-ui-theme-default .x { color: #fff; }";
-    const themeShared = ".quest-ui-theme .x { color: #fff; }";
-    if (!/\.quest-ui-theme-[A-Za-z0-9_-]+/.test(parseCssRules(themeScoped)[0]?.selector ?? "")) {
-        throw new Error("self-test: named theme selectors must be recognized");
-    }
-    if (/\.quest-ui-theme-[A-Za-z0-9_-]+/.test(parseCssRules(themeShared)[0]?.selector ?? "")) {
-        throw new Error("self-test: shared theme root must not count as a named theme");
-    }
-
     const shadowed = ".x { width: 10px; }\n.x { width: 12px; }";
     if (shadowedDeclarations(shadowed).length !== 1) throw new Error("self-test: later identical selector must shadow earlier declaration");
+
+    const grouped = ".x, .y { width: 10px; }\n.x { width: 12px; }\n.y { width: 14px; }";
+    if (shadowedDeclarations(grouped).length !== 1) throw new Error("self-test: every selector-list arm can be shadowed independently");
+    const partial = ".x, .y { width: 10px; }\n.x { width: 12px; }";
+    if (shadowedDeclarations(partial).length !== 0) throw new Error("self-test: live selector-list arms must remain allowed");
+    const custom = ".x { --quest-ui-example: 1; }\n.x { --quest-ui-example: 2; }";
+    if (shadowedDeclarations(custom).length !== 1) throw new Error("self-test: duplicate custom properties must be detected");
+    const duplicate = ".x { width: 10px; width: 10px; }";
+    if (shadowedDeclarations(duplicate).length !== 1) throw new Error("self-test: identical declarations inside one rule must be detected");
+    const fallback = ".x { display: block; display: grid; }";
+    if (shadowedDeclarations(fallback).length !== 0) throw new Error("self-test: distinct within-rule fallbacks must stay allowed");
 
     const protectedImportant = ".x { width: 10px !important; }\n.x { width: 12px; }";
     if (shadowedDeclarations(protectedImportant).length !== 0) throw new Error("self-test: normal declaration must not shadow earlier !important");
@@ -666,12 +624,30 @@ function selfTest() {
     }
 
     const selectorList = splitSelectorList(".quest-ui-theme-default .a, .unscoped:is(.b, .c)");
-    if (selectorList.length !== 2 || selectorList.every(isNamedThemeSelector)) {
+    if (selectorList.length !== 2 || selectorList[1] !== ".unscoped:is(.b, .c)") {
         throw new Error("self-test: mixed selector lists must preserve unscoped selectors");
     }
 
-    if (!THEME_STRUCTURAL_PROPERTIES.has("grid-template-columns") || THEME_STRUCTURAL_PROPERTIES.has("color")) {
-        throw new Error("self-test: theme geometry property classification drifted");
+
+    const acrossFiles = (...sources) => crossFileDeclarationOwners(sources.map((source, index) => ({ file: `theme/${index}.css`, source })));
+    const crossFileHits = acrossFiles(".x, .y { color: red; }", ".y { color: blue; }");
+    if (crossFileHits.length !== 1 || crossFileHits[0].selector !== ".y" || crossFileHits[0].locations.size !== 2) {
+        throw new Error("self-test: selector-list cross-file ownership must be detected");
+    }
+    if (acrossFiles(".x { width: 10px; }", ".x { width: 10px; }").length !== 1) {
+        throw new Error("self-test: identical cross-file declarations must be detected");
+    }
+    if (acrossFiles(".x { WIDTH: 10px !important; }", ".x { width: 20px; }").length !== 1) {
+        throw new Error("self-test: cross-file ownership must not depend on importance or property case");
+    }
+    if (acrossFiles(".x { display: block; display: grid; }", ".x:hover { display: flex; }", "@media (max-width: 500px) { .x { display: block; } }").length !== 0) {
+        throw new Error("self-test: in-file fallbacks, distinct selectors and conditional contexts must remain allowed");
+    }
+    if (acrossFiles(".x:is(.a, .b) { color: red; }", ".x:is(.a, .b), .z { color: blue; }").length !== 1) {
+        throw new Error("self-test: commas inside selector functions must not split ownership keys");
+    }
+    if (acrossFiles(".x { --quest-ui-A: 1; }", ".x { --quest-ui-a: 2; }").length !== 0) {
+        throw new Error("self-test: custom-property names must remain case-sensitive");
     }
 
     console.log("QuestUI theme contract verifier self-test OK.");

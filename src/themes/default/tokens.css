@@ -1,12 +1,11 @@
-/* Shared visual contract for the default QuestUI theme.
- * Shared .quest-ui-theme rules own geometry and behavior; named theme roots own visual values.
- * Future dashboard themes can override this contract without copying layout rules.
+/* Default theme palette and reusable values.
+ * Themes own their complete styles, including layout and interaction presentation.
+ * Tokens are an internal convenience, not a limit on theme design.
  */
 .quest-ui-theme-default {
     --quest-ui-theme-accent: #a970ff;
     --quest-ui-dashboard-border: color-mix(in srgb, var(--quest-ui-theme-accent) 24%, rgba(255, 255, 255, .08));
     --quest-ui-dashboard-base: #121216;
-    --quest-ui-dashboard-raised: #1a1a20;
     --quest-ui-dashboard-card: #19191e;
 
     --quest-ui-theme-panel: #111216;
@@ -46,8 +45,6 @@
     --quest-ui-theme-popout-shadow: rgba(0, 0, 0, .42);
     --quest-ui-dashboard-filter-shadow-rest: rgba(0, 0, 0, .24);
     --quest-ui-dashboard-filter-shadow-hover: rgba(0, 0, 0, .28);
-    --quest-ui-dashboard-filter-shadow-open: rgba(0, 0, 0, .30);
-    --quest-ui-dashboard-filter-shadow-active: rgba(0, 0, 0, .26);
 
     /* Update Center */
     --quest-ui-update-panel: #17171c;
@@ -119,7 +116,6 @@
     --quest-ui-event-storage-surface-base: #242129;
     --quest-ui-event-account-change: #f59e42;
     --quest-ui-event-choice-border: #666b75;
-    --quest-ui-event-choice-accent: #858cff;
     --quest-ui-event-filter-heading: #9ea2aa;
     --quest-ui-event-filter-text: #e3e5e8;
     --quest-ui-event-filter-error: #da373c;
@@ -141,6 +137,5 @@
     --quest-ui-event-text-muted: var(--text-muted, #949ba4);
     --quest-ui-event-text-muted-soft: var(--text-muted, #b5bac1);
     --quest-ui-event-interactive-normal: var(--interactive-normal, #b5bac1);
-
 
 }

@@ -24,7 +24,7 @@ import { claimQuestReward, hasPendingClaimAction, QuestActionError } from "./nat
 import { useQuestSnapshot } from "../data";
 import { QuestsStore } from "../../plugin/stores";
 
-import "./actions.css";
+import "../../themes/default/quest-actions.css";
 
 function currentUserId(): string | null {
     try {

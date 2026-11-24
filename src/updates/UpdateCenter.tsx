@@ -10,7 +10,7 @@ import { pushDashboardNotice } from "../dashboard/notifications";
 import { dashboardThemeClassName } from "../themes/runtime";
 import { versionChannelClass } from "./channel";
 
-import "./styles.css";
+import "../themes/default/update-center.css";
 
 function useUpdateSnapshot(): UpdateSnapshot {
     const [, setRevision] = useState(0);

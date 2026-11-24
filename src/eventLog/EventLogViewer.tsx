@@ -44,7 +44,7 @@ import {
 import { clearEventLog, getEventLogInfo, openEventLogFolder, subscribeEventLog } from "./runtime";
 import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort, EventLogSource } from "./types";
 
-import "./styles/eventLog.css";
+import "../themes/default/event-log.css";
 
 type EventLogStorageInfo = {
     path: string;

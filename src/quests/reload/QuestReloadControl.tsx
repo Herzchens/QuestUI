@@ -6,7 +6,7 @@ import { markQuestReloadSuccessful } from "./auto";
 import { reloadQuestList } from "./native";
 import { shouldFinishReloadSpin } from "./logic";
 
-import "./reload.css";
+import "../../themes/default/quest-reload.css";
 
 function ReloadIcon({ onIteration }: { onIteration: () => void; }) {
     return (

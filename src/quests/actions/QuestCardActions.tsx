@@ -23,7 +23,7 @@ import { getClaimAllRuntimeState } from "./claimAllState";
 import type { NormalizedQuest } from "../data";
 import settings from "../../plugin/settings";
 
-import "./actions.css";
+import "../../themes/default/quest-actions.css";
 
 type QuestAction = "enroll" | "claim";
 type SubmittedState = { action: QuestAction; userId: string; releaseAt: number; };

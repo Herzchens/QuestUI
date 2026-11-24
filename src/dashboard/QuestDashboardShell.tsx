@@ -17,7 +17,7 @@ import settings from "../plugin/settings";
 import { dashboardThemeClassName } from "../themes/runtime";
 import { UpdateCenterIndicator } from "../updates/UpdateCenter";
 
-import "../orion/styles/orion.css";
+import "../themes/default/orion.css";
 import "../themes/default/dashboard.css";
 
 const NativeQuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
