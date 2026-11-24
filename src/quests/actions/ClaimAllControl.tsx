@@ -4,6 +4,7 @@ import {
     buildClaimAllSnapshot,
     ClaimAllBatchStoppedError,
     runClaimAllBatch,
+    waitBetweenClaimAllRequests,
     type ClaimAllCurrentState
 } from "./claimAll";
 import {
@@ -22,6 +23,7 @@ import { useIgnoredQuests } from "../ignored/runtime";
 import { isQuestVerificationError } from "./responses";
 import { claimQuestReward, hasPendingClaimAction, QuestActionError } from "./native";
 import { useQuestSnapshot } from "../data";
+import { captureQuestEventRef } from "../presentation";
 import { QuestsStore } from "../../plugin/stores";
 
 import "../../themes/default/quest-actions.css";
@@ -77,7 +79,7 @@ export function ClaimAllControl() {
     const claimable = buildClaimAllSnapshot(eligibleQuests);
 
     const run = async () => {
-        if (!accountId) return;
+        if (!accountId || currentUserId() !== accountId) return;
 
         const snapshot = buildClaimAllSnapshot(eligibleQuests);
         if (snapshot.length === 0) return;
@@ -107,6 +109,7 @@ export function ClaimAllControl() {
             accountId
         });
 
+        const questRefs = new Map(snapshot.map(quest => [quest.id, captureQuestEventRef(quest, accountId)]));
         try {
             const result = await runClaimAllBatch(
                 snapshot,
@@ -115,18 +118,31 @@ export function ClaimAllControl() {
                     currentAccountId: currentUserId,
                     currentState: currentClaimState,
                     claim: claimQuestReward,
-                    shouldContinue: () => isClaimAllRuntimeGenerationActive(runtimeGeneration)
+                    waitBetweenClaims: waitBetweenClaimAllRequests,
+                    shouldContinue: () => isClaimAllRuntimeGenerationActive(runtimeGeneration),
+                    onConfirmed: quest => {
+                        void recordQuestUIEvent({
+                            severity: "success",
+                            eventCode: "QUEST_CLAIM_SUCCEEDED",
+                            summary: "Quest reward claimed",
+                            quest: questRefs.get(quest.id) ?? { id: quest.id, name: quest.name },
+                            detail: { storeConfirmed: true, claimMode: "batch" },
+                            accountId
+                        });
+                    }
                 },
                 progress => updateClaimAllRuntimeProgress(progress.position, runtimeGeneration)
             );
 
             if (!isClaimAllRuntimeGenerationActive(runtimeGeneration)) return;
 
-            pushDashboardNotice({
-                tone: "success",
-                text: "All rewards claimed",
-                duration: 2200
-            });
+            if (currentUserId() === accountId) {
+                pushDashboardNotice({
+                    tone: result.claimed > 0 ? "success" : "info",
+                    text: result.claimed > 0 ? "All rewards claimed" : "Rewards already claimed",
+                    duration: 2200
+                });
+            }
             void recordQuestUIEvent({
                 severity: "success",
                 eventCode: "QUEST_CLAIM_ALL_SUCCEEDED",
@@ -146,14 +162,14 @@ export function ClaimAllControl() {
                 : stopped?.message ?? (error instanceof Error ? error.message : "Claim all stopped unexpectedly.");
             const message = `Claim all stopped at ${at}/${total}: ${reason}`;
 
-            showToast({ text: message, variant: "critical", duration: 7000 });
+            if (currentUserId() === accountId) showToast({ text: message, variant: "critical", duration: 7000 });
             void recordQuestUIEvent({
                 severity: isVerification ? "warning" : "error",
                 eventCode: "QUEST_CLAIM_ALL_STOPPED",
                 summary: isVerification
                     ? "Claim all stopped for Discord verification"
                     : "Claim all stopped",
-                quest: stopped ? { id: stopped.quest.id, name: stopped.quest.name, taskType: null } : undefined,
+                quest: stopped ? questRefs.get(stopped.quest.id) ?? { id: stopped.quest.id, name: stopped.quest.name } : undefined,
                 detail: {
                     message: reason,
                     total,

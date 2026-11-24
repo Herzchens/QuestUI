@@ -77,7 +77,7 @@ Prefer `taskConfigV2` over legacy `taskConfig`; do not merge both into duplicate
 ## Manual Accept / Claim
 
 - Mutation requires explicit QuestUI user authorization. One **Claim all** click may authorize only the fixed same-account snapshot of currently Ready, non-ignored Quest IDs captured by that click.
-- Claim all must process that snapshot strictly one at a time, re-read QuestStore before every claim, advance only after store confirmation, and never append newly claimable Quests.
+- Claim all must process that snapshot strictly one at a time, re-read QuestStore before every claim, advance only after store confirmation, pause 1-3 seconds between consecutive native claims, revalidate account/batch/Quest state after the pause, and never append newly claimable Quests.
 - Keep the header **Claim All N** control immediately after Stop and before Reload. It stays visible, is disabled at `N = 0`, and is actionable from one non-ignored Ready reward onward.
 - Stop on account change, CAPTCHA/verification, changed/unavailable Quest state, native failure, or ambiguous/submitted-only outcomes. Do not auto-retry or continue past uncertainty.
 - Acquire a module-global Claim all lock synchronously before async work so rapid double-clicks, stale per-card click events, and Dashboard close/reopen cannot create overlapping batches. Refuse Claim all while a same-account per-card claim is in-flight/held, and re-check the global batch lock inside the card Claim handler as well as disabling the button.
@@ -177,8 +177,8 @@ QuestUI notification delivery stays local-first through Vencord's Notifications 
 - Treat the Center as an account-scoped Dashboard inbox backed by sanitized Event Log events, not as a second event database.
 - Persist only Center presentation state (initialization/read-through/clear-through) per account; clearing the Center must not clear Event Log.
 - Account switches must change both the visible feed and read/clear state without leaking another account's inbox.
-- Keep the whitelist intentionally narrower than Event Log: user-facing new-Quest, successful Accept/Claim/Claim All outcomes, and actionable failure/verification states belong; routine lifecycle, progress/completion, updater, retry, and generic runtime noise do not.
-- Quest artwork/task badges are optional presentation and must fail safely when the live Quest cannot be resolved.
+- Keep the whitelist intentionally narrower than Event Log: user-facing new-Quest, individual confirmed Accept/Claim outcomes, including partial Claim All results, and actionable failure/verification states belong; routine lifecycle, progress/completion, updater, retry, and generic runtime noise do not.
+- Claim All aggregate results remain diagnostic-only; never create a success row for a skipped or unconfirmed reward. Preserve bounded, sanitized reward labels and public Discord Quest artwork when available, with safe fallbacks.
 
 ## Dashboard presentation
 

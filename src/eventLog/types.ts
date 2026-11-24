@@ -9,6 +9,9 @@ export interface EventLogQuestRef {
     id?: string | null;
     name?: string | null;
     taskType?: string | null;
+    rewardLabel?: string;
+    artworkDark?: string;
+    artworkLight?: string;
 }
 
 export interface EventLogDetail {

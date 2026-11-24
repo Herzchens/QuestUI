@@ -10,6 +10,8 @@ import {
     type RewardKind
 } from "./rewardFilters";
 import { sameQuestShortcutSnapshot } from "./shortcut";
+import { findQuestByIdentity, taskTypeForKey } from "./presentationLogic";
+import type { EventLogQuestRef } from "../eventLog/types";
 import { QuestsStore } from "../plugin/stores";
 
 export type QuestStatus = "available" | "in-progress" | "claimable" | "claimed" | "expired";
@@ -278,15 +280,6 @@ function rewardInfo(quest: any): NormalizedReward {
     return { kind: "unknown", kinds, label: names.join(" + ") || "Unknown reward", orbQuantity: 0, boostedOrbQuantity: 0 };
 }
 
-function taskTypeForKey(key: string): QuestTaskType {
-    if (key === "ACHIEVEMENT_IN_ACTIVITY" || key === "ACHIEVEMENT_IN_GAME" || key === "PLAY_ACTIVITY") return "activity";
-    if (key.startsWith("STREAM")) return "stream";
-    if (key.includes("VIDEO")) return "video";
-    if (key.startsWith("PLAY")) return "play";
-    if (key.includes("ACTIVITY") || key.includes("ACHIEVEMENT")) return "activity";
-    return "other";
-}
-
 function taskEntries(tasks: any): Array<[string, any]> {
     if (!tasks) return [];
     if (tasks instanceof Map) return Array.from(tasks.entries());
@@ -471,6 +464,19 @@ function normalizeQuest(quest: any, now: number): NormalizedQuest {
         applicationId: primaryTask?.applicationId ?? fallbackApplicationId,
         rawQuest: quest
     };
+}
+
+export function readQuestByIdentity(identity: Pick<EventLogQuestRef, "id" | "name">): NormalizedQuest | null {
+    const candidates = rawQuests().map(rawQuest => {
+        const id = String(rawQuest?.id ?? rawQuest?.config?.id ?? "");
+        const name = String(rawQuest?.config?.messages?.questName
+            ?? rawQuest?.config?.application?.name
+            ?? rawQuest?.config?.messages?.gameTitle
+            ?? (id ? `Quest ${id}` : ""));
+        return { id, name, rawQuest };
+    });
+    const matched = findQuestByIdentity(identity, candidates);
+    return matched ? normalizeQuest(matched.rawQuest, Date.now()) : null;
 }
 
 function readSnapshot(): NormalizedQuest[] {

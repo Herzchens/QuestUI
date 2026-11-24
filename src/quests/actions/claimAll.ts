@@ -23,6 +23,19 @@ export interface ClaimAllBatchRuntime<T extends ClaimAllQuestLike> {
     currentState(questId: string): ClaimAllCurrentState;
     claim(quest: T): Promise<{ storeConfirmed: boolean; }>;
     shouldContinue?(): boolean;
+    onConfirmed?(quest: T): void;
+    waitBetweenClaims?(): Promise<void>;
+}
+
+const CLAIM_ALL_MIN_DELAY_MS = 1000;
+const CLAIM_ALL_MAX_DELAY_MS = 3000;
+
+export function claimAllDelayMs(random = Math.random): number {
+    return CLAIM_ALL_MIN_DELAY_MS + Math.floor(random() * (CLAIM_ALL_MAX_DELAY_MS - CLAIM_ALL_MIN_DELAY_MS + 1));
+}
+
+export function waitBetweenClaimAllRequests(): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, claimAllDelayMs()));
 }
 
 export class ClaimAllBatchStoppedError<T extends ClaimAllQuestLike = ClaimAllQuestLike> extends Error {
@@ -61,6 +74,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
     const total = quests.length;
     let claimed = 0;
     let skipped = 0;
+    let needsPacing = false;
 
     for (let index = 0; index < quests.length; index++) {
         const quest = quests[index];
@@ -85,7 +99,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
             );
         }
 
-        const state = runtime.currentState(quest.id);
+        let state = runtime.currentState(quest.id);
         if (state === "claimed") {
             skipped++;
             continue;
@@ -97,6 +111,42 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
                 position,
                 quest
             );
+        }
+
+        // Pace native requests, not skipped snapshot entries. Never wait before
+        // the first request or after the final request. Revalidate after the await.
+        if (needsPacing && runtime.waitBetweenClaims) {
+            await runtime.waitBetweenClaims();
+            needsPacing = false;
+            if (runtime.shouldContinue?.() === false) {
+                throw new ClaimAllBatchStoppedError(
+                    "Claim all was cancelled before the next reward claim.",
+                    result(),
+                    position,
+                    quest
+                );
+            }
+            if (runtime.currentAccountId() !== expectedAccountId) {
+                throw new ClaimAllBatchStoppedError(
+                    "Discord account changed while Claim all was running.",
+                    result(),
+                    position,
+                    quest
+                );
+            }
+            state = runtime.currentState(quest.id);
+            if (state === "claimed") {
+                skipped++;
+                continue;
+            }
+            if (state !== "claimable") {
+                throw new ClaimAllBatchStoppedError(
+                    "This Quest is no longer ready to claim.",
+                    result(),
+                    position,
+                    quest
+                );
+            }
         }
 
         onProgress?.({
@@ -111,6 +161,15 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
         if (runtime.currentAccountId() !== expectedAccountId) {
             throw new ClaimAllBatchStoppedError(
                 "Discord account changed while Claim all was running.",
+                result(),
+                position,
+                quest
+            );
+        }
+
+        if (runtime.shouldContinue?.() === false) {
+            throw new ClaimAllBatchStoppedError(
+                "Claim all was cancelled before the next reward claim.",
                 result(),
                 position,
                 quest
@@ -149,6 +208,16 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
                 quest
             );
         }
+        if (runtime.currentAccountId() !== expectedAccountId) {
+            throw new ClaimAllBatchStoppedError(
+                "Discord account changed while Claim all was running.",
+                result(),
+                position,
+                quest
+            );
+        }
+        runtime.onConfirmed?.(quest);
+        needsPacing = true;
     }
 
     return { total, claimed, skipped };

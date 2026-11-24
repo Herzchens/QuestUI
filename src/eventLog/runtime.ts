@@ -17,7 +17,8 @@ import type {
     EventLogQuery,
     EventLogQueryResult,
     EventLogSource,
-    EventLogSeverity
+    EventLogSeverity,
+    EventLogQuestRef
 } from "./types";
 import { getOrionEventCapabilitySource } from "../orion/capabilities";
 import {
@@ -27,6 +28,10 @@ import {
     type OrionConsoleShadowCandidate
 } from "../orion/events";
 import { getOrionIntegrationHealth } from "../orion/integration";
+import { notificationCenterPresentation } from "../notifications/centerLogic";
+import { readQuestByIdentity } from "../quests/data";
+import { captureQuestEventRef } from "../quests/presentation";
+import { normalizeQuestPresentationMetadata } from "../quests/presentationLogic";
 
 const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>
@@ -105,7 +110,7 @@ export async function recordQuestUIEvent(input: {
     category?: EventLogCategory;
     eventCode: string;
     summary: string;
-    quest?: { id?: string | null; name?: string | null; taskType?: string | null; } | null;
+    quest?: EventLogQuestRef | null;
     detail?: Record<string, unknown> | null;
     captureSource?: EventLogEvent["captureSource"];
     timestamp?: number;
@@ -142,10 +147,29 @@ export async function recordQuestUIEvent(input: {
         quest: input.quest ? {
             id: input.quest.id ? sanitizeEventText(input.quest.id, 120) : null,
             name: input.quest.name ? sanitizeEventText(input.quest.name, 240) : null,
-            taskType: input.quest.taskType ? sanitizeEventText(input.quest.taskType, 120) : null
+            taskType: input.quest.taskType ? sanitizeEventText(input.quest.taskType, 120) : null,
+            ...normalizeQuestPresentationMetadata({ ...input.quest })
         } : null,
         detail: sanitizeDetail(input.detail)
     };
+
+    // Enrich only Center-eligible Quest events, and never consult another account's
+    // current QuestStore for a delayed event. Existing action-time metadata wins.
+    if (event.quest && accountId && accountId === currentAccountId && notificationCenterPresentation(event)
+        && (!event.quest.rewardLabel || !event.quest.artworkDark || !event.quest.artworkLight)) {
+        try {
+            const quest = readQuestByIdentity(event.quest);
+            if (quest) {
+                const snapshot = captureQuestEventRef(quest, accountId);
+                event.quest = {
+                    ...normalizeQuestPresentationMetadata({ ...snapshot, ...event.quest }),
+                    id: event.quest.id ?? snapshot.id,
+                    name: event.quest.name ?? snapshot.name,
+                    taskType: event.quest.taskType ?? snapshot.taskType
+                };
+            }
+        } catch { }
+    }
 
     memoryEvents.unshift(event);
     if (memoryEvents.length > 1000) memoryEvents.length = 1000;

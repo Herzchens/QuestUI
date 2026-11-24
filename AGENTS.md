@@ -71,6 +71,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAll.ts`, `src/quests/actions/claimAllState.ts` - bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
 - `src/quests/actions/native.ts` - manual Enroll/Claim orchestration delegating to Discord native actions.
 - `src/quests/data.ts` - normalization/filtering/sorting and live read-only QuestStore snapshot source.
+- `src/quests/presentation.ts`, `src/quests/presentationLogic.ts` - shared native artwork, safe historical presentation metadata and exact/unique Quest identity resolution.
 - `src/quests/rewardFilters.ts` - v1.6 reward preset/detail normalization and legacy reward-filter migration helpers.
 - `src/quests/reload/native.ts`, `src/quests/reload/logic.ts`, `src/quests/reload/QuestReloadControl.tsx` - native current-Quest refresh and whole-rotation spinner state.
 - `src/quests/reload/auto.ts`, `src/quests/reload/autoLogic.ts` - background native Quest-list refresh lifecycle plus persisted freshness scheduling. It runs independently of Dashboard visibility and reuses the same Discord-native fetch path so existing QuestStore notifications remain authoritative.
@@ -164,7 +165,7 @@ Do not install packages from inside QuestUI. Never claim hosted CI passed withou
 ## Manual Accept / Claim invariants
 
 - Every mutation requires explicit user authorization. A single **Claim all** click may authorize only the fixed same-account snapshot of currently Ready, non-ignored Quest IDs captured at that click; never append a Quest that becomes claimable later without another click.
-- Claim all is strictly sequential: re-read QuestStore before each claim and advance only after the previous Quest is store-confirmed claimed. Already-claimed snapshot members may be skipped.
+- Claim all is strictly sequential: re-read QuestStore before each claim and advance only after the previous Quest is store-confirmed claimed. Already-claimed snapshot members may be skipped. Pause 1-3 seconds between consecutive native claim requests; do not pause before the first or after the final request. Revalidate generation, account and QuestStore state after the pause.
 - Keep the header **Claim All N** control immediately after Stop and before Reload. It stays visible, is disabled at `N = 0`, and is actionable from one non-ignored Ready reward onward.
 - Stop the batch on account change, verification/CAPTCHA, unavailable/changed Quest state, native failure, or submitted/uncertain store outcome. Never solve/bypass a challenge and never auto-retry or continue past uncertainty.
 - Acquire a module-global Claim all lock synchronously before starting async work so rapid double-clicks, stale per-card click events, and Dashboard close/reopen cannot create overlapping batches. Refuse Claim all while any same-account per-card claim is in-flight or held after an ambiguous submission; while Claim all is active, both disable per-card Claim buttons and re-check the global lock inside the card handler.
@@ -291,8 +292,9 @@ Feedback channel is purpose-specific, not toast-only. Short-lived successful act
 - Reuse sanitized Event Log events as the Center's event source of truth. Persist only account-scoped presentation state such as initialization, read-through, and clear-through markers.
 - Clearing the Notification Center must not delete or rewrite Event Log history.
 - First initialization and account switching establish a baseline; an account must never inherit another account's unread/read/clear state or feed.
-- Keep the Center whitelist focused on user-facing Quest availability, successful Accept/Claim outcomes, Claim All completion, and actionable failures/verification states. Do not expand it into Orion lifecycle chatter, progress/completion noise, updater chatter, retry diagnostics, or generic runtime logs.
-- Quest artwork/task badges are presentation-only and may fall back safely when a live Quest cannot be resolved.
+- Keep the Center whitelist focused on user-facing Quest availability, confirmed Accept/Claim outcomes (one row per confirmed Quest, including partial Claim All results), and actionable failures/verification states. Do not expand it into Orion lifecycle chatter, progress/completion noise, updater chatter, retry diagnostics, or generic runtime logs.
+- Claim All aggregate completion is diagnostic-only. Skipped and unconfirmed submissions must never produce a success row. Bind asynchronous action events to the initiating account.
+- Quest artwork/task badges are presentation-only. Persist bounded reward display labels and validated public Discord Quest artwork URLs in the existing Event Log Quest reference; never store raw Quest objects, reward code values, credentials, or URL query parameters. Resolve exact Quest IDs, using a unique name only for name-only legacy events. Historical reward labels win over current labels; safe artwork fallbacks are allowed.
 - The bell unread indicator reflects unread Center state for the current account; visual state must not mutate Event Log events.
 
 ## Event Log invariants

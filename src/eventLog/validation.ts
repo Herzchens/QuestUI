@@ -1,3 +1,4 @@
+import { normalizeQuestPresentationMetadata } from "../quests/presentationLogic";
 import type { EventLogCaptureSource, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSource } from "./types";
 
 const EVENT_SOURCES = new Set<EventLogSource>(["orion", "questui"]);
@@ -53,7 +54,8 @@ export function normalizePersistedEvent(value: unknown): EventLogEvent | null {
         quest = {
             id: optionalString(rawQuest.id),
             name: optionalString(rawQuest.name),
-            taskType: optionalString(rawQuest.taskType)
+            taskType: optionalString(rawQuest.taskType),
+            ...normalizeQuestPresentationMetadata(rawQuest)
         };
     }
 

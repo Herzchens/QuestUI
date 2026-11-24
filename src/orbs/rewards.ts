@@ -34,3 +34,12 @@ export function effectiveOrbRewardAmount(
 ): number {
     return receivesBoost && amounts.boosted > amounts.base ? amounts.boosted : amounts.base;
 }
+
+export function formatQuestRewardLabel(
+    reward: { kind: string; label: string; orbQuantity: number; boostedOrbQuantity: number; },
+    receivesBoost: boolean
+): string {
+    if (reward.kind !== "orbs") return reward.label;
+    const amount = effectiveOrbRewardAmount({ base: reward.orbQuantity, boosted: reward.boostedOrbQuantity }, receivesBoost);
+    return amount > 0 ? `${Math.round(amount)} Orbs` : reward.label;
+}

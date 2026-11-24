@@ -119,7 +119,8 @@ function normalizedCode(value: unknown): string {
 
 function eventDescription(event: EventLogEvent): string {
     const detailMessage = typeof event.detail?.message === "string" ? event.detail.message.trim() : "";
-    return detailMessage || String(event.summary ?? "");
+    const reason = typeof event.detail?.reason === "string" ? event.detail.reason.trim() : "";
+    return detailMessage || reason || String(event.summary ?? "");
 }
 
 export function notificationCenterPresentation(event: EventLogEvent): {
@@ -144,6 +145,7 @@ export function notificationCenterPresentation(event: EventLogEvent): {
     }
 
     if (code === "QUEST_ACCEPT_SUCCEEDED") {
+        if (event.detail?.storeConfirmed === false) return null;
         return {
             title: "Quest accepted",
             description: String(event.summary ?? ""),
@@ -153,6 +155,7 @@ export function notificationCenterPresentation(event: EventLogEvent): {
     }
 
     if (code === "QUEST_CLAIM_SUCCEEDED" || code === "ORION_CLAIM_SUCCEEDED" || code === "CLAIM_SUCCEEDED") {
+        if (event.detail?.storeConfirmed === false) return null;
         return {
             title: "Reward claimed",
             description: String(event.summary ?? ""),
@@ -161,14 +164,8 @@ export function notificationCenterPresentation(event: EventLogEvent): {
         };
     }
 
-    if (code === "QUEST_CLAIM_ALL_SUCCEEDED") {
-        return {
-            title: "Rewards claimed",
-            description: String(event.summary ?? ""),
-            kind: "reward",
-            tone: "success"
-        };
-    }
+    // Batch summaries stay in Event Log; confirmed rewards own their Center rows.
+    if (code === "QUEST_CLAIM_ALL_SUCCEEDED") return null;
 
     if (code === "QUEST_ACCEPT_FAILED") {
         return {
@@ -197,7 +194,7 @@ export function notificationCenterPresentation(event: EventLogEvent): {
         };
     }
 
-    if (code === "ORION_TASK_FAILED" || code === "TASK_FAILED") {
+    if (code === "ORION_TASK_FAILED" || code === "TASK_FAILED" || code === "ORION_TASK_ABORTED" || code === "ORION_HEARTBEAT_TIMEOUT") {
         return {
             title: "Quest failed",
             description: eventDescription(event),
@@ -274,4 +271,22 @@ export function notificationCenterItems(
 
 export function unreadNotificationCenterCount(items: readonly NotificationCenterItem[]): number {
     return items.reduce((count, item) => count + Number(!item.read), 0);
+}
+
+export function notificationQuestMeta(
+    item: NotificationCenterItem,
+    liveQuest: { name: string; rewardLabel: string; } | null
+): string {
+    const parts: string[] = [];
+    const name = item.questName || liveQuest?.name;
+    if (name) parts.push(name);
+    const rewardLabel = item.event.quest?.rewardLabel || liveQuest?.rewardLabel;
+    if (rewardLabel) parts.push(`Reward: ${rewardLabel}`);
+    if (parts.length === 0) {
+        const description = item.description.trim();
+        parts.push(item.kind !== "problem" && description && description.toLocaleLowerCase() !== item.title.toLocaleLowerCase()
+            ? description
+            : item.source);
+    }
+    return parts.join(" · ");
 }

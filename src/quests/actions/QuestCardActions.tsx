@@ -21,6 +21,7 @@ import {
 import { isExplicitRewardCodeConfig } from "./responses";
 import { getClaimAllRuntimeState } from "./claimAllState";
 import type { NormalizedQuest } from "../data";
+import { captureQuestEventRef } from "../presentation";
 import settings from "../../plugin/settings";
 
 import "../../themes/default/quest-actions.css";
@@ -93,17 +94,19 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
 
     const run = async () => {
         const userIdAtClick = currentUserIdFromStore;
-        if (!action || !userIdAtClick || pending) return;
+        if (!action || !userIdAtClick || pending || currentUserId() !== userIdAtClick) return;
         if (submitted?.action === action && submitted.userId === userIdAtClick) return;
         // Disabled UI is not a synchronization primitive: a stale click event can still arrive
         // during the render that starts Claim all. Re-check the module-global batch lock here.
         if (action === "claim" && getClaimAllRuntimeState().active) return;
+        const questRef = captureQuestEventRef(quest, userIdAtClick);
         setPending(true);
         void recordQuestUIEvent({
             severity: "info",
             eventCode: action === "enroll" ? "QUEST_ACCEPT_REQUESTED" : "QUEST_CLAIM_REQUESTED",
             summary: action === "enroll" ? "Quest acceptance requested" : "Quest reward claim requested",
-            quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null }
+            quest: questRef,
+            accountId: userIdAtClick
         });
 
         try {
@@ -117,23 +120,28 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
             setSubmitted(result.resubmitAfterMs == null
                 ? null
                 : submittedState(action, userIdAtClick, result.resubmitAfterMs));
-            pushDashboardNotice({
-                tone: "success",
-                text: action === "enroll" ? "Quest accepted" : "Reward claimed",
-                duration: 2100
-            });
+            const confirmed = result.storeConfirmed;
+            const outcome = action === "enroll"
+                ? confirmed ? "Quest accepted" : "Acceptance submitted"
+                : confirmed ? "Reward claimed" : "Claim submitted";
+            if (currentUserId() === userIdAtClick) {
+                pushDashboardNotice({ tone: confirmed ? "success" : "info", text: outcome, duration: 2100 });
+            }
             void recordQuestUIEvent({
-                severity: "success",
-                eventCode: action === "enroll" ? "QUEST_ACCEPT_SUCCEEDED" : "QUEST_CLAIM_SUCCEEDED",
-                summary: action === "enroll" ? "Quest accepted" : "Quest reward claimed",
-                quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
-                detail: { storeConfirmed: result.storeConfirmed, resubmitAfterMs: result.resubmitAfterMs }
+                severity: confirmed ? "success" : "info",
+                eventCode: action === "enroll"
+                    ? confirmed ? "QUEST_ACCEPT_SUCCEEDED" : "QUEST_ACCEPT_SUBMITTED"
+                    : confirmed ? "QUEST_CLAIM_SUCCEEDED" : "QUEST_CLAIM_SUBMITTED",
+                summary: outcome,
+                quest: questRef,
+                detail: { storeConfirmed: confirmed, resubmitAfterMs: result.resubmitAfterMs },
+                accountId: userIdAtClick
             });
 
             // QuestUI's explicit Accept should start farming even when Orion's independent
             // watchForEnrollments setting is off. Only do this after Discord's store confirmed
             // enrolledAt; a merely submitted/uncertain enrollment is not enough to start a run.
-            if (action === "enroll" && result.storeConfirmed && orionIntegration && isOrionCommandReady()) {
+            if (action === "enroll" && result.storeConfirmed && currentUserId() === userIdAtClick && orionIntegration && isOrionCommandReady()) {
                 const snapshot = getOrionControlSnapshot();
                 if (snapshot && !snapshot.running) {
                     try {
@@ -143,10 +151,11 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                             severity: "warning",
                             eventCode: "ORION_AUTO_START_FAILED",
                             summary: "Quest accepted, but Orion auto-start failed",
-                            quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
-                            detail: { message: error instanceof Error ? error.message : String(error) }
+                            quest: questRef,
+                            detail: { message: error instanceof Error ? error.message : String(error) },
+                            accountId: userIdAtClick
                         });
-                        showToast({
+                        if (currentUserId() === userIdAtClick) showToast({
                             text: `Quest was accepted, but Orion could not start automatically: ${error instanceof Error ? error.message : "unknown control error"}`,
                             variant: "critical",
                             duration: 6000
@@ -168,14 +177,15 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 severity: "error",
                 eventCode: action === "enroll" ? "QUEST_ACCEPT_FAILED" : "QUEST_CLAIM_FAILED",
                 summary: action === "enroll" ? "Quest acceptance failed" : "Quest reward claim failed",
-                quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
+                quest: questRef,
+                accountId: userIdAtClick,
                 detail: {
                     message,
                     reason: error instanceof QuestActionError && error.cause instanceof Error ? error.cause.message : null,
                     stack: error instanceof Error ? error.stack ?? null : null
                 }
             });
-            showToast({ text: message, variant: "critical", duration: 6000 });
+            if (currentUserId() === userIdAtClick) showToast({ text: message, variant: "critical", duration: 6000 });
         } finally {
             setPending(false);
         }

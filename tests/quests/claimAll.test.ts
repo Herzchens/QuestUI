@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 
 import {
     buildClaimAllSnapshot,
+    claimAllDelayMs,
     ClaimAllBatchStoppedError,
     runClaimAllBatch
 } from "../../src/quests/actions/claimAll";
@@ -137,7 +138,8 @@ async function main() {
                 }
             ),
             error => error instanceof ClaimAllBatchStoppedError
-                && error.position === 2
+                && error.position === 1
+                && error.result.claimed === 1
                 && /account changed/i.test(error.message)
         );
         assert.deepEqual(order, ["a"]);
@@ -209,6 +211,96 @@ async function main() {
 
         assert.deepEqual(order, ["solo"]);
         assert.deepEqual(result, { total: 1, claimed: 1, skipped: 0 });
+    }
+
+    {
+        const confirmed: string[] = [];
+        await assert.rejects(runClaimAllBatch(
+            [quest("skipped"), quest("a"), quest("b"), quest("c")],
+            "user-a",
+            {
+                currentAccountId: () => "user-a",
+                currentState: id => id === "skipped" ? "claimed" : "claimable",
+                claim: async item => ({ storeConfirmed: item.id !== "b" }),
+                onConfirmed: item => confirmed.push(item.id)
+            }
+        ), error => error instanceof ClaimAllBatchStoppedError && error.result.claimed === 1 && error.result.skipped === 1);
+        assert.deepEqual(confirmed, ["a"]);
+    }
+    {
+        const confirmed: string[] = [];
+        const result = await runClaimAllBatch([quest("a"), quest("b")], "user-a", {
+            currentAccountId: () => "user-a",
+            currentState: () => "claimable",
+            claim: async () => ({ storeConfirmed: true }),
+            onConfirmed: item => confirmed.push(item.id)
+        });
+        assert.deepEqual(confirmed, ["a", "b"]);
+        assert.equal(result.claimed, 2);
+    }
+    {
+        const confirmed: string[] = [];
+        let account = "user-a";
+        await assert.rejects(runClaimAllBatch([quest("a")], "user-a", {
+            currentAccountId: () => account,
+            currentState: () => "claimable",
+            claim: async () => {
+                account = "user-b";
+                return { storeConfirmed: true };
+            },
+            onConfirmed: item => confirmed.push(item.id)
+        }), error => error instanceof ClaimAllBatchStoppedError && /account changed/i.test(error.message));
+        assert.deepEqual(confirmed, []);
+    }
+
+    assert.equal(claimAllDelayMs(() => 0), 1000);
+    assert.equal(claimAllDelayMs(() => 0.5), 2000);
+    assert.equal(claimAllDelayMs(() => 0.999999), 3000);
+    {
+        const trace: string[] = [];
+        const result = await runClaimAllBatch(
+            [quest("a"), quest("skipped"), quest("b"), quest("c"), quest("last-skipped")],
+            "user-a",
+            {
+                currentAccountId: () => "user-a",
+                currentState: id => id.includes("skipped") ? "claimed" : "claimable",
+                claim: async item => { trace.push(item.id); return { storeConfirmed: true }; },
+                waitBetweenClaims: async () => { trace.push("wait"); },
+                onConfirmed: item => { trace.push("confirmed:" + item.id); }
+            }
+        );
+        assert.deepEqual(trace, ["a", "confirmed:a", "wait", "b", "confirmed:b", "wait", "c", "confirmed:c"]);
+        assert.deepEqual(result, { total: 5, claimed: 3, skipped: 2 });
+    }
+    for (const change of ["account", "cancel", "unavailable"] as const) {
+        let account = "user-a";
+        let active = true;
+        let unavailable = false;
+        const claimed: string[] = [];
+        await assert.rejects(runClaimAllBatch([quest("a"), quest("b")], "user-a", {
+            currentAccountId: () => account,
+            currentState: () => unavailable ? "unavailable" : "claimable",
+            shouldContinue: () => active,
+            claim: async item => { claimed.push(item.id); return { storeConfirmed: true }; },
+            waitBetweenClaims: async () => {
+                if (change === "account") account = "user-b";
+                if (change === "cancel") active = false;
+                if (change === "unavailable") unavailable = true;
+            }
+        }), error => error instanceof ClaimAllBatchStoppedError && error.position === 2 && error.result.claimed === 1);
+        assert.deepEqual(claimed, ["a"]);
+    }
+    {
+        let waited = false;
+        const trace: string[] = [];
+        const result = await runClaimAllBatch([quest("a"), quest("b"), quest("c")], "user-a", {
+            currentAccountId: () => "user-a",
+            currentState: id => id === "b" && waited ? "claimed" : "claimable",
+            claim: async item => { trace.push(item.id); return { storeConfirmed: true }; },
+            waitBetweenClaims: async () => { waited = true; trace.push("wait"); }
+        });
+        assert.deepEqual(trace, ["a", "wait", "c"]);
+        assert.deepEqual(result, { total: 3, claimed: 2, skipped: 1 });
     }
 
     console.log("QuestUI Claim all logic tests - PASS");

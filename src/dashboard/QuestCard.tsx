@@ -3,7 +3,8 @@ import { ThemeStore, useStateFromStores } from "@webpack/common";
 
 import type { OrionControlSnapshot } from "../orion/companion";
 import { orionQuestProgressSource, orionQuestTagState, storedQuestTaskProgress, type OrionQuestTagState } from "../orion/controls";
-import { effectiveOrbRewardAmount } from "../orbs/rewards";
+import { effectiveOrbRewardAmount, formatQuestRewardLabel } from "../orbs/rewards";
+import { resolveQuestArtwork, type QuestTheme } from "../quests/presentation";
 import { QuestOrbIcon } from "../orbs/QuestOrbIcon";
 import { QuestCardActions } from "../quests/actions/QuestCardActions";
 import { expiryUrgency, formatExpiry, formatQuestProgress } from "../quests/data";
@@ -14,14 +15,6 @@ interface DiscordQuestCompletion {
     completedRatioDisplay: string;
 }
 
-interface DiscordQuestAsset {
-    url: string;
-    mimetype?: string | null;
-    isAnimated: boolean;
-}
-
-type DiscordQuestAssetKind = "game_tile" | "quest_bar_hero_image" | "hero_image";
-type QuestTheme = "dark" | "light";
 type QuestProgressTone = "starting" | "building" | "mid" | "advanced" | "near-complete";
 
 interface TimedProgressParts {
@@ -38,15 +31,6 @@ const useDiscordQuestCompletion = findByCodeLazy(
     "roundingMode:\"floor\"",
     "completedRatio"
 ) as (quest: any, forcePercent?: boolean) => DiscordQuestCompletion;
-
-// Discord Quest asset values are asset keys, not ready-to-use URLs. This is Discord's
-// own resolver that turns GAME_TILE/HERO keys into the themed CDN URL used by Quest UI.
-const getDiscordQuestAsset = findByCodeLazy(
-    "\"game_tile\"",
-    "\"quest_bar_hero\"",
-    "\"video_player_thumbnail\""
-) as (quest: any, assetKind: DiscordQuestAssetKind, theme?: QuestTheme) => DiscordQuestAsset | null;
-
 
 function ProgressRing({
     quest,
@@ -179,17 +163,6 @@ function TaskTypeGlyph({ type }: { type: QuestTaskType; }) {
             )}
         </svg>
     );
-}
-
-function resolveQuestArtwork(quest: NormalizedQuest, theme: QuestTheme): string | null {
-    const candidates: DiscordQuestAssetKind[] = ["game_tile", "quest_bar_hero_image", "hero_image"];
-    for (const assetKind of candidates) {
-        try {
-            const asset = getDiscordQuestAsset(quest.rawQuest, assetKind, theme);
-            if (asset?.url) return asset.url;
-        } catch { }
-    }
-    return null;
 }
 
 function QuestArtwork({ imageUrl, type }: { imageUrl: string | null; type: QuestTaskType; }) {
@@ -355,9 +328,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
         receivesOrbBoost
     );
     const rewardTier = quest.reward.kind === "orbs" ? orbRewardTier(displayedOrbQuantity) : null;
-    const rewardLabel = quest.reward.kind === "orbs" && displayedOrbQuantity > 0
-        ? `${Math.round(displayedOrbQuantity)} Orbs`
-        : quest.reward.label;
+    const rewardLabel = formatQuestRewardLabel(quest.reward, receivesOrbBoost);
     const orionTagState = quest.status === "in-progress"
         ? orionQuestTagState(orionSnapshot, quest.id)
         : null;

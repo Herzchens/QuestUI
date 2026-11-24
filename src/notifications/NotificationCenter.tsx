@@ -1,12 +1,16 @@
-import { findByCodeLazy } from "@webpack";
 import { showToast, ThemeStore, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { queryEventLog, subscribeEventLog } from "../eventLog/runtime";
 import type { EventLogEvent } from "../eventLog/types";
 import { useQuestSnapshot, type NormalizedQuest, type QuestTaskType } from "../quests/data";
+import { resolveQuestArtwork, type QuestTheme } from "../quests/presentation";
+import { findQuestByIdentity, safeQuestArtworkUrl, taskTypeForKey } from "../quests/presentationLogic";
+import { useQuestOrbMultiplierState } from "../orbs/multiplier";
+import { formatQuestRewardLabel } from "../orbs/rewards";
 import { dashboardThemeClassName } from "../themes/runtime";
 import {
     notificationCenterItems,
+    notificationQuestMeta,
     unreadNotificationCenterCount,
     type NotificationCenterItem
 } from "./centerLogic";
@@ -25,19 +29,6 @@ import "../themes/default/notifications.css";
 const CENTER_QUERY_LIMIT = 300;
 const EVENT_SETTLE_DELAY_MS = 160;
 const EVENT_RECHECK_DELAY_MS = 1_050;
-
-interface DiscordQuestAsset {
-    url: string;
-}
-
-type DiscordQuestAssetKind = "game_tile" | "quest_bar_hero_image" | "hero_image";
-type QuestTheme = "dark" | "light";
-
-const getDiscordQuestAsset = findByCodeLazy(
-    "\"game_tile\"",
-    "\"quest_bar_hero\"",
-    "\"video_player_thumbnail\""
-) as (quest: any, assetKind: DiscordQuestAssetKind, theme?: QuestTheme) => DiscordQuestAsset | null;
 
 export interface NotificationCenterFeed {
     accountId: string | null;
@@ -234,36 +225,16 @@ function NotificationFallbackIcon({ item }: { item: NotificationCenterItem; }) {
     return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" /><path d="m8.5 12 2.2 2.2 4.8-4.8" /></svg>;
 }
 
-function resolveQuestArtwork(quest: NormalizedQuest | null, theme: QuestTheme): string | null {
-    if (!quest) return null;
-    const candidates: DiscordQuestAssetKind[] = ["game_tile", "quest_bar_hero_image", "hero_image"];
-    for (const assetKind of candidates) {
-        try {
-            const asset = getDiscordQuestAsset(quest.rawQuest, assetKind, theme);
-            if (asset?.url) return asset.url;
-        } catch { }
-    }
-    return null;
-}
-
-function questForNotification(item: NotificationCenterItem, quests: readonly NormalizedQuest[]): NormalizedQuest | null {
-    if (item.questId) {
-        const byId = quests.find(quest => quest.id === item.questId);
-        if (byId) return byId;
-    }
-
-    const name = item.questName?.trim().toLocaleLowerCase();
-    if (!name) return null;
-    return quests.find(quest => quest.name.trim().toLocaleLowerCase() === name) ?? null;
-}
-
 function NotificationQuestArtwork({ item, quest }: {
     item: NotificationCenterItem;
     quest: NormalizedQuest | null;
 }) {
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark") as QuestTheme;
-    const imageUrl = resolveQuestArtwork(quest, theme);
-    const taskType = quest?.primaryTask?.type ?? quest?.tasks[0]?.type ?? "other";
+    const savedArtwork = safeQuestArtworkUrl(theme === "light" ? item.event.quest?.artworkLight : item.event.quest?.artworkDark)
+        ?? safeQuestArtworkUrl(theme === "light" ? item.event.quest?.artworkDark : item.event.quest?.artworkLight);
+    const imageUrl = resolveQuestArtwork(quest, theme) ?? savedArtwork;
+    const savedTask = item.event.quest?.taskType;
+    const taskType = quest?.primaryTask?.type ?? quest?.tasks[0]?.type ?? taskTypeForKey(savedTask ?? "");
 
     return (
         <span className="quest-ui-notification-center-row-artwork" aria-hidden="true">
@@ -272,6 +243,7 @@ function NotificationQuestArtwork({ item, quest }: {
             </span>
             {imageUrl && (
                 <img
+                    key={imageUrl}
                     src={imageUrl}
                     alt=""
                     loading="lazy"
@@ -279,25 +251,13 @@ function NotificationQuestArtwork({ item, quest }: {
                     onError={event => { event.currentTarget.style.display = "none"; }}
                 />
             )}
-            {quest && (
+            {(quest || savedTask) && (
                 <span className={`quest-ui-notification-center-task-badge is-${taskType}`}>
                     <TaskTypeGlyph type={taskType} />
                 </span>
             )}
         </span>
     );
-}
-
-function notificationMeta(item: NotificationCenterItem, quest: NormalizedQuest | null): string {
-    const parts: string[] = [];
-    const questName = quest?.name ?? item.questName;
-    if (questName) parts.push(questName);
-
-    const rewardLabel = quest?.reward?.label;
-    if (rewardLabel) parts.push(`Reward: ${rewardLabel}`);
-
-    if (parts.length === 0) parts.push(item.source);
-    return parts.join(" · ");
 }
 
 function showNotificationDescription(item: NotificationCenterItem): boolean {
@@ -328,6 +288,7 @@ function ActionButton({ children, icon, disabled, danger, onClick }: {
 }
 
 export function NotificationCenterPanel({ feed }: { feed: NotificationCenterFeed; }) {
+    const { receivesBoost } = useQuestOrbMultiplierState();
     const [now, setNow] = useState(Date.now());
     const [busy, setBusy] = useState(false);
     const accountId = feed.accountId;
@@ -424,7 +385,7 @@ export function NotificationCenterPanel({ feed }: { feed: NotificationCenterFeed
                         <span>New quests, successful Quest actions, and important failures will appear here.</span>
                     </div>
                 ) : feed.items.map(item => {
-                    const quest = questForNotification(item, feed.quests);
+                    const quest = findQuestByIdentity({ id: item.questId, name: item.questName }, feed.quests);
                     return (
                     <article
                         key={item.id}
@@ -441,7 +402,7 @@ export function NotificationCenterPanel({ feed }: { feed: NotificationCenterFeed
                                 <span className="quest-ui-notification-center-row-description">{item.description}</span>
                             )}
                             <span className="quest-ui-notification-center-row-meta">
-                                {notificationMeta(item, quest)}
+                                {notificationQuestMeta(item, quest ? { name: quest.name, rewardLabel: formatQuestRewardLabel(quest.reward, receivesBoost) } : null)}
                             </span>
                         </div>
                     </article>

@@ -40,7 +40,7 @@ The capture above is a real Discord runtime screenshot supplied by the maintaine
 
 - Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
 
-- Explicit **Accept Quest**, **Claim Reward**, and bounded sequential **Claim all** actions
+- Explicit **Accept Quest**, **Claim Reward**, and bounded sequential **Claim all** actions, with a 1-3 second pause between consecutive native claims
 
 - Account-scoped duplicate-submission guards, compact Dashboard notices for successful in-Dashboard actions, and Vencord-native toasts for failures or utility feedback
 
@@ -258,7 +258,7 @@ Problem notifications ignore normal retry/fallback/recovery warnings, establish 
 
 The Dashboard notification island opens QuestUI's account-scoped **Notification Center**. The Center reuses sanitized Event Log events as its event source instead of creating a second event database. It stores only per-account presentation state such as the initialization baseline, read-through position, and clear-through position; clearing the Notification Center does not delete Event Log history.
 
-The Center intentionally shows a narrower user-facing inbox than Event Log. Its current scope includes newly available Quests, successful Quest acceptance, successful reward claims and Claim All completion, plus actionable failures such as accept/claim/Claim All failures, Orion task failures, blocked Quests, auto-start failures, and claim verification/action-required states. Routine Orion start/stop events, Quest start/completion progress, Ready-to-Claim transitions, updater chatter, network retry diagnostics, and generic runtime noise stay out of the Center. Account switching changes both the visible feed and its read/clear state without leaking another account's inbox.
+The Center intentionally shows a narrower user-facing inbox than Event Log. Its current scope includes newly available Quests, confirmed Quest acceptance and individual confirmed reward claims (including partial Claim All results), plus actionable failures such as accept/claim/Claim All failures, Orion task failures, blocked Quests, auto-start failures, and claim verification/action-required states. Routine Orion start/stop events, Quest start/completion progress, Ready-to-Claim transitions, updater chatter, network retry diagnostics, and generic runtime noise stay out of the Center. Account switching changes both the visible feed and its read/clear state without leaking another account's inbox. Claim All aggregate completion remains diagnostic-only. Public Quest artwork and reward display labels are captured when available so historical rows can remain readable after QuestStore removes a Quest.
 
 ## Manual Accept and Claim
 
