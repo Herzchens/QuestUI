@@ -2,7 +2,7 @@ import { showNotification } from "@api/Notifications";
 import { NavigationRouter, UserStore } from "@webpack/common";
 
 import { openQuestDashboard } from "../dashboard/open";
-import { queryEventLog, subscribeEventLog } from "../eventLog/runtime";
+import { queryEventLog, recordQuestUIEvent, subscribeEventLog } from "../eventLog/runtime";
 import type { EventLogEvent } from "../eventLog/types";
 import {
     ignoredQuestIds,
@@ -144,6 +144,28 @@ function observeQuestState(): void {
     const newlyAvailable = newAvailableQuestTransitions(knownQuestIds, next);
     previousQuests = next;
     for (const id of allQuestIds) knownQuestIds.add(id);
+
+    for (const quest of completed) {
+        void recordQuestUIEvent({
+            severity: "success",
+            category: "quest",
+            eventCode: "QUEST_READY_TO_CLAIM",
+            summary: `${quest.questName} is ready to claim`,
+            quest: { id: quest.questId, name: quest.questName },
+            accountId
+        });
+    }
+
+    for (const quest of newlyAvailable) {
+        void recordQuestUIEvent({
+            severity: "info",
+            category: "quest",
+            eventCode: "QUEST_NEW_AVAILABLE",
+            summary: `${quest.questName} is available to accept`,
+            quest: { id: quest.questId, name: quest.questName },
+            accountId
+        });
+    }
 
     if (settings.store.notifyQuestCompletion !== false) {
         for (const quest of completed) {

@@ -811,6 +811,10 @@
     min-width: 0;
 }
 
+.quest-ui-event-filter-account-options {
+    grid-column: 2 / -1;
+}
+
 .quest-ui-event-filter-list-row {
     align-items: center;
     background: transparent;

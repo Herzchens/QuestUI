@@ -1,0 +1,390 @@
+.quest-ui-notification-center-panel {
+    background: #111216;
+    border: 1px solid color-mix(in srgb, var(--quest-ui-default-accent, #a970ff) 28%, rgba(255,255,255,.12));
+    border-radius: 16px;
+    box-shadow: 0 22px 56px rgba(0,0,0,.52), inset 0 1px 0 rgba(255,255,255,.035);
+    box-sizing: border-box;
+    color: var(--text-default, #dbdee1);
+    overflow: hidden;
+    padding: 14px;
+    width: min(590px, calc(100vw - 28px));
+}
+
+.quest-ui-notification-center-header {
+    align-items: flex-start;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.quest-ui-notification-center-header > div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.quest-ui-notification-center-header strong {
+    color: var(--header-primary, #f2f3f5);
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+}
+
+.quest-ui-notification-center-unread {
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 999px;
+    color: var(--text-muted, #949ba4);
+    flex: 0 0 auto;
+    font-size: 10.5px;
+    font-weight: 750;
+    line-height: 1;
+    padding: 6px 9px;
+}
+
+.quest-ui-notification-center-unread.has-unread {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 18%, #211719);
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 42%, rgba(255,255,255,.10));
+    color: color-mix(in srgb, var(--status-danger, #f23f42) 48%, #fff 52%);
+}
+
+.quest-ui-notification-center-account {
+    align-items: center;
+    background: #17181d;
+    border: 1px solid rgba(255,255,255,.075);
+    border-radius: 12px;
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    min-height: 54px;
+    padding: 8px 10px;
+}
+
+.quest-ui-notification-center-avatar {
+    align-items: center;
+    background: #24252b;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 50%;
+    color: #fff;
+    display: inline-flex;
+    flex: 0 0 36px;
+    font-size: 14px;
+    font-weight: 800;
+    height: 36px;
+    justify-content: center;
+    overflow: hidden;
+    width: 36px;
+}
+
+.quest-ui-notification-center-avatar img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.quest-ui-notification-center-account-copy {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.quest-ui-notification-center-account-copy strong {
+    color: var(--header-primary, #f2f3f5);
+    font-size: 13px;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-notification-center-account-copy span {
+    color: var(--text-muted, #949ba4);
+    font-size: 10.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-notification-center-current-chip {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 13%, #181b19);
+    border: 1px solid color-mix(in srgb, var(--status-positive, #23a55a) 32%, rgba(255,255,255,.08));
+    border-radius: 999px;
+    color: color-mix(in srgb, var(--status-positive, #23a55a) 48%, #fff 52%);
+    flex: 0 0 auto;
+    font-size: 9.5px;
+    font-weight: 750;
+    padding: 5px 8px;
+}
+
+.quest-ui-notification-center-actions {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 12px;
+}
+
+.quest-ui-notification-center-action {
+    align-items: center;
+    appearance: none;
+    background: #191a1f;
+    border: 1px solid rgba(255,255,255,.105);
+    border-radius: 10px;
+    color: var(--text-default, #dbdee1);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 750;
+    gap: 8px;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 12px;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.quest-ui-notification-center-action svg {
+    fill: none;
+    flex: 0 0 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    width: 18px;
+}
+
+.quest-ui-notification-center-action:hover:not(:disabled) {
+    background: #222329;
+    border-color: color-mix(in srgb, var(--quest-ui-default-accent, #a970ff) 28%, rgba(255,255,255,.12));
+    color: #fff;
+}
+
+.quest-ui-notification-center-action.is-danger:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 10%, #1b191c);
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 35%, rgba(255,255,255,.10));
+    color: color-mix(in srgb, var(--status-danger, #f23f42) 60%, #fff 40%);
+}
+
+.quest-ui-notification-center-action:disabled {
+    cursor: default;
+    opacity: .5;
+}
+
+.quest-ui-notification-center-divider {
+    background: rgba(255,255,255,.075);
+    height: 1px;
+    margin: 12px 0 5px;
+}
+
+.quest-ui-notification-center-list {
+    max-height: min(430px, calc(100vh - 260px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.quest-ui-notification-center-row {
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,.065);
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 50px minmax(0, 1fr);
+    min-height: 84px;
+    padding: 14px 6px 14px 0;
+    transition: background-color 120ms ease, opacity 120ms ease;
+}
+
+.quest-ui-notification-center-row:last-child {
+    border-bottom: 0;
+}
+
+.quest-ui-notification-center-row.is-read .quest-ui-notification-center-row-artwork,
+.quest-ui-notification-center-row.is-read .quest-ui-notification-center-row-description,
+.quest-ui-notification-center-row.is-read .quest-ui-notification-center-row-meta,
+.quest-ui-notification-center-row.is-read .quest-ui-notification-center-row-heading time {
+    opacity: .62;
+}
+
+.quest-ui-notification-center-row:hover {
+    background: rgba(255,255,255,.022);
+}
+
+.quest-ui-notification-center-row-artwork {
+    background: #1d1f23;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px;
+    box-sizing: border-box;
+    display: block;
+    height: 48px;
+    overflow: visible;
+    position: relative;
+    width: 48px;
+}
+
+.quest-ui-notification-center-row-artwork > img,
+.quest-ui-notification-center-row-artwork-fallback {
+    border-radius: 11px;
+    height: 100%;
+    inset: 0;
+    position: absolute;
+    width: 100%;
+}
+
+.quest-ui-notification-center-row-artwork > img {
+    object-fit: cover;
+    z-index: 2;
+}
+
+.quest-ui-notification-center-row-artwork-fallback {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    z-index: 1;
+}
+
+.quest-ui-notification-center-row-artwork-fallback > svg {
+    fill: none;
+    height: 24px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+    width: 24px;
+}
+
+.quest-ui-notification-center-row.is-success .quest-ui-notification-center-row-artwork-fallback {
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 12%, #1b201d);
+    color: color-mix(in srgb, var(--status-positive, #23a55a) 70%, #fff 30%);
+}
+
+.quest-ui-notification-center-row.is-warning .quest-ui-notification-center-row-artwork-fallback {
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 11%, #201d17);
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-notification-center-row.is-error .quest-ui-notification-center-row-artwork-fallback {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 12%, #21191b);
+    color: color-mix(in srgb, var(--status-danger, #f23f42) 78%, #fff 22%);
+}
+
+.quest-ui-notification-center-row.is-info .quest-ui-notification-center-row-artwork-fallback {
+    background: color-mix(in srgb, var(--quest-ui-default-accent, #a970ff) 10%, #1d1c23);
+    color: #c5a4ff;
+}
+
+.quest-ui-notification-center-task-badge {
+    align-items: center;
+    background: #17181d;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 50%;
+    bottom: -4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.45);
+    color: #d7d9dd;
+    display: inline-flex;
+    height: 18px;
+    justify-content: center;
+    position: absolute;
+    right: -4px;
+    width: 18px;
+    z-index: 3;
+}
+
+.quest-ui-notification-center-task-badge > svg {
+    fill: currentColor;
+    height: 11px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.4;
+    width: 11px;
+}
+
+.quest-ui-notification-center-task-badge .quest-ui-notification-center-task-cutout {
+    fill: #17181d;
+    stroke: #17181d;
+}
+
+.quest-ui-notification-center-row-main {
+    min-width: 0;
+    padding-top: 1px;
+}
+
+.quest-ui-notification-center-row-heading {
+    align-items: baseline;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.quest-ui-notification-center-row-heading strong {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 850;
+    line-height: 1.18;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quest-ui-notification-center-row-heading time {
+    color: var(--text-muted, #949ba4);
+    flex: 0 0 auto;
+    font-size: 10.5px;
+    font-weight: 650;
+}
+
+.quest-ui-notification-center-row-description {
+    color: var(--text-muted, #b5bac1);
+    display: block;
+    font-size: 11px;
+    line-height: 1.4;
+    margin-top: 4px;
+    white-space: normal;
+}
+
+.quest-ui-notification-center-row-meta {
+    color: var(--text-muted, #aeb3ba);
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.45;
+    margin-top: 5px;
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+.quest-ui-notification-center-empty {
+    align-items: center;
+    color: var(--text-muted, #949ba4);
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    gap: 4px;
+    justify-content: center;
+    min-height: 150px;
+    text-align: center;
+}
+
+.quest-ui-notification-center-empty strong {
+    color: var(--header-primary, #f2f3f5);
+    font-size: 13px;
+}
+
+@media (max-width: 620px) {
+    .quest-ui-notification-center-panel {
+        padding: 11px;
+        width: calc(100vw - 16px);
+    }
+
+    .quest-ui-notification-center-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .quest-ui-notification-center-list {
+        max-height: min(390px, calc(100vh - 230px));
+    }
+}

@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "@webpack/common";
+import { Popout, useEffect, useRef, useState } from "@webpack/common";
+
+import { NotificationCenterPanel, useNotificationCenterFeed } from "../notifications/NotificationCenter";
 
 import {
     getDashboardNotice,
@@ -9,6 +11,9 @@ import {
 type NoticePhase = "hidden" | "mounted" | "visible" | "exiting";
 
 export function DashboardNoticeLane() {
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
+    const [open, setOpen] = useState(false);
+    const feed = useNotificationCenterFeed();
     const initialNotice = getDashboardNotice();
     const [notice, setNotice] = useState<DashboardNotice | null>(initialNotice);
     const [phase, setPhase] = useState<NoticePhase>(initialNotice ? "visible" : "hidden");
@@ -63,29 +68,55 @@ export function DashboardNoticeLane() {
 
     const shown = notice != null && phase !== "hidden";
     const displayText = notice?.text ?? "Notification Center";
+    const showUnread = !shown && feed.unreadCount > 0;
+    const accessibilityLabel = shown
+        ? `${displayText}. Open Notification Center.`
+        : feed.unreadCount > 0
+            ? `Notification Center, ${feed.unreadCount} unread`
+            : "Notification Center";
 
     return (
-        <div
-            className={`quest-ui-dashboard-notification-island${shown ? ` is-${phase} is-${notice.tone}` : " is-idle"}`}
-            aria-label={shown ? undefined : "Notification Center"}
-            aria-live="polite"
-            aria-atomic="true"
+        <Popout
+            position="bottom"
+            align="right"
+            animation={Popout.Animation.NONE}
+            shouldShow={open}
+            onRequestClose={() => setOpen(false)}
+            targetElementRef={buttonRef}
+            renderPopout={() => <NotificationCenterPanel feed={feed} />}
         >
-            <span className="quest-ui-dashboard-notification-bell" aria-hidden="true">
-                <svg className="quest-ui-dashboard-notification-surface" aria-hidden="true">
-                    <rect className="quest-ui-dashboard-notification-surface-rect" />
-                </svg>
-                <svg className="quest-ui-dashboard-notification-icon" viewBox="0 0 24 24">
-                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
-                    <path d="M10 21h4" />
-                </svg>
-            </span>
-            <span className="quest-ui-dashboard-notification-measure" aria-hidden="true">
-                {displayText}
-            </span>
-            <span className="quest-ui-dashboard-notification-copy">
-                <span className="quest-ui-dashboard-notification-text">{displayText}</span>
-            </span>
-        </div>
+            {(_, { isShown }) => (
+                <>
+                    <button
+                        ref={buttonRef}
+                        type="button"
+                        className={`quest-ui-dashboard-notification-island${shown ? ` is-${phase} is-${notice.tone}` : " is-idle"}${isShown ? " is-open" : ""}`}
+                        onClick={() => setOpen(value => !value)}
+                        aria-label={accessibilityLabel}
+                        aria-expanded={isShown}
+                        aria-haspopup="dialog"
+                    >
+                        <span className="quest-ui-dashboard-notification-bell" aria-hidden="true">
+                            <svg className="quest-ui-dashboard-notification-surface" aria-hidden="true">
+                                <rect className="quest-ui-dashboard-notification-surface-rect" />
+                            </svg>
+                            <svg className="quest-ui-dashboard-notification-icon" viewBox="0 0 24 24">
+                                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                                <path d="M10 21h4" />
+                            </svg>
+                        </span>
+                        <span className="quest-ui-dashboard-notification-measure" aria-hidden="true">
+                            <span>{displayText}</span>
+                            {showUnread && <span className="quest-ui-dashboard-notification-unread-chip">{feed.unreadCount} unread</span>}
+                        </span>
+                        <span className="quest-ui-dashboard-notification-copy" aria-live="polite" aria-atomic="true">
+                            <span className="quest-ui-dashboard-notification-text">{displayText}</span>
+                            {showUnread && <span className="quest-ui-dashboard-notification-unread-chip">{feed.unreadCount} unread</span>}
+                        </span>
+                        {showUnread && <span className="quest-ui-dashboard-notification-unread-dot" aria-hidden="true" />}
+                    </button>
+                </>
+            )}
+        </Popout>
     );
 }

@@ -4954,10 +4954,12 @@
     flex: 1 1 0;
     min-width: 44px;
     overflow: hidden;
+    position: relative;
 }
 
 .quest-ui-theme-default .quest-ui-dashboard-notification-island {
     --quest-ui-notification-tone: var(--brand-360, #949cf7);
+    appearance: none;
     align-self: center;
     background-color: #19191f !important;
     background-image: none !important;
@@ -4967,17 +4969,22 @@
         inset 0 0 0 1px rgba(255,255,255,.11),
         inset 0 1px 0 rgba(255,255,255,.035);
     box-sizing: border-box;
+    color: inherit;
+    cursor: pointer;
     display: block;
     flex: 0 0 auto;
+    font: inherit;
     height: 44px;
     line-height: 0;
     margin: 0;
     max-width: 44px;
     min-height: 44px;
     min-width: 44px;
-    overflow: hidden;
+    overflow: visible;
+    outline: none;
     padding: 0;
     position: relative;
+    text-align: left;
     transition:
         max-width 340ms cubic-bezier(.18,.82,.24,1),
         box-shadow 160ms ease;
@@ -5000,12 +5007,16 @@
     max-width: 100%;
 }
 
-.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover {
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover,
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:focus-visible,
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle.is-open {
     box-shadow:
         inset 0 0 0 1px color-mix(in srgb, var(--brand-360, #949cf7) 24%, rgba(255,255,255,.11)),
         inset 0 1px 0 rgba(255,255,255,.04);
-    cursor: pointer;
     max-width: 100%;
+    transition:
+        max-width 560ms cubic-bezier(.16,.84,.22,1),
+        box-shadow 160ms ease;
 }
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-exiting {
     max-width: 44px;
@@ -5082,15 +5093,19 @@
     color: color-mix(in srgb, #fff 72%, var(--quest-ui-notification-tone) 28%);
 }
 
-.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover .quest-ui-dashboard-notification-icon {
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover .quest-ui-dashboard-notification-icon,
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:focus-visible .quest-ui-dashboard-notification-icon,
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle.is-open .quest-ui-dashboard-notification-icon {
     color: color-mix(in srgb, #fff 78%, var(--brand-360, #949cf7) 22%);
 }
 .quest-ui-theme-default .quest-ui-dashboard-notification-measure {
+    align-items: center;
     box-sizing: border-box;
     color: transparent;
-    display: block;
+    display: inline-flex;
     font-size: 10.5px;
     font-weight: 700;
+    gap: 7px;
     height: 44px;
     line-height: 44px;
     padding: 0 12px 0 48px;
@@ -5103,6 +5118,7 @@
 .quest-ui-theme-default .quest-ui-dashboard-notification-copy {
     align-items: center;
     display: flex;
+    gap: 7px;
     height: 44px;
     left: 48px;
     min-width: 0;
@@ -5121,9 +5137,11 @@
     transition-delay: 205ms;
 }
 
-.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover .quest-ui-dashboard-notification-copy {
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover .quest-ui-dashboard-notification-copy,
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:focus-visible .quest-ui-dashboard-notification-copy,
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle.is-open .quest-ui-dashboard-notification-copy {
     opacity: 1;
-    transition-delay: 150ms;
+    transition-delay: 285ms;
 }
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-exiting .quest-ui-dashboard-notification-copy {
     opacity: 0;
@@ -5141,6 +5159,48 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.quest-ui-theme-default .quest-ui-dashboard-notification-unread-chip {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 18%, #211719);
+    border: 1px solid color-mix(in srgb, var(--status-danger, #f23f42) 42%, rgba(255,255,255,.10));
+    border-radius: 999px;
+    color: color-mix(in srgb, var(--status-danger, #f23f42) 48%, #fff 52%);
+    flex: 0 0 auto;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+    padding: 4px 6px;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notification-measure .quest-ui-dashboard-notification-unread-chip {
+    border-color: transparent;
+    color: transparent;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notification-unread-dot {
+    background: var(--status-danger, #f23f42);
+    border: 2px solid #19191f;
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,.10),
+        0 2px 7px color-mix(in srgb, var(--status-danger, #f23f42) 42%, transparent);
+    box-sizing: border-box;
+    height: 12px;
+    left: 28px;
+    pointer-events: none;
+    position: absolute;
+    top: 4px;
+    width: 12px;
+    z-index: 50;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover .quest-ui-dashboard-notification-unread-dot,
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:focus-visible .quest-ui-dashboard-notification-unread-dot,
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle.is-open .quest-ui-dashboard-notification-unread-dot {
+    opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .quest-ui-theme-default .quest-ui-dashboard-notification-island,
     .quest-ui-theme-default .quest-ui-dashboard-notification-surface-rect,
@@ -5209,4 +5269,15 @@
     .quest-ui-theme-default .quest-ui-filter-list-options.is-reward-details {
         grid-template-columns: 1fr;
     }
+}
+
+
+/* Balance the Quest List control row between the summary chips and the first Quest card.
+ * Move only this row down slightly while reclaiming the same space from the list top padding. */
+.quest-ui-theme-default .quest-ui-dashboard-filter-tools {
+    margin-top: 9px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-content {
+    padding-top: 8px;
 }
