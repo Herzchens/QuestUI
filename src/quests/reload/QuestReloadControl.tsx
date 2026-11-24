@@ -31,12 +31,17 @@ export function QuestReloadControl() {
     const requestSettledRef = useRef(false);
     const completedRotationsRef = useRef(0);
     const finishBoundaryRef = useRef<(() => void) | null>(null);
+    const successResetTimerRef = useRef<number | null>(null);
     const mountedRef = useRef(true);
 
     useEffect(() => {
         mountedRef.current = true;
         return () => {
             mountedRef.current = false;
+            if (successResetTimerRef.current != null) {
+                window.clearTimeout(successResetTimerRef.current);
+                successResetTimerRef.current = null;
+            }
             const resolve = finishBoundaryRef.current;
             finishBoundaryRef.current = null;
             resolve?.();
@@ -105,7 +110,11 @@ export function QuestReloadControl() {
                     text: "Quest list refreshed",
                     duration: 2100
                 });
-                window.setTimeout(() => {
+                if (successResetTimerRef.current != null) {
+                    window.clearTimeout(successResetTimerRef.current);
+                }
+                successResetTimerRef.current = window.setTimeout(() => {
+                    successResetTimerRef.current = null;
                     if (mountedRef.current) setSucceeded(false);
                 }, 1200);
             }

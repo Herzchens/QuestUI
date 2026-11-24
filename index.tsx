@@ -6,6 +6,7 @@ import { startQuestNotifications, stopQuestNotifications } from "./src/notificat
 import { startQuestAutoReload, stopQuestAutoReload } from "./src/quests/reload/auto";
 import { questAutoReloadMinutesFromStep } from "./src/quests/reload/autoLogic";
 import { QuestButton, QuestsCount } from "./src/dashboard/QuestButton";
+import { resetDashboardNotices } from "./src/dashboard/notifications";
 import { QUESTUI_VERSION } from "./src/plugin/version";
 import settings from "./src/plugin/settings";
 import { updateCheckHoursFromStep } from "./src/updates/logic";
@@ -45,6 +46,7 @@ export default definePlugin({
         stopQuestNotifications();
         stopIgnoredQuestLifecycle();
         stopEventLogCapture();
+        resetDashboardNotices();
     },
 
     patches: [

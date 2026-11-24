@@ -24,6 +24,16 @@ export function subscribeDashboardNotice(listener: () => void): () => void {
     return () => listeners.delete(listener);
 }
 
+export function resetDashboardNotices(): void {
+    if (clearTimer != null) {
+        clearTimeout(clearTimer);
+        clearTimer = null;
+    }
+    if (currentNotice == null) return;
+    currentNotice = null;
+    notify();
+}
+
 export function pushDashboardNotice({
     tone = "info",
     text,

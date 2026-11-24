@@ -318,6 +318,21 @@ function emptyRules(source) {
         .map(rule => ({ line: rule.line, selector: rule.selector, context: rule.context || "top-level" }));
 }
 
+function emptyAtRules(source) {
+    const masked = maskCssComments(source);
+    const hits = [];
+    const pattern = /@(media|supports|container|layer)\b([^{}]*)\{\s*\}/g;
+    let match;
+    while ((match = pattern.exec(masked))) {
+        hits.push({
+            line: lineAt(source, match.index),
+            kind: match[1],
+            condition: match[2].trim()
+        });
+    }
+    return hits;
+}
+
 function collectTokenGraph(cssFiles, sourceFiles) {
     const definitions = new Map();
     const uses = new Map();
@@ -378,10 +393,24 @@ function validateRepository() {
             for (const hit of visualLiteralMatches(source)) {
                 failures.push(`${rel}:${hit.line}: component CSS owns raw color ${hit.value}`);
             }
+        } else {
+            for (const rule of parseCssRules(source)) {
+                if (/\.quest-ui-theme-[A-Za-z0-9_-]+/.test(rule.selector)) continue;
+                for (const declaration of rule.declarations) {
+                    if (visualLiteralMatches(declaration.value).length === 0) continue;
+                    failures.push(
+                        `${rel}:${rule.line}: raw theme color outside named theme in ${rule.selector} (${declaration.property})`
+                    );
+                }
+            }
         }
 
         for (const hit of emptyRules(source)) {
             failures.push(`${rel}:${hit.line}: empty CSS rule ${hit.selector} [${hit.context}]`);
+        }
+
+        for (const hit of emptyAtRules(source)) {
+            failures.push(`${rel}:${hit.line}: empty @${hit.kind} block ${hit.condition}`);
         }
 
         for (const hit of shadowedDeclarations(source)) {
@@ -390,7 +419,7 @@ function validateRepository() {
 
         if (rel.startsWith("src/themes/")) {
             for (const rule of parseCssRules(source)) {
-                if (!/\\.quest-ui-theme-[A-Za-z0-9_-]+/.test(rule.selector)) continue;
+                if (!/\.quest-ui-theme-[A-Za-z0-9_-]+/.test(rule.selector)) continue;
                 for (const declaration of rule.declarations) {
                     if (!THEME_STRUCTURAL_PROPERTIES.has(declaration.property)) continue;
                     failures.push(
@@ -456,6 +485,15 @@ function selfTest() {
     const named = ".x { color: white; white-space: nowrap; }";
     if (visualLiteralMatches(named).length !== 1) throw new Error("self-test: named colors must not confuse white-space");
 
+    const themeScoped = ".quest-ui-theme-default .x { color: #fff; }";
+    const themeShared = ".quest-ui-theme .x { color: #fff; }";
+    if (!/\.quest-ui-theme-[A-Za-z0-9_-]+/.test(parseCssRules(themeScoped)[0]?.selector ?? "")) {
+        throw new Error("self-test: named theme selectors must be recognized");
+    }
+    if (/\.quest-ui-theme-[A-Za-z0-9_-]+/.test(parseCssRules(themeShared)[0]?.selector ?? "")) {
+        throw new Error("self-test: shared theme root must not count as a named theme");
+    }
+
     const shadowed = ".x { width: 10px; }\n.x { width: 12px; }";
     if (shadowedDeclarations(shadowed).length !== 1) throw new Error("self-test: later identical selector must shadow earlier declaration");
 
@@ -464,6 +502,13 @@ function selfTest() {
 
     const differentMedia = "@media (max-width: 500px) { .x { width: 10px; } }\n.x { width: 12px; }";
     if (shadowedDeclarations(differentMedia).length !== 0) throw new Error("self-test: different contexts must stay independent");
+
+    if (emptyAtRules("@media (max-width: 500px) { /* no rules */ }").length !== 1) {
+        throw new Error("self-test: empty at-rules must be detected");
+    }
+    if (emptyAtRules("@media (max-width: 500px) { .x { display: block; } }").length !== 0) {
+        throw new Error("self-test: non-empty at-rules must remain allowed");
+    }
 
     if (!THEME_STRUCTURAL_PROPERTIES.has("grid-template-columns") || THEME_STRUCTURAL_PROPERTIES.has("color")) {
         throw new Error("self-test: theme geometry property classification drifted");
