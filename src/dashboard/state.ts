@@ -1,5 +1,10 @@
 import settings from "../plugin/settings";
 import type { NormalizedQuest } from "../quests/data";
+import {
+    legacyDashboardRewardSelection,
+    normalizeDashboardRewardPreset,
+    serializeDashboardRewardKinds
+} from "../quests/rewardFilters";
 
 export const DASHBOARD_SETTING_KEYS = [
     "dashboardShowAvailable",
@@ -9,6 +14,8 @@ export const DASHBOARD_SETTING_KEYS = [
     "dashboardShowExpired",
     "dashboardShowIgnored",
     "dashboardExpiredAgeDays",
+    "dashboardRewardPreset",
+    "dashboardRewardCustomKinds",
     "dashboardRewardFilter",
     "dashboardIncludeUnknownRewards",
     "dashboardShowPlay",
@@ -27,7 +34,7 @@ export function dashboardFilterCount(store: any): number {
     if (store.dashboardShowClaimed !== true) count++;
     if (store.dashboardShowExpired !== true) count++;
     if (store.dashboardShowIgnored === true) count++;
-    if (store.dashboardRewardFilter !== "all") count++;
+    if (normalizeDashboardRewardPreset(store.dashboardRewardPreset) !== "all") count++;
     if (store.dashboardShowExpired === true && Math.floor(Number(store.dashboardExpiredAgeDays ?? 0)) !== 0) count++;
     if (store.dashboardShowPlay === false) count++;
     if (store.dashboardShowStream === false) count++;
@@ -38,6 +45,15 @@ export function dashboardFilterCount(store: any): number {
 }
 
 export function ensureDashboardV16FilterDefaults(): void {
+    if ((settings.store.detailedRewardFilter as string) === "non-orbs") settings.store.detailedRewardFilter = "all";
+
+    if (settings.store.dashboardRewardFilterV2Initialized !== true) {
+        const migrated = legacyDashboardRewardSelection(settings.store.dashboardRewardFilter as string);
+        settings.store.dashboardRewardPreset = migrated.preset;
+        settings.store.dashboardRewardCustomKinds = serializeDashboardRewardKinds(migrated.customKinds);
+        settings.store.dashboardRewardFilterV2Initialized = true;
+    }
+
     if (settings.store.dashboardFiltersV16Initialized === true) return;
 
     // v1.5 defaulted Claimed and Expired off, which made a fresh-looking Dashboard
@@ -48,6 +64,9 @@ export function ensureDashboardV16FilterDefaults(): void {
     settings.store.dashboardShowClaimed = true;
     settings.store.dashboardShowExpired = true;
     settings.store.dashboardExpiredAgeDays = 0;
+    settings.store.dashboardRewardPreset = "all";
+    settings.store.dashboardRewardPreset = "all";
+    settings.store.dashboardRewardPreset = "all";
     settings.store.dashboardRewardFilter = "all";
     settings.store.dashboardIncludeUnknownRewards = true;
     settings.store.dashboardShowPlay = true;

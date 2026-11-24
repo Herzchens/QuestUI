@@ -4911,3 +4911,129 @@
     text-overflow: clip !important;
     white-space: nowrap !important;
 }
+
+
+/* v1.6 Quest List heading and notification-island shell. */
+.quest-ui-theme-default .quest-ui-dashboard-filter-tools {
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-list-title {
+    color: #fff;
+    font-family: var(--font-display, var(--font-primary));
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .05px;
+    line-height: 30px;
+    margin-right: auto;
+    white-space: nowrap;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-left {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 1 auto;
+    gap: 8px;
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notification-island {
+    align-self: center;
+    background-color: #19191f !important;
+    background-image: none !important;
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 999px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+    box-sizing: border-box;
+    display: grid;
+    flex: 0 0 44px;
+    height: 44px;
+    line-height: 0;
+    padding: 0;
+    place-items: center;
+    width: 44px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notification-bell {
+    background: color-mix(in srgb, #202126 88%, #2d2637 12%);
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: #fff;
+    display: grid;
+    height: 34px;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    place-items: center;
+    width: 34px;
+}
+
+.quest-ui-theme-default .quest-ui-dashboard-notification-bell svg {
+    display: block;
+    fill: none;
+    margin: 0;
+    height: 17px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.9;
+    width: 17px;
+}
+
+@media (max-width: 720px) {
+    .quest-ui-theme-default .quest-ui-dashboard-actionbar-left {
+        flex-wrap: wrap;
+    }
+}
+
+
+/* v1.6 two-level reward filtering: preset radios above explicit detail checkboxes. */
+.quest-ui-theme-default .quest-ui-reward-filter-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-options.is-reward-presets {
+    align-items: center;
+    display: grid !important;
+    gap: 4px 10px !important;
+    grid-template-columns: repeat(5, max-content);
+}
+
+.quest-ui-theme-default .quest-ui-filter-list-options.is-reward-details {
+    align-items: center;
+    display: grid !important;
+    gap: 3px 10px !important;
+    grid-template-columns: repeat(3, minmax(0, max-content));
+}
+
+.quest-ui-theme-default .is-reward-presets .quest-ui-filter-list-row,
+.quest-ui-theme-default .is-reward-details .quest-ui-filter-list-row {
+    min-width: 0;
+    width: auto;
+}
+
+.quest-ui-theme-default .quest-ui-reward-detail-divider {
+    background: rgba(255,255,255,.07);
+    height: 1px;
+    width: 100%;
+}
+
+@media (max-width: 720px) {
+    .quest-ui-theme-default .quest-ui-filter-list-options.is-reward-presets,
+    .quest-ui-theme-default .quest-ui-filter-list-options.is-reward-details {
+        grid-template-columns: repeat(2, max-content);
+    }
+}
+
+@media (max-width: 520px) {
+    .quest-ui-theme-default .quest-ui-filter-list-options.is-reward-presets,
+    .quest-ui-theme-default .quest-ui-filter-list-options.is-reward-details {
+        grid-template-columns: 1fr;
+    }
+}

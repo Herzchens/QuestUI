@@ -14,9 +14,28 @@ import { notifyUpdateSettingsChanged } from "../updates/runtime";
 
 const rewardOptions = [
     { label: "All rewards", value: "all", default: true },
-    { label: "Orbs only", value: "orbs" },
-    { label: "Non-Orb rewards", value: "non-orbs" }
+    { label: "Orbs", value: "orbs" },
+    { label: "Reward Code", value: "reward-code" },
+    { label: "In-game Reward", value: "in-game" },
+    { label: "Avatar Decoration", value: "avatar-decoration" },
+    { label: "Profile Effect", value: "profile-effect" },
+    { label: "Nameplate", value: "nameplate" },
+    { label: "Profile Frame", value: "profile-frame" },
+    { label: "Bundle", value: "bundle" },
+    { label: "Collectible", value: "collectible" },
+    { label: "Nitro Credits", value: "nitro-credits" }
 ] as const;
+
+const dashboardRewardPresetOptions = [
+    { label: "All", value: "all", default: true },
+    { label: "Orbs", value: "orbs" },
+    { label: "Collectible", value: "collectible" },
+    { label: "In Game Reward", value: "in-game" },
+    { label: "Custom", value: "custom" }
+] as const;
+
+const DEFAULT_DASHBOARD_REWARD_CUSTOM_KINDS =
+    "orbs,avatar-decoration,profile-effect,nameplate,profile-frame,bundle,collectible,nitro-credits,reward-code,in-game,unknown";
 
 const dashboardSortOptions = [
     { label: "Expiring Soon", value: "expiring", default: true },
@@ -204,10 +223,28 @@ export default definePluginSettings({
         description: "Internal migration marker for the v1.6 Dashboard filter baseline.",
         default: false
     },
+    dashboardRewardPreset: {
+        type: OptionType.SELECT,
+        displayName: "Dashboard • Reward Preset",
+        description: "Internal Dashboard reward preset.",
+        options: dashboardRewardPresetOptions
+    },
+    dashboardRewardCustomKinds: {
+        type: OptionType.STRING,
+        displayName: "Dashboard • Custom Reward Types",
+        description: "Internal persisted custom reward-type selection.",
+        default: DEFAULT_DASHBOARD_REWARD_CUSTOM_KINDS
+    },
+    dashboardRewardFilterV2Initialized: {
+        type: OptionType.BOOLEAN,
+        displayName: "Dashboard • v1.6 reward filter initialized",
+        description: "Internal migration marker for the v1.6 two-level reward filter.",
+        default: false
+    },
     dashboardRewardFilter: {
         type: OptionType.SELECT,
-        displayName: "Dashboard • Reward Filter",
-        description: "Dashboard reward filter.",
+        displayName: "Dashboard • Legacy Reward Filter",
+        description: "Legacy Dashboard reward filter retained for migration.",
         options: rewardOptions
     },
     dashboardIncludeUnknownRewards: {
@@ -340,6 +377,9 @@ export default definePluginSettings({
     dashboardShowIgnored: { hidden: true },
     dashboardExpiredAgeDays: { hidden: true },
     dashboardFiltersV16Initialized: { hidden: true },
+    dashboardRewardPreset: { hidden: true },
+    dashboardRewardCustomKinds: { hidden: true },
+    dashboardRewardFilterV2Initialized: { hidden: true },
     dashboardRewardFilter: { hidden: true },
     dashboardIncludeUnknownRewards: { hidden: true },
     dashboardShowPlay: { hidden: true },

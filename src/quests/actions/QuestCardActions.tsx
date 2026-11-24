@@ -11,7 +11,13 @@ import {
     isOrionCommandReady
 } from "../../orion/integration";
 import { OrionQuestControl } from "../../orion/OrionQuestControl";
-import { claimQuestReward, enrollQuest, openQuestRewardCode, QuestActionError } from "./native";
+import {
+    claimQuestReward,
+    enrollQuest,
+    prepareQuestRewardCode,
+    QuestActionError,
+    useNativeQuestRewardOpener
+} from "./native";
 import { isExplicitRewardCodeConfig } from "./responses";
 import { getClaimAllRuntimeState } from "./claimAllState";
 import type { QuestActionResult } from "./native";
@@ -71,6 +77,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
     const showViewCode = quest.status === "claimed"
         && isExplicitRewardCodeConfig(quest.rawQuest?.config?.rewardsConfig);
     const currentUserIdFromStore = useStateFromStores([UserStore], currentUserId);
+    const openNativeQuestReward = useNativeQuestRewardOpener(quest);
     const { orionIntegration } = settings.use(["orionIntegration"]);
     const [pending, setPending] = useState(false);
     const [ignorePending, setIgnorePending] = useState(false);
@@ -179,7 +186,8 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
         if (!showViewCode || pending || currentUserIdFromStore == null) return;
         setPending(true);
         try {
-            await openQuestRewardCode(quest);
+            await prepareQuestRewardCode(quest);
+            openNativeQuestReward();
         } catch (error) {
             const message = error instanceof QuestActionError
                 ? error.message
@@ -314,7 +322,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                     disabled={pending || currentUserIdFromStore == null}
                     aria-busy={pending}
                     onClick={() => void viewCode()}
-                    title="Open this claimed reward code in Discord Gift Inventory"
+                    title="Open this claimed reward code in Discord's native Reward Code modal"
                 >
                     {pending ? "Opening…" : "View Code"}
                 </button>

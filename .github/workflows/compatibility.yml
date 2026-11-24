@@ -118,6 +118,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/sort.test.ts
 
+      - name: Test Dashboard reward filter logic
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/rewardFilters.test.ts
+
       - name: Test Dashboard open routing logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/open.test.ts
@@ -232,6 +236,11 @@ jobs:
             'v1.6.0-beta1'
             'Highest Orb Reward'
             'Shortest Required Time'
+            'Quest List'
+            'Avatar Decoration'
+            'Nitro Credits'
+            'Gift Code'
+            'In Game Item'
             'Event Log'
             'Ignored'
             'Quest ready to claim'

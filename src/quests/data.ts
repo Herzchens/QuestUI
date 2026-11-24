@@ -1,15 +1,21 @@
-import { findByCodeLazy } from "@webpack";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
 
 import { orbRewardAmounts } from "../orbs/rewards";
+import {
+    dashboardRewardKindsForPreset,
+    normalizeDashboardRewardPreset,
+    REWARD_DETAIL_KINDS,
+    type RewardFilter,
+    type RewardKind
+} from "./rewardFilters";
 import { sameQuestShortcutSnapshot } from "./shortcut";
 import { QuestsStore } from "../plugin/stores";
 
 export type QuestStatus = "available" | "in-progress" | "claimable" | "claimed" | "expired";
 export type AttentionStatus = "available" | "in-progress" | "claimable";
 export type QuestTaskType = "play" | "stream" | "video" | "activity" | "other";
-export type RewardKind = "orbs" | "non-orbs" | "unknown";
-export type RewardFilter = "all" | "orbs" | "non-orbs";
+export type { RewardFilter, RewardKind } from "./rewardFilters";
 export type QuestSnapshotMode = "live" | "shortcut";
 
 export interface NormalizedTask {
@@ -23,6 +29,7 @@ export interface NormalizedTask {
 
 export interface NormalizedReward {
     kind: RewardKind;
+    kinds: RewardKind[];
     label: string;
     orbQuantity: number;
     boostedOrbQuantity: number;
@@ -100,6 +107,72 @@ const getDiscordSelectedTaskDetails = findByCodeLazy(
     "includeTaskTypes"
 ) as (quest: any, includeTaskTypes?: Set<string>) => DiscordTaskDetails | null;
 
+const StorefrontProductStore = findStoreLazy("StorefrontProductStore") as {
+    getProductsForSku?: (skuId: string) => any[] | undefined;
+};
+
+const REWARD_CODE = 1;
+const IN_GAME_REWARD = 2;
+const COLLECTIBLE_REWARD = 3;
+const VIRTUAL_CURRENCY_REWARD = 4;
+const FRACTIONAL_PREMIUM_REWARD = 5;
+
+const AVATAR_DECORATION = 0;
+const PROFILE_EFFECT = 1;
+const NAMEPLATE = 2;
+const PROFILE_FRAME = 3;
+const COLLECTIBLE_BUNDLE = 1000;
+
+function collectibleKindForSku(skuId: unknown): RewardKind {
+    if (typeof skuId !== "string" || !skuId) return "collectible";
+
+    try {
+        const products = StorefrontProductStore?.getProductsForSku?.(skuId) ?? [];
+        for (const product of products) {
+            const rawType = product?.type ?? product?.tenantMetadata?.collectibles?.type;
+            if (rawType === AVATAR_DECORATION) return "avatar-decoration";
+            if (rawType === PROFILE_EFFECT) return "profile-effect";
+            if (rawType === NAMEPLATE) return "nameplate";
+            if (rawType === PROFILE_FRAME) return "profile-frame";
+            if (rawType === COLLECTIBLE_BUNDLE) return "bundle";
+        }
+    } catch { }
+
+    // Storefront metadata is cache-backed and may not be hydrated yet. Keep a truthful generic
+    // Collectible bucket rather than guessing from the localized reward name.
+    return "collectible";
+}
+
+function configuredRewardKind(rewards: any[]): RewardKind {
+    // Match Discord's current reward-modal precedence so mixed/future configurations do not
+    // disagree between the card action path and Dashboard filtering.
+    if (rewards.some(reward => reward?.type === FRACTIONAL_PREMIUM_REWARD)) return "nitro-credits";
+
+    const collectible = rewards.find(reward => reward?.type === COLLECTIBLE_REWARD);
+    if (collectible) return collectibleKindForSku(collectible.skuId);
+
+    if (rewards.some(reward => reward?.type === IN_GAME_REWARD)) return "in-game";
+    if (rewards.some(reward => reward?.type === VIRTUAL_CURRENCY_REWARD)) return "orbs";
+    if (rewards.some(reward => reward?.type === REWARD_CODE)) return "reward-code";
+    return "unknown";
+}
+
+function configuredRewardKinds(rewards: any[]): RewardKind[] {
+    if (rewards.length === 0) return ["unknown"];
+
+    const found = new Set<RewardKind>();
+    for (const reward of rewards) {
+        if (reward?.type === FRACTIONAL_PREMIUM_REWARD) found.add("nitro-credits");
+        else if (reward?.type === COLLECTIBLE_REWARD) found.add(collectibleKindForSku(reward?.skuId));
+        else if (reward?.type === IN_GAME_REWARD) found.add("in-game");
+        else if (reward?.type === VIRTUAL_CURRENCY_REWARD) found.add("orbs");
+        else if (reward?.type === REWARD_CODE) found.add("reward-code");
+        else found.add("unknown");
+    }
+
+    return REWARD_DETAIL_KINDS.filter(kind => found.has(kind));
+}
+
 // This is only a Dashboard/live-progress render clock. Shortcut surfaces use a
 // store-driven subscription so their interactive Header Bar target is not forced
 // through a new render four times per second when only progress changes.
@@ -168,31 +241,50 @@ function rewardInfo(quest: any): NormalizedReward {
         : [];
 
     const { base: orbQuantity, boosted: boostedOrbQuantity } = orbRewardAmounts(rewards);
-
     const names = rewards
         .map((reward: any) => reward?.messages?.name)
         .filter((name: any): name is string => typeof name === "string" && name.trim().length > 0);
 
-    const hasOrbName = names.some((name: string) => /\borbs?\b/i.test(name));
-    if (orbQuantity > 0 || hasOrbName) {
+    let kind = configuredRewardKind(rewards);
+    let kinds = configuredRewardKinds(rewards);
+    // Older virtual-currency payloads can expose quantity/name before the numeric type reaches
+    // the store. Preserve the already-proven Orb detector only as a compatibility fallback.
+    if (kind === "unknown" && (orbQuantity > 0 || names.some((name: string) => /\borbs?\b/i.test(name)))) {
+        kind = "orbs";
+        kinds = ["orbs"];
+    }
+
+    if (kind === "orbs") {
         return {
-            kind: "orbs",
-            label: orbQuantity > 0 ? `${Math.round(orbQuantity).toLocaleString()} Orbs` : names.join(" + "),
+            kind,
+            kinds,
+            label: orbQuantity > 0 ? `${Math.round(orbQuantity).toLocaleString()} Orbs` : names.join(" + ") || "Orbs",
             orbQuantity,
             boostedOrbQuantity
         };
     }
 
-    if (rewards.length > 0 || names.length > 0) {
+    if (kind !== "unknown") {
         return {
-            kind: "non-orbs",
-            label: names.length > 0 ? names.join(" + ") : "Reward",
+            kind,
+            kinds,
+            label: names.length > 0 ? names.join(" + ") : ({
+                "reward-code": "Reward Code",
+                "in-game": "In-game Reward",
+                "avatar-decoration": "Avatar Decoration",
+                "profile-effect": "Profile Effect",
+                nameplate: "Nameplate",
+                "profile-frame": "Profile Frame",
+                bundle: "Collectible Bundle",
+                collectible: "Collectible",
+                "nitro-credits": "Nitro Credits"
+            } as Record<Exclude<RewardKind, "orbs" | "unknown">, string>)[kind],
             orbQuantity: 0,
             boostedOrbQuantity: 0
         };
     }
 
-    return { kind: "unknown", label: "Unknown reward", orbQuantity: 0, boostedOrbQuantity: 0 };
+    return { kind: "unknown", kinds, label: names.join(" + ") || "Unknown reward", orbQuantity: 0, boostedOrbQuantity: 0 };
 }
 
 function taskTypeForKey(key: string): QuestTaskType {
@@ -483,11 +575,9 @@ export function filterQuests(quests: NormalizedQuest[], scope: QuestScope): Norm
         }
 
         if (scope.rewards !== "all") {
-            if (quest.reward.kind === "unknown") {
-                if (!scope.includeUnknownRewards) return false;
-            } else if (quest.reward.kind !== scope.rewards) {
-                return false;
-            }
+            if (scope.rewards.length === 0) return false;
+            const rewardKinds = quest.reward.kinds?.length > 0 ? quest.reward.kinds : [quest.reward.kind];
+            if (!rewardKinds.some(kind => scope.rewards !== "all" && scope.rewards.includes(kind))) return false;
         }
 
         const taskTypes = quest.tasks.length > 0
@@ -498,8 +588,11 @@ export function filterQuests(quests: NormalizedQuest[], scope: QuestScope): Norm
     });
 }
 
-function normalizeRewardFilter(value: any): RewardFilter {
-    return value === "orbs" || value === "non-orbs" ? value : "all";
+function normalizeDetailedRewardFilter(value: any, includeUnknownRewards: boolean): RewardFilter {
+    if (value === "all") return "all";
+    const selected = REWARD_DETAIL_KINDS.find(kind => kind !== "unknown" && kind === value);
+    if (!selected) return "all";
+    return includeUnknownRewards ? [selected, "unknown"] : [selected];
 }
 
 function normalizeExpiredAgeDays(value: any): number | null {
@@ -508,6 +601,11 @@ function normalizeExpiredAgeDays(value: any): number | null {
 }
 
 export function dashboardScopeFromSettings(store: any): QuestScope {
+    const rewardPreset = normalizeDashboardRewardPreset(store.dashboardRewardPreset);
+    const selectedRewardKinds = rewardPreset === "all"
+        ? "all"
+        : dashboardRewardKindsForPreset(rewardPreset, store.dashboardRewardCustomKinds);
+
     return {
         statuses: {
             available: store.dashboardShowAvailable !== false,
@@ -517,10 +615,8 @@ export function dashboardScopeFromSettings(store: any): QuestScope {
             expired: store.dashboardShowExpired === true
         },
         expiredAgeDays: normalizeExpiredAgeDays(store.dashboardExpiredAgeDays),
-        rewards: normalizeRewardFilter(store.dashboardRewardFilter),
-        // The old toggle is intentionally no longer a Dashboard control. Unknown future reward
-        // formats stay visible instead of being silently affected by stale persisted state.
-        includeUnknownRewards: true,
+        rewards: selectedRewardKinds,
+        includeUnknownRewards: selectedRewardKinds === "all" || selectedRewardKinds.includes("unknown"),
         taskTypes: {
             play: store.dashboardShowPlay !== false,
             stream: store.dashboardShowStream !== false,
@@ -543,7 +639,10 @@ export function detailedScopeFromSettings(store: any): QuestScope {
             expired: false
         },
         expiredAgeDays: null,
-        rewards: normalizeRewardFilter(store.detailedRewardFilter),
+        rewards: normalizeDetailedRewardFilter(
+            store.detailedRewardFilter,
+            store.detailedIncludeUnknownRewards !== false
+        ),
         includeUnknownRewards: store.detailedIncludeUnknownRewards !== false,
         taskTypes: {
             play: store.detailedShowPlay !== false,

@@ -138,6 +138,19 @@ function QuestDashboardDisplayTitle() {
     );
 }
 
+function DashboardNotificationIsland() {
+    return (
+        <div className="quest-ui-dashboard-notification-island" aria-hidden="true">
+            <span className="quest-ui-dashboard-notification-bell">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                    <path d="M10 21h4" />
+                </svg>
+            </span>
+        </div>
+    );
+}
+
 export function QuestDashboardShell({ closePopout }: { closePopout?: () => void; }) {
     const { orionIntegration } = settings.use(["orionIntegration"]);
     useSettings(["plugins.OrionQuests.enabled"]);
@@ -150,13 +163,16 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
                 <QuestOrbBalance closePopout={closePopout} />
             </div>
             <div className="quest-ui-dashboard-actionbar" aria-label="Quest Dashboard controls">
-                <div className="quest-ui-dashboard-actionbar-primary">
-                    {showOrionControls && <OrionGlobalControls />}
-                    <ClaimAllControl />
-                    <span className="quest-ui-dashboard-action-divider" aria-hidden="true" />
-                    <QuestReloadControl />
-                    <UpdateCenterIndicator />
-                    <EventLogButton />
+                <div className="quest-ui-dashboard-actionbar-left">
+                    <div className="quest-ui-dashboard-actionbar-primary">
+                        {showOrionControls && <OrionGlobalControls />}
+                        <ClaimAllControl />
+                        <span className="quest-ui-dashboard-action-divider" aria-hidden="true" />
+                        <QuestReloadControl />
+                        <UpdateCenterIndicator />
+                        <EventLogButton />
+                    </div>
+                    <DashboardNotificationIsland />
                 </div>
                 <DashboardNoticeLane />
                 <div className="quest-ui-dashboard-actionbar-destinations">

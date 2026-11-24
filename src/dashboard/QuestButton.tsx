@@ -182,6 +182,8 @@ export function QuestButton({ type }: { type: "top-bar" | "settings-bar"; }) {
         "dashboardShowClaimable",
         "dashboardShowClaimed",
         "dashboardShowExpired",
+        "dashboardRewardPreset",
+        "dashboardRewardCustomKinds",
         "dashboardRewardFilter",
         "dashboardIncludeUnknownRewards",
         "dashboardShowPlay",

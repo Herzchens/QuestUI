@@ -5,6 +5,13 @@ import { NavigationRouter, Popout, useRef, useState } from "@webpack/common";
 import settings from "../plugin/settings";
 import { useIgnoredQuests } from "../quests/ignored/runtime";
 import { useQuestSnapshot } from "../quests/data";
+import {
+    dashboardRewardKindsForPreset,
+    normalizeDashboardRewardPreset,
+    serializeDashboardRewardKinds,
+    type DashboardRewardPreset,
+    type RewardKind
+} from "../quests/rewardFilters";
 import { normalizeDashboardSortMode, type DashboardSortMode } from "./sort";
 import {
     DASHBOARD_SETTING_KEYS,
@@ -254,6 +261,23 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
     const store = settings.store;
     const expiredAgeDays = Math.max(0, Math.floor(Number(store.dashboardExpiredAgeDays ?? 0)) || 0);
     const expiredAgePresets = [7, 15, 30, 90, 0] as const;
+    const rewardPreset = normalizeDashboardRewardPreset(store.dashboardRewardPreset);
+    const activeRewardKinds = dashboardRewardKindsForPreset(rewardPreset, store.dashboardRewardCustomKinds);
+    const activeRewardKindSet = new Set(activeRewardKinds);
+
+    const selectRewardPreset = (preset: DashboardRewardPreset) => {
+        store.dashboardRewardPreset = preset;
+    };
+
+    const toggleRewardKind = (kind: RewardKind) => {
+        const next = new Set(activeRewardKinds);
+        if (next.has(kind)) next.delete(kind);
+        else next.add(kind);
+
+        store.dashboardRewardCustomKinds = serializeDashboardRewardKinds(Array.from(next));
+        store.dashboardRewardPreset = "custom";
+    };
+
     const expiredAgeSliderIndex = (() => {
         const exact = expiredAgePresets.indexOf(expiredAgeDays as any);
         if (exact >= 0) return exact;
@@ -296,12 +320,30 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
                     </section>
                 )}
 
-                <section className="quest-ui-filter-list-section">
+                <section className="quest-ui-filter-list-section is-reward-section">
                     <h3>Reward</h3>
-                    <div className="quest-ui-filter-list-options is-radio-options" role="radiogroup" aria-label="Reward type">
-                        <FilterRadioRow checked={store.dashboardRewardFilter === "all"} label="All Rewards" onClick={() => { store.dashboardRewardFilter = "all"; }} />
-                        <FilterRadioRow checked={store.dashboardRewardFilter === "orbs"} label="Orbs" onClick={() => { store.dashboardRewardFilter = "orbs"; }} />
-                        <FilterRadioRow checked={store.dashboardRewardFilter === "non-orbs"} label="Other Rewards" onClick={() => { store.dashboardRewardFilter = "non-orbs"; }} />
+                    <div className="quest-ui-reward-filter-stack">
+                        <div className="quest-ui-filter-list-options is-radio-options is-reward-presets" role="radiogroup" aria-label="Reward preset">
+                            <FilterRadioRow checked={rewardPreset === "all"} label="All" onClick={() => selectRewardPreset("all")} />
+                            <FilterRadioRow checked={rewardPreset === "orbs"} label="Orbs" onClick={() => selectRewardPreset("orbs")} />
+                            <FilterRadioRow checked={rewardPreset === "collectible"} label="Collectible" onClick={() => selectRewardPreset("collectible")} />
+                            <FilterRadioRow checked={rewardPreset === "in-game"} label="In Game Reward" onClick={() => selectRewardPreset("in-game")} />
+                            <FilterRadioRow checked={rewardPreset === "custom"} label="Custom" onClick={() => selectRewardPreset("custom")} />
+                        </div>
+                        <div className="quest-ui-reward-detail-divider" aria-hidden="true" />
+                        <div className="quest-ui-filter-list-options is-reward-details" role="group" aria-label="Detailed reward types">
+                            <FilterCheckRow checked={activeRewardKindSet.has("orbs")} label="Orbs" onClick={() => toggleRewardKind("orbs")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("avatar-decoration")} label="Avatar Decoration" onClick={() => toggleRewardKind("avatar-decoration")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("profile-effect")} label="Profile Effect" onClick={() => toggleRewardKind("profile-effect")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("nameplate")} label="Nameplate" onClick={() => toggleRewardKind("nameplate")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("profile-frame")} label="Profile Frame" onClick={() => toggleRewardKind("profile-frame")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("bundle")} label="Bundle" onClick={() => toggleRewardKind("bundle")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("collectible")} label="Other Collectible" onClick={() => toggleRewardKind("collectible")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("nitro-credits")} label="Nitro Credits" onClick={() => toggleRewardKind("nitro-credits")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("reward-code")} label="Gift Code" onClick={() => toggleRewardKind("reward-code")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("in-game")} label="In Game Item" onClick={() => toggleRewardKind("in-game")} />
+                            <FilterCheckRow checked={activeRewardKindSet.has("unknown")} label="Unknown / Future" onClick={() => toggleRewardKind("unknown")} />
+                        </div>
                     </div>
                 </section>
 
@@ -379,6 +421,7 @@ export function QuestDashboardFilterSortControls() {
 
     return (
         <div className="quest-ui-dashboard-filter-tools">
+            <strong className="quest-ui-dashboard-list-title">Quest List</strong>
             <Popout
                 position="bottom"
                 align="right"

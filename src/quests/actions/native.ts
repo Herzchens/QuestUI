@@ -1,5 +1,5 @@
 import { findByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { SettingsRouter, UserStore } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 
 import {
     assessClaimResponse,
@@ -24,6 +24,13 @@ const SUBMITTED_ACTION_HOLD_MS = 15000;
 type NativeEnrollQuest = (questId: string, context: { questContent: number; }) => Promise<unknown>;
 type NativeClaimQuestReward = (questId: string, platform: number, location: number) => Promise<unknown>;
 type NativeFetchQuestRewardCode = (questId: string) => Promise<unknown>;
+type NativeQuestRewardActionHook = (options: {
+    quest: any;
+    questContent: number;
+    sourceQuestContent: number;
+    questContentPosition?: number;
+    questContentRowIndex?: number;
+}) => () => void;
 type QuestActionKind = "enroll" | "claim";
 type StoreWaitResult = "confirmed" | "timeout" | "unavailable" | "account-changed";
 
@@ -72,6 +79,15 @@ const nativeFetchQuestRewardCode = findByCodeLazy(
     "QUESTS_FETCH_REWARD_CODE_SUCCESS",
     "QUESTS_FETCH_REWARD_CODE_FAILURE"
 ) as NativeFetchQuestRewardCode;
+
+// Use Discord's native Quest reward CTA hook instead of mounting the reward modal component
+// ourselves. The hook delegates claimed reward-code quests to Discord's own lazy modal opener,
+// which supplies the visibility/context wrappers that the modal component requires.
+const useNativeQuestRewardAction = findByCodeLazy(
+    "hasVerifiedEmailOrPhone",
+    "CLAIM_REWARD",
+    "sourceQuestContent"
+) as NativeQuestRewardActionHook;
 
 const inFlightActions = new Set<string>();
 const submittedActions = new Set<string>();
@@ -423,7 +439,17 @@ export async function enrollQuest(quest: NormalizedQuest): Promise<QuestActionRe
 }
 
 
-export async function openQuestRewardCode(quest: NormalizedQuest): Promise<void> {
+export function useNativeQuestRewardOpener(quest: NormalizedQuest): () => void {
+    const rawQuest = currentQuest(quest.id) ?? quest.rawQuest;
+
+    return useNativeQuestRewardAction({
+        quest: rawQuest,
+        questContent: QUEST_HOME_DESKTOP_LOCATION,
+        sourceQuestContent: QUEST_HOME_DESKTOP_LOCATION
+    });
+}
+
+export async function prepareQuestRewardCode(quest: NormalizedQuest): Promise<void> {
     const userId = requireCurrentUserId();
     const rawQuest = currentQuest(quest.id);
     ensureCurrentQuestShape(rawQuest);
@@ -449,12 +475,6 @@ export async function openQuestRewardCode(quest: NormalizedQuest): Promise<void>
 
     if (currentUserId() !== userId) {
         throw new QuestActionError("Discord account changed while loading the Quest reward code.");
-    }
-
-    try {
-        await SettingsRouter.openUserSettings("gift_panel");
-    } catch (error) {
-        throw new QuestActionError("Discord could not open Gift Inventory.", error);
     }
 }
 
