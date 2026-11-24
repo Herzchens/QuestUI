@@ -12,6 +12,7 @@ import type { EventLogEvent } from "../../src/eventLog/types";
 import { normalizePersistedEvent } from "../../src/eventLog/validation";
 import { findQuestByIdentity, safeQuestArtworkUrl, taskTypeForKey } from "../../src/quests/presentationLogic";
 import { formatQuestRewardLabel } from "../../src/orbs/rewards";
+import { availableUpdateNoticeVersion, rememberUpdateNotice } from "../../src/updates/notificationLogic";
 
 function event(overrides: Partial<EventLogEvent> = {}): EventLogEvent {
     return {
@@ -50,7 +51,20 @@ assert.equal(notificationCenterPresentation(event({ source: "orion", severity: "
 assert.equal(notificationCenterPresentation(event({ source: "orion", severity: "success", eventCode: "task.completed", summary: "Task completed" })), null);
 assert.equal(notificationCenterPresentation(event({ severity: "success", eventCode: "QUEST_READY_TO_CLAIM", summary: "Ready to claim" })), null);
 assert.equal(notificationCenterPresentation(event({ source: "orion", severity: "info", eventCode: "engine.stopped", summary: "Engine stopped" })), null);
-assert.equal(notificationCenterPresentation(event({ source: "questui", severity: "info", eventCode: "QUESTUI_UPDATE_AVAILABLE", summary: "Update available" })), null);
+for (const product of ["QUESTUI", "ORION"]) {
+    for (const [outcome, tone] of [["AVAILABLE", "info"], ["SUCCEEDED", "success"], ["FAILED", "error"]]) {
+        const item = notificationCenterPresentation(event({
+            source: "questui", eventCode: product + "_UPDATE_" + outcome,
+            detail: { fromVersion: "v1.0.0", toVersion: "v1.1.0", restartRequired: true }
+        }));
+        assert.equal(item?.kind, "update");
+        assert.equal(item?.tone, tone);
+        assert.equal(item?.description, outcome === "SUCCEEDED" ? "Restart Discord to apply the update." : outcome === "FAILED" ? item?.description : "");
+    }
+}
+assert.equal(notificationCenterPresentation(event({ eventCode: "QUESTUI_UPDATE_STARTED" })), null);
+assert.equal(notificationCenterPresentation(event({ eventCode: "ORION_UPDATE_DECISION_REQUIRED" })), null);
+assert.equal(notificationCenterPresentation(event({ eventCode: "ORION_UPDATE_KEPT" })), null);
 
 const taskFailure = event({
     id: "evt-error",
@@ -159,5 +173,31 @@ const rewardItems = notificationCenterItems([
 assert.equal(rewardItems.length, 1);
 assert.equal(notificationQuestMeta(rewardItems[0], null), "Quest One · Reward: 240 Orbs");
 assert.equal(notificationQuestMeta(rewardItems[0], { name: "Changed", rewardLabel: "200 Orbs" }), "Quest One · Reward: 240 Orbs");
+
+const updateRow = notificationCenterItems([
+    event({ id: "update", timestamp: 304, eventCode: "ORION_UPDATE_AVAILABLE", quest: null,
+        detail: { fromVersion: "v4.10.7", toVersion: "v4.11.0" } }),
+    event({ id: "other-update", timestamp: 305, accountId: "acct-b", eventCode: "QUESTUI_UPDATE_SUCCEEDED" })
+], "acct-a", account);
+assert.equal(updateRow.length, 1);
+assert.equal(notificationQuestMeta(updateRow[0], null), "v4.10.7 → v4.11.0");
+let history = rememberUpdateNotice(null, "123", "questui", "v1.6.0-beta3");
+assert.equal(history.added, true);
+history = rememberUpdateNotice(history.history, "123", "questui", "v1.6.0-beta3");
+assert.equal(history.added, false);
+history = rememberUpdateNotice(history.history, "123", "orion", "v1.6.0-beta3");
+assert.equal(history.added, true);
+history = rememberUpdateNotice(history.history, "456", "questui", "v1.6.0-beta3");
+assert.equal(history.added, true);
+assert.equal(rememberUpdateNotice(history.history, "123", "questui", "v1.6.0-beta3").added, false);
+assert.equal(rememberUpdateNotice({}, "123", "questui", "invalid").added, false);
+assert.equal(availableUpdateNoticeVersion({ kind: "up-to-date", installed: "v1.0.0" }), null);
+const available = { kind: "available" as const, installed: "v1.0.0", release: {
+    tagName: "v1.1.0", name: null, htmlUrl: "https://github.com/Herzchens/QuestUI/releases/tag/v1.1.0",
+    publishedAt: null, prerelease: false, draft: false as const
+}, suppression: null, snoozeUntil: null };
+assert.equal(availableUpdateNoticeVersion(available), "v1.1.0");
+assert.equal(availableUpdateNoticeVersion({ ...available, suppression: "skipped" }), null);
+assert.equal(availableUpdateNoticeVersion({ ...available, suppression: "snoozed" }), null);
 
 console.log("QuestUI Notification Center logic tests - PASS");

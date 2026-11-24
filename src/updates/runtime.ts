@@ -13,6 +13,7 @@ import {
     type ReleaseLike
 } from "./logic";
 import { QUESTUI_VERSION } from "../plugin/version";
+import { currentUpdateAccountId, recordAvailableUpdate } from "./notificationEvents";
 
 export type UpdateProduct = "questui" | "orion";
 export type UpdateSuppression = "skipped" | "snoozed" | null;
@@ -537,6 +538,7 @@ async function runUpdateCheck(
 ): Promise<UpdateSnapshot> {
     if (!isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) return snapshot;
 
+    const accountId = currentUpdateAccountId();
     lastAttemptAt = startedAt;
     snapshot = { ...snapshot, checking: true };
     notify();
@@ -568,6 +570,23 @@ async function runUpdateCheck(
     };
     notify();
     scheduleNextCheck();
+
+    // Only successful fresh checks may introduce availability notifications.
+    // Do not emit from cache hydration, failed feeds or stale account transitions.
+    if (accountId) {
+        const isCurrent = () => isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)
+            && currentUpdateAccountId() === accountId;
+        const publish = (product: UpdateProduct, state: PluginUpdateState) => {
+            const stillEligible = () => {
+                const current = product === "questui" ? snapshot.questUI : snapshot.orion;
+                return isCurrent() && current.kind === "available" && current.suppression === null
+                    && state.kind === "available" && current.release.tagName === state.release.tagName;
+            };
+            return recordAvailableUpdate(product, state, accountId, stillEligible);
+        };
+        if (questResult.ok) await publish("questui", snapshot.questUI);
+        if (orionResult?.ok) await publish("orion", snapshot.orion);
+    }
     return snapshot;
 }
 

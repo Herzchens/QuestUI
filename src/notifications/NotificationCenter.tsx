@@ -8,6 +8,7 @@ import { findQuestByIdentity, safeQuestArtworkUrl, taskTypeForKey } from "../que
 import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { formatQuestRewardLabel } from "../orbs/rewards";
 import { dashboardThemeClassName } from "../themes/runtime";
+import { UpdateCenterIcon } from "../updates/status";
 import {
     notificationCenterItems,
     notificationQuestMeta,
@@ -206,6 +207,7 @@ function TaskTypeGlyph({ type }: { type: QuestTaskType; }) {
 }
 
 function NotificationFallbackIcon({ item }: { item: NotificationCenterItem; }) {
+    if (item.kind === "update") return <UpdateCenterIcon />;
     if (item.tone === "error" || item.tone === "warning") {
         return (
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -261,7 +263,7 @@ function NotificationQuestArtwork({ item, quest }: {
 }
 
 function showNotificationDescription(item: NotificationCenterItem): boolean {
-    if (item.kind !== "problem") return false;
+    if (item.kind !== "problem" && item.kind !== "update") return false;
     const description = item.description.trim().toLocaleLowerCase();
     const title = item.title.trim().toLocaleLowerCase();
     return description.length > 0 && description !== title;
@@ -382,7 +384,7 @@ export function NotificationCenterPanel({ feed }: { feed: NotificationCenterFeed
                 ) : feed.items.length === 0 ? (
                     <div className="quest-ui-notification-center-empty">
                         <strong>You're all caught up</strong>
-                        <span>New quests, successful Quest actions, and important failures will appear here.</span>
+                        <span>New quests, confirmed Quest actions, updates, and important failures will appear here.</span>
                     </div>
                 ) : feed.items.map(item => {
                     const quest = findQuestByIdentity({ id: item.questId, name: item.questName }, feed.quests);

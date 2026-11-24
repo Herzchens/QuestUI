@@ -5,6 +5,7 @@ import { recordQuestUIEvent } from "../eventLog/runtime";
 import type { QuestUIUpdateResult } from "./questui/native";
 import { skipUpdate, snoozeUpdate, type PluginUpdateState, type UpdateProduct } from "./runtime";
 import { productLabel } from "./status";
+import { currentUpdateAccountId } from "./notificationEvents";
 
 export interface ManagedReleaseUpdateResult {
     ok: boolean;
@@ -103,7 +104,8 @@ function recordManagedUpdateEvent(
     outcome: ManagedUpdateEventOutcome,
     result: ManagedReleaseUpdateResult | null,
     installed: string,
-    target: string
+    target: string,
+    accountId: string | null
 ): void {
     const rollbackFailed = result?.status === "rollback-failed";
     const fromVersion = result?.fromVersion ?? installed;
@@ -114,6 +116,7 @@ function recordManagedUpdateEvent(
         category: "diagnostic",
         eventCode: managedUpdateEventCode(product, outcome),
         summary: managedUpdateSummary(product, outcome, result, installed, target),
+        accountId,
         detail: {
             product,
             message: result?.message ?? null,
@@ -130,6 +133,7 @@ function recordManagedUpdateEvent(
             localCommitCount: result?.decision?.localCommitCount ?? null,
             updateTrace: managedUpdateTrace(outcome, result, installed, target),
             diagnostic: result?.diagnostic ?? null,
+            restartRequired: result?.restartRequired === true,
             terminal: rollbackFailed
         }
     });
@@ -143,16 +147,17 @@ function applyManagedUpdateResult(
     product: UpdateProduct,
     state: AvailableUpdateState,
     result: ManagedReleaseUpdateResult,
-    setUpdateResult: (value: ManagedReleaseUpdateResult | null) => void
+    setUpdateResult: (value: ManagedReleaseUpdateResult | null) => void,
+    accountId: string | null
 ): void {
     setUpdateResult(result);
 
     if (result.status === "decision-required") {
-        recordManagedUpdateEvent(product, "decision-required", result, state.installed, state.release.tagName);
+        recordManagedUpdateEvent(product, "decision-required", result, state.installed, state.release.tagName, accountId);
         return;
     }
     if (result.status === "kept") {
-        recordManagedUpdateEvent(product, "kept", result, state.installed, state.release.tagName);
+        recordManagedUpdateEvent(product, "kept", result, state.installed, state.release.tagName, accountId);
         return;
     }
 
@@ -161,9 +166,10 @@ function applyManagedUpdateResult(
         result.ok ? "succeeded" : "failed",
         result,
         state.installed,
-        state.release.tagName
+        state.release.tagName,
+        accountId
     );
-    showToast({ text: result.message, variant: result.ok ? "success" : "critical" });
+    if (currentUpdateAccountId() === accountId) showToast({ text: result.message, variant: result.ok ? "success" : "critical" });
 }
 
 function managedUpdateInvocationFailure(message: string, error: unknown): ManagedReleaseUpdateResult {
@@ -183,24 +189,25 @@ export async function runManagedReleaseUpdate(
     setPending: (value: UpdatePendingAction) => void,
     setUpdateResult: (value: ManagedReleaseUpdateResult | null) => void
 ): Promise<void> {
+    const accountId = currentUpdateAccountId();
     setPending("update");
     setUpdateResult(null);
-    recordManagedUpdateEvent(product, "started", null, state.installed, state.release.tagName);
+    recordManagedUpdateEvent(product, "started", null, state.installed, state.release.tagName, accountId);
 
     try {
         if (!managedNative) return;
         const result = product === "questui"
             ? await managedNative.updateQuestUIRelease(state.installed, state.release.tagName) as QuestUIUpdateResult
             : await managedNative.updateOrionRelease(state.installed, state.release.tagName);
-        applyManagedUpdateResult(product, state, result, setUpdateResult);
+        applyManagedUpdateResult(product, state, result, setUpdateResult, accountId);
     } catch (error) {
         const result = managedUpdateInvocationFailure(
             `${label} could not invoke its managed release updater.`,
             error
         );
         setUpdateResult(result);
-        recordManagedUpdateEvent(product, "failed", result, state.installed, state.release.tagName);
-        toastFailure(result.message);
+        recordManagedUpdateEvent(product, "failed", result, state.installed, state.release.tagName, accountId);
+        if (currentUpdateAccountId() === accountId) toastFailure(result.message);
     } finally {
         setPending(null);
     }
@@ -215,9 +222,10 @@ export async function runOrionUpdateDecision(
 ): Promise<void> {
     if (!managedNative || !currentResult.decision) return;
 
+    const accountId = currentUpdateAccountId();
     setPending("update");
     if (action === "discard") {
-        recordManagedUpdateEvent("orion", "discard-confirmed", currentResult, state.installed, state.release.tagName);
+        recordManagedUpdateEvent("orion", "discard-confirmed", currentResult, state.installed, state.release.tagName, accountId);
     }
 
     try {
@@ -226,15 +234,15 @@ export async function runOrionUpdateDecision(
             state.release.tagName,
             { action, token: currentResult.decision.token }
         );
-        applyManagedUpdateResult("orion", state, result, setUpdateResult);
+        applyManagedUpdateResult("orion", state, result, setUpdateResult, accountId);
     } catch (error) {
         const result = managedUpdateInvocationFailure(
             "OrionQuests could not resolve the local-work update choice.",
             error
         );
         setUpdateResult(result);
-        recordManagedUpdateEvent("orion", "failed", result, state.installed, state.release.tagName);
-        toastFailure(result.message);
+        recordManagedUpdateEvent("orion", "failed", result, state.installed, state.release.tagName, accountId);
+        if (currentUpdateAccountId() === accountId) toastFailure(result.message);
     } finally {
         setPending(null);
     }

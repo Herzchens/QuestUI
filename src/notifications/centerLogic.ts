@@ -1,7 +1,7 @@
 import type { EventLogEvent } from "../eventLog/types";
 
 export type NotificationCenterTone = "info" | "success" | "warning" | "error";
-export type NotificationCenterKind = "quest" | "reward" | "problem";
+export type NotificationCenterKind = "quest" | "reward" | "problem" | "update";
 
 export interface NotificationCenterAccountState {
     initializedAt: number;
@@ -131,6 +131,19 @@ export function notificationCenterPresentation(event: EventLogEvent): {
 } | null {
     const code = normalizedCode(event.eventCode);
     if (!code) return null;
+
+    const update = /^(QUESTUI|ORION)_UPDATE_(AVAILABLE|SUCCEEDED|FAILED)$/.exec(code);
+    if (event.source === "questui" && update) {
+        const label = update[1] === "QUESTUI" ? "QuestUI" : "OrionQuests";
+        const outcome = update[2];
+        return {
+            title: label + (outcome === "AVAILABLE" ? " update available" : outcome === "SUCCEEDED" ? " update completed" : " update failed"),
+            description: outcome === "FAILED" ? eventDescription(event)
+                : outcome === "SUCCEEDED" && event.detail?.restartRequired === true ? "Restart Discord to apply the update." : "",
+            kind: "update",
+            tone: outcome === "AVAILABLE" ? "info" : outcome === "SUCCEEDED" ? "success" : "error"
+        };
+    }
 
     // Notification Center is intentionally a small, user-facing event inbox rather than
     // a second Event Log. Only explicit Quest discovery/action outcomes and actionable
@@ -278,6 +291,11 @@ export function notificationQuestMeta(
     liveQuest: { name: string; rewardLabel: string; } | null
 ): string {
     const parts: string[] = [];
+    if (item.kind === "update") {
+        const from = typeof item.event.detail?.fromVersion === "string" ? item.event.detail.fromVersion : "";
+        const to = typeof item.event.detail?.toVersion === "string" ? item.event.detail.toVersion : "";
+        return from && to ? `${from} → ${to}` : to || from || item.source;
+    }
     const name = item.questName || liveQuest?.name;
     if (name) parts.push(name);
     const rewardLabel = item.event.quest?.rewardLabel || liveQuest?.rewardLabel;
