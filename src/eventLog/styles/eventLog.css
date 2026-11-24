@@ -412,8 +412,8 @@
 /* Runtime-polished controls, custom dropdown, and Dashboard-identical scrollbar behavior. */
 .quest-ui-event-log-panel {
     --quest-ui-event-control-bg: color-mix(in srgb, var(--background-base-lowest, #111214) 38%, var(--quest-ui-event-control-surface) 62%);
-    --quest-ui-event-control-hover: color-mix(in srgb, var(--background-base-lowest, #111214) 28%, var(--quest-ui-event-control-hover) 72%);
-    --quest-ui-event-control-pressed: color-mix(in srgb, var(--background-base-lowest, #111214) 32%, var(--quest-ui-event-control-pressed) 68%);
+    --quest-ui-event-control-hover-bg: color-mix(in srgb, var(--background-base-lowest, #111214) 28%, var(--quest-ui-event-control-hover) 72%);
+    --quest-ui-event-control-pressed-bg: color-mix(in srgb, var(--background-base-lowest, #111214) 32%, var(--quest-ui-event-control-pressed) 68%);
     --quest-ui-event-control-border: color-mix(in srgb, var(--quest-ui-theme-text-strong) 14.000000000000002%, transparent);
     --quest-ui-event-control-border-hover: color-mix(in srgb, var(--quest-ui-theme-text-strong) 26%, transparent);
 }.quest-ui-event-log-panel .quest-ui-event-search {
@@ -441,12 +441,12 @@
 .quest-ui-event-sort-trigger:hover,
 .quest-ui-event-sort-trigger.is-open {
     border-color: var(--quest-ui-event-control-border-hover, color-mix(in srgb, var(--quest-ui-theme-text-strong) 26%, transparent));
-    background: var(--quest-ui-event-control-hover, var(--quest-ui-event-control-hover));
+    background: var(--quest-ui-event-control-hover-bg);
     color: var(--quest-ui-theme-text-strong);
 }.quest-ui-event-log-panel .quest-ui-event-log-actions button:active,
 .quest-ui-event-detail .quest-ui-event-detail-header button:active,
 .quest-ui-event-sort-trigger:active {
-    background: var(--quest-ui-event-control-pressed, var(--quest-ui-event-control-pressed));
+    background: var(--quest-ui-event-control-pressed-bg);
     border-color: color-mix(in srgb, var(--quest-ui-theme-text-strong) 30%, transparent);
     color: var(--quest-ui-theme-text-strong);
 }.quest-ui-event-log-panel button:focus-visible,

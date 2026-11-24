@@ -333,6 +333,13 @@ function emptyAtRules(source) {
     return hits;
 }
 
+function hasCustomPropertySelfReference(declaration) {
+    if (!/^--[A-Za-z0-9_-]+$/.test(declaration.property)) return false;
+    return new RegExp(
+        `var\\(\\s*${declaration.property}\\s*(?:,|\\))`
+    ).test(declaration.value);
+}
+
 function collectTokenGraph(cssFiles, sourceFiles) {
     const definitions = new Map();
     const uses = new Map();
@@ -417,6 +424,15 @@ function validateRepository() {
             failures.push(`${rel}:${hit.line}: shadowed CSS declaration ${hit.property} in ${hit.selector} [${hit.context}]`);
         }
 
+        for (const rule of parseCssRules(source)) {
+            for (const declaration of rule.declarations) {
+                if (!hasCustomPropertySelfReference(declaration)) continue;
+                failures.push(
+                    `${rel}:${rule.line}: custom property self-reference ${declaration.property} in ${rule.selector}`
+                );
+            }
+        }
+
         if (rel.startsWith("src/themes/")) {
             for (const rule of parseCssRules(source)) {
                 if (!/\.quest-ui-theme-[A-Za-z0-9_-]+/.test(rule.selector)) continue;
@@ -447,12 +463,29 @@ function validateRepository() {
     for (const file of sourceFiles) {
         if (relative(file) === "src/themes/runtime.ts") continue;
         const source = stripJsComments(fs.readFileSync(file, "utf8"));
-        if (source.includes("quest-ui-theme-default") || source.includes("quest-ui-theme\"")) {
+        if (/\bquest-ui-theme(?:-default)?\b/.test(source)) {
             failures.push(`${relative(file)}: theme root classes must be applied through dashboardThemeClassName()`);
         }
     }
 
     const { definitions, uses } = collectTokenGraph(cssFiles, sourceFiles);
+    const canonicalTokenFile = "src/themes/default/tokens.css";
+    const canonicalTokens = new Set(
+        [...definitions.entries()]
+            .filter(([, locations]) => locations.some(location => location.file === canonicalTokenFile))
+            .map(([token]) => token)
+    );
+    for (const [token, locations] of definitions) {
+        if (!canonicalTokens.has(token)) continue;
+        for (const location of locations) {
+            if (location.file === canonicalTokenFile) continue;
+            if (/^src\/themes\/[^/]+\/tokens\.css$/.test(location.file)) continue;
+            failures.push(
+                `${location.file}:${location.line}: canonical theme token ${token} must only be overridden by a theme tokens.css`
+            );
+        }
+    }
+
     for (const [token, locations] of uses) {
         if (definitions.has(token)) continue;
         for (const location of locations) {
@@ -508,6 +541,15 @@ function selfTest() {
     }
     if (emptyAtRules("@media (max-width: 500px) { .x { display: block; } }").length !== 0) {
         throw new Error("self-test: non-empty at-rules must remain allowed");
+    }
+
+    const selfCycleRule = parseCssRules(".x { --quest-ui-test: var(--quest-ui-test); }")[0];
+    if (!selfCycleRule || !selfCycleRule.declarations.some(hasCustomPropertySelfReference)) {
+        throw new Error("self-test: custom-property self-cycles must remain detectable");
+    }
+    const nonCycleRule = parseCssRules(".x { --quest-ui-test: var(--quest-ui-other); }")[0];
+    if (!nonCycleRule || nonCycleRule.declarations.some(hasCustomPropertySelfReference)) {
+        throw new Error("self-test: unrelated custom-property references must remain allowed");
     }
 
     if (!THEME_STRUCTURAL_PROPERTIES.has("grid-template-columns") || THEME_STRUCTURAL_PROPERTIES.has("color")) {
