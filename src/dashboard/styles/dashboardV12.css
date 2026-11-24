@@ -885,15 +885,27 @@
 
 /* version channel semantics */
 .quest-ui-version-chip.is-stable {
-    border-color: color-mix(in srgb, var(--blue-345, #5c9ded) 55%, transparent);
-    background: color-mix(in srgb, var(--blue-345, #5c9ded) 12%, transparent);
+    border-color: color-mix(in srgb, var(--blue-345, #5c9ded) 58%, transparent);
+    background: color-mix(in srgb, var(--blue-345, #5c9ded) 13%, transparent);
     color: var(--blue-330, #79b5f8);
 }
 
+.quest-ui-version-chip.is-beta {
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 60%, transparent);
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 13%, transparent);
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-version-chip.is-alpha {
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 60%, transparent);
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 13%, transparent);
+    color: #ff7b7e;
+}
+
 .quest-ui-version-chip.is-prerelease {
-    border-color: color-mix(in srgb, var(--status-warning) 55%, transparent);
-    background: color-mix(in srgb, var(--status-warning) 11%, transparent);
-    color: var(--status-warning);
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 48%, transparent);
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 10%, transparent);
+    color: var(--brand-360, #949cf7);
 }
 
 .quest-ui-version-chip.is-unknown {

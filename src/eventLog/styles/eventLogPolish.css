@@ -9,16 +9,16 @@
 .quest-ui-event-log-panel.quest-ui-event-log-panel,
 .quest-ui-event-detail.quest-ui-event-detail {
     box-sizing: border-box;
-    width: min(600px, calc(100vw - 28px));
-    height: min(690px, calc(100vh - 88px));
-    max-height: min(690px, calc(100vh - 88px));
-    padding: 14px;
+    width: min(720px, calc(100vw - 28px));
+    height: min(620px, calc(100vh - 88px));
+    max-height: min(620px, calc(100vh - 88px));
+    padding: 12px;
     position: relative;
     isolation: isolate;
     z-index: 1000;
-    border-color: var(--border-subtle, rgba(255, 255, 255, 0.08));
-    background: var(--background-base-lowest, var(--background-primary, #111214));
-    box-shadow: var(--shadow-high, 0 18px 48px rgba(0, 0, 0, 0.5));
+    border-color: color-mix(in srgb, #a970ff 24%, rgba(255, 255, 255, 0.08));
+    background: linear-gradient(180deg, #100d17 0%, #0e0b14 100%);
+    box-shadow: 0 22px 60px rgba(0, 0, 0, .48), 0 0 0 1px color-mix(in srgb, #a970ff 7%, transparent);
 }
 
 .quest-ui-event-log-panel.quest-ui-event-log-panel {
@@ -501,4 +501,423 @@
 .quest-ui-event-detail.quest-ui-event-detail::-webkit-resizer,
 .quest-ui-event-detail .quest-ui-event-detail pre::-webkit-resizer {
     display: none !important;
+}
+
+
+/* v1.6 Event Log controls: Sort and Filter stay flat; only file actions form
+ * a compact interaction island. Query/pagination behavior is unchanged. */
+.quest-ui-event-log-panel.quest-ui-event-log-panel {
+    width: min(720px, calc(100vw - 28px));
+    height: min(620px, calc(100vh - 88px));
+    max-height: min(620px, calc(100vh - 88px));
+}
+
+.quest-ui-event-log-panel .quest-ui-event-search-shell {
+    flex: 0 0 auto;
+    margin: 9px 0 7px;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-log-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+    gap: 10px;
+    margin: 7px 0 6px;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.quest-ui-event-controls-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.quest-ui-event-flat-control {
+    min-height: 31px;
+    padding: 5px 9px;
+    border: 1px solid var(--quest-ui-event-control-border, rgba(255, 255, 255, 0.14));
+    border-radius: 7px;
+    background: var(--quest-ui-event-control-bg, #24262b);
+    color: #d7d9dc;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: inherit;
+    font-size: 11px;
+    white-space: nowrap;
+    transition:
+        background-color 110ms ease,
+        border-color 110ms ease,
+        color 110ms ease,
+        box-shadow 110ms ease;
+}
+
+.quest-ui-event-flat-control:hover,
+.quest-ui-event-flat-control.is-open {
+    border-color: var(--quest-ui-event-control-border-hover, rgba(255, 255, 255, 0.26));
+    background: var(--quest-ui-event-control-hover, #34373d);
+    color: #fff;
+}
+
+.quest-ui-event-flat-control:active {
+    background: var(--quest-ui-event-control-pressed, #2b2e33);
+}
+
+.quest-ui-event-flat-control .quest-ui-event-control-icon,
+.quest-ui-event-flat-control .quest-ui-event-sort-chevron {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.quest-ui-event-sort-trigger {
+    min-width: 132px;
+    justify-content: space-between;
+}
+
+.quest-ui-event-sort-trigger > span {
+    flex: 1 1 auto;
+    text-align: left;
+}
+
+.quest-ui-event-filter-launcher {
+    position: relative;
+}
+
+.quest-ui-event-filter-launcher.has-active-filter {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 58%, rgba(255,255,255,.14));
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-event-filter-count {
+    display: grid;
+    min-width: 15px;
+    height: 15px;
+    place-items: center;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 22%, transparent);
+    color: currentColor;
+    font: 750 8.5px/1 var(--font-code);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-log-actions > .quest-ui-event-action-island {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 8px;
+    width: max-content;
+    min-width: 96px;
+    max-width: 272px;
+    height: 48px;
+    padding: 6px 7px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 999px;
+    background: #19191f;
+    box-shadow: none;
+}
+
+/* Folder is a stable child action: always a true 36px circle. */
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-island-icon-button {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    aspect-ratio: 1 / 1;
+    flex: 0 0 36px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #2c2d34;
+    border-radius: 50%;
+    background: #1d1a1c;
+    color: #f4f4f5;
+    box-shadow: none;
+    font-size: 0;
+    line-height: 0;
+    cursor: pointer;
+    transition:
+        background-color 110ms ease,
+        border-color 110ms ease,
+        color 110ms ease,
+        transform 110ms ease;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-island-icon-button:hover {
+    border-color: #3c3d45;
+    background: #242429;
+    color: #fff;
+}
+
+.quest-ui-event-island-icon-button:active {
+    transform: scale(.94);
+}
+
+.quest-ui-event-island-icon-button:disabled {
+    cursor: default;
+    opacity: .6;
+}
+
+/* Clean Log is its own child island. It is a circle at rest and expands itself
+ * into the confirmation pill; the parent action island stays visually neutral. */
+.quest-ui-event-clean-island {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 0;
+    width: 36px;
+    min-width: 36px;
+    max-width: 188px;
+    height: 36px;
+    overflow: hidden;
+    border: 1px solid #2c2d34;
+    border-radius: 999px;
+    background: #1d1a1c;
+    color: #f4f4f5;
+    transition:
+        width 340ms cubic-bezier(.18,.82,.24,1),
+        border-color 180ms ease,
+        background-color 180ms ease;
+}
+
+.quest-ui-event-clean-island.is-expanded {
+    width: 188px;
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 34%, #2c2d34);
+    background: color-mix(in srgb, #1d1a1c 91%, var(--status-danger, #f23f42) 9%);
+}
+
+/* Reset the legacy Event Log action-button rule completely for the child trigger. */
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    min-width: 34px;
+    max-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    max-height: 34px;
+    flex: 0 0 34px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #f4f4f5;
+    box-shadow: none;
+    font-size: 0;
+    line-height: 0;
+    cursor: pointer;
+    transition:
+        background-color 110ms ease,
+        color 110ms ease,
+        transform 110ms ease;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:hover {
+    background: rgba(255,255,255,.07);
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:active {
+    transform: scale(.94);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:disabled {
+    cursor: default;
+    opacity: .72;
+}
+
+.quest-ui-event-action-icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.quest-ui-event-island-icon-button .quest-ui-event-action-icon,
+.quest-ui-event-clean-trigger .quest-ui-event-action-icon,
+.quest-ui-event-clear-confirm-button .quest-ui-event-action-icon {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.8;
+}
+
+.quest-ui-event-folder-icon {
+    width: 19px !important;
+    height: 19px !important;
+    stroke-width: 1.8 !important;
+}
+
+.quest-ui-event-folder-icon path {
+    vector-effect: non-scaling-stroke;
+}
+
+.quest-ui-event-broom-icon {
+    width: 19px !important;
+    height: 19px !important;
+    stroke-width: 1.85 !important;
+}
+
+.quest-ui-event-clear-confirm {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    max-width: 0;
+    height: 100%;
+    overflow: hidden;
+    opacity: 0;
+    white-space: nowrap;
+    pointer-events: none;
+    transition:
+        max-width 340ms cubic-bezier(.18,.82,.24,1),
+        opacity 70ms ease;
+}
+
+.quest-ui-event-clean-island.is-expanded .quest-ui-event-clear-confirm {
+    max-width: 150px;
+    opacity: 1;
+    pointer-events: auto;
+    transition:
+        max-width 340ms cubic-bezier(.18,.82,.24,1),
+        opacity 130ms ease 220ms;
+}
+
+.quest-ui-event-clear-confirm-text {
+    min-width: 70px;
+    color: var(--status-danger, #f23f42);
+    font-size: 10px;
+    font-weight: 750;
+    text-align: center;
+}
+
+.quest-ui-event-clear-confirm-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clear-confirm-button {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 27px;
+    min-width: 27px;
+    max-width: 27px;
+    height: 27px;
+    min-height: 27px;
+    max-height: 27px;
+    flex: 0 0 27px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 50%;
+    background: #202026;
+    color: #f4f4f5;
+    box-shadow: none;
+    font-size: 0;
+    line-height: 0;
+    cursor: pointer;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clear-confirm-button:hover {
+    border-color: rgba(255,255,255,.22);
+    background: #292930;
+}
+
+.quest-ui-event-clear-confirm-button .quest-ui-event-action-icon {
+    width: 13px;
+    height: 13px;
+}
+
+.quest-ui-event-clear-confirm-button.is-confirm {
+    color: var(--status-danger, #f23f42);
+}
+
+.quest-ui-event-clear-confirm-button.is-confirm:hover {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 16%, #202026);
+}
+
+.quest-ui-event-clear-confirm-button.is-cancel {
+    color: var(--text-muted, #949ba4);
+}
+
+.quest-ui-event-clean-island.is-clearing .quest-ui-event-clean-trigger {
+    color: var(--status-danger, #f23f42);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-row {
+    min-height: 44px;
+    padding: 6px 7px;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-day {
+    margin: 7px 0 4px;
+}
+
+@media (max-width: 650px) {
+    .quest-ui-event-log-panel.quest-ui-event-log-panel,
+    .quest-ui-event-detail.quest-ui-event-detail {
+        width: calc(100vw - 16px);
+        height: min(620px, calc(100vh - 56px));
+        max-height: min(620px, calc(100vh - 56px));
+        padding: 10px;
+    }
+
+    .quest-ui-event-log-panel .quest-ui-event-log-actions {
+        gap: 6px;
+    }
+
+    .quest-ui-event-sort-trigger {
+        min-width: 116px;
+    }
+}
+
+@media (max-width: 520px) {
+    .quest-ui-event-flat-control > span:not(.quest-ui-event-filter-count) {
+        display: none;
+    }
+
+    .quest-ui-event-sort-trigger {
+        min-width: 34px;
+        width: 34px;
+        padding-inline: 8px;
+    }
+
+    .quest-ui-event-action-island {
+        --quest-ui-event-action-expanded-width: 226px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-event-action-island,
+    .quest-ui-event-clear-confirm {
+        transition-duration: 1ms !important;
+        transition-delay: 0ms !important;
+    }
 }

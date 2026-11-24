@@ -1527,6 +1527,31 @@
     padding: 3px 6px;
 }
 
+/* Same tag recipe for every release channel; only the hue changes. */
+.quest-ui-theme-default .quest-ui-version-chip.is-stable {
+    background: color-mix(in srgb, var(--blue-345, #5c9ded) 12%, transparent);
+    border-color: color-mix(in srgb, var(--blue-345, #5c9ded) 42%, transparent);
+    color: var(--blue-330, #79b5f8);
+}
+
+.quest-ui-theme-default .quest-ui-version-chip.is-beta {
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 12%, transparent);
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 42%, transparent);
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-theme-default .quest-ui-version-chip.is-alpha {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 12%, transparent);
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 42%, transparent);
+    color: #ff7b7e;
+}
+
+.quest-ui-theme-default .quest-ui-version-chip.is-prerelease {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 42%, transparent);
+    color: var(--brand-360, #949cf7);
+}
+
 /* Runtime state is metadata: retain dot + text, remove the large capsule. */
 .quest-ui-theme-default .quest-ui-orion-runtime-chip {
     background: transparent;

@@ -2,8 +2,8 @@
  * the full persisted history does not mount every event at once. */
 .quest-ui-event-virtual-list {
     position: relative;
-    height: min(410px, calc(100vh - 330px));
-    min-height: 220px;
+    height: min(350px, calc(100vh - 300px));
+    min-height: 200px;
     margin-top: 4px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -80,6 +80,6 @@
 
 @media (max-height: 620px) {
     .quest-ui-event-virtual-list {
-        height: 220px;
+        height: 200px;
     }
 }

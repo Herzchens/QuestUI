@@ -1161,3 +1161,33 @@
     stroke-width: 2;
     width: 20px !important;
 }
+
+
+/* v1.6 shortcut badge cleanup for custom Discord themes. */
+.quest-ui-update-attention-badge {
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    height: 12px !important;
+    width: 12px !important;
+    right: -4px !important;
+    top: -4px !important;
+    padding: 0 !important;
+}
+
+.quest-ui-update-attention-badge > svg {
+    fill: none;
+    height: 8px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2.1;
+    width: 8px;
+}
+
+.quest-ui-enrollable [class*="iconBadge"],
+.quest-ui-enrolled [class*="iconBadge"],
+.quest-ui-claimable [class*="iconBadge"] {
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}

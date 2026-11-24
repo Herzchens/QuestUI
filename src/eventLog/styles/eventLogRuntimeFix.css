@@ -401,3 +401,212 @@
 .quest-ui-event-semantic.is-success {
     color: var(--status-positive, #23a55a);
 }
+
+
+/* Compact filter popouts live in Discord's portal layer, outside the Event Log
+ * subtree. Reapply the existing tone language there so dynamic Source / Level /
+ * Category colors are preserved instead of flattening every option to violet. */
+.quest-ui-event-filter-menu {
+    box-sizing: border-box;
+    width: 190px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: var(--background-base-lowest, #111214);
+    color: #f2f3f5;
+    box-shadow: var(--shadow-high, 0 14px 38px rgba(0, 0, 0, 0.48));
+}
+
+.quest-ui-event-filter-menu-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 1px 3px 8px;
+}
+
+.quest-ui-event-filter-menu-heading strong {
+    color: #f2f3f5;
+    font-size: 12px;
+}
+
+.quest-ui-event-filter-menu-heading span {
+    color: #949ba4;
+    font-size: 10.5px;
+}
+
+.quest-ui-event-filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice {
+    width: 100%;
+    min-height: 32px;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: #d7d9dc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font: inherit;
+    font-size: 11.5px;
+    text-align: left;
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice.is-selected {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.38);
+    background: color-mix(in srgb, var(--background-base-lowest, #111214) 26%, #454950 74%);
+}
+
+.quest-ui-event-filter-check {
+    color: var(--status-positive, #23a55a);
+    font-weight: 800;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger {
+    border: 1px solid var(--quest-ui-event-control-border, rgba(255, 255, 255, 0.14));
+    background: var(--quest-ui-event-control-bg, #24262b);
+    color: #d7d9dc;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    transition: background-color 110ms ease, border-color 110ms ease, color 110ms ease, box-shadow 110ms ease;
+}
+
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger:hover,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.is-open {
+    border-color: var(--quest-ui-event-control-border-hover, rgba(255, 255, 255, 0.26));
+    color: #fff;
+    filter: brightness(1.08);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger:active {
+    color: #fff;
+    filter: brightness(.94);
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-orion.is-selected,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-orion {
+    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 68%, rgba(255, 255, 255, 0.18));
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 13%, #24262b);
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-questui.is-selected,
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-info.is-selected,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-questui,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-info {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 68%, rgba(255, 255, 255, 0.18));
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 13%, #24262b);
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-error.is-selected,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-error {
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 72%, rgba(255, 255, 255, 0.16));
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 12%, #24262b);
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-warning.is-selected,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-warning,
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-network.is-selected,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-network {
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 68%, rgba(255, 255, 255, 0.16));
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 11%, #24262b);
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-success.is-selected,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-success {
+    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 72%, rgba(255, 255, 255, 0.16));
+    background: color-mix(in srgb, var(--status-positive, #23a55a) 12%, #24262b);
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-quest.is-selected,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-quest {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 68%, rgba(255, 255, 255, 0.18));
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 13%, #24262b);
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-runtime.is-selected,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-runtime {
+    border-color: color-mix(in srgb, var(--blue-345, #00a8fc) 68%, rgba(255, 255, 255, 0.18));
+    background: color-mix(in srgb, var(--blue-345, #00a8fc) 11%, #24262b);
+}
+
+.quest-ui-event-filter-menu .quest-ui-event-choice.tone-diagnostic.is-selected,
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.tone-diagnostic {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 48%, var(--status-danger, #f23f42));
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 9%, #24262b);
+}
+
+.quest-ui-event-log-panel .quest-ui-event-search-shell .quest-ui-event-match-count {
+    right: 10px;
+    max-width: 38%;
+    padding: 0 0 0 10px;
+    border: 0;
+    border-left: 1px solid color-mix(in srgb, var(--quest-ui-match-color) 28%, transparent);
+    border-radius: 0;
+    background: transparent;
+    font-size: 9.5px;
+}
+
+
+/* Dynamic-island focus treatment. Tone/background still comes from the existing
+ * source, level, category, storage and semantic state rules above. */
+.quest-ui-event-log-panel .quest-ui-event-filter-trigger.is-open,
+.quest-ui-event-log-panel .quest-ui-event-sort-trigger.is-open {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 14%, transparent);
+}
+
+
+/* Combined Event Log filter panel. It reuses the existing per-tone Choice
+ * colors so Source / Level / Category selections stay dynamic. */
+.quest-ui-event-combined-filter-menu {
+    width: 286px;
+}
+
+.quest-ui-event-combined-filter-menu .quest-ui-event-filter-menu-heading {
+    padding-bottom: 5px;
+}
+
+.quest-ui-event-filter-section {
+    padding: 8px 3px 3px;
+    border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.quest-ui-event-filter-section:first-of-type {
+    border-top: 0;
+}
+
+.quest-ui-event-filter-section > span {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-muted, #949ba4);
+    font: 700 9px/1.2 var(--font-code);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.quest-ui-event-combined-filter-menu .quest-ui-event-filter-options {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.quest-ui-event-combined-filter-menu .quest-ui-event-filter-options .quest-ui-event-choice {
+    width: auto;
+    min-height: 28px;
+    padding: 4px 8px;
+    flex: 0 0 auto;
+    justify-content: center;
+}

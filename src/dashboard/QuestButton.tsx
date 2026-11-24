@@ -81,7 +81,13 @@ function detailClass(status: "available" | "in-progress" | "claimable"): string 
 }
 
 function UpdateAttentionBadge({ level }: { level: Exclude<UpdateAttentionLevel, "none" | "critical">; }) {
-    return <span className={`quest-ui-update-attention-badge is-${level}`} aria-hidden="true">!</span>;
+    return (
+        <span className={`quest-ui-update-attention-badge is-${level}`} aria-hidden="true">
+            <svg viewBox="0 0 12 12">
+                <path d="M6 2.3v4.4M6 9v.1" />
+            </svg>
+        </span>
+    );
 }
 
 function CriticalUpdateIcon({ iconProps }: { iconProps: any; }) {

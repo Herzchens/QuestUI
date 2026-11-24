@@ -1,7 +1,18 @@
 import { Popout, showToast, UserStore, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { isLegacyUnscopedEvent } from "./account";
-import { Choice, EVENT_LOG_SORT_OPTIONS, EventLogSortMenu, SortChevronIcon } from "./controls";
+import {
+    BroomIcon,
+    CheckIcon,
+    CloseIcon,
+    EVENT_LOG_SORT_OPTIONS,
+    EventLogCombinedFilterMenu,
+    EventLogSortMenu,
+    FilterIcon,
+    FolderIcon,
+    SortChevronIcon,
+    SortIcon
+} from "./controls";
 import { EventLogWindowedScroller } from "./EventLogWindowedScroller";
 import { inferEventCategory } from "./logic";
 import { queryEventLogPage } from "./page";
@@ -55,6 +66,7 @@ function EventLogPanel() {
     const [category, setCategory] = useState<"all" | EventLogCategory>("all");
     const [sort, setSort] = useState<EventLogSort>("newest");
     const [sortOpen, setSortOpen] = useState(false);
+    const [filterOpen, setFilterOpen] = useState(false);
     const [selected, setSelected] = useState<EventLogEvent | null>(null);
     const [clearCountdown, setClearCountdown] = useState<number | null>(null);
     const [clearing, setClearing] = useState(false);
@@ -65,6 +77,7 @@ function EventLogPanel() {
     const [info, setInfo] = useState<EventLogStorageInfo>({ path: "", size: 0 });
 
     const sortButtonRef = useRef<HTMLButtonElement | null>(null);
+    const filterButtonRef = useRef<HTMLButtonElement | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
     const requestGenerationRef = useRef(0);
     const queryIdentityRef = useRef<string | null>(null);
@@ -163,9 +176,22 @@ function EventLogPanel() {
         liveRefreshTimerRef.current = null;
     }, []);
 
+    const closeControlPopouts = () => {
+        setSortOpen(false);
+        setFilterOpen(false);
+    };
+
     const selectSort = (mode: EventLogSort) => {
         setSort(mode);
-        setSortOpen(false);
+        closeControlPopouts();
+    };
+
+    const toggleControlPopout = (control: "sort" | "filter") => {
+        const next = control === "sort" ? !sortOpen : !filterOpen;
+        closeControlPopouts();
+        if (!next) return;
+        if (control === "sort") setSortOpen(true);
+        else setFilterOpen(true);
     };
 
     const loadNextPage = async () => {
@@ -241,6 +267,7 @@ function EventLogPanel() {
         : `Event Log storage: ${formatStorageBytes(info.size)}.`;
     const matchState = matchingTone(total);
     const matchingLabel = `${total.toLocaleString()} matching`;
+    const activeFilterCount = Number(source !== "all") + Number(severity !== "all") + Number(category !== "all");
 
     const renderVirtualRow = (row: EventLogVirtualRow | undefined) => {
         if (!row) return null;
@@ -297,54 +324,125 @@ function EventLogPanel() {
                 <span className={`quest-ui-event-match-count is-${matchState}`} title={matchingLabel}>{matchingLabel}</span>
             </div>
 
-            <div className="quest-ui-event-filter-row">
-                <span>Source</span>
-                <div><Choice value="all" active={source === "all"} onClick={setSource}>All</Choice><Choice value="orion" active={source === "orion"} tone="orion" onClick={setSource}>Orion</Choice><Choice value="questui" active={source === "questui"} tone="questui" onClick={setSource}>QuestUI</Choice></div>
-            </div>
-            <div className="quest-ui-event-filter-row">
-                <span>Level</span>
-                <div><Choice value="all" active={severity === "all"} onClick={setSeverity}>All</Choice><Choice value="error" active={severity === "error"} tone="error" onClick={setSeverity}>Error</Choice><Choice value="warning" active={severity === "warning"} tone="warning" onClick={setSeverity}>Warning</Choice><Choice value="success" active={severity === "success"} tone="success" onClick={setSeverity}>Success</Choice><Choice value="info" active={severity === "info"} tone="info" onClick={setSeverity}>Info</Choice></div>
-            </div>
-            <div className="quest-ui-event-filter-row">
-                <span>Category</span>
-                <div><Choice value="all" active={category === "all"} onClick={setCategory}>All</Choice><Choice value="quest" active={category === "quest"} tone="quest" onClick={setCategory}>Quest</Choice><Choice value="runtime" active={category === "runtime"} tone="runtime" onClick={setCategory}>Runtime</Choice><Choice value="network" active={category === "network"} tone="network" onClick={setCategory}>Network</Choice><Choice value="diagnostic" active={category === "diagnostic"} tone="diagnostic" onClick={setCategory}>Diagnostic</Choice></div>
-            </div>
-
             <div className="quest-ui-event-log-actions">
-                <div className="quest-ui-event-sort-control">
-                    <span>Sort</span>
+                <div className="quest-ui-event-controls-main">
                     <Popout position="bottom" align="left" animation={Popout.Animation.NONE} shouldShow={sortOpen} onRequestClose={() => setSortOpen(false)} targetElementRef={sortButtonRef} renderPopout={() => <EventLogSortMenu mode={sort} onChange={selectSort} />}>
                         {(_, { isShown }) => (
-                            <button ref={sortButtonRef} type="button" className={`quest-ui-event-sort-trigger${isShown ? " is-open" : ""}`} onClick={() => setSortOpen(value => !value)} aria-label={`Sort Event Log: ${EVENT_LOG_SORT_OPTIONS.find(option => option.value === sort)?.label ?? "Newest first"}`} aria-expanded={isShown} aria-haspopup="menu">
+                            <button
+                                ref={sortButtonRef}
+                                type="button"
+                                className={`quest-ui-event-flat-control quest-ui-event-sort-trigger${isShown ? " is-open" : ""}`}
+                                onClick={() => toggleControlPopout("sort")}
+                                aria-label={`Sort Event Log: ${EVENT_LOG_SORT_OPTIONS.find(option => option.value === sort)?.label ?? "Newest first"}`}
+                                aria-expanded={isShown}
+                                aria-haspopup="menu"
+                            >
+                                <SortIcon />
                                 <span>{EVENT_LOG_SORT_OPTIONS.find(option => option.value === sort)?.label ?? "Newest first"}</span>
                                 <SortChevronIcon />
                             </button>
                         )}
                     </Popout>
+
+                    <Popout
+                        position="bottom"
+                        align="left"
+                        animation={Popout.Animation.NONE}
+                        shouldShow={filterOpen}
+                        onRequestClose={() => setFilterOpen(false)}
+                        targetElementRef={filterButtonRef}
+                        renderPopout={() => (
+                            <EventLogCombinedFilterMenu
+                                source={source}
+                                severity={severity}
+                                category={category}
+                                onSourceChange={setSource}
+                                onSeverityChange={setSeverity}
+                                onCategoryChange={setCategory}
+                            />
+                        )}
+                    >
+                        {(_, { isShown }) => (
+                            <button
+                                ref={filterButtonRef}
+                                type="button"
+                                className={`quest-ui-event-flat-control quest-ui-event-filter-launcher${isShown ? " is-open" : ""}${activeFilterCount > 0 ? " has-active-filter" : ""}`}
+                                onClick={() => toggleControlPopout("filter")}
+                                aria-label={`Filter Event Log${activeFilterCount > 0 ? `: ${activeFilterCount} active` : ""}`}
+                                aria-expanded={isShown}
+                                aria-haspopup="menu"
+                            >
+                                <FilterIcon />
+                                <span>Filter</span>
+                                {activeFilterCount > 0 && <span className="quest-ui-event-filter-count" aria-hidden="true">{activeFilterCount}</span>}
+                            </button>
+                        )}
+                    </Popout>
                 </div>
-                <div>
-                    <button type="button" onClick={() => void openEventLogFolder()}>Open file</button>
+
+                <div className="quest-ui-event-action-island">
                     <button
                         type="button"
-                        className={clearCountdown != null ? "is-danger" : ""}
+                        className="quest-ui-event-island-icon-button"
+                        onClick={() => void openEventLogFolder()}
+                        title="Open Event Log folder"
+                        aria-label="Open Event Log folder"
                         disabled={clearing}
-                        title="Clear Event Log entries owned by the current Discord account"
-                        onClick={() => {
-                            if (clearing) return;
-                            if (clearCountdown == null) {
-                                setClearCountdown(5);
-                                return;
-                            }
-                            setClearing(true);
-                            void clearEventLog().then(() => {
-                                setClearCountdown(null);
-                                showToast({ text: "Event Log cleared successfully.", variant: "success" });
-                                setRefreshNonce(value => value + 1);
-                            }).finally(() => setClearing(false));
-                        }}
                     >
-                        {clearing ? "Clearing…" : clearCountdown != null ? `Confirm Clear ${clearCountdown}` : "Clear log"}
+                        <FolderIcon />
                     </button>
+
+                    <div className={`quest-ui-event-clean-island${clearCountdown != null || clearing ? " is-expanded" : ""}${clearing ? " is-clearing" : ""}`}>
+                        <button
+                            type="button"
+                            className="quest-ui-event-clean-trigger"
+                            title="Clear Event Log"
+                            aria-label="Clear Event Log"
+                            aria-expanded={clearCountdown != null || clearing}
+                            disabled={clearing || clearCountdown != null}
+                            onClick={() => {
+                                if (clearing || clearCountdown != null) return;
+                                setClearCountdown(5);
+                            }}
+                        >
+                            <BroomIcon />
+                        </button>
+
+                        <div className="quest-ui-event-clear-confirm" role="status" aria-live="polite">
+                            <span className="quest-ui-event-clear-confirm-text">
+                                {clearing ? "Clearing…" : clearCountdown != null ? `Clear log? ${clearCountdown}s` : ""}
+                            </span>
+                            {!clearing && clearCountdown != null && (
+                                <div className="quest-ui-event-clear-confirm-actions">
+                                    <button
+                                        type="button"
+                                        className="quest-ui-event-clear-confirm-button is-confirm"
+                                        title="Confirm clear"
+                                        aria-label="Confirm clear Event Log"
+                                        onClick={() => {
+                                            setClearing(true);
+                                            void clearEventLog().then(() => {
+                                                setClearCountdown(null);
+                                                showToast({ text: "Event Log cleared successfully.", variant: "success" });
+                                                setRefreshNonce(value => value + 1);
+                                            }).finally(() => setClearing(false));
+                                        }}
+                                    >
+                                        <CheckIcon />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="quest-ui-event-clear-confirm-button is-cancel"
+                                        title="Cancel"
+                                        aria-label="Cancel clear Event Log"
+                                        onClick={() => setClearCountdown(null)}
+                                    >
+                                        <CloseIcon />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 

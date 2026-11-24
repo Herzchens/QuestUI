@@ -11,9 +11,9 @@ export type EventLogVirtualRow =
     | { kind: "day"; key: string; timestamp: number; }
     | { kind: "event"; key: string; event: EventLogEvent; };
 
-const EVENT_LOG_DAY_ROW_HEIGHT = 30;
-const EVENT_LOG_EVENT_ROW_HEIGHT = 64;
-const EVENT_LOG_ACCOUNT_ROW_HEIGHT = 78;
+const EVENT_LOG_DAY_ROW_HEIGHT = 28;
+const EVENT_LOG_EVENT_ROW_HEIGHT = 58;
+const EVENT_LOG_ACCOUNT_ROW_HEIGHT = 70;
 
 export function BugLogIcon() {
     return (

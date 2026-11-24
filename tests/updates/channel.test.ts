@@ -14,7 +14,10 @@ import { classifyVersionChannel } from "../../src/updates/channel";
 
 assert.equal(classifyVersionChannel("v1.1.2"), "stable");
 assert.equal(classifyVersionChannel("4.11.2"), "stable");
-assert.equal(classifyVersionChannel("v1.2.0-beta.2"), "prerelease");
+assert.equal(classifyVersionChannel("v1.2.0-beta.2"), "beta");
+assert.equal(classifyVersionChannel("v1.6.0-beta1"), "beta");
+assert.equal(classifyVersionChannel("v2.0.0-alpha.3"), "alpha");
+assert.equal(classifyVersionChannel("v2.0.0-alpha1"), "alpha");
 assert.equal(classifyVersionChannel("v2.0.0-dev"), "prerelease");
 assert.equal(classifyVersionChannel("v5.0.0-rc.1"), "prerelease");
 assert.equal(classifyVersionChannel("dev-main"), "unknown");

@@ -1763,3 +1763,40 @@
         max-width: none;
     }
 }
+
+
+/* v1.6 update badge + checking indicator cleanup. */
+.quest-ui-update-count {
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    right: -3px !important;
+    top: -3px !important;
+}
+
+.quest-ui-update-banner.is-checking .quest-ui-update-banner-mark svg {
+    animation: none !important;
+}
+
+.quest-ui-update-check-spinner {
+    animation: quest-ui-update-spinner-rotate 780ms linear infinite !important;
+    transform-origin: 50% 50%;
+}
+
+.quest-ui-update-check-spinner-track {
+    fill: none;
+    opacity: .22;
+    stroke: currentColor;
+    stroke-width: 1.8;
+}
+
+.quest-ui-update-check-spinner-arc {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2.2;
+}
+
+@keyframes quest-ui-update-spinner-rotate {
+    to { transform: rotate(360deg); }
+}

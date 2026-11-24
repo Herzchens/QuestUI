@@ -67,8 +67,9 @@ function UpdateStateIcon({ kind }: { kind: "current" | "available" | "error" | "
     }
     if (kind === "checking") {
         return (
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M13 8a5 5 0 1 1-1.4-3.46M13 3.5v3.2H9.8" />
+            <svg className="quest-ui-update-check-spinner" viewBox="0 0 16 16" aria-hidden="true">
+                <circle className="quest-ui-update-check-spinner-track" cx="8" cy="8" r="5.2" />
+                <path className="quest-ui-update-check-spinner-arc" d="M8 2.8a5.2 5.2 0 0 1 5.2 5.2" />
             </svg>
         );
     }
