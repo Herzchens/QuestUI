@@ -2,6 +2,7 @@ import * as DataStore from "@api/DataStore";
 import { plugins } from "@api/PluginManager";
 
 import {
+    isCurrentUpdateCheckRun,
     nextUpdateHealthTimestamps,
     normalizeUpdateCheckHours,
     normalizeUpdateHealthTimestamps,
@@ -92,7 +93,8 @@ let writeChain: Promise<void> = Promise.resolve();
 let preferenceReader: (() => UpdatePreferences) | null = null;
 let lastPreferences: UpdatePreferences | null = null;
 let timer: ReturnType<typeof setTimeout> | null = null;
-let activeCheck: Promise<UpdateSnapshot> | null = null;
+let activeCheck: { generation: number; promise: Promise<UpdateSnapshot>; } | null = null;
+let lifecycleGeneration = 0;
 let lastAttemptAt = 0;
 let lastAttemptFailed = false;
 let started = false;
@@ -528,7 +530,13 @@ async function persistUpdateCheck(
     try { await writePersistedState(nextPersisted); } catch { }
 }
 
-async function runUpdateCheck(preferences: UpdatePreferences, startedAt: number): Promise<UpdateSnapshot> {
+async function runUpdateCheck(
+    preferences: UpdatePreferences,
+    startedAt: number,
+    generation: number
+): Promise<UpdateSnapshot> {
+    if (!isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) return snapshot;
+
     lastAttemptAt = startedAt;
     snapshot = { ...snapshot, checking: true };
     notify();
@@ -539,10 +547,14 @@ async function runUpdateCheck(preferences: UpdatePreferences, startedAt: number)
         wantsOrion ? settleReleaseFeed("orion") : Promise.resolve(null)
     ]);
 
+    if (!isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) return snapshot;
+
     const checkedAt = Date.now();
     applyQuestUIReleaseResult(questResult, preferences, checkedAt);
     applyOrionReleaseResult(orionResult, preferences, checkedAt);
     await persistUpdateCheck(questResult, orionResult, wantsOrion, checkedAt);
+
+    if (!isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) return snapshot;
 
     // Settings can change while the network requests are in flight. Re-apply the
     // cached releases through the current policy so a stale prerelease/checkOrion
@@ -560,8 +572,10 @@ async function runUpdateCheck(preferences: UpdatePreferences, startedAt: number)
 }
 
 export async function checkForUpdates(manual = true): Promise<UpdateSnapshot> {
+    const generation = lifecycleGeneration;
     await ensurePersistedState();
-    if (activeCheck) return activeCheck;
+    if (!isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) return snapshot;
+    if (activeCheck?.generation === generation) return activeCheck.promise;
 
     const preferences = readPreferences();
     const now = Date.now();
@@ -574,8 +588,15 @@ export async function checkForUpdates(manual = true): Promise<UpdateSnapshot> {
         return snapshot;
     }
 
-    activeCheck = runUpdateCheck(preferences, now).finally(() => { activeCheck = null; });
-    return activeCheck;
+    const entry: { generation: number; promise: Promise<UpdateSnapshot>; } = {
+        generation,
+        promise: Promise.resolve(snapshot)
+    };
+    entry.promise = runUpdateCheck(preferences, now, generation).finally(() => {
+        if (activeCheck === entry) activeCheck = null;
+    });
+    activeCheck = entry;
+    return entry.promise;
 }
 
 export async function snoozeUpdate(product: UpdateProduct, hours = 24): Promise<void> {
@@ -634,8 +655,9 @@ export function startUpdateChecks(read: () => UpdatePreferences): void {
     preferenceReader = read;
     lastPreferences = readPreferences();
     started = true;
+    const generation = ++lifecycleGeneration;
     void ensurePersistedState().then(async () => {
-        if (!started) return;
+        if (!isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) return;
         recomputeCachedPolicy();
         const preferences = readPreferences();
         const wantsOrion = preferences.checkOrion && orionInstalled();
@@ -654,7 +676,12 @@ export function startUpdateChecks(read: () => UpdatePreferences): void {
 
 export function stopUpdateChecks(): void {
     started = false;
+    lifecycleGeneration++;
     clearTimer();
     preferenceReader = null;
     lastPreferences = null;
+    if (snapshot.checking) {
+        snapshot = { ...snapshot, checking: false };
+        notify();
+    }
 }

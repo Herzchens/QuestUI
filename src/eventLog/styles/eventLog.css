@@ -34,9 +34,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-}.quest-ui-event-log-header > span {
-    color: var(--text-muted);
-    font-size: 11px;
 }.quest-ui-event-search {
     box-sizing: border-box;
     width: 100%;
@@ -62,22 +59,9 @@
     margin: 12px 0 8px;
     padding-top: 10px;
     border-top: 1px solid var(--background-modifier-accent);
-}.quest-ui-event-log-actions label {
-    color: var(--text-muted);
-    font-size: 11px;
-}.quest-ui-event-log-actions select {
-    margin-left: 5px;
-    padding: 4px 6px;
-    border: 1px solid var(--background-modifier-accent);
-    border-radius: 6px;
-    background: var(--background-secondary);
-    color: var(--text-normal);
 }.quest-ui-event-log-actions > div {
     display: flex;
     gap: 5px;
-}.quest-ui-event-log-actions button.is-danger {
-    border-color: var(--status-danger);
-    color: var(--status-danger);
 }.quest-ui-event-day {
     display: flex;
     align-items: center;
@@ -349,12 +333,7 @@
     border-color: var(--border-subtle, color-mix(in srgb, var(--quest-ui-theme-text-strong) 10%, transparent));
     
 }.quest-ui-event-log-panel .quest-ui-event-log-actions button,
-.quest-ui-event-detail .quest-ui-event-detail-header button,
-.quest-ui-event-log-panel .quest-ui-event-log-actions select {
-    border-color: var(--border-subtle, color-mix(in srgb, var(--quest-ui-theme-text-strong) 10%, transparent));
-    background: var(--background-base-low, var(--background-secondary, #1e1f22));
-}.quest-ui-event-log-panel .quest-ui-event-log-actions button:hover,
-.quest-ui-event-detail .quest-ui-event-detail-header button:hover {
+.quest-ui-event-log-panel .quest-ui-event-log-panel .quest-ui-event-log-actions button:hover {
     background: var(--background-mod-strong, color-mix(in srgb, var(--quest-ui-theme-text-strong) 9%, transparent));
     color: var(--text-default, var(--header-primary));
 }.quest-ui-event-log-panel .quest-ui-event-list {
@@ -429,7 +408,6 @@
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 64%, color-mix(in srgb, var(--quest-ui-theme-text-strong) 20%, transparent));
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 22%, transparent);
 }.quest-ui-event-log-panel .quest-ui-event-log-actions button,
-.quest-ui-event-detail .quest-ui-event-detail-header button,
 .quest-ui-event-sort-trigger {
     border: 1px solid var(--quest-ui-event-control-border, color-mix(in srgb, var(--quest-ui-theme-text-strong) 14.000000000000002%, transparent));
     background: var(--quest-ui-event-control-bg, var(--quest-ui-event-control-surface));
@@ -437,14 +415,12 @@
     box-shadow: inset 0 1px 0 color-mix(in srgb, var(--quest-ui-theme-text-strong) 4.5%, transparent);
     transition: background-color 110ms ease, border-color 110ms ease, color 110ms ease, box-shadow 110ms ease;
 }.quest-ui-event-log-panel .quest-ui-event-log-actions button:hover,
-.quest-ui-event-detail .quest-ui-event-detail-header button:hover,
 .quest-ui-event-sort-trigger:hover,
 .quest-ui-event-sort-trigger.is-open {
     border-color: var(--quest-ui-event-control-border-hover, color-mix(in srgb, var(--quest-ui-theme-text-strong) 26%, transparent));
     background: var(--quest-ui-event-control-hover-bg);
     color: var(--quest-ui-theme-text-strong);
 }.quest-ui-event-log-panel .quest-ui-event-log-actions button:active,
-.quest-ui-event-detail .quest-ui-event-detail-header button:active,
 .quest-ui-event-sort-trigger:active {
     background: var(--quest-ui-event-control-pressed-bg);
     border-color: color-mix(in srgb, var(--quest-ui-theme-text-strong) 30%, transparent);
@@ -476,11 +452,7 @@
     background: var(--background-base-lowest, #111214);
     color: var(--quest-ui-theme-text-primary);
     box-shadow: var(--shadow-high, 0 14px 38px var(--quest-ui-event-panel-shadow));
-}.quest-ui-event-log-panel .quest-ui-event-log-actions button.is-danger {
-    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 62%, color-mix(in srgb, var(--quest-ui-theme-text-strong) 12%, transparent));
-    background: color-mix(in srgb, var(--status-danger, #f23f42) 13%, var(--quest-ui-event-control-surface));
-    color: var(--quest-ui-theme-text-strong);
-}
+}.quest-ui-event-log-panel 
 
 /* v1.6 Event Log controls: Sort and Filter stay flat; only file actions form
  * a compact interaction island. Query/pagination behavior is unchanged. */
@@ -870,7 +842,6 @@
 /* Detail headings/codes are also generic Discord nodes. Keep the ordinary text
  * readable while child semantic tokens (stopped/failed/etc.) retain their own
  * warning/error/success colors. */
-.quest-ui-event-detail > h3,
 .quest-ui-event-detail code {
     color: var(--quest-ui-event-text-strong) !important;
 }

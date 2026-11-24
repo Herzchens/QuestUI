@@ -10,6 +10,7 @@ const listeners = new Set<() => void>();
 let currentNotice: DashboardNotice | null = null;
 let noticeId = 0;
 let clearTimer: ReturnType<typeof setTimeout> | null = null;
+let acceptingNotices = false;
 
 function notify(): void {
     for (const listener of listeners) listener();
@@ -24,7 +25,12 @@ export function subscribeDashboardNotice(listener: () => void): () => void {
     return () => listeners.delete(listener);
 }
 
+export function startDashboardNotices(): void {
+    acceptingNotices = true;
+}
+
 export function resetDashboardNotices(): void {
+    acceptingNotices = false;
     if (clearTimer != null) {
         clearTimeout(clearTimer);
         clearTimer = null;
@@ -43,6 +49,7 @@ export function pushDashboardNotice({
     text: string;
     duration?: number;
 }): void {
+    if (!acceptingNotices) return;
     if (clearTimer != null) clearTimeout(clearTimer);
 
     currentNotice = {

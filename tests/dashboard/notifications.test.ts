@@ -4,6 +4,7 @@ import {
     getDashboardNotice,
     pushDashboardNotice,
     resetDashboardNotices,
+    startDashboardNotices,
     subscribeDashboardNotice
 } from "../../src/dashboard/notifications";
 
@@ -28,6 +29,7 @@ const unsubscribe = subscribeDashboardNotice(() => {
 });
 
 try {
+    startDashboardNotices();
     pushDashboardNotice({ tone: "info", text: "Update available", duration: 2400 });
     assert.deepEqual(getDashboardNotice(), {
         id: 1,
@@ -46,6 +48,12 @@ try {
     resetDashboardNotices();
     assert.equal(notifications, 2);
 
+    pushDashboardNotice({ tone: "warning", text: "Stale", duration: 2400 });
+    assert.equal(getDashboardNotice(), null);
+    assert.equal(notifications, 2);
+    assert.equal(scheduled, null);
+
+    startDashboardNotices();
     pushDashboardNotice({ tone: "success", text: "Done", duration: 0 });
     assert.equal(getDashboardNotice()?.text, "Done");
     assert.equal(notifications, 3);

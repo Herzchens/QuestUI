@@ -18,7 +18,12 @@ const WEBPACK_FIND_SIGNATURES = [
     'findByCode("VIRTUAL_CURRENCY_BALANCE_FETCH", "VIRTUAL_CURRENCY_BALANCE_FETCH_SUCCESS", "VIRTUAL_CURRENCY_USER_BALANCE")',
     'findByCode("QUESTS_ENROLL_BEGIN", "QUESTS_ENROLL_SUCCESS", "QUESTS_ENROLL_FAILURE", "previous_in_flight_request")',
     'mapMangledModule("QUESTS_CLAIM_REWARD_BEGIN,QUESTS_CLAIM_REWARD_SUCCESS,QUESTS_CLAIM_REWARD_FAILURE,traffic_metadata_sealed"',
-    'findByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")'
+    'findByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")',
+    'findByCode("QUESTS_FETCH_REWARD_CODE_BEGIN", "QUESTS_FETCH_REWARD_CODE_SUCCESS", "QUESTS_FETCH_REWARD_CODE_FAILURE")',
+    'findByCode("hasVerifiedEmailOrPhone", "CLAIM_REWARD", "sourceQuestContent")',
+    'findStore("StorefrontProductStore")',
+    'findByCode("canUseMoreQuestOrbs", "XBOX_GAME_PASS", "isFractionalPremiumWithNoStandardSub")',
+    'findByProps("getBadges")'
 ];
 
 function extractSection(report, name) {
@@ -117,6 +122,11 @@ function runSelfTest() {
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_ENROLL_BEGIN", "QUESTS_ENROLL_SUCCESS", "QUESTS_ENROLL_FAILURE", "previous_in_flight_request")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nmapMangledModule("QUESTS_CLAIM_REWARD_BEGIN,QUESTS_CLAIM_REWARD_SUCCESS,QUESTS_CLAIM_REWARD_FAILURE,traffic_metadata_sealed", {\n\tclaimQuestReward: function isNativeClaimQuestRewardExport(candidate) {...\n})\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("QUESTS_FETCH_REWARD_CODE_BEGIN", "QUESTS_FETCH_REWARD_CODE_SUCCESS", "QUESTS_FETCH_REWARD_CODE_FAILURE")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("hasVerifiedEmailOrPhone", "CLAIM_REWARD", "sourceQuestContent")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindStore("StorefrontProductStore")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByCode("canUseMoreQuestOrbs", "XBOX_GAME_PASS", "isFractionalPremiumWithNoStandardSub")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
+    assert.match(analyzeReport(completeReport({ badWebpackFinds: '- ```\nfindByProps("getBadges")\n```\n' }), "", 1).problems.join("\n"), /QuestUI webpack lookup failed/);
     assert.deepEqual(analyzeReport(completeReport({ badPatches: "- SomeOtherPlugin (had no effect)\n" }), "", 1), {
         problems: [],
         warnings: ["reporter exited with 1, but only unrelated Vencord failures were found"]

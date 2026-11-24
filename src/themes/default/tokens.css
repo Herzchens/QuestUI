@@ -4,6 +4,10 @@
  */
 .quest-ui-theme-default {
     --quest-ui-theme-accent: #a970ff;
+    --quest-ui-dashboard-border: color-mix(in srgb, var(--quest-ui-theme-accent) 24%, rgba(255, 255, 255, .08));
+    --quest-ui-dashboard-base: #121216;
+    --quest-ui-dashboard-raised: #1a1a20;
+    --quest-ui-dashboard-card: #19191e;
 
     --quest-ui-theme-panel: #111216;
     --quest-ui-theme-surface: #17181d;

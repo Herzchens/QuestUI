@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 
 import {
     compareSemver,
+    isCurrentUpdateCheckRun,
     normalizeUpdateCheckHours,
     parseSemver,
     selectLatestEligibleRelease,
@@ -66,6 +67,9 @@ assert.equal(shouldRunScheduledUpdateCheck(null, 1_000, 6), true);
 assert.equal(shouldRunScheduledUpdateCheck(1_000, 1_000 + 6 * 60 * 60 * 1000 - 1, 6), false);
 assert.equal(shouldRunScheduledUpdateCheck(1_000, 1_000 + 6 * 60 * 60 * 1000, 6), true);
 assert.equal(shouldRunScheduledUpdateCheck(null, 1_000, 0), false);
+assert.equal(isCurrentUpdateCheckRun(true, 4, 4), true);
+assert.equal(isCurrentUpdateCheckRun(false, 4, 4), false);
+assert.equal(isCurrentUpdateCheckRun(true, 4, 5), false);
 
 const releases = [
     { tagName: "v1.4.2", prerelease: false, draft: false },

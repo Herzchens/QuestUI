@@ -469,6 +469,7 @@ export function startEventLogCapture(): void {
         const original = console[level] as ConsoleMethod;
         const wrapper: ConsoleMethod = (...args: any[]) => {
             original.apply(console, args);
+            if (!captureStarted || wrappers.get(level) !== wrapper) return;
             try { captureConsole(level, args); } catch { }
         };
         originals.set(level, original);

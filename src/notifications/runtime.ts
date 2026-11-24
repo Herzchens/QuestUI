@@ -196,6 +196,7 @@ function resetProblemBaseline(accountId: string | null): void {
 }
 
 function shouldNotifyProblem(event: EventLogEvent, accountId: string): boolean {
+    if (event.accountId !== accountId) return false;
     if (!isActionableProblemEvent(event)) return false;
     if (event.quest?.id && ignoredQuestIds(accountId).has(event.quest.id)) return false;
 
@@ -235,7 +236,12 @@ async function scanProblemEvents(generation: number): Promise<void> {
 
     let events: EventLogEvent[];
     try {
-        const result = await queryEventLog({ sort: "newest", limit: PROBLEM_QUERY_LIMIT });
+        const result = await queryEventLog({
+            sort: "newest",
+            limit: PROBLEM_QUERY_LIMIT,
+            accountId,
+            includeLegacy: false
+        });
         events = result.events;
     } catch {
         return;

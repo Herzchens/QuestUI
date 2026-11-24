@@ -133,15 +133,20 @@ export async function setQuestIgnored(accountId: string, questId: string, ignore
     return writeChain;
 }
 
-export async function pruneExpiredIgnoredQuests(accountId = currentAccountId()): Promise<void> {
+export async function pruneExpiredIgnoredQuests(
+    accountId = currentAccountId(),
+    expectedGeneration: number | null = null
+): Promise<void> {
     if (!accountId) return;
     await loadState();
+    if (expectedGeneration != null && (!lifecycleStarted || expectedGeneration !== lifecycleGeneration)) return;
 
     const expired = expiredQuestIds();
     const staleIds = ignoredQuestIdsForAccount(cachedState, accountId).filter(id => expired.has(id));
     if (staleIds.length === 0) return;
 
     writeChain = writeChain.catch(() => { }).then(async () => {
+        if (expectedGeneration != null && (!lifecycleStarted || expectedGeneration !== lifecycleGeneration)) return;
         cachedState = pruneIgnoredQuestState(cachedState, accountId, staleIds);
         notify();
 
@@ -164,7 +169,8 @@ export async function pruneExpiredIgnoredQuests(accountId = currentAccountId()):
 
 function sweepExpiredIgnoredQuests(): void {
     if (!lifecycleStarted) return;
-    void pruneExpiredIgnoredQuests();
+    const generation = lifecycleGeneration;
+    void pruneExpiredIgnoredQuests(currentAccountId(), generation);
 }
 
 export function startIgnoredQuestLifecycle(): void {

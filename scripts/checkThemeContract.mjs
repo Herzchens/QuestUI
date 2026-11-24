@@ -98,11 +98,13 @@ const THEME_STRUCTURAL_PROPERTIES = new Set([
     "grid-auto-flow", "grid-auto-columns", "grid-auto-rows",
     "top", "right", "bottom", "left", "inset", "overflow", "overflow-x", "overflow-y",
     "box-sizing", "z-index", "pointer-events", "object-fit", "object-position",
-    "white-space", "text-overflow"
+    "white-space", "text-overflow",
+    "transform", "visibility", "touch-action", "user-select", "x", "y",
+    "content", "cursor", "appearance"
 ]);
 
 const SIMPLE_COLOR = "(?:#[0-9a-fA-F]{3,8}\\b|rgba?\\([^()]*\\)|hsla?\\([^()]*\\)|white\\b|black\\b)";
-const VAR_FALLBACK_COLOR = new RegExp("(var\\(\\s*--[A-Za-z0-9_-]+\\s*,\\s*)" + SIMPLE_COLOR + "(\\s*\\))", "gi");
+const VAR_FALLBACK_COLOR = new RegExp("(var\\(\\s*--(?!quest-ui-)[A-Za-z0-9_-]+\\s*,\\s*)" + SIMPLE_COLOR + "(\\s*\\))", "gi");
 
 function maskSimpleVarFallbackColors(source) {
     let current = source;
@@ -123,6 +125,44 @@ function visualLiteralMatches(source) {
         hits.push({ index, line: lineAt(clean, index), value: match[2] ?? match[0].trim() });
     }
     return hits;
+}
+
+function splitSelectorList(selector) {
+    const parts = [];
+    let start = 0;
+    let quote = null;
+    let parenDepth = 0;
+    let bracketDepth = 0;
+
+    for (let i = 0; i < selector.length; i++) {
+        const ch = selector[i];
+        if (quote) {
+            if (ch === "\\") {
+                i++;
+                continue;
+            }
+            if (ch === quote) quote = null;
+            continue;
+        }
+        if (ch === "'" || ch === "\"") {
+            quote = ch;
+            continue;
+        }
+        if (ch === "(") parenDepth++;
+        else if (ch === ")") parenDepth = Math.max(0, parenDepth - 1);
+        else if (ch === "[") bracketDepth++;
+        else if (ch === "]") bracketDepth = Math.max(0, bracketDepth - 1);
+        else if (ch === "," && parenDepth === 0 && bracketDepth === 0) {
+            parts.push(selector.slice(start, i).trim());
+            start = i + 1;
+        }
+    }
+    parts.push(selector.slice(start).trim());
+    return parts.filter(Boolean);
+}
+
+function isNamedThemeSelector(selector) {
+    return /\.quest-ui-theme-[A-Za-z0-9_-]+/.test(selector);
 }
 
 function parseDeclarations(source, masked, start, end) {
@@ -343,15 +383,22 @@ function hasCustomPropertySelfReference(declaration) {
 function collectTokenGraph(cssFiles, sourceFiles) {
     const definitions = new Map();
     const uses = new Map();
+    const edges = new Map();
 
     const push = (map, token, location) => {
         const values = map.get(token) ?? [];
         values.push(location);
         map.set(token, values);
     };
+    const addEdge = (from, to) => {
+        const targets = edges.get(from) ?? new Set();
+        targets.add(to);
+        edges.set(from, targets);
+    };
 
     for (const file of cssFiles) {
-        const source = fs.readFileSync(file, "utf8");
+        const rawSource = fs.readFileSync(file, "utf8");
+        const source = maskCssComments(rawSource);
         let match;
         const definitionPattern = /(--quest-ui-[A-Za-z0-9_-]+)\s*:/g;
         while ((match = definitionPattern.exec(source))) {
@@ -360,6 +407,14 @@ function collectTokenGraph(cssFiles, sourceFiles) {
         const usePattern = /var\(\s*(--quest-ui-[A-Za-z0-9_-]+)/g;
         while ((match = usePattern.exec(source))) {
             push(uses, match[1], { file: relative(file), line: lineAt(source, match.index) });
+        }
+        for (const rule of parseCssRules(rawSource)) {
+            for (const declaration of rule.declarations) {
+                if (!/^--quest-ui-[A-Za-z0-9_-]+$/.test(declaration.property)) continue;
+                for (const ref of declaration.value.matchAll(/var\(\s*(--quest-ui-[A-Za-z0-9_-]+)/g)) {
+                    addEdge(declaration.property, ref[1]);
+                }
+            }
         }
     }
 
@@ -380,7 +435,43 @@ function collectTokenGraph(cssFiles, sourceFiles) {
         }
     }
 
-    return { definitions, uses };
+    return { definitions, uses, edges };
+}
+
+function customPropertyCycles(edges) {
+    const cycles = [];
+    const seen = new Set();
+    const visiting = new Set();
+    const stack = [];
+
+    const canonical = nodes => {
+        const ring = nodes.slice(0, -1);
+        const rotations = ring.map((_, index) => [...ring.slice(index), ...ring.slice(0, index)].join(" -> "));
+        return rotations.sort()[0];
+    };
+
+    const visit = node => {
+        visiting.add(node);
+        stack.push(node);
+        for (const next of edges.get(node) ?? []) {
+            const existing = stack.indexOf(next);
+            if (existing >= 0) {
+                const cycle = [...stack.slice(existing), next];
+                const key = canonical(cycle);
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    cycles.push(cycle);
+                }
+                continue;
+            }
+            if (!visiting.has(next)) visit(next);
+        }
+        stack.pop();
+        visiting.delete(node);
+    };
+
+    for (const node of edges.keys()) visit(node);
+    return cycles;
 }
 
 function validateRepository() {
@@ -402,7 +493,8 @@ function validateRepository() {
             }
         } else {
             for (const rule of parseCssRules(source)) {
-                if (/\.quest-ui-theme-[A-Za-z0-9_-]+/.test(rule.selector)) continue;
+                const selectorParts = splitSelectorList(rule.selector);
+                if (selectorParts.length > 0 && selectorParts.every(isNamedThemeSelector)) continue;
                 for (const declaration of rule.declarations) {
                     if (visualLiteralMatches(declaration.value).length === 0) continue;
                     failures.push(
@@ -435,7 +527,7 @@ function validateRepository() {
 
         if (rel.startsWith("src/themes/")) {
             for (const rule of parseCssRules(source)) {
-                if (!/\.quest-ui-theme-[A-Za-z0-9_-]+/.test(rule.selector)) continue;
+                if (!splitSelectorList(rule.selector).some(isNamedThemeSelector)) continue;
                 for (const declaration of rule.declarations) {
                     if (!THEME_STRUCTURAL_PROPERTIES.has(declaration.property)) continue;
                     failures.push(
@@ -468,7 +560,7 @@ function validateRepository() {
         }
     }
 
-    const { definitions, uses } = collectTokenGraph(cssFiles, sourceFiles);
+    const { definitions, uses, edges } = collectTokenGraph(cssFiles, sourceFiles);
     const canonicalTokenFile = "src/themes/default/tokens.css";
     const canonicalTokens = new Set(
         [...definitions.entries()]
@@ -484,6 +576,11 @@ function validateRepository() {
                 `${location.file}:${location.line}: canonical theme token ${token} must only be overridden by a theme tokens.css`
             );
         }
+    }
+
+    for (const cycle of customPropertyCycles(edges)) {
+        if (cycle.length <= 2) continue; // direct self-cycles are reported with selector context above.
+        failures.push(`indirect custom-property cycle ${cycle.join(" -> ")}`);
     }
 
     for (const [token, locations] of uses) {
@@ -510,7 +607,10 @@ function validateRepository() {
 
 function selfTest() {
     const fallbackOnly = ".x { color: var(--text-default, #fff); background: var(--surface, rgba(1, 2, 3, .5)); }";
-    if (visualLiteralMatches(fallbackOnly).length !== 0) throw new Error("self-test: simple var fallbacks must be allowed");
+    if (visualLiteralMatches(fallbackOnly).length !== 0) throw new Error("self-test: host var fallbacks must be allowed");
+
+    const questFallback = ".x { color: var(--quest-ui-test, #fff); }";
+    if (visualLiteralMatches(questFallback).length !== 1) throw new Error("self-test: QuestUI token color fallbacks must be rejected");
 
     const raw = ".x { color: #fff; background: rgba(1, 2, 3, .5); }";
     if (visualLiteralMatches(raw).length !== 2) throw new Error("self-test: raw component colors must be detected");
@@ -550,6 +650,24 @@ function selfTest() {
     const nonCycleRule = parseCssRules(".x { --quest-ui-test: var(--quest-ui-other); }")[0];
     if (!nonCycleRule || nonCycleRule.declarations.some(hasCustomPropertySelfReference)) {
         throw new Error("self-test: unrelated custom-property references must remain allowed");
+    }
+
+    const indirectRules = parseCssRules(".x { --quest-ui-a: var(--quest-ui-b); --quest-ui-b: var(--quest-ui-c); --quest-ui-c: var(--quest-ui-a); }");
+    const indirectEdges = new Map();
+    for (const declaration of indirectRules[0].declarations) {
+        if (!declaration.property.startsWith("--quest-ui-")) continue;
+        indirectEdges.set(
+            declaration.property,
+            new Set([...declaration.value.matchAll(/var\(\s*(--quest-ui-[A-Za-z0-9_-]+)/g)].map(match => match[1]))
+        );
+    }
+    if (customPropertyCycles(indirectEdges).length !== 1) {
+        throw new Error("self-test: indirect custom-property cycles must be detected");
+    }
+
+    const selectorList = splitSelectorList(".quest-ui-theme-default .a, .unscoped:is(.b, .c)");
+    if (selectorList.length !== 2 || selectorList.every(isNamedThemeSelector)) {
+        throw new Error("self-test: mixed selector lists must preserve unscoped selectors");
     }
 
     if (!THEME_STRUCTURAL_PROPERTIES.has("grid-template-columns") || THEME_STRUCTURAL_PROPERTIES.has("color")) {

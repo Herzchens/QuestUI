@@ -90,6 +90,14 @@ export function isPrereleaseVersion(value: unknown): boolean {
     return (parseSemver(value)?.prerelease.length ?? 0) > 0;
 }
 
+export function isCurrentUpdateCheckRun(
+    started: boolean,
+    expectedGeneration: number,
+    currentGeneration: number
+): boolean {
+    return started && expectedGeneration === currentGeneration;
+}
+
 export function normalizeUpdateCheckStep(value: unknown): number {
     const numeric = Number(value);
     return UPDATE_CHECK_STEP_MARKERS.includes(numeric as typeof UPDATE_CHECK_STEP_MARKERS[number])
