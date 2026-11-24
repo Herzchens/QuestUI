@@ -1,6 +1,6 @@
 /* Shared visual contract for the default QuestUI theme.
- * Component styles own geometry and behavior; theme roots own visual values.
- * Future dashboard themes can override this contract without copying component CSS.
+ * Shared .quest-ui-theme rules own geometry and behavior; named theme roots own visual values.
+ * Future dashboard themes can override this contract without copying layout rules.
  */
 .quest-ui-theme-default {
     --quest-ui-theme-accent: #a970ff;

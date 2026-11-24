@@ -48,6 +48,12 @@ jobs:
           git show v1.4.7:updateNativeEngine.ts | grep -Fq '${commit}:version.ts'
           git show v1.4.7:updateNativeEngine.ts | grep -Fq 'join(config.questUIDir, "version.ts")'
 
+      - name: Verify theme contract
+        working-directory: questui
+        run: |
+          node scripts/checkThemeContract.mjs --self-test
+          node scripts/checkThemeContract.mjs
+
       - name: Checkout Vencord
         uses: actions/checkout@v7
         with:

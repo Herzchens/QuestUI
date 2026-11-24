@@ -722,82 +722,158 @@
 }
 
 /* --- v1.6 default theme --- */
-.quest-ui-theme-default.quest-ui-dashboard-shell {
-    --quest-ui-default-accent: #a970ff;
-    --quest-ui-default-border: color-mix(in srgb, var(--quest-ui-default-accent) 24%, rgba(255, 255, 255, 0.08));
-    
-    border: 1px solid var(--quest-ui-default-border);
-    border-radius: 18px;
-    box-shadow: 0 22px 60px rgba(0,0,0,.48), 0 0 0 1px color-mix(in srgb, var(--quest-ui-default-accent) 7%, transparent);
+.quest-ui-theme.quest-ui-dashboard-shell {
     overflow: hidden;
     box-sizing: border-box;
     width: min(820px, calc(100vw - 24px));
-}.quest-ui-theme-default .quest-ui-dashboard-topbar {
+}
+.quest-ui-theme-default.quest-ui-dashboard-shell {
+    --quest-ui-default-accent: #a970ff;
+    --quest-ui-default-border: color-mix(in srgb, var(--quest-ui-default-accent) 24%, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--quest-ui-default-border);
+    border-radius: 18px;
+    box-shadow: 0 22px 60px rgba(0,0,0,.48), 0 0 0 1px color-mix(in srgb, var(--quest-ui-default-accent) 7%, transparent);
+}.quest-ui-theme .quest-ui-dashboard-topbar {
     align-items: center;
-    background: linear-gradient(90deg, color-mix(in srgb, var(--background-base-lowest,#111214) 90%, #25143a 10%), color-mix(in srgb, var(--background-base-lowest,#111214) 94%, #17111f 6%));
-    border-bottom: 1px solid rgba(255,255,255,.065);
     display: flex;
     gap: 18px;
     justify-content: space-between;
     left: auto;
-    
-    
     position: relative;
     right: auto;
     top: auto;
-}.quest-ui-theme-default .quest-ui-dashboard-display-title {
+}
+.quest-ui-theme-default .quest-ui-dashboard-topbar {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--background-base-lowest,#111214) 90%, #25143a 10%), color-mix(in srgb, var(--background-base-lowest,#111214) 94%, #17111f 6%));
+    border-bottom: 1px solid rgba(255,255,255,.065);
+}.quest-ui-theme .quest-ui-dashboard-display-title {
     align-items: center;
     display: inline-flex;
     flex: 1 1 auto;
-    
     height: auto;
-    line-height: 1;
     max-width: none;
     overflow: visible;
     pointer-events: none;
     position: static;
     width: auto;
-}.quest-ui-theme-default .quest-ui-dashboard-display-title-icon {
-    color: #c9a7ff;
-    filter: none;
+}
+.quest-ui-theme-default .quest-ui-dashboard-display-title {
+    line-height: 1;
+}.quest-ui-theme .quest-ui-dashboard-display-title-icon {
     flex: 0 0 31px;
     height: 31px;
     width: 31px;
-}.quest-ui-theme-default .quest-ui-dashboard-display-title-icon > svg { height: 31px; width: 31px; }.quest-ui-theme-default .quest-ui-dashboard-display-title > strong {
-    
-    
-    
-    background: none;
-    
+}
+.quest-ui-theme-default .quest-ui-dashboard-display-title-icon {
+    color: #c9a7ff;
+    filter: none;
+}.quest-ui-theme .quest-ui-dashboard-display-title-icon > svg {
+    height: 31px;
+    width: 31px;
+}.quest-ui-theme .quest-ui-dashboard-display-title > strong {
     flex: 0 1 auto;
-    
-    font-weight: 800;
-    
-    line-height: 1.08;
     overflow: visible;
     text-overflow: clip;
-}.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag,
+}
+.quest-ui-theme-default .quest-ui-dashboard-display-title > strong {
+    background: none;
+    font-weight: 800;
+    line-height: 1.08;
+}.quest-ui-theme .quest-ui-dashboard-boost-source-tag,
+.quest-ui-theme .quest-ui-dashboard-orb-balance {
+    box-sizing: border-box;
+}
+.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag,
 .quest-ui-theme-default .quest-ui-dashboard-orb-balance {
     border-radius: 11px;
-    box-sizing: border-box;
-    
-    
-}.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag {  margin-left: 4px;  }.quest-ui-theme-default .quest-ui-dashboard-boost-source-wordmark {  font-weight: 800; }.quest-ui-theme-default .quest-ui-dashboard-orb-balance {
+}.quest-ui-theme .quest-ui-dashboard-boost-source-tag {
+    margin-left: 4px;
+}.quest-ui-theme-default .quest-ui-dashboard-boost-source-wordmark {  font-weight: 800; }.quest-ui-theme .quest-ui-dashboard-orb-balance {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+.quest-ui-theme-default .quest-ui-dashboard-orb-balance {
     background: color-mix(in srgb, var(--brand-500,#5865f2) 17%, #18121f 83%);
     border-color: color-mix(in srgb, var(--quest-ui-default-accent) 52%, rgba(255,255,255,.12));
     box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 0 16px color-mix(in srgb, var(--quest-ui-default-accent) 13%, transparent);
+}.quest-ui-theme-default .quest-ui-dashboard-orb-balance > strong {  font-weight: 800; letter-spacing: -.2px; }.quest-ui-theme .quest-ui-dashboard-actionbar-primary,
+.quest-ui-theme .quest-ui-orion-controls {
+    align-items: center;
+    display: inline-flex;
+    gap: 8px;
+}.quest-ui-theme .quest-ui-dashboard-action-divider {
+    display: block;
+    width: 1px;
+}
+.quest-ui-theme-default .quest-ui-dashboard-action-divider {
+    background: rgba(255,255,255,.14);
+}.quest-ui-theme .quest-ui-orion-icon-button {
+    box-sizing: border-box;
+    height: 38px;
+    width: auto;
+}
+.quest-ui-theme-default .quest-ui-orion-icon-button {
+    border-radius: 9px;
+}.quest-ui-theme .quest-ui-orion-icon-button svg {
+    flex: 0 0 16px;
+    height: 16px;
+    width: 16px;
+}.quest-ui-theme .quest-ui-orion-control-label {
+    display: inline;
+}
+.quest-ui-theme-default .quest-ui-orion-control-label {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+}.quest-ui-theme-default .quest-ui-orion-icon-button.is-start,
+.quest-ui-theme-default .quest-ui-orion-icon-button.is-resume { background: color-mix(in srgb, var(--status-positive,#23a55a) 15%, #151a18); border-color: color-mix(in srgb, var(--status-positive,#23a55a) 60%, rgba(255,255,255,.12)); }.quest-ui-theme-default .quest-ui-orion-icon-button.is-pause { background: color-mix(in srgb, var(--status-warning,#f0b232) 12%, #1c1a15); border-color: color-mix(in srgb, var(--status-warning,#f0b232) 55%, rgba(255,255,255,.12)); }.quest-ui-theme-default .quest-ui-orion-icon-button.is-stop { background: color-mix(in srgb, var(--status-danger,#f23f42) 13%, #1d1518); border-color: color-mix(in srgb, var(--status-danger,#f23f42) 55%, rgba(255,255,255,.12)); }.quest-ui-theme .quest-ui-toolbar-button,
+.quest-ui-theme .quest-ui-reload-icon-button {
+    height: 38px;
+    min-height: 38px;
+}
+.quest-ui-theme-default .quest-ui-toolbar-button,
+.quest-ui-theme-default .quest-ui-reload-icon-button {
+    border-radius: 9px;
+}.quest-ui-theme .quest-ui-toolbar-button.quest-ui-claim-all-button {
+    min-width: 108px;
+    padding: 0 12px;
+}.quest-ui-theme-default .quest-ui-claim-all-label { font-size: 13px; }.quest-ui-theme .quest-ui-reload-icon-button,
+.quest-ui-theme .quest-ui-update-center-button,
+.quest-ui-theme .quest-ui-home-button {
+    flex: 0 0 40px;
+}.quest-ui-theme .quest-ui-event-log-button {
     flex: 0 0 auto;
-    
-    margin-left: auto;
-    
-}.quest-ui-theme-default .quest-ui-dashboard-orb-balance > strong {  font-weight: 800; letter-spacing: -.2px; }.quest-ui-theme-default .quest-ui-dashboard-actionbar-primary,
-.quest-ui-theme-default .quest-ui-orion-controls { align-items: center; display: inline-flex; gap: 8px; }.quest-ui-theme-default .quest-ui-dashboard-action-divider { background: rgba(255,255,255,.14); display: block;   width: 1px; }.quest-ui-theme-default .quest-ui-orion-icon-button { border-radius: 9px; box-sizing: border-box;  height: 38px;  width: auto; }.quest-ui-theme-default .quest-ui-orion-icon-button svg { flex: 0 0 16px; height: 16px; width: 16px; }.quest-ui-theme-default .quest-ui-orion-control-label { display: inline; font-size: 13px; font-weight: 700; line-height: 1; }.quest-ui-theme-default .quest-ui-orion-icon-button.is-start,
-.quest-ui-theme-default .quest-ui-orion-icon-button.is-resume { background: color-mix(in srgb, var(--status-positive,#23a55a) 15%, #151a18); border-color: color-mix(in srgb, var(--status-positive,#23a55a) 60%, rgba(255,255,255,.12)); }.quest-ui-theme-default .quest-ui-orion-icon-button.is-pause { background: color-mix(in srgb, var(--status-warning,#f0b232) 12%, #1c1a15); border-color: color-mix(in srgb, var(--status-warning,#f0b232) 55%, rgba(255,255,255,.12)); }.quest-ui-theme-default .quest-ui-orion-icon-button.is-stop { background: color-mix(in srgb, var(--status-danger,#f23f42) 13%, #1d1518); border-color: color-mix(in srgb, var(--status-danger,#f23f42) 55%, rgba(255,255,255,.12)); }.quest-ui-theme-default .quest-ui-toolbar-button,
-.quest-ui-theme-default .quest-ui-reload-icon-button { border-radius: 9px; height: 38px; min-height: 38px; }.quest-ui-theme-default .quest-ui-toolbar-button.quest-ui-claim-all-button { min-width: 108px; padding: 0 12px; }.quest-ui-theme-default .quest-ui-claim-all-label { font-size: 13px; }.quest-ui-theme-default .quest-ui-reload-icon-button,
-.quest-ui-theme-default .quest-ui-update-center-button,
-.quest-ui-theme-default .quest-ui-home-button { flex: 0 0 40px;  }.quest-ui-theme-default .quest-ui-event-log-button { flex: 0 0 auto; gap: 8px;  width: auto; }.quest-ui-theme-default .quest-ui-dashboard { background: linear-gradient(180deg,#100d17 0%,#0e0b14 100%); border: 0; border-radius: 0; box-shadow: none; overflow: visible; }.quest-ui-theme-default .quest-ui-dashboard-header { background: transparent; border-bottom: 0;  }.quest-ui-theme-default .quest-ui-default-status-name { color: var(--header-primary,#f2f3f5);   font-weight: 800; white-space: nowrap; }.quest-ui-theme-default .quest-ui-orion-status { display: inline-flex; flex: 0 1 auto;  }.quest-ui-theme-default .quest-ui-orion-status .quest-ui-version-chip { order: 0; }.quest-ui-theme-default .quest-ui-orion-status-dot,
-.quest-ui-theme-default .quest-ui-orion-status-warning,
-.quest-ui-theme-default .quest-ui-orion-status-question { order: 1; }.quest-ui-theme-default .quest-ui-orion-status-copy {
+    gap: 8px;
+    width: auto;
+}.quest-ui-theme .quest-ui-dashboard {
+    overflow: visible;
+}
+.quest-ui-theme-default .quest-ui-dashboard {
+    background: linear-gradient(180deg,#100d17 0%,#0e0b14 100%);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}.quest-ui-theme-default .quest-ui-dashboard-header { background: transparent; border-bottom: 0;  }.quest-ui-theme .quest-ui-default-status-name {
+    white-space: nowrap;
+}
+.quest-ui-theme-default .quest-ui-default-status-name {
+    color: var(--header-primary,#f2f3f5);
+    font-weight: 800;
+}.quest-ui-theme .quest-ui-orion-status {
+    display: inline-flex;
+    flex: 0 1 auto;
+}.quest-ui-theme .quest-ui-orion-status .quest-ui-version-chip {
+    order: 0;
+}.quest-ui-theme .quest-ui-orion-status-dot,
+.quest-ui-theme .quest-ui-orion-status-warning,
+.quest-ui-theme .quest-ui-orion-status-question {
+    order: 1;
+}.quest-ui-theme .quest-ui-orion-status-copy {
+    min-height: 25px;
+    order: 2;
+    padding: 6px 9px;
+}
+.quest-ui-theme-default .quest-ui-orion-status-copy {
     background: color-mix(in srgb, var(--interactive-muted,#949ba4) 11%, rgba(255,255,255,.035));
     border: 1px solid rgba(255,255,255,.1);
     border-radius: 999px;
@@ -805,240 +881,277 @@
     font-size: 11.5px;
     font-weight: 650;
     line-height: 1;
-    min-height: 25px;
-    order: 2;
-    padding: 6px 9px;
-}.quest-ui-theme-default .quest-ui-orion-status-dot {  position: relative; z-index: 1; }.quest-ui-theme-default .quest-ui-product-update-chip {
+}.quest-ui-theme .quest-ui-orion-status-dot {
+    position: relative;
+    z-index: 1;
+}.quest-ui-theme .quest-ui-product-update-chip {
     align-items: center;
-    background: rgba(255,255,255,.045);
-    border: 1px solid rgba(255,255,255,.1);
-    
-    color: var(--text-muted,#949ba4);
     display: inline-flex;
     flex: 0 0 auto;
-    
-    font-weight: 700;
     gap: 5px;
-    line-height: 1;
-    
-    
     white-space: nowrap;
+}
+.quest-ui-theme-default .quest-ui-product-update-chip {
+    background: rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.1);
+    color: var(--text-muted,#949ba4);
+    font-weight: 700;
+    line-height: 1;
 }.quest-ui-theme-default .quest-ui-product-update-chip.is-current { background: color-mix(in srgb, var(--status-positive,#23a55a) 13%, #101914); border-color: color-mix(in srgb, var(--status-positive,#23a55a) 45%, rgba(255,255,255,.08)); color: #65e89a; }.quest-ui-theme-default .quest-ui-product-update-chip.is-available { background: color-mix(in srgb, var(--quest-ui-default-accent) 14%, #17121f); border-color: color-mix(in srgb, var(--quest-ui-default-accent) 56%, rgba(255,255,255,.1)); color: #d8b4fe; }.quest-ui-theme-default .quest-ui-product-update-chip.is-error { background: color-mix(in srgb, var(--status-danger,#f23f42) 12%, #1c1416); border-color: color-mix(in srgb, var(--status-danger,#f23f42) 45%, rgba(255,255,255,.08)); color: #ff9b9d; }.quest-ui-theme-default .quest-ui-product-update-chip.is-warning { color: var(--status-warning,#f0b232); }.quest-ui-theme-default .quest-ui-product-update-chip.is-checking .quest-ui-product-update-mark { animation: quest-ui-default-update-pulse 1.1s ease-in-out infinite; }
-@keyframes quest-ui-default-update-pulse { 50% { opacity: .35; } }.quest-ui-theme-default .quest-ui-status-settings-button {
+@keyframes quest-ui-default-update-pulse { 50% { opacity: .35; } }.quest-ui-theme .quest-ui-status-settings-button {
     align-items: center;
-    background: color-mix(in srgb, var(--background-mod-strong,#2b2d31) 70%, #17131e);
-    border: 1px solid rgba(255,255,255,.11);
-    
-    color: var(--interactive-normal,#b5bac1);
-    cursor: pointer;
     display: inline-flex;
-    
-    
     justify-content: center;
     padding: 0;
-    
-}.quest-ui-theme-default .quest-ui-status-settings-button:hover { background: color-mix(in srgb, var(--background-mod-stronger,#34363c) 82%, #21172d); border-color: color-mix(in srgb, var(--quest-ui-default-accent) 36%, rgba(255,255,255,.13)); color: #fff; }.quest-ui-theme-default .quest-ui-summary-all { background: color-mix(in srgb, var(--quest-ui-default-accent) 15%, rgba(255,255,255,.035)); border-color: color-mix(in srgb, var(--quest-ui-default-accent) 46%, rgba(255,255,255,.08)); color: #e9d5ff; }.quest-ui-theme-default .quest-ui-dashboard-summary > span::before { flex: 0 0 6px;   }.quest-ui-theme-default .quest-ui-dashboard-filter-control {
+}
+.quest-ui-theme-default .quest-ui-status-settings-button {
+    background: color-mix(in srgb, var(--background-mod-strong,#2b2d31) 70%, #17131e);
+    border: 1px solid rgba(255,255,255,.11);
+    color: var(--interactive-normal,#b5bac1);
+    cursor: pointer;
+}.quest-ui-theme-default .quest-ui-status-settings-button:hover { background: color-mix(in srgb, var(--background-mod-stronger,#34363c) 82%, #21172d); border-color: color-mix(in srgb, var(--quest-ui-default-accent) 36%, rgba(255,255,255,.13)); color: #fff; }.quest-ui-theme-default .quest-ui-summary-all { background: color-mix(in srgb, var(--quest-ui-default-accent) 15%, rgba(255,255,255,.035)); border-color: color-mix(in srgb, var(--quest-ui-default-accent) 46%, rgba(255,255,255,.08)); color: #e9d5ff; }.quest-ui-theme .quest-ui-dashboard-summary > span::before {
+    flex: 0 0 6px;
+}.quest-ui-theme .quest-ui-dashboard-filter-control {
     align-items: center;
-    
+    display: inline-flex;
+    gap: 7px;
+    height: 34px;
+    padding: 0 11px;
+}
+.quest-ui-theme-default .quest-ui-dashboard-filter-control {
     border: 1px solid rgba(255,255,255,.11);
     border-radius: 9px;
     color: var(--interactive-normal,#b5bac1);
     cursor: pointer;
-    display: inline-flex;
     font: inherit;
     font-size: 11.5px;
     font-weight: 700;
-    gap: 7px;
-    height: 34px;
-    padding: 0 11px;
 }.quest-ui-theme-default .quest-ui-dashboard-filter-control:hover,
-.quest-ui-theme-default .quest-ui-dashboard-filter-control.is-open { background: color-mix(in srgb, var(--background-mod-stronger,#34363c) 84%, #21172d 16%); border-color: color-mix(in srgb, var(--quest-ui-default-accent) 34%, rgba(255,255,255,.12)); color: #fff; }.quest-ui-theme-default .quest-ui-dashboard-filter-control { white-space: nowrap; }.quest-ui-theme-default .quest-ui-dashboard-filter-control svg { flex: 0 0 17px;   }.quest-ui-theme-default .quest-ui-card {
+.quest-ui-theme-default .quest-ui-dashboard-filter-control.is-open { background: color-mix(in srgb, var(--background-mod-stronger,#34363c) 84%, #21172d 16%); border-color: color-mix(in srgb, var(--quest-ui-default-accent) 34%, rgba(255,255,255,.12)); color: #fff; }.quest-ui-theme .quest-ui-dashboard-filter-control {
+    white-space: nowrap;
+}.quest-ui-theme .quest-ui-dashboard-filter-control svg {
+    flex: 0 0 17px;
+}.quest-ui-theme-default .quest-ui-card {
     background: color-mix(in srgb, var(--background-base-low,#1e1f22) 82%, #17111f 18%);
     border-color: color-mix(in srgb, var(--quest-ui-default-accent) 19%, rgba(255,255,255,.08));
     border-radius: 12px;
     
     
-}.quest-ui-theme-default .quest-ui-card:hover { border-color: color-mix(in srgb, var(--quest-ui-default-accent) 42%, rgba(255,255,255,.1)); box-shadow: 0 5px 18px rgba(0,0,0,.22); transform: translateY(-1px); }.quest-ui-theme-default .quest-ui-artwork { flex: 0 0 54px; height: 54px; width: 54px; }.quest-ui-theme-default .quest-ui-card-title { font-size: 14px; }.quest-ui-theme-default .quest-ui-card-side { align-items: center; display: flex; flex: 0 0 128px; flex-direction: column; gap: 5px; justify-content: center; width: 128px; }.quest-ui-theme-default .quest-ui-progress-ring,
-.quest-ui-theme-default .quest-ui-progress-ring svg { height: 45px; width: 45px; }.quest-ui-theme-default .quest-ui-achievement-progress-segments > span { background: color-mix(in srgb, var(--interactive-muted,#949ba4) 23%, rgba(255,255,255,.045)); border: 1px solid rgba(255,255,255,.07); border-radius: 4px;  }.quest-ui-theme-default .quest-ui-achievement-progress-segments > span.is-filled { background: linear-gradient(90deg,#8b5cf6,#c084fc); border-color: color-mix(in srgb,#c084fc 70%,transparent); box-shadow: 0 0 7px rgba(168,85,247,.28); }
+}.quest-ui-theme-default .quest-ui-card:hover { border-color: color-mix(in srgb, var(--quest-ui-default-accent) 42%, rgba(255,255,255,.1)); box-shadow: 0 5px 18px rgba(0,0,0,.22); transform: translateY(-1px); }.quest-ui-theme .quest-ui-artwork {
+    flex: 0 0 54px;
+    height: 54px;
+    width: 54px;
+}.quest-ui-theme-default .quest-ui-card-title { font-size: 14px; }.quest-ui-theme .quest-ui-card-side {
+    align-items: center;
+    display: flex;
+    flex: 0 0 128px;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: center;
+    width: 128px;
+}.quest-ui-theme .quest-ui-progress-ring,
+.quest-ui-theme .quest-ui-progress-ring svg {
+    height: 45px;
+    width: 45px;
+}.quest-ui-theme-default .quest-ui-achievement-progress-segments > span { background: color-mix(in srgb, var(--interactive-muted,#949ba4) 23%, rgba(255,255,255,.045)); border: 1px solid rgba(255,255,255,.07); border-radius: 4px;  }.quest-ui-theme-default .quest-ui-achievement-progress-segments > span.is-filled { background: linear-gradient(90deg,#8b5cf6,#c084fc); border-color: color-mix(in srgb,#c084fc 70%,transparent); box-shadow: 0 0 7px rgba(168,85,247,.28); }
 
-@media (max-width: 900px) {.quest-ui-theme-default .quest-ui-dashboard-summary { grid-template-columns: repeat(4,minmax(0,1fr)); }
+@media (max-width: 900px) {.quest-ui-theme .quest-ui-dashboard-summary {
+    grid-template-columns: repeat(4,minmax(0,1fr));
 }
-@media (max-width: 720px) {.quest-ui-theme-default .quest-ui-dashboard-actionbar { align-items: stretch; flex-direction: column; }.quest-ui-theme-default .quest-ui-dashboard-actionbar-primary { flex-wrap: wrap; }.quest-ui-theme-default .quest-ui-home-button { align-self: flex-end; }.quest-ui-theme-default .quest-ui-card-side.is-achievement { flex-basis: 220px; width: 220px; }
 }
-@media (max-width: 560px) {.quest-ui-theme-default .quest-ui-dashboard-topbar { align-items: flex-start; flex-wrap: wrap; }.quest-ui-theme-default .quest-ui-dashboard-display-title > strong { font-size: 22px; }.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag,
-.quest-ui-theme-default .quest-ui-dashboard-orb-balance { height: 36px; min-height: 36px; }.quest-ui-theme-default .quest-ui-dashboard-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }.quest-ui-theme-default .quest-ui-default-status-product { flex-wrap: wrap; }.quest-ui-theme-default .quest-ui-card { align-items: stretch; flex-direction: column; }.quest-ui-theme-default .quest-ui-card-side,
-.quest-ui-theme-default .quest-ui-card-side.is-achievement { align-items: flex-start; flex-basis: auto; width: 100%; }
+@media (max-width: 720px) {.quest-ui-theme .quest-ui-dashboard-actionbar {
+    align-items: stretch;
+    flex-direction: column;
+}.quest-ui-theme .quest-ui-dashboard-actionbar-primary {
+    flex-wrap: wrap;
+}.quest-ui-theme .quest-ui-home-button {
+    align-self: flex-end;
+}.quest-ui-theme .quest-ui-card-side.is-achievement {
+    flex-basis: 220px;
+    width: 220px;
+}
+}
+@media (max-width: 560px) {.quest-ui-theme .quest-ui-dashboard-topbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+}.quest-ui-theme-default .quest-ui-dashboard-display-title > strong { font-size: 22px; }.quest-ui-theme .quest-ui-dashboard-boost-source-tag,
+.quest-ui-theme .quest-ui-dashboard-orb-balance {
+    height: 36px;
+    min-height: 36px;
+}.quest-ui-theme .quest-ui-dashboard-summary {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+}.quest-ui-theme .quest-ui-default-status-product {
+    flex-wrap: wrap;
+}.quest-ui-theme .quest-ui-card {
+    align-items: stretch;
+    flex-direction: column;
+}.quest-ui-theme .quest-ui-card-side,
+.quest-ui-theme .quest-ui-card-side.is-achievement {
+    align-items: flex-start;
+    flex-basis: auto;
+    width: 100%;
+}
 }
 
 /* v1.6 default live-review compact pass */
 .quest-ui-theme-default .quest-ui-dashboard-display-title > strong {
     
     letter-spacing: -0.4px;
-}.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag {
+}.quest-ui-theme .quest-ui-dashboard-boost-source-tag {
     gap: 6px;
-    
-}.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag img,
-.quest-ui-theme-default .quest-ui-dashboard-nitro-fallback-icon,
-.quest-ui-theme-default .quest-ui-dashboard-xbox-icon {
+}.quest-ui-theme .quest-ui-dashboard-boost-source-tag img,
+.quest-ui-theme .quest-ui-dashboard-nitro-fallback-icon,
+.quest-ui-theme .quest-ui-dashboard-xbox-icon {
     height: 18px;
     width: 18px;
 }.quest-ui-theme-default .quest-ui-dashboard-boost-source-wordmark {
     font-size: 14px;
-}.quest-ui-theme-default .quest-ui-dashboard-orb-balance {
+}.quest-ui-theme .quest-ui-dashboard-orb-balance {
     gap: 7px;
-    
-}.quest-ui-theme-default .quest-ui-dashboard-orb-icon {
+}.quest-ui-theme .quest-ui-dashboard-orb-icon {
     flex-basis: 20px;
     height: 20px;
     width: 20px;
-}.quest-ui-theme-default .quest-ui-orion-icon-button {
+}.quest-ui-theme .quest-ui-orion-icon-button {
     gap: 7px;
     padding: 0 11px;
 }.quest-ui-theme-default .quest-ui-orion-control-label,
 .quest-ui-theme-default .quest-ui-claim-all-label {
     font-size: 12px;
-}.quest-ui-theme-default .quest-ui-event-log-button {
+}.quest-ui-theme .quest-ui-event-log-button {
     padding: 0 11px;
-}.quest-ui-theme-default .quest-ui-orion-status {
+}.quest-ui-theme .quest-ui-orion-status {
     gap: 5px;
-}.quest-ui-theme-default .quest-ui-orion-status-copy,
-.quest-ui-theme-default .quest-ui-product-update-chip {
-    font-size: 10.5px;
+}.quest-ui-theme .quest-ui-orion-status-copy,
+.quest-ui-theme .quest-ui-product-update-chip {
     min-height: 23px;
     padding: 5px 8px;
-}.quest-ui-theme-default .quest-ui-orion-status-dot {
+}
+.quest-ui-theme-default .quest-ui-orion-status-copy,
+.quest-ui-theme-default .quest-ui-product-update-chip {
+    font-size: 10.5px;
+}.quest-ui-theme .quest-ui-orion-status-dot {
     flex-basis: 6px;
     height: 6px;
     margin-right: -10px;
     width: 6px;
 }/* Old dashboard CSS forces filter buttons to 34px. Undo that for the labeled v1.6 controls. */
-.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-filter-button,
-.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-sort-button {
+.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-filter-button,
+.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-sort-button {
     flex: 0 0 auto;
-    
     min-width: max-content;
-    
     width: auto;
-}.quest-ui-theme-default .quest-ui-card-side {
+}.quest-ui-theme .quest-ui-card-side {
     min-width: 0;
     overflow: hidden;
-}.quest-ui-theme-default .quest-ui-card-side.is-achievement {
+}.quest-ui-theme .quest-ui-card-side.is-achievement {
     flex-basis: 270px;
-    
-}@media (max-width: 900px) {.quest-ui-theme-default .quest-ui-default-status-strip {
+}@media (max-width: 900px) {.quest-ui-theme .quest-ui-default-status-strip {
         align-items: center;
         flex-direction: row;
         gap: 8px;
-    }.quest-ui-theme-default .quest-ui-default-status-product {
+}.quest-ui-theme .quest-ui-default-status-product {
         flex-wrap: nowrap;
-    }
+}
 }
 
-@media (max-width: 760px) {.quest-ui-theme-default .quest-ui-default-status-strip {
+@media (max-width: 760px) {.quest-ui-theme .quest-ui-default-status-strip {
         align-items: stretch;
         flex-direction: column;
-    }.quest-ui-theme-default .quest-ui-default-status-product {
+}.quest-ui-theme .quest-ui-default-status-product {
         flex-wrap: wrap;
-    }
+}
 }
 
 /* v1.6 default live-review layout repair */
-.quest-ui-theme-default .quest-ui-dashboard-actionbar {
+.quest-ui-theme .quest-ui-dashboard-actionbar {
     justify-content: flex-start;
-}.quest-ui-theme-default .quest-ui-dashboard-actionbar > .quest-ui-home-button {
+}.quest-ui-theme .quest-ui-dashboard-actionbar > .quest-ui-home-button {
     margin-left: 0;
-}.quest-ui-theme-default .quest-ui-default-status-product {
+}.quest-ui-theme .quest-ui-default-status-product {
     flex: none;
-    
-}.quest-ui-theme-default .quest-ui-orion-status.is-compact {
+}.quest-ui-theme .quest-ui-orion-status.is-compact {
     align-items: center;
     display: inline-flex;
     gap: 6px;
-}.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-version-chip {
+}.quest-ui-theme .quest-ui-orion-status.is-compact .quest-ui-version-chip {
     order: initial;
-}.quest-ui-theme-default .quest-ui-orion-runtime-chip {
+}.quest-ui-theme .quest-ui-orion-runtime-chip {
     align-items: center;
-    
-    
-    
     display: inline-flex;
-    
-    
-    
-}.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
+}.quest-ui-theme .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
+    order: initial;
+}
+.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
     background: transparent;
     border: 0;
-    
-    order: initial;
-    
-}.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-dot,
-.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-warning,
-.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-question {
+}.quest-ui-theme .quest-ui-orion-status.is-compact .quest-ui-orion-status-dot,
+.quest-ui-theme .quest-ui-orion-status.is-compact .quest-ui-orion-status-warning,
+.quest-ui-theme .quest-ui-orion-status.is-compact .quest-ui-orion-status-question {
     flex: 0 0 6px;
     height: 6px;
     margin: 0;
     order: initial;
     position: static;
     width: 6px;
-}.quest-ui-theme-default .quest-ui-dashboard-content {
+}.quest-ui-theme .quest-ui-dashboard-content {
     overflow-x: hidden;
-}.quest-ui-theme-default .quest-ui-card {
+}.quest-ui-theme .quest-ui-card {
     grid-template-columns: 54px minmax(0, 1fr) 92px;
-    
-}.quest-ui-theme-default .quest-ui-card-side,
-.quest-ui-theme-default .quest-ui-card-side.is-achievement {
+}.quest-ui-theme .quest-ui-card-side,
+.quest-ui-theme .quest-ui-card-side.is-achievement {
     box-sizing: border-box;
     flex: none;
     min-width: 0;
     overflow: visible;
     width: 100%;
-}.quest-ui-theme-default .quest-ui-achievement-progress,
-.quest-ui-theme-default .quest-ui-achievement-progress-segments {
+}.quest-ui-theme .quest-ui-achievement-progress,
+.quest-ui-theme .quest-ui-achievement-progress-segments {
     box-sizing: border-box;
     max-width: 100%;
     min-width: 0;
     width: 100%;
 }
 
-@media (max-width: 760px) {.quest-ui-theme-default .quest-ui-default-status-strip {
+@media (max-width: 760px) {.quest-ui-theme .quest-ui-default-status-strip {
         display: flex;
-    }}
+}}
 
 /* v1.6 default live-review density and alignment pass */
-.quest-ui-theme-default .quest-ui-dashboard-topbar {
+.quest-ui-theme .quest-ui-dashboard-topbar {
     min-height: 50px;
     padding: 6px 12px;
-}.quest-ui-theme-default .quest-ui-dashboard-display-title {
+}.quest-ui-theme .quest-ui-dashboard-display-title {
     gap: 7px;
-}.quest-ui-theme-default .quest-ui-dashboard-display-title-icon,
-.quest-ui-theme-default .quest-ui-dashboard-display-title-icon > svg {
+}.quest-ui-theme .quest-ui-dashboard-display-title-icon,
+.quest-ui-theme .quest-ui-dashboard-display-title-icon > svg {
     flex-basis: 24px;
     height: 24px;
     width: 24px;
 }.quest-ui-theme-default .quest-ui-dashboard-display-title > strong {
     font-size: 22px;
-}.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag,
-.quest-ui-theme-default .quest-ui-dashboard-orb-balance {
+}.quest-ui-theme .quest-ui-dashboard-boost-source-tag,
+.quest-ui-theme .quest-ui-dashboard-orb-balance {
     height: 34px;
     min-height: 34px;
-}.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag {
+}.quest-ui-theme .quest-ui-dashboard-boost-source-tag {
     padding: 0 9px;
-}.quest-ui-theme-default .quest-ui-dashboard-orb-balance {
+}.quest-ui-theme .quest-ui-dashboard-orb-balance {
     padding: 0 10px;
 }.quest-ui-theme-default .quest-ui-dashboard-orb-balance > strong {
     font-size: 16px;
-}.quest-ui-theme-default .quest-ui-orion-icon-button,
-.quest-ui-theme-default .quest-ui-toolbar-button,
-.quest-ui-theme-default .quest-ui-reload-icon-button {
+}.quest-ui-theme .quest-ui-orion-icon-button,
+.quest-ui-theme .quest-ui-toolbar-button,
+.quest-ui-theme .quest-ui-reload-icon-button {
     height: 32px;
     min-height: 32px;
-}.quest-ui-theme-default .quest-ui-dashboard-header {
+}.quest-ui-theme .quest-ui-dashboard-header {
     padding: 7px 10px 6px;
 }.quest-ui-theme-default .quest-ui-default-status-name {
     font-size: 12px;
-}.quest-ui-theme-default .quest-ui-version-chip,
-.quest-ui-theme-default .quest-ui-orion-runtime-chip,
-.quest-ui-theme-default .quest-ui-product-update-chip {
+}.quest-ui-theme .quest-ui-version-chip,
+.quest-ui-theme .quest-ui-orion-runtime-chip,
+.quest-ui-theme .quest-ui-product-update-chip {
     min-height: 21px;
 }/* Counters are navigation/status text, not eight equally strong pills. */
 .quest-ui-theme-default .quest-ui-dashboard-summary > span:nth-child(n) {
@@ -1048,7 +1161,7 @@
     
     
     
-}.quest-ui-theme-default .quest-ui-dashboard-summary > span::before {
+}.quest-ui-theme .quest-ui-dashboard-summary > span::before {
     flex-basis: 5px;
     height: 5px;
     min-height: 5px;
@@ -1058,43 +1171,48 @@
     
     
     border-radius: 999px;
-}.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-filter-button,
-.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-sort-button {
-    font-size: 11px;
+}.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-filter-button,
+.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-sort-button {
     height: 30px;
     padding: 0 9px;
-}.quest-ui-theme-default .quest-ui-filter-count-badge {
+}
+.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-filter-button,
+.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-sort-button {
+    font-size: 11px;
+}.quest-ui-theme .quest-ui-filter-count-badge {
     align-items: center;
+    display: inline-flex;
+    height: 16px;
+    justify-content: center;
+    min-width: 16px;
+    padding: 0 4px;
+}
+.quest-ui-theme-default .quest-ui-filter-count-badge {
     background: rgba(255,255,255,.075);
     border: 1px solid rgba(255,255,255,.12);
     border-radius: 999px;
     color: var(--text-muted, #949ba4);
-    display: inline-flex;
     font-size: 9px;
     font-variant-numeric: tabular-nums;
     font-weight: 750;
-    height: 16px;
-    justify-content: center;
     line-height: 1;
-    min-width: 16px;
-    padding: 0 4px;
 }.quest-ui-theme-default .quest-ui-filter-button:hover .quest-ui-filter-count-badge,
 .quest-ui-theme-default .quest-ui-filter-button.is-open .quest-ui-filter-count-badge {
     background: rgba(255,255,255,.11);
     border-color: rgba(255,255,255,.18);
     color: #d7d9dc;
-}.quest-ui-theme-default .quest-ui-dashboard-filter-control svg {
+}.quest-ui-theme .quest-ui-dashboard-filter-control svg {
     flex-basis: 16px;
     height: 16px;
     width: 16px;
 }
 
 /* Match the visible artwork box to its image/fallback; legacy CSS still used 56px children. */
-.quest-ui-theme-default .quest-ui-card {
+.quest-ui-theme .quest-ui-card {
     min-height: 80px;
     padding: 9px 11px;
-}.quest-ui-theme-default .quest-ui-card-side,
-.quest-ui-theme-default .quest-ui-card-side.is-achievement {
+}.quest-ui-theme .quest-ui-card-side,
+.quest-ui-theme .quest-ui-card-side.is-achievement {
     align-self: center;
     gap: 3px;
     justify-content: center;
@@ -1102,60 +1220,48 @@
     
     
     scrollbar-width: thin;
-}.quest-ui-theme-default .quest-ui-dashboard-content::-webkit-scrollbar {
+}.quest-ui-theme .quest-ui-dashboard-content::-webkit-scrollbar {
     width: 6px;
 }.quest-ui-theme-default .quest-ui-dashboard-content::-webkit-scrollbar-thumb {
     border-width: 1px;
 }
 
-@media (max-width: 760px) {.quest-ui-theme-default .quest-ui-card.quest-ui-card-achievement {
+@media (max-width: 760px) {.quest-ui-theme .quest-ui-card.quest-ui-card-achievement {
         grid-template-columns: 54px minmax(0, 1fr) 170px;
-    }
+}
 }
 
 /* Keep the one-line plugin strip resilient to long prerelease/update labels. */
-.quest-ui-theme-default .quest-ui-default-status-strip {
-    
+.quest-ui-theme .quest-ui-default-status-strip {
     max-width: 100%;
     overflow: hidden;
-}.quest-ui-theme-default .quest-ui-default-status-product {
+}.quest-ui-theme .quest-ui-default-status-product {
     max-width: 100%;
-    
-}.quest-ui-theme-default .quest-ui-product-update-chip {
+}.quest-ui-theme .quest-ui-product-update-chip {
     max-width: 150px;
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-product-update-chip > span:last-child {
+}.quest-ui-theme .quest-ui-product-update-chip > span:last-child {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-}.quest-ui-theme-default .quest-ui-default-status-name,
-.quest-ui-theme-default .quest-ui-version-chip,
-.quest-ui-theme-default .quest-ui-orion-runtime-chip,
-.quest-ui-theme-default .quest-ui-status-settings-button {
+}.quest-ui-theme .quest-ui-default-status-name,
+.quest-ui-theme .quest-ui-version-chip,
+.quest-ui-theme .quest-ui-orion-runtime-chip,
+.quest-ui-theme .quest-ui-status-settings-button {
     flex-shrink: 0;
 }
 
 /* v1.6 default baseline remix: restore the original summary rhythm and keep card actions safe. */
-.quest-ui-theme-default .quest-ui-default-status-strip {
-    
+.quest-ui-theme .quest-ui-default-status-strip {
     justify-content: stretch;
 }/* Return to the original eight-segment summary instead of telemetry-like loose text. */
-.quest-ui-theme-default .quest-ui-dashboard-summary {
+.quest-ui-theme .quest-ui-dashboard-summary {
     column-gap: 6px;
-    
-    
-    
     row-gap: 0;
-    
-}.quest-ui-theme-default .quest-ui-dashboard-summary > span:nth-child(n) {
+}.quest-ui-theme .quest-ui-dashboard-summary > span:nth-child(n) {
     align-items: center;
-    background: color-mix(in srgb, var(--background-mod-subtle, rgba(255,255,255,.05)) 72%, transparent);
-    border: 1px solid color-mix(in srgb, var(--interactive-normal, #b5bac1) 11%, transparent);
-    border-radius: 999px;
     box-sizing: border-box;
     display: inline-flex;
-    font-size: 9.75px;
-    font-weight: 700;
     gap: 5px;
     grid-column: auto;
     justify-content: center;
@@ -1165,65 +1271,72 @@
     padding: 4px 6px;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.quest-ui-theme-default .quest-ui-dashboard-summary > span:nth-child(n) {
+    background: color-mix(in srgb, var(--background-mod-subtle, rgba(255,255,255,.05)) 72%, transparent);
+    border: 1px solid color-mix(in srgb, var(--interactive-normal, #b5bac1) 11%, transparent);
+    border-radius: 999px;
+    font-size: 9.75px;
+    font-weight: 700;
 }.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-all {
     background: color-mix(in srgb, var(--quest-ui-default-accent) 15%, rgba(255,255,255,.035));
     border-color: color-mix(in srgb, var(--quest-ui-default-accent) 42%, rgba(255,255,255,.07));
     color: #eadcff;
-}.quest-ui-theme-default .quest-ui-dashboard-filter-tools {
-    
+}.quest-ui-theme .quest-ui-dashboard-filter-tools {
     margin-bottom: 2px;
 }
 
 /* Available/Ready card actions must never be sacrificed to a long reward label. */
-.quest-ui-theme-default .quest-ui-card {
+.quest-ui-theme .quest-ui-card {
     overflow: visible;
-}.quest-ui-theme-default .quest-ui-card-action {
+}.quest-ui-theme .quest-ui-card-action {
     box-sizing: border-box;
     min-height: 28px;
     overflow: visible;
-}.quest-ui-theme-default .quest-ui-card-action-enroll,
-.quest-ui-theme-default .quest-ui-card-action-claim {
+}.quest-ui-theme .quest-ui-card-action-enroll,
+.quest-ui-theme .quest-ui-card-action-claim {
     min-width: 96px;
     padding-inline: 11px;
 }
 
-@media (max-width: 760px) {.quest-ui-theme-default .quest-ui-dashboard-summary {
+@media (max-width: 760px) {.quest-ui-theme .quest-ui-dashboard-summary {
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        
-    }.quest-ui-theme-default .quest-ui-card-meta-row {
+}.quest-ui-theme .quest-ui-card-meta-row {
         grid-template-columns: minmax(0, 1fr) max-content;
-    }
+}
 }
 
-@media (max-width: 520px) {.quest-ui-theme-default .quest-ui-dashboard-summary {
+@media (max-width: 520px) {.quest-ui-theme .quest-ui-dashboard-summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-    }.quest-ui-theme-default .quest-ui-card-meta-row {
+}.quest-ui-theme .quest-ui-card-meta-row {
         align-items: start;
         grid-template-columns: 1fr;
-    }.quest-ui-theme-default .quest-ui-card-actions {
+}.quest-ui-theme .quest-ui-card-actions {
         justify-self: start;
-    }
+}
 }
 
 /* v1.6 default: preserve the proven v1.5.x Quest card layout.
  * The only intentional card-layout change is ACHIEVEMENT_* using segmented progress.
  */
-.quest-ui-theme-default .quest-ui-dashboard-content {
+.quest-ui-theme .quest-ui-dashboard-content {
     gap: 10px;
     padding: 12px;
-}.quest-ui-theme-default .quest-ui-card,
-.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement) {
+}.quest-ui-theme .quest-ui-card,
+.quest-ui-theme .quest-ui-card:not(.quest-ui-card-achievement) {
     align-items: center;
-    
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.09));
-    border-radius: 11px;
-    box-shadow: none;
     display: grid;
     gap: 12px;
     grid-template-columns: 56px minmax(0, 1fr) 82px;
     min-height: 118px;
     overflow: visible;
     padding: 13px 14px;
+}
+.quest-ui-theme-default .quest-ui-card,
+.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement) {
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.09));
+    border-radius: 11px;
+    box-shadow: none;
     transform: none;
 }.quest-ui-theme-default .quest-ui-card:hover,
 .quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement):hover {
@@ -1231,27 +1344,29 @@
     border-color: var(--border-normal, rgba(255, 255, 255, 0.14));
     box-shadow: none;
     transform: none;
-}.quest-ui-theme-default .quest-ui-artwork,
-.quest-ui-theme-default .quest-ui-artwork-fallback,
-.quest-ui-theme-default .quest-ui-artwork-image {
+}.quest-ui-theme .quest-ui-artwork,
+.quest-ui-theme .quest-ui-artwork-fallback,
+.quest-ui-theme .quest-ui-artwork-image {
     height: 56px;
     width: 56px;
-}.quest-ui-theme-default .quest-ui-card-main {
+}.quest-ui-theme .quest-ui-card-main {
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-card-meta-row {
+}.quest-ui-theme .quest-ui-card-meta-row {
     align-items: center;
     display: flex;
-    font-size: 11.5px;
     gap: 5px 10px;
     grid-template-columns: none;
-    line-height: 16px;
     margin-top: 7px;
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-card-reward {
+}
+.quest-ui-theme-default .quest-ui-card-meta-row {
+    font-size: 11.5px;
+    line-height: 16px;
+}.quest-ui-theme .quest-ui-card-reward {
     max-width: none;
     min-width: 0;
     overflow: hidden;
-}.quest-ui-theme-default .quest-ui-card-actions {
+}.quest-ui-theme .quest-ui-card-actions {
     align-items: center;
     align-self: auto;
     display: inline-flex;
@@ -1260,14 +1375,14 @@
     justify-self: auto;
     min-width: 0;
     overflow: visible;
-}.quest-ui-theme-default .quest-ui-card-action,
-.quest-ui-theme-default .quest-ui-card-action-enroll,
-.quest-ui-theme-default .quest-ui-card-action-claim {
+}.quest-ui-theme .quest-ui-card-action,
+.quest-ui-theme .quest-ui-card-action-enroll,
+.quest-ui-theme .quest-ui-card-action-claim {
     min-height: 28px;
     min-width: 0;
     padding: 6px 10px;
-}.quest-ui-theme-default .quest-ui-card-side,
-.quest-ui-theme-default .quest-ui-card-side:not(.is-achievement) {
+}.quest-ui-theme .quest-ui-card-side,
+.quest-ui-theme .quest-ui-card-side:not(.is-achievement) {
     align-items: center;
     align-self: stretch;
     display: flex;
@@ -1278,46 +1393,50 @@
     min-width: 0;
     overflow: visible;
     width: auto;
-}.quest-ui-theme-default .quest-ui-progress-ring {
+}.quest-ui-theme .quest-ui-progress-ring {
     flex: 0 0 56px;
     height: 56px;
     width: 56px;
-}.quest-ui-theme-default .quest-ui-progress-ring > svg:first-child {
+}.quest-ui-theme .quest-ui-progress-ring > svg:first-child {
     height: 56px;
     width: 56px;
-}.quest-ui-theme-default .quest-ui-card-expiry {
+}.quest-ui-theme .quest-ui-card-expiry {
     box-sizing: content-box;
-    font-size: 9.5px;
-    font-weight: 650;
-    line-height: 12px;
     max-width: 82px;
     overflow: visible;
-    text-align: center;
     text-overflow: clip;
     white-space: normal;
     width: auto;
 }
+.quest-ui-theme-default .quest-ui-card-expiry {
+    font-size: 9.5px;
+    font-weight: 650;
+    line-height: 12px;
+    text-align: center;
+}
 
 /* Achievement keeps the v1.5 card body and only swaps the right-side indicator. */
-.quest-ui-theme-default .quest-ui-card.quest-ui-card-achievement {
+.quest-ui-theme .quest-ui-card.quest-ui-card-achievement {
     align-items: center;
-    background: var(--background-base-low, var(--background-secondary, #1e1f22));
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.09));
-    border-radius: 11px;
-    box-shadow: none;
     display: grid;
     gap: 12px;
     grid-template-columns: 56px minmax(0, 1fr) 210px;
     min-height: 118px;
     overflow: visible;
     padding: 13px 14px;
+}
+.quest-ui-theme-default .quest-ui-card.quest-ui-card-achievement {
+    background: var(--background-base-low, var(--background-secondary, #1e1f22));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.09));
+    border-radius: 11px;
+    box-shadow: none;
     transform: none;
 }.quest-ui-theme-default .quest-ui-card.quest-ui-card-achievement:hover {
     background: var(--background-base-lower, var(--background-secondary-alt, #232428));
     border-color: var(--border-normal, rgba(255, 255, 255, 0.14));
     box-shadow: none;
     transform: none;
-}.quest-ui-theme-default .quest-ui-card-side.is-achievement {
+}.quest-ui-theme .quest-ui-card-side.is-achievement {
     align-items: stretch;
     align-self: stretch;
     display: flex;
@@ -1328,96 +1447,94 @@
     min-width: 0;
     overflow: visible;
     width: auto;
-}.quest-ui-theme-default .quest-ui-achievement-progress {
+}.quest-ui-theme .quest-ui-achievement-progress {
     display: flex;
     flex-direction: column;
     gap: 6px;
     min-width: 0;
     width: 100%;
-}.quest-ui-theme-default .quest-ui-achievement-progress-copy {
+}.quest-ui-theme .quest-ui-achievement-progress-copy {
     align-items: baseline;
-    color: var(--text-muted, #949ba4);
     display: flex;
-    font-size: 10.5px;
     gap: 5px;
+}
+.quest-ui-theme-default .quest-ui-achievement-progress-copy {
+    color: var(--text-muted, #949ba4);
+    font-size: 10.5px;
 }.quest-ui-theme-default .quest-ui-achievement-progress-copy strong {
     color: var(--header-primary, #f2f3f5);
     font-size: 11.5px;
     font-variant-numeric: tabular-nums;
-}.quest-ui-theme-default .quest-ui-achievement-progress-segments {
+}.quest-ui-theme .quest-ui-achievement-progress-segments {
     display: grid;
     gap: 4px;
     min-width: 0;
     width: 100%;
-}.quest-ui-theme-default .quest-ui-achievement-progress-segments > span {
+}.quest-ui-theme .quest-ui-achievement-progress-segments > span {
     height: 11px;
-}.quest-ui-theme-default .quest-ui-card-side.is-achievement .quest-ui-card-expiry {
+}.quest-ui-theme .quest-ui-card-side.is-achievement .quest-ui-card-expiry {
     max-width: 210px;
-    text-align: center;
     white-space: normal;
     width: auto;
 }
+.quest-ui-theme-default .quest-ui-card-side.is-achievement .quest-ui-card-expiry {
+    text-align: center;
+}
 
-@media (max-width: 520px) {.quest-ui-theme-default .quest-ui-card,
-.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement) {
+@media (max-width: 520px) {.quest-ui-theme .quest-ui-card,
+.quest-ui-theme .quest-ui-card:not(.quest-ui-card-achievement) {
         gap: 9px;
         grid-template-columns: 48px minmax(0, 1fr) 72px;
         padding: 11px;
-    }.quest-ui-theme-default .quest-ui-artwork,
-.quest-ui-theme-default .quest-ui-artwork-fallback,
-.quest-ui-theme-default .quest-ui-artwork-image {
+}.quest-ui-theme .quest-ui-artwork,
+.quest-ui-theme .quest-ui-artwork-fallback,
+.quest-ui-theme .quest-ui-artwork-image {
         height: 48px;
         width: 48px;
-    }.quest-ui-theme-default .quest-ui-progress-ring,
-.quest-ui-theme-default .quest-ui-progress-ring > svg:first-child {
+}.quest-ui-theme .quest-ui-progress-ring,
+.quest-ui-theme .quest-ui-progress-ring > svg:first-child {
         height: 52px;
         width: 52px;
-    }.quest-ui-theme-default .quest-ui-progress-ring {
+}.quest-ui-theme .quest-ui-progress-ring {
         flex-basis: 52px;
-    }.quest-ui-theme-default .quest-ui-card-expiry {
+}.quest-ui-theme .quest-ui-card-expiry {
         max-width: 72px;
-    }.quest-ui-theme-default .quest-ui-card.quest-ui-card-achievement {
+}.quest-ui-theme .quest-ui-card.quest-ui-card-achievement {
         gap: 9px;
         grid-template-columns: 48px minmax(0, 1fr) 150px;
         padding: 11px;
-    }
+}
 }
 
 /* v1.6 default status quick views: restore the colorful clickable chip language. */
-.quest-ui-theme-default .quest-ui-dashboard-summary {
+.quest-ui-theme .quest-ui-dashboard-summary {
     align-items: center;
     display: flex;
-    
-    
     grid-template-columns: none;
-    
     width: 100%;
-}.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+}.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+    align-items: center;
+    box-sizing: border-box;
+    display: inline-flex;
+    grid-column: auto;
+    justify-content: flex-start;
+    min-width: 0;
+    overflow: visible;
+    white-space: nowrap;
+}
+.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip {
     --quest-ui-summary-color: var(--interactive-normal, #b5bac1);
     --quest-ui-summary-tint: rgba(181, 186, 193, 0.08);
-    align-items: center;
     appearance: none;
     background: var(--quest-ui-summary-tint);
     border: 1px solid color-mix(in srgb, var(--quest-ui-summary-color) 42%, transparent);
     border-radius: 999px;
-    box-sizing: border-box;
     color: var(--quest-ui-summary-color);
     cursor: pointer;
-    display: inline-flex;
-    
     font: inherit;
-    
     font-weight: 750;
-    
-    grid-column: auto;
-    justify-content: flex-start;
-    
-    min-width: 0;
     outline: 0;
-    overflow: visible;
-    
     transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
-    white-space: nowrap;
 }.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip:hover {
     background: color-mix(in srgb, var(--quest-ui-summary-color) 15%, transparent);
     border-color: color-mix(in srgb, var(--quest-ui-summary-color) 72%, transparent);
@@ -1433,12 +1550,12 @@
     box-shadow:
         0 0 0 1px color-mix(in srgb, var(--quest-ui-summary-color) 20%, transparent),
         0 0 12px color-mix(in srgb, var(--quest-ui-summary-color) 18%, transparent);
-}.quest-ui-theme-default .quest-ui-summary-chip-dot {
+}.quest-ui-theme .quest-ui-summary-chip-dot {
+    flex: 0 0 6px;
+}
+.quest-ui-theme-default .quest-ui-summary-chip-dot {
     background: currentColor;
     border-radius: 999px;
-    flex: 0 0 6px;
-    
-    
 }.quest-ui-theme-default .quest-ui-summary-chip-label {
     color: currentColor;
 }.quest-ui-theme-default .quest-ui-summary-chip-count {
@@ -1481,22 +1598,22 @@
     --quest-ui-summary-tint: rgba(199,125,255,.075);
 }
 
-@media (max-width: 760px) {.quest-ui-theme-default .quest-ui-dashboard-summary {
+@media (max-width: 760px) {.quest-ui-theme .quest-ui-dashboard-summary {
         display: flex;
         row-gap: 7px;
-    }
+}
 }
 
 /* Compact colored status chips - match the approved reference proportions.
  * Status-specific selectors intentionally match/exceed the base specificity so
  * semantic custom properties cannot fall back to the neutral gray defaults.
  */
+.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+    min-height: 25px;
+}
 .quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip {
     font-size: 10px;
-    
-    min-height: 25px;
-    
-}.quest-ui-theme-default .quest-ui-summary-chip-dot {
+}.quest-ui-theme .quest-ui-summary-chip-dot {
     flex-basis: 5px;
     height: 5px;
     width: 5px;
@@ -1530,16 +1647,16 @@
 }
 
 /* Keep all eight status chips on one row at the fixed 820px dashboard width. */
-.quest-ui-theme-default .quest-ui-dashboard-summary {
+.quest-ui-theme .quest-ui-dashboard-summary {
     flex-wrap: nowrap;
     gap: 5px;
-}.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+}.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip {
     flex: 0 1 auto;
 }
 
-@media (max-width: 760px) {.quest-ui-theme-default .quest-ui-dashboard-summary {
+@media (max-width: 760px) {.quest-ui-theme .quest-ui-dashboard-summary {
         flex-wrap: wrap;
-    }
+}
 }
 
 /* Distinguish Ignored from Hidden while keeping Hidden violet as approved. */
@@ -1554,36 +1671,40 @@
 /* v1.6 default polish: simplify plugin status chrome and tighten category counts. */
 
 /* Category chips: no leading status dot. The semantic color already lives on the pill. */
-.quest-ui-theme-default .quest-ui-summary-chip-dot {
+.quest-ui-theme .quest-ui-summary-chip-dot {
     display: none;
-}.quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+}.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip {
     gap: 5px;
     padding: 2px 5px 2px 8px;
 }
 
 /* Keep the count as a compact rounded capsule with the number optically centered. */
-.quest-ui-theme-default .quest-ui-summary-chip-count {
+.quest-ui-theme .quest-ui-summary-chip-count {
     align-items: center;
     box-sizing: border-box;
     display: inline-flex;
-    font-variant-numeric: tabular-nums;
     height: 18px;
     justify-content: center;
-    line-height: 18px;
     min-width: 20px;
     padding: 0 5px;
+}
+.quest-ui-theme-default .quest-ui-summary-chip-count {
+    font-variant-numeric: tabular-nums;
+    line-height: 18px;
     text-align: center;
 }
 
 /* Plugin strip: keep product identity strong, reduce nested pill-on-pill styling. */
 /* Versions behave as compact tags, not full rounded pills. */
+.quest-ui-theme .quest-ui-version-chip {
+    min-height: 20px;
+    padding: 3px 6px;
+}
 .quest-ui-theme-default .quest-ui-version-chip {
     background: color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 42%, transparent);
     border-radius: 6px;
     font-size: 9.5px;
-    min-height: 20px;
-    padding: 3px 6px;
 }
 
 /* Same tag recipe for every release channel; only the hue changes. */
@@ -1606,21 +1727,23 @@
 }
 
 /* Runtime state is metadata: retain dot + text, remove the large capsule. */
+.quest-ui-theme .quest-ui-orion-runtime-chip {
+    gap: 5px;
+    min-height: 20px;
+    padding: 0 2px;
+}
 .quest-ui-theme-default .quest-ui-orion-runtime-chip {
     background: transparent;
     border: 0;
     border-radius: 0;
-    gap: 5px;
-    min-height: 20px;
-    padding: 0 2px;
 }
 
 /* Updater status remains the one prominent status capsule, but make it more compact. */
 /* Settings is a real action, so its hit target must not be visually tiny. */
 /* Split the plugin status strip into two clear halves and reduce updater-chip weight. */
-.quest-ui-theme-default .quest-ui-default-status-product.is-orion {
+.quest-ui-theme .quest-ui-default-status-product.is-orion {
     justify-content: flex-start;
-}.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+}.quest-ui-theme .quest-ui-default-status-product.is-questui {
     justify-content: flex-end;
 }.quest-ui-theme-default .quest-ui-product-update-chip {
     border-radius: 7px;
@@ -1632,61 +1755,59 @@
 }
 
 /* v1.6 default plugin strip: each half owns its identity and controls. */
-.quest-ui-theme-default .quest-ui-default-status-product {
-    
-    
-    
+.quest-ui-theme .quest-ui-default-status-product {
     column-gap: 7px;
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+}.quest-ui-theme .quest-ui-default-status-product.is-orion,
+.quest-ui-theme .quest-ui-default-status-product.is-questui {
     justify-content: stretch;
-}.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+}.quest-ui-theme .quest-ui-default-status-product.is-questui {
     grid-template-columns: max-content max-content minmax(0, 1fr) max-content max-content;
 }
 
 /* Identity stays at the left edge of each half. */
-.quest-ui-theme-default .quest-ui-default-status-name {
+.quest-ui-theme .quest-ui-default-status-name {
     justify-self: start;
-}.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-version-chip,
-.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-orion-status {
+}.quest-ui-theme .quest-ui-default-status-product .quest-ui-version-chip,
+.quest-ui-theme .quest-ui-default-status-product .quest-ui-orion-status {
     justify-self: start;
 }
 
 /* Updater + settings form the right-side anchor for each half. */
 /* QuestUI has no runtime chip, so let the flexible middle track absorb the space. */
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-product-update-chip {
+.quest-ui-theme .quest-ui-default-status-product.is-questui > .quest-ui-product-update-chip {
     grid-column: 4;
-}.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-status-settings-button {
+}.quest-ui-theme .quest-ui-default-status-product.is-questui > .quest-ui-status-settings-button {
     grid-column: 5;
 }
 
 /* Keep update state secondary to product identity. */
-.quest-ui-theme-default .quest-ui-product-update-chip {
-    font-size: 8.75px;
+.quest-ui-theme .quest-ui-product-update-chip {
     min-height: 19px;
     padding: 3px 6px;
+}
+.quest-ui-theme-default .quest-ui-product-update-chip {
+    font-size: 8.75px;
 }
 
 /* v1.6 default status-strip balance pass.
  * Match QuestUI integration typography to Orion runtime and anchor updater controls symmetrically.
  */
-.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-product-update-chip {
-    
+.quest-ui-theme .quest-ui-default-status-product .quest-ui-product-update-chip {
     justify-self: auto;
-}.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-status-settings-button {
+}.quest-ui-theme .quest-ui-default-status-product .quest-ui-status-settings-button {
     justify-self: auto;
 }
 
 /* Undo the previous grid-column placement for QuestUI. */
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-product-update-chip,
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-status-settings-button {
+.quest-ui-theme .quest-ui-default-status-product.is-questui > .quest-ui-product-update-chip,
+.quest-ui-theme .quest-ui-default-status-product.is-questui > .quest-ui-status-settings-button {
     grid-column: auto;
 }.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
     font-size: 11.5px;
     font-weight: 650;
     
-}.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-dot {
+}.quest-ui-theme .quest-ui-orion-status.is-compact .quest-ui-orion-status-dot {
     flex-basis: 6px;
     height: 6px;
     width: 6px;
@@ -1718,21 +1839,25 @@
 }
 
 /* Do not make the controls sit on a second full-width panel. */
-.quest-ui-theme-default .quest-ui-dashboard-actionbar {
-    background: transparent;
-    border-bottom: 0;
+.quest-ui-theme .quest-ui-dashboard-actionbar {
     min-height: 48px;
     padding: 7px 12px;
 }
+.quest-ui-theme-default .quest-ui-dashboard-actionbar {
+    background: transparent;
+    border-bottom: 0;
+}
 
 /* One compact control capsule keeps the toolbar visually grouped without adding another band. */
+.quest-ui-theme .quest-ui-dashboard-actionbar-primary {
+    gap: 6px;
+    padding: 5px 7px;
+}
 .quest-ui-theme-default .quest-ui-dashboard-actionbar-primary {
     background: color-mix(in srgb, var(--background-base-low, #1e1f22) 76%, #18131f 24%);
     border: 1px solid color-mix(in srgb, var(--interactive-normal, #b5bac1) 13%, transparent);
     border-radius: 999px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
-    gap: 6px;
-    padding: 5px 7px;
 }
 
 /* Text actions read as pills. */
@@ -1743,14 +1868,18 @@
 }
 
 /* Utility actions read as circular icon pills. */
-.quest-ui-theme-default .quest-ui-reload-icon-button,
-.quest-ui-theme-default .quest-ui-update-center-button,
-.quest-ui-theme-default .quest-ui-home-button {
-    border-radius: 999px;
+.quest-ui-theme .quest-ui-reload-icon-button,
+.quest-ui-theme .quest-ui-update-center-button,
+.quest-ui-theme .quest-ui-home-button {
     flex-basis: 34px;
     height: 34px;
     min-height: 34px;
     width: 34px;
+}
+.quest-ui-theme-default .quest-ui-reload-icon-button,
+.quest-ui-theme-default .quest-ui-update-center-button,
+.quest-ui-theme-default .quest-ui-home-button {
+    border-radius: 999px;
 }
 
 /* Home belongs to the same visual family but remains a separate destination action. */
@@ -1758,9 +1887,11 @@
     background: color-mix(in srgb, var(--background-base-low, #1e1f22) 76%, #18131f 24%);
     border-color: color-mix(in srgb, var(--interactive-normal, #b5bac1) 15%, transparent);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
-}.quest-ui-theme-default .quest-ui-dashboard-action-divider {
+}.quest-ui-theme .quest-ui-dashboard-action-divider {
     height: 18px;
     margin: 0 1px;
+}
+.quest-ui-theme-default .quest-ui-dashboard-action-divider {
     opacity: .65;
 }
 
@@ -1773,42 +1904,48 @@
 }
 
 /* v1.6 default actionbar: use spare width as an inline notice lane. */
-.quest-ui-theme-default .quest-ui-dashboard-actionbar {
+.quest-ui-theme .quest-ui-dashboard-actionbar {
     display: flex;
     align-items: center;
     gap: 8px;
-}.quest-ui-theme-default .quest-ui-dashboard-actionbar-primary {
+}.quest-ui-theme .quest-ui-dashboard-actionbar-primary {
     flex: 0 0 auto;
-}.quest-ui-theme-default .quest-ui-dashboard-actionbar-destinations {
+}.quest-ui-theme .quest-ui-dashboard-actionbar-destinations {
     align-items: center;
-    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 76%, #18131f 24%);
-    border: 1px solid color-mix(in srgb, var(--interactive-normal, #b5bac1) 13%, transparent);
-    border-radius: 999px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
     display: inline-flex;
     flex: 0 0 auto;
     gap: 5px;
     padding: 5px 6px;
-}.quest-ui-theme-default .quest-ui-market-button,
-.quest-ui-theme-default .quest-ui-home-button {
+}
+.quest-ui-theme-default .quest-ui-dashboard-actionbar-destinations {
+    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 76%, #18131f 24%);
+    border: 1px solid color-mix(in srgb, var(--interactive-normal, #b5bac1) 13%, transparent);
     border-radius: 999px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}.quest-ui-theme .quest-ui-market-button,
+.quest-ui-theme .quest-ui-home-button {
     flex: 0 0 34px;
     height: 34px;
     min-height: 34px;
     width: 34px;
-}.quest-ui-theme-default .quest-ui-market-glyph {
-    fill: none;
+}
+.quest-ui-theme-default .quest-ui-market-button,
+.quest-ui-theme-default .quest-ui-home-button {
+    border-radius: 999px;
+}.quest-ui-theme .quest-ui-market-glyph {
     height: 17px;
+    width: 17px;
+}
+.quest-ui-theme-default .quest-ui-market-glyph {
+    fill: none;
     stroke: currentColor;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 1.8;
-    width: 17px;
 }
 
 /* v1.6 default action feedback polish. */
-.quest-ui-theme-default .quest-ui-dashboard-actionbar .quest-ui-event-log-button {
-    border-radius: 999px;
+.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-event-log-button {
     flex: 0 0 34px;
     gap: 0;
     height: 34px;
@@ -1817,54 +1954,61 @@
     min-width: 34px;
     padding: 0;
     width: 34px;
-}.quest-ui-theme-default .quest-ui-dashboard-actionbar .quest-ui-event-log-button svg {
+}
+.quest-ui-theme-default .quest-ui-dashboard-actionbar .quest-ui-event-log-button {
+    border-radius: 999px;
+}.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-event-log-button svg {
     height: 16px;
     width: 16px;
 }
 
 /* v1.6 plugin status cards: separate the products while keeping a living integration bridge. */
+.quest-ui-theme .quest-ui-default-status-strip {
+    min-height: 0;
+    padding: 0;
+}
 .quest-ui-theme-default .quest-ui-default-status-strip {
-    
     background: transparent;
     border: 0;
     border-radius: 0;
-    
-    
-    
-    min-height: 0;
-    padding: 0;
-}.quest-ui-theme-default .quest-ui-default-status-product,
-.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+}.quest-ui-theme .quest-ui-default-status-product,
+.quest-ui-theme .quest-ui-default-status-product.is-orion,
+.quest-ui-theme .quest-ui-default-status-product.is-questui {
     align-items: center;
-    
-    border: 1px solid color-mix(in srgb, var(--quest-ui-default-accent) 25%, rgba(255,255,255,.08));
-    
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
     display: flex;
     gap: 6px;
     justify-content: flex-start;
-    
     min-width: 0;
-    
     padding: 6px 8px;
-}.quest-ui-theme-default .quest-ui-default-status-product .quest-ui-product-update-chip {
+}
+.quest-ui-theme-default .quest-ui-default-status-product,
+.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+    border: 1px solid color-mix(in srgb, var(--quest-ui-default-accent) 25%, rgba(255,255,255,.08));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}.quest-ui-theme .quest-ui-default-status-product .quest-ui-product-update-chip {
     margin-left: 0;
-}.quest-ui-theme-default .quest-ui-status-bridge {
+}.quest-ui-theme .quest-ui-status-bridge {
     align-items: center;
     display: grid;
-    
-    
     pointer-events: none;
     position: relative;
-}.quest-ui-theme-default .quest-ui-status-bridge-line {
-    background: color-mix(in srgb, var(--interactive-muted, #949ba4) 24%, transparent);
-    border-radius: 999px;
+}.quest-ui-theme .quest-ui-status-bridge-line {
     height: 1px;
     overflow: hidden;
     position: relative;
     width: 100%;
-}.quest-ui-theme-default .quest-ui-status-bridge-line::after {
+}
+.quest-ui-theme-default .quest-ui-status-bridge-line {
+    background: color-mix(in srgb, var(--interactive-muted, #949ba4) 24%, transparent);
+    border-radius: 999px;
+}.quest-ui-theme .quest-ui-status-bridge-line::after {
+    height: 1px;
+    position: absolute;
+    top: 0;
+    width: 55%;
+}
+.quest-ui-theme-default .quest-ui-status-bridge-line::after {
     background: linear-gradient(
         90deg,
         transparent 0%,
@@ -1874,22 +2018,20 @@
         transparent 100%
     );
     content: "";
-    height: 1px;
     opacity: 0;
-    position: absolute;
-    top: 0;
-    width: 55%;
-}.quest-ui-theme-default .quest-ui-status-bridge-node {
+}.quest-ui-theme .quest-ui-status-bridge-node {
+    height: 7px;
+    justify-self: center;
+    position: relative;
+    width: 7px;
+    z-index: 1;
+}
+.quest-ui-theme-default .quest-ui-status-bridge-node {
     background: var(--interactive-muted, #949ba4);
     border: 2px solid var(--background-base-lowest, #111214);
     border-radius: 2px;
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--interactive-muted, #949ba4) 24%, transparent);
-    height: 7px;
-    justify-self: center;
-    position: relative;
     transform: rotate(45deg);
-    width: 7px;
-    z-index: 1;
 }
 
 /* Connected: both sides visibly feed the center node, then the node gives a restrained heartbeat. */
@@ -1897,12 +2039,16 @@
     color: color-mix(in srgb, var(--status-positive, #23a55a) 85%, white 15%);
 }.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line {
     background: color-mix(in srgb, var(--status-positive, #23a55a) 38%, transparent);
-}.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line:first-child::after {
-    animation: quest-ui-bridge-pulse-left 2.25s ease-in-out infinite;
+}.quest-ui-theme .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line:first-child::after {
     left: -58%;
-}.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line:last-child::after {
-    animation: quest-ui-bridge-pulse-right 2.25s ease-in-out infinite;
+}
+.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line:first-child::after {
+    animation: quest-ui-bridge-pulse-left 2.25s ease-in-out infinite;
+}.quest-ui-theme .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line:last-child::after {
     right: -58%;
+}
+.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line:last-child::after {
+    animation: quest-ui-bridge-pulse-right 2.25s ease-in-out infinite;
 }.quest-ui-theme-default .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-node {
     
     background: var(--status-positive, #23a55a);
@@ -1918,9 +2064,11 @@
         color-mix(in srgb, var(--status-danger, #f23f42) 50%, transparent) 0 3px,
         transparent 3px 6px
     );
-}.quest-ui-theme-default .quest-ui-status-bridge.is-disconnected .quest-ui-status-bridge-line::after {
-    animation: none;
+}.quest-ui-theme .quest-ui-status-bridge.is-disconnected .quest-ui-status-bridge-line::after {
     display: none;
+}
+.quest-ui-theme-default .quest-ui-status-bridge.is-disconnected .quest-ui-status-bridge-line::after {
+    animation: none;
 }.quest-ui-theme-default .quest-ui-status-bridge.is-disconnected .quest-ui-status-bridge-node {
     animation: none;
     background: var(--status-danger, #f23f42);
@@ -1928,12 +2076,8 @@
 }
 
 /* Settings is intentionally larger than the status metadata around it. */
-.quest-ui-theme-default .quest-ui-status-settings-button {
-    
+.quest-ui-theme .quest-ui-status-settings-button {
     flex: 0 0 34px;
-    
-    
-    
 }@keyframes quest-ui-bridge-pulse-left {
     0%, 12% {
         opacity: 0;
@@ -2000,32 +2144,29 @@
     }
 }
 
-@media (max-width: 760px) {.quest-ui-theme-default .quest-ui-default-status-product,
-.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+@media (max-width: 760px) {.quest-ui-theme .quest-ui-default-status-product,
+.quest-ui-theme .quest-ui-default-status-product.is-orion,
+.quest-ui-theme .quest-ui-default-status-product.is-questui {
         gap: 5px;
         padding-left: 6px;
         padding-right: 6px;
-    }
+}
 }
 
 /* v1.6 bridge/card correction: keep QuestUI slightly smaller without clipping its controls. */
-.quest-ui-theme-default .quest-ui-status-bridge {
+.quest-ui-theme .quest-ui-status-bridge {
     grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
-    
-}.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+}.quest-ui-theme .quest-ui-default-status-product.is-questui {
     gap: 5px;
     min-width: 0;
-    
-    
 }
 
 /* Keep every fixed control inside the QuestUI card instead of letting the final gear get clipped. */
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-version-chip,
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-product-update-chip,
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-status-settings-button {
+.quest-ui-theme .quest-ui-default-status-product.is-questui > .quest-ui-version-chip,
+.quest-ui-theme .quest-ui-default-status-product.is-questui > .quest-ui-product-update-chip,
+.quest-ui-theme .quest-ui-default-status-product.is-questui > .quest-ui-status-settings-button {
     flex-shrink: 0;
-}.quest-ui-theme-default .quest-ui-default-status-product.is-questui > .quest-ui-default-status-name {
+}.quest-ui-theme .quest-ui-default-status-product.is-questui > .quest-ui-default-status-name {
     flex: 0 1 auto;
     min-width: 0;
 }
@@ -2047,78 +2188,81 @@
     }
 }
 
-@media (max-width: 760px) {.quest-ui-theme-default .quest-ui-default-status-strip {
-        
+@media (max-width: 760px) {.quest-ui-theme .quest-ui-default-status-strip {
         grid-template-columns: minmax(0, 1.03fr) 28px minmax(0, .97fr);
-    }.quest-ui-theme-default .quest-ui-status-bridge {
+}.quest-ui-theme .quest-ui-status-bridge {
         grid-template-columns: minmax(0, 1fr) 8px minmax(0, 1fr);
-        
-    }
+}
 }
 
 /* Golden-ratio status layout:
  * each card first gets the width its content actually needs, then spare width is split 1.618:1.
  */
-.quest-ui-theme-default .quest-ui-default-status-strip {
+.quest-ui-theme .quest-ui-default-status-strip {
     align-items: center;
     column-gap: 8px;
-    
-}.quest-ui-theme-default .quest-ui-default-status-product.is-orion {
+}.quest-ui-theme .quest-ui-default-status-product.is-orion {
     flex: 1.618 1 max-content;
-}.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+}.quest-ui-theme .quest-ui-default-status-product.is-questui {
     flex: 1 1 max-content;
 }
 
 /* Keep the bridge fixed so only true spare card space follows the golden ratio. */
-.quest-ui-theme-default .quest-ui-status-bridge {
+.quest-ui-theme .quest-ui-status-bridge {
     flex: 0 0 36px;
     min-width: 36px;
 }
 
 /* Reduce visual mass after the cards stopped being forced into equal halves. */
+.quest-ui-theme .quest-ui-default-status-product,
+.quest-ui-theme .quest-ui-default-status-product.is-orion,
+.quest-ui-theme .quest-ui-default-status-product.is-questui {
+    min-height: 40px;
+    padding-bottom: 4px;
+    padding-top: 4px;
+}
 .quest-ui-theme-default .quest-ui-default-status-product,
 .quest-ui-theme-default .quest-ui-default-status-product.is-orion,
 .quest-ui-theme-default .quest-ui-default-status-product.is-questui {
     border-radius: 10px;
-    min-height: 40px;
-    padding-bottom: 4px;
-    padding-top: 4px;
-}.quest-ui-theme-default .quest-ui-default-status-product.is-orion {
+}.quest-ui-theme .quest-ui-default-status-product.is-orion {
     padding-left: 8px;
     padding-right: 8px;
-}.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+}.quest-ui-theme .quest-ui-default-status-product.is-questui {
     padding-left: 7px;
     padding-right: 7px;
 }
 
 /* Settings stays readable but no longer dominates the more compact cards. */
-.quest-ui-theme-default .quest-ui-status-settings-button {
-    border-radius: 7px;
+.quest-ui-theme .quest-ui-status-settings-button {
     flex-basis: 30px;
     height: 30px;
     min-height: 30px;
     width: 30px;
-}.quest-ui-theme-default .quest-ui-status-settings-button .quest-ui-plugin-settings-glyph {
+}
+.quest-ui-theme-default .quest-ui-status-settings-button {
+    border-radius: 7px;
+}.quest-ui-theme .quest-ui-status-settings-button .quest-ui-plugin-settings-glyph {
     height: 17px;
     width: 17px;
 }
 
-@media (max-width: 760px) {.quest-ui-theme-default .quest-ui-default-status-strip {
+@media (max-width: 760px) {.quest-ui-theme .quest-ui-default-status-strip {
         column-gap: 6px;
-    }.quest-ui-theme-default .quest-ui-default-status-product.is-orion {
+}.quest-ui-theme .quest-ui-default-status-product.is-orion {
         flex-grow: 1.35;
-    }.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+}.quest-ui-theme .quest-ui-default-status-product.is-questui {
         flex-grow: 1;
-    }.quest-ui-theme-default .quest-ui-status-bridge {
+}.quest-ui-theme .quest-ui-status-bridge {
         flex-basis: 28px;
         min-width: 28px;
-    }
+}
 }
 
 /* v1.6 header rhythm: give plugin status cards more breathing room from summary,
  * and keep Sort/Filter as a right-aligned utility pair.
  */
-.quest-ui-theme-default .quest-ui-dashboard-summary {
+.quest-ui-theme .quest-ui-dashboard-summary {
     margin-top: 12px;
 }/* v1.6 completed/expired progress states. */
 .quest-ui-theme-default .quest-ui-progress-state-ring {
@@ -2129,47 +2273,54 @@
 /* Claimed: a complete violet ring with a cleaner blue check. */
 .quest-ui-theme-default .quest-ui-progress-claimed .quest-ui-progress-state-ring {
     stroke: var(--brand-500, #5865f2);
-}.quest-ui-theme-default .quest-ui-progress-state-icon.is-claimed {
+}.quest-ui-theme .quest-ui-progress-state-icon.is-claimed {
+    height: 28px;
+    width: 28px;
+}
+.quest-ui-theme-default .quest-ui-progress-state-icon.is-claimed {
     color: var(--blue-345, #00a8fc);
     fill: none;
-    height: 28px;
     stroke: currentColor;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 2.6;
-    width: 28px;
 }
 
 /* Expired: neutral completed ring, semantic red X. */
 .quest-ui-theme-default .quest-ui-progress-expired .quest-ui-progress-state-ring {
     stroke: color-mix(in srgb, var(--interactive-muted, #949ba4) 45%, transparent);
-}.quest-ui-theme-default .quest-ui-progress-state-icon.is-expired {
+}.quest-ui-theme .quest-ui-progress-state-icon.is-expired {
+    height: 25px;
+    width: 25px;
+}
+.quest-ui-theme-default .quest-ui-progress-state-icon.is-expired {
     color: var(--status-danger, #f23f42);
     fill: none;
-    height: 25px;
     stroke: currentColor;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 2.35;
-    width: 25px;
 }
 
 /* The state icons own their colors now; do not inherit the old filled accent glyph. */
-.quest-ui-theme-default .quest-ui-progress-state-icon.is-claimed,
-.quest-ui-theme-default .quest-ui-progress-state-icon.is-expired {
+.quest-ui-theme .quest-ui-progress-state-icon.is-claimed,
+.quest-ui-theme .quest-ui-progress-state-icon.is-expired {
     position: relative;
     z-index: 1;
 }
 
 /* v1.6: make the right-side Sort/Filter pair easier to hit and read. */
+.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-sort-button,
+.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-filter-button {
+    height: 36px;
+    padding: 0 12px;
+}
 .quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-sort-button,
 .quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-filter-button {
     border-radius: 10px;
     font-size: 12px;
-    height: 36px;
-    padding: 0 12px;
-}.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-sort-button svg,
-.quest-ui-theme-default .quest-ui-dashboard-filter-control.quest-ui-filter-button svg {
+}.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-sort-button svg,
+.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-filter-button svg {
     flex-basis: 18px;
     height: 18px;
     width: 18px;
@@ -2182,8 +2333,6 @@
 .quest-ui-theme-default .quest-ui-dashboard {
     --quest-ui-dashboard-base: var(--background-base-lowest, var(--background-primary, #111214));
     --quest-ui-dashboard-raised: var(--background-base-low, var(--background-secondary, #1e1f22));
-}.quest-ui-theme-default.quest-ui-dashboard-shell {
-    
 }.quest-ui-theme-default .quest-ui-dashboard-topbar {
     border-bottom-color: color-mix(in srgb, var(--text-muted, #949ba4) 12%, transparent);
 }.quest-ui-theme-default .quest-ui-dashboard-actionbar-primary,
@@ -2196,42 +2345,40 @@
 }
 
 /* Cards stay theme-aware, but remain visually related to the Dashboard shell. */
-.quest-ui-theme-default .quest-ui-card,
-.quest-ui-theme-default .quest-ui-card:not(.quest-ui-card-achievement) {
-    
+.quest-ui-theme .quest-ui-card,
+.quest-ui-theme .quest-ui-card:not(.quest-ui-card-achievement) {
     position: relative;
 }/* Per-Quest ambient artwork. The clipping wrapper keeps blur inside the card while
  * preserving the card's existing overflow for badges and action controls.
  */
-.quest-ui-theme-default .quest-ui-card-backdrop {
-    border-radius: inherit;
+.quest-ui-theme .quest-ui-card-backdrop {
     inset: 1px;
     overflow: hidden;
     pointer-events: none;
     position: absolute;
     z-index: 0;
-}.quest-ui-theme-default .quest-ui-card-backdrop > img {
-    
-    
-    
+}
+.quest-ui-theme-default .quest-ui-card-backdrop {
+    border-radius: inherit;
+}.quest-ui-theme .quest-ui-card-backdrop > img {
     object-fit: cover;
-    
     position: absolute;
-    
+}
+.quest-ui-theme-default .quest-ui-card-backdrop > img {
     transform: translateY(-50%) scale(1.12);
-    
-}.quest-ui-theme-default .quest-ui-card-backdrop::after {
-    
-    content: "";
+}.quest-ui-theme .quest-ui-card-backdrop::after {
     inset: 0;
     position: absolute;
-}.quest-ui-theme-default .quest-ui-card > :not(.quest-ui-card-backdrop) {
+}
+.quest-ui-theme-default .quest-ui-card-backdrop::after {
+    content: "";
+}.quest-ui-theme .quest-ui-card > :not(.quest-ui-card-backdrop) {
     position: relative;
     z-index: 1;
 }/* Discord's own premium badge is the preferred fallback while the user's tier badge loads.
  * Keep the local SVG only as a last-resort when Discord's badge registry is unavailable.
  */
-.quest-ui-theme-default .quest-ui-dashboard-boost-source-tag.is-nitro img {
+.quest-ui-theme .quest-ui-dashboard-boost-source-tag.is-nitro img {
     object-fit: contain;
 }
 
@@ -2302,13 +2449,15 @@
 }
 
 /* Stronger ambient art: brighter and more saturated, while still reading as a backdrop. */
-.quest-ui-theme-default .quest-ui-card-backdrop > img {
-    filter: blur(22px) saturate(1.55) brightness(1.18);
+.quest-ui-theme .quest-ui-card-backdrop > img {
     height: 175%;
     left: -3%;
-    opacity: .34;
     top: 50%;
     width: 60%;
+}
+.quest-ui-theme-default .quest-ui-card-backdrop > img {
+    filter: blur(22px) saturate(1.55) brightness(1.18);
+    opacity: .34;
 }.quest-ui-theme-default .quest-ui-card-backdrop::after {
     background: linear-gradient(
         90deg,
@@ -2322,24 +2471,22 @@
 }
 
 /* v1.6 dropdown reset: intentionally plain, Discord-like checklist/menu surfaces. */
+.quest-ui-theme.quest-ui-filter-list,
+.quest-ui-theme.quest-ui-sort-list {
+    box-sizing: border-box;
+}
 .quest-ui-theme-default.quest-ui-filter-list,
 .quest-ui-theme-default.quest-ui-sort-list {
     background: #202126;
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 9px;
     box-shadow: 0 14px 36px rgba(0,0,0,.45);
-    box-sizing: border-box;
     color: #dbdee1;
-}.quest-ui-theme-default.quest-ui-filter-list {
+}.quest-ui-theme.quest-ui-filter-list {
     display: flex;
     flex-direction: column;
-    
-    
-    
-}.quest-ui-theme-default .quest-ui-filter-list-scroll {
+}.quest-ui-theme .quest-ui-filter-list-scroll {
     overflow-y: auto;
-    
-    
 }.quest-ui-theme-default .quest-ui-filter-list-section + .quest-ui-filter-list-section {
     border-top: 1px solid rgba(255,255,255,.07);
     
@@ -2349,37 +2496,38 @@
     font-weight: 700;
     line-height: 16px;
     
-}.quest-ui-theme-default .quest-ui-filter-list-row {
+}.quest-ui-theme .quest-ui-filter-list-row {
     align-items: center;
+    display: flex;
+    gap: 10px;
+}
+.quest-ui-theme-default .quest-ui-filter-list-row {
     background: transparent;
     border: 0;
     border-radius: 5px;
     color: #e3e5e8;
     cursor: pointer;
-    display: flex;
     font: inherit;
     font-size: 12px;
     font-weight: 600;
-    gap: 10px;
-    
-    
     text-align: left;
-    
 }.quest-ui-theme-default .quest-ui-filter-list-row:hover:not(:disabled) {
     background: rgba(255,255,255,.055);
 }.quest-ui-theme-default .quest-ui-filter-list-row:disabled {
     color: #676b73;
     cursor: default;
-}.quest-ui-theme-default .quest-ui-filter-list-box {
+}.quest-ui-theme .quest-ui-filter-list-box {
     align-items: center;
-    border: 1px solid #666b75;
-    border-radius: 4px;
     box-sizing: border-box;
     display: inline-flex;
     flex: 0 0 19px;
     height: 19px;
     justify-content: center;
     width: 19px;
+}
+.quest-ui-theme-default .quest-ui-filter-list-box {
+    border: 1px solid #666b75;
+    border-radius: 4px;
 }.quest-ui-theme-default .quest-ui-filter-list-row.is-checked .quest-ui-filter-list-box {
     background: #5865f2;
     border-color: #5865f2;
@@ -2395,101 +2543,105 @@
 }.quest-ui-theme-default .quest-ui-filter-list-row.is-brand.is-checked .quest-ui-filter-list-box {
     background: #5865f2;
     border-color: #5865f2;
-}.quest-ui-theme-default .quest-ui-filter-list-box svg {
-    fill: none;
+}.quest-ui-theme .quest-ui-filter-list-box svg {
     height: 13px;
+    width: 13px;
+}
+.quest-ui-theme-default .quest-ui-filter-list-box svg {
+    fill: none;
     stroke: #fff;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 2.3;
-    width: 13px;
 }.quest-ui-theme-default .quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box {
     border-radius: 50%;
-}.quest-ui-theme-default .quest-ui-filter-list-radio-dot {
-    background: #858cff;
-    border-radius: 50%;
+}.quest-ui-theme .quest-ui-filter-list-radio-dot {
     height: 9px;
     width: 9px;
 }
+.quest-ui-theme-default .quest-ui-filter-list-radio-dot {
+    background: #858cff;
+    border-radius: 50%;
+}
 
 /* Sort is the same plain menu language, not a separate visual concept. */
+.quest-ui-theme .quest-ui-sort-list-title {
+    display: block;
+    padding: 5px 8px 6px;
+}
 .quest-ui-theme-default .quest-ui-sort-list-title {
     color: #8f939c;
-    display: block;
     font-size: 10px;
     font-weight: 700;
-    padding: 5px 8px 6px;
-}.quest-ui-theme-default .quest-ui-sort-list > button {
+}.quest-ui-theme .quest-ui-sort-list > button {
     align-items: center;
+    display: flex;
+    justify-content: space-between;
+    min-height: 32px;
+    padding: 5px 8px;
+    width: 100%;
+}
+.quest-ui-theme-default .quest-ui-sort-list > button {
     background: transparent;
     border: 0;
     border-radius: 5px;
     color: #d7d9dd;
     cursor: pointer;
-    display: flex;
     font: inherit;
     font-size: 11.5px;
-    justify-content: space-between;
-    min-height: 32px;
-    padding: 5px 8px;
     text-align: left;
-    width: 100%;
 }.quest-ui-theme-default .quest-ui-sort-list > button:hover {
     background: rgba(255,255,255,.055);
 }.quest-ui-theme-default .quest-ui-sort-list > button.is-selected {
     background: rgba(88,101,242,.12);
     color: #fff;
-}.quest-ui-theme-default .quest-ui-sort-list-radio {
+}.quest-ui-theme .quest-ui-sort-list-radio {
     align-items: center;
-    border: 1px solid #666b75;
-    border-radius: 50%;
     display: inline-flex;
     flex: 0 0 16px;
     height: 16px;
     justify-content: center;
     width: 16px;
+}
+.quest-ui-theme-default .quest-ui-sort-list-radio {
+    border: 1px solid #666b75;
+    border-radius: 50%;
 }.quest-ui-theme-default .quest-ui-sort-list > button.is-selected .quest-ui-sort-list-radio {
     border-color: #858cff;
-}.quest-ui-theme-default .quest-ui-sort-list-radio > span {
-    background: #858cff;
-    border-radius: 50%;
+}.quest-ui-theme .quest-ui-sort-list-radio > span {
     height: 8px;
     width: 8px;
 }
+.quest-ui-theme-default .quest-ui-sort-list-radio > span {
+    background: #858cff;
+    border-radius: 50%;
+}
 
-@media (max-width: 520px) {.quest-ui-theme-default.quest-ui-filter-list {
+@media (max-width: 520px) {.quest-ui-theme.quest-ui-filter-list {
         width: min(300px, calc(100vw - 24px));
-    }
+}
 }
 
 /* v1.6 horizontal filter menu: multi-select lanes stay compact; radio groups remain single-choice. */
-.quest-ui-theme-default.quest-ui-filter-list {
-    
+.quest-ui-theme.quest-ui-filter-list {
     width: 650px;
-}.quest-ui-theme-default .quest-ui-filter-list-section {
-    
+}.quest-ui-theme .quest-ui-filter-list-section {
     display: grid;
-    
-    
-    
-}.quest-ui-theme-default .quest-ui-filter-list-section + .quest-ui-filter-list-section {
+}.quest-ui-theme .quest-ui-filter-list-section + .quest-ui-filter-list-section {
     padding-top: 10px;
-}.quest-ui-theme-default .quest-ui-filter-list-section h3 {
-    
-    
+}.quest-ui-theme .quest-ui-filter-list-section h3 {
     padding-left: 3px;
-}.quest-ui-theme-default .quest-ui-filter-list-options {
+}.quest-ui-theme .quest-ui-filter-list-options {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-filter-list-row {
+}.quest-ui-theme .quest-ui-filter-list-row {
     flex: 0 0 auto;
     min-height: 32px;
     padding: 4px 7px;
     width: auto;
-}.quest-ui-theme-default .quest-ui-filter-list-row > span:last-child {
+}.quest-ui-theme .quest-ui-filter-list-row > span:last-child {
     white-space: nowrap;
 }
 
@@ -2515,66 +2667,66 @@
 }
 
 /* Single-choice groups use Discord-like radio circles, matching the supplied reference. */
-.quest-ui-theme-default .quest-ui-filter-list-options.is-radio-options .quest-ui-filter-list-row {
+.quest-ui-theme .quest-ui-filter-list-options.is-radio-options .quest-ui-filter-list-row {
     padding-right: 10px;
 }.quest-ui-theme-default .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-box {
     background: #5865f2;
     border-color: #5865f2;
-}.quest-ui-theme-default .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-radio-dot {
-    background: #fff;
+}.quest-ui-theme .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-radio-dot {
     height: 7px;
     width: 7px;
 }
-
-@media (max-width: 720px) {.quest-ui-theme-default.quest-ui-filter-list {
-        width: min(650px, calc(100vw - 24px));
-    }.quest-ui-theme-default .quest-ui-filter-list-section {
-        grid-template-columns: 82px minmax(0, 1fr);
-    }
+.quest-ui-theme-default .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-radio-dot {
+    background: #fff;
 }
 
-@media (max-width: 520px) {.quest-ui-theme-default .quest-ui-filter-list-section {
+@media (max-width: 720px) {.quest-ui-theme.quest-ui-filter-list {
+        width: min(650px, calc(100vw - 24px));
+}.quest-ui-theme .quest-ui-filter-list-section {
+        grid-template-columns: 82px minmax(0, 1fr);
+}
+}
+
+@media (max-width: 520px) {.quest-ui-theme .quest-ui-filter-list-section {
         display: block;
-    }.quest-ui-theme-default .quest-ui-filter-list-section h3 {
+}.quest-ui-theme .quest-ui-filter-list-section h3 {
         margin-bottom: 6px;
-    }
+}
 }
 
 /* v1.6 dropdown stabilization: no scrollbars in this compact Filter popout. */
-.quest-ui-theme-default.quest-ui-filter-list {
+.quest-ui-theme.quest-ui-filter-list {
     max-height: none !important;
     overflow: hidden !important;
-}.quest-ui-theme-default .quest-ui-filter-list-scroll {
+}.quest-ui-theme .quest-ui-filter-list-scroll {
     overflow: visible !important;
     padding: 10px 14px !important;
+}
+.quest-ui-theme-default .quest-ui-filter-list-scroll {
     scrollbar-width: none !important;
-}.quest-ui-theme-default .quest-ui-filter-list-scroll::-webkit-scrollbar {
+}.quest-ui-theme .quest-ui-filter-list-scroll::-webkit-scrollbar {
     display: none !important;
     height: 0 !important;
     width: 0 !important;
-}.quest-ui-theme-default .quest-ui-filter-list-section {
+}.quest-ui-theme .quest-ui-filter-list-section {
     align-items: center !important;
     gap: 8px !important;
     grid-template-columns: 68px minmax(0, 1fr) !important;
     padding: 11px 0 !important;
-}.quest-ui-theme-default .quest-ui-filter-list-section:first-child {
+}.quest-ui-theme .quest-ui-filter-list-section:first-child {
     padding-top: 0 !important;
-}.quest-ui-theme-default .quest-ui-filter-list-section:last-child {
+}.quest-ui-theme .quest-ui-filter-list-section:last-child {
     padding-bottom: 0 !important;
-}.quest-ui-theme-default .quest-ui-filter-list-section h3 {
+}.quest-ui-theme .quest-ui-filter-list-section h3 {
     align-self: center !important;
     margin: 0 !important;
     padding: 0 0 0 2px !important;
-}.quest-ui-theme-default .quest-ui-filter-list-options {
+}.quest-ui-theme .quest-ui-filter-list-options {
     gap: 6px 10px !important;
 }
 
 /* Sort lives in a Discord portal. Scope styles to the root element itself. */
-.quest-ui-theme-default.quest-ui-sort-list {
-    background: #202126 !important;
-    border: 1px solid rgba(255,255,255,.08) !important;
-    border-radius: 9px !important;
-    box-shadow: 0 14px 36px rgba(0,0,0,.45) !important;
+.quest-ui-theme.quest-ui-sort-list {
     box-sizing: border-box;
     display: flex !important;
     flex-direction: column !important;
@@ -2582,32 +2734,42 @@
     overflow: hidden !important;
     padding: 7px !important;
     width: 250px !important;
-}.quest-ui-theme-default.quest-ui-sort-list > .quest-ui-sort-list-title {
-    color: #8f939c !important;
+}
+.quest-ui-theme-default.quest-ui-sort-list {
+    background: #202126 !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    border-radius: 9px !important;
+    box-shadow: 0 14px 36px rgba(0,0,0,.45) !important;
+}.quest-ui-theme.quest-ui-sort-list > .quest-ui-sort-list-title {
     display: block !important;
+    padding: 5px 8px 7px !important;
+}
+.quest-ui-theme-default.quest-ui-sort-list > .quest-ui-sort-list-title {
+    color: #8f939c !important;
     font-size: 10px !important;
     font-weight: 700 !important;
     line-height: 14px;
-    padding: 5px 8px 7px !important;
-}.quest-ui-theme-default.quest-ui-sort-list > button {
+}.quest-ui-theme.quest-ui-sort-list > button {
     align-items: center !important;
-    background: transparent !important;
-    border: 0 !important;
-    border-radius: 5px !important;
     box-sizing: border-box;
-    color: #d7d9dd !important;
-    cursor: pointer;
     display: flex !important;
     flex: 0 0 auto !important;
-    font: inherit !important;
-    font-size: 11.5px !important;
     gap: 10px;
     justify-content: space-between !important;
     min-height: 34px !important;
     padding: 6px 8px !important;
-    text-align: left !important;
     width: 100% !important;
-}.quest-ui-theme-default.quest-ui-sort-list > button > span:first-child {
+}
+.quest-ui-theme-default.quest-ui-sort-list > button {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    color: #d7d9dd !important;
+    cursor: pointer;
+    font: inherit !important;
+    font-size: 11.5px !important;
+    text-align: left !important;
+}.quest-ui-theme.quest-ui-sort-list > button > span:first-child {
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
@@ -2618,10 +2780,8 @@
 }.quest-ui-theme-default.quest-ui-sort-list > button.is-selected {
     background: rgba(88,101,242,.12) !important;
     color: #fff !important;
-}.quest-ui-theme-default.quest-ui-sort-list > button > .quest-ui-sort-list-radio {
+}.quest-ui-theme.quest-ui-sort-list > button > .quest-ui-sort-list-radio {
     align-items: center !important;
-    border: 1px solid #666b75 !important;
-    border-radius: 50% !important;
     box-sizing: border-box;
     display: inline-flex !important;
     flex: 0 0 18px !important;
@@ -2630,112 +2790,130 @@
     margin-left: auto;
     position: static !important;
     width: 18px !important;
+}
+.quest-ui-theme-default.quest-ui-sort-list > button > .quest-ui-sort-list-radio {
+    border: 1px solid #666b75 !important;
+    border-radius: 50% !important;
 }.quest-ui-theme-default.quest-ui-sort-list > button.is-selected > .quest-ui-sort-list-radio {
     background: #5865f2 !important;
     border-color: #5865f2 !important;
-}.quest-ui-theme-default.quest-ui-sort-list > button > .quest-ui-sort-list-radio > span {
-    background: #fff !important;
-    border-radius: 50%;
+}.quest-ui-theme.quest-ui-sort-list > button > .quest-ui-sort-list-radio > span {
     display: block !important;
     height: 7px !important;
     width: 7px !important;
+}
+.quest-ui-theme-default.quest-ui-sort-list > button > .quest-ui-sort-list-radio > span {
+    background: #fff !important;
+    border-radius: 50%;
 }
 
 /* v1.6 custom stepped expired-history control.
  * No native range input and no overlaid fake nodes: track, fill and nodes are one control.
  */
-.quest-ui-theme-default .quest-ui-history-steps {
+.quest-ui-theme .quest-ui-history-steps {
     box-sizing: border-box;
     min-width: 0;
     padding: 2px 4px 0;
     width: 100%;
-}.quest-ui-theme-default .quest-ui-history-steps-track {
+}.quest-ui-theme .quest-ui-history-steps-track {
     height: 42px;
     position: relative;
+    width: 100%;
+}
+.quest-ui-theme-default .quest-ui-history-steps-track {
     touch-action: none;
     user-select: none;
-    width: 100%;
-}.quest-ui-theme-default .quest-ui-history-steps-line,
-.quest-ui-theme-default .quest-ui-history-steps-fill {
-    border-radius: 999px;
+}.quest-ui-theme .quest-ui-history-steps-line,
+.quest-ui-theme .quest-ui-history-steps-fill {
     height: 3px;
     left: 9px;
     pointer-events: none;
     position: absolute;
     right: 9px;
     top: 8px;
+}
+.quest-ui-theme-default .quest-ui-history-steps-line,
+.quest-ui-theme-default .quest-ui-history-steps-fill {
+    border-radius: 999px;
 }.quest-ui-theme-default .quest-ui-history-steps-line {
     background: rgba(255,255,255,.12);
-}.quest-ui-theme-default .quest-ui-history-steps-fill {
-    background: #5865f2;
+}.quest-ui-theme .quest-ui-history-steps-fill {
     right: auto;
     width: calc((100% - 18px) * var(--quest-ui-history-step) / 4);
-}.quest-ui-theme-default .quest-ui-history-steps-nodes {
-    
-    
+}
+.quest-ui-theme-default .quest-ui-history-steps-fill {
+    background: #5865f2;
+}.quest-ui-theme .quest-ui-history-steps-nodes {
     inset: 0;
     position: absolute;
-}.quest-ui-theme-default .quest-ui-history-steps-nodes > button {
-    
-    background: transparent;
-    border: 0;
-    color: #747983;
-    cursor: pointer;
+}.quest-ui-theme .quest-ui-history-steps-nodes > button {
     display: flex;
     flex-direction: column;
-    font: inherit;
     gap: 6px;
     min-width: 0;
     padding: 0;
     position: relative;
-}.quest-ui-theme-default .quest-ui-history-steps-nodes > button:first-child {
+}
+.quest-ui-theme-default .quest-ui-history-steps-nodes > button {
+    background: transparent;
+    border: 0;
+    color: #747983;
+    cursor: pointer;
+    font: inherit;
+}.quest-ui-theme .quest-ui-history-steps-nodes > button:first-child {
     align-items: flex-start;
-}.quest-ui-theme-default .quest-ui-history-steps-nodes > button:last-child {
+}.quest-ui-theme .quest-ui-history-steps-nodes > button:last-child {
     align-items: flex-end;
-}.quest-ui-theme-default .quest-ui-history-step-node {
+}.quest-ui-theme .quest-ui-history-step-node {
     align-items: center;
-    background: #202126;
-    border: 2px solid #666b75;
-    border-radius: 50%;
     box-sizing: border-box;
     display: inline-flex;
     flex: 0 0 18px;
     height: 18px;
     justify-content: center;
+    width: 18px;
+}
+.quest-ui-theme-default .quest-ui-history-step-node {
+    background: #202126;
+    border: 2px solid #666b75;
+    border-radius: 50%;
     transition:
         background-color 100ms ease,
         border-color 100ms ease,
         box-shadow 100ms ease;
-    width: 18px;
-}.quest-ui-theme-default .quest-ui-history-step-node > span {
-    background: transparent;
-    border-radius: 50%;
+}.quest-ui-theme .quest-ui-history-step-node > span {
     height: 7px;
     width: 7px;
+}
+.quest-ui-theme-default .quest-ui-history-step-node > span {
+    background: transparent;
+    border-radius: 50%;
 }.quest-ui-theme-default .quest-ui-history-steps-nodes > button:hover .quest-ui-history-step-node {
     border-color: #8c91a0;
 }.quest-ui-theme-default .quest-ui-history-steps-nodes > button.is-selected .quest-ui-history-step-node > span {
     background: #fff;
-}.quest-ui-theme-default .quest-ui-history-step-label {
+}.quest-ui-theme .quest-ui-history-step-label {
+    white-space: nowrap;
+}
+.quest-ui-theme-default .quest-ui-history-step-label {
     font-size: 9px;
     line-height: 11px;
-    white-space: nowrap;
 }
 
 /* v1.6 expired-history geometry correction.
  * Five 18px controls use space-between across the same 9px-inset track, so their
  * centers land exactly at 0 / 25 / 50 / 75 / 100 percent of the usable line.
  */
-.quest-ui-theme-default .quest-ui-history-steps-nodes {
+.quest-ui-theme .quest-ui-history-steps-nodes {
     display: flex !important;
     grid-template-columns: none !important;
     justify-content: space-between;
-}.quest-ui-theme-default .quest-ui-history-steps-nodes > button {
+}.quest-ui-theme .quest-ui-history-steps-nodes > button {
     align-items: center !important;
     flex: 0 0 18px;
     width: 18px;
-}.quest-ui-theme-default .quest-ui-history-steps-nodes > button:first-child,
-.quest-ui-theme-default .quest-ui-history-steps-nodes > button:last-child {
+}.quest-ui-theme .quest-ui-history-steps-nodes > button:first-child,
+.quest-ui-theme .quest-ui-history-steps-nodes > button:last-child {
     align-items: center !important;
 }
 
@@ -2760,102 +2938,108 @@
 }
 
 /* Keep labels centered under the true node center even though the button itself is only 18px. */
-.quest-ui-theme-default .quest-ui-history-step-label {
+.quest-ui-theme .quest-ui-history-step-label {
     overflow: visible;
-    text-align: center;
     width: max-content;
+}
+.quest-ui-theme-default .quest-ui-history-step-label {
+    text-align: center;
 }
 
 /* v1.6 beta-safe plugin status cards. */
-.quest-ui-theme-default .quest-ui-default-status-strip {
+.quest-ui-theme .quest-ui-default-status-strip {
     display: grid !important;
     grid-template-columns: minmax(0, 1.05fr) 38px minmax(0, .95fr) !important;
     gap: 10px !important;
-}.quest-ui-theme-default .quest-ui-default-status-product {
+}.quest-ui-theme .quest-ui-default-status-product {
     align-items: center !important;
     display: grid !important;
     gap: 8px !important;
     grid-template-columns: minmax(0, auto) minmax(0, 1fr) 31px !important;
     min-height: 50px;
     padding: 6px 8px !important;
-}.quest-ui-theme-default .quest-ui-default-status-identity {
+}.quest-ui-theme .quest-ui-default-status-identity {
     display: flex;
     flex-direction: column;
     gap: 3px;
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-default-status-identity-row {
+}.quest-ui-theme .quest-ui-default-status-identity-row {
     align-items: center;
     display: flex;
     gap: 6px;
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-default-status-name {
+}.quest-ui-theme .quest-ui-default-status-name {
     flex: 0 1 auto !important;
     overflow: hidden;
     text-overflow: ellipsis;
-}.quest-ui-theme-default .quest-ui-version-chip {
+}.quest-ui-theme .quest-ui-version-chip {
     flex: 0 0 auto !important;
     max-width: none !important;
     white-space: nowrap;
-}.quest-ui-theme-default .quest-ui-default-status-state {
+}.quest-ui-theme .quest-ui-default-status-state {
     align-items: center;
     display: flex;
     flex: 1 1 auto;
     gap: 6px;
     justify-content: flex-end;
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-status,
-.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-runtime-chip {
+}.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-status,
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-runtime-chip {
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-status-copy {
+}.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-status-copy {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-product-update-chip > span:last-child {
+}.quest-ui-theme .quest-ui-default-status-state .quest-ui-product-update-chip > span:last-child {
     overflow: hidden;
     text-overflow: ellipsis;
-}.quest-ui-theme-default .quest-ui-status-settings-button {
+}.quest-ui-theme .quest-ui-status-settings-button {
     justify-self: end;
 }
 
-@media (max-width: 720px) {.quest-ui-theme-default .quest-ui-default-status-strip {
+@media (max-width: 720px) {.quest-ui-theme .quest-ui-default-status-strip {
         grid-template-columns: 1fr !important;
-    }.quest-ui-theme-default .quest-ui-status-bridge {
+}.quest-ui-theme .quest-ui-status-bridge {
         justify-self: center;
+}
+.quest-ui-theme-default .quest-ui-status-bridge {
         transform: rotate(90deg);
-    }
+}
 }
 
 /* v1.6 beta status strip clipping fix.
  * Runtime text and update chips must remain fully visible even when the product half is tight.
  */
-.quest-ui-theme-default .quest-ui-default-status-product,
-.quest-ui-theme-default .quest-ui-default-status-product.is-orion,
-.quest-ui-theme-default .quest-ui-default-status-product.is-questui {
+.quest-ui-theme .quest-ui-default-status-product,
+.quest-ui-theme .quest-ui-default-status-product.is-orion,
+.quest-ui-theme .quest-ui-default-status-product.is-questui {
     overflow: visible !important;
-}.quest-ui-theme-default .quest-ui-default-status-state {
+}.quest-ui-theme .quest-ui-default-status-state {
     overflow: visible !important;
-}.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-status,
-.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-runtime-chip,
-.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-orion-status-copy {
+}.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-status,
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-runtime-chip,
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-status-copy {
     overflow: visible !important;
-}.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
-    line-height: 1.2 !important;
+}.quest-ui-theme .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
     min-height: auto !important;
     padding: 1px 0 !important;
     text-overflow: clip !important;
-}.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-product-update-chip {
+}
+.quest-ui-theme-default .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
+    line-height: 1.2 !important;
+}.quest-ui-theme .quest-ui-default-status-state .quest-ui-product-update-chip {
     flex: 0 0 auto !important;
     max-width: none !important;
     overflow: visible !important;
-}.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-product-update-chip > span,
-.quest-ui-theme-default .quest-ui-default-status-state .quest-ui-product-update-chip > span:last-child {
+}.quest-ui-theme .quest-ui-default-status-state .quest-ui-product-update-chip > span,
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-product-update-chip > span:last-child {
     overflow: visible !important;
     text-overflow: clip !important;
     white-space: nowrap !important;
 }
 
 /* v1.6 Quest List heading and notification-island shell. */
-.quest-ui-theme-default .quest-ui-dashboard-filter-tools {
+.quest-ui-theme .quest-ui-dashboard-filter-tools {
     align-items: center;
     display: grid;
     gap: 8px;
@@ -2863,37 +3047,53 @@
     justify-content: stretch;
     min-height: 36px;
     width: 100%;
-}.quest-ui-theme-default .quest-ui-dashboard-list-title {
+}.quest-ui-theme .quest-ui-dashboard-list-title {
     align-items: center;
-    color: #fff;
     display: flex;
-    font-family: var(--font-display, var(--font-primary));
-    font-size: 24px;
-    font-weight: 800;
     height: 36px;
     justify-self: start;
-    letter-spacing: -.02em;
-    line-height: 1;
     margin: 0;
     padding: 0 0 0 4px;
     white-space: nowrap;
-}.quest-ui-theme-default .quest-ui-dashboard-actionbar-left {
+}
+.quest-ui-theme-default .quest-ui-dashboard-list-title {
+    color: #fff;
+    font-family: var(--font-display, var(--font-primary));
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1;
+}.quest-ui-theme .quest-ui-dashboard-actionbar-left {
     align-items: center;
     display: inline-flex;
     flex: 0 0 auto;
     gap: 8px;
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-region {
+}.quest-ui-theme .quest-ui-dashboard-notification-region {
     align-items: center;
     display: flex;
     flex: 1 1 0;
     min-width: 44px;
     overflow: hidden;
     position: relative;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-island {
+}.quest-ui-theme .quest-ui-dashboard-notification-island {
+    align-self: center;
+    box-sizing: border-box;
+    display: block;
+    flex: 0 0 auto;
+    height: 44px;
+    margin: 0;
+    max-width: 44px;
+    min-height: 44px;
+    min-width: 44px;
+    overflow: visible;
+    padding: 0;
+    position: relative;
+    width: max-content;
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-island {
     --quest-ui-notification-tone: var(--brand-360, #949cf7);
     appearance: none;
-    align-self: center;
     background-color: #19191f !important;
     background-image: none !important;
     border: 0;
@@ -2901,65 +3101,61 @@
     box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.11),
         inset 0 1px 0 rgba(255,255,255,.035);
-    box-sizing: border-box;
     color: inherit;
     cursor: pointer;
-    display: block;
-    flex: 0 0 auto;
     font: inherit;
-    height: 44px;
     line-height: 0;
-    margin: 0;
-    max-width: 44px;
-    min-height: 44px;
-    min-width: 44px;
-    overflow: visible;
     outline: none;
-    padding: 0;
-    position: relative;
     text-align: left;
     transition:
         max-width 340ms cubic-bezier(.18,.82,.24,1),
         box-shadow 160ms ease;
-    width: max-content;
 }.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-success {
     --quest-ui-notification-tone: var(--status-positive, #23a55a);
 }.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-warning {
     --quest-ui-notification-tone: var(--status-warning, #f0b232);
 }.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-error {
     --quest-ui-notification-tone: var(--status-danger, #f23f42);
-}.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-visible {
+}.quest-ui-theme .quest-ui-dashboard-notification-island.is-visible {
+    max-width: 100%;
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-visible {
     box-shadow:
         inset 0 0 0 1px color-mix(in srgb, var(--quest-ui-notification-tone) 26%, rgba(255,255,255,.11)),
         inset 0 1px 0 rgba(255,255,255,.04);
+}.quest-ui-theme .quest-ui-dashboard-notification-island.is-idle:hover,
+.quest-ui-theme .quest-ui-dashboard-notification-island.is-idle:focus-visible,
+.quest-ui-theme .quest-ui-dashboard-notification-island.is-idle.is-open {
     max-width: 100%;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover,
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover,
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:focus-visible,
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle.is-open {
     box-shadow:
         inset 0 0 0 1px color-mix(in srgb, var(--brand-360, #949cf7) 24%, rgba(255,255,255,.11)),
         inset 0 1px 0 rgba(255,255,255,.04);
-    max-width: 100%;
     transition:
         max-width 560ms cubic-bezier(.16,.84,.22,1),
         box-shadow 160ms ease;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-exiting {
+}.quest-ui-theme .quest-ui-dashboard-notification-island.is-exiting {
     max-width: 44px;
 }
 
 /* Preserve the vector-centered resting bell; only its right-hand body grows. */
-.quest-ui-theme-default .quest-ui-dashboard-notification-bell {
-    color: #fff;
+.quest-ui-theme .quest-ui-dashboard-notification-bell {
     display: block;
     height: 44px;
     left: 0;
-    line-height: 0;
     margin: 0;
     padding: 0;
     position: absolute;
     top: 0;
     width: 100%;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-surface {
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-bell {
+    color: #fff;
+    line-height: 0;
+}.quest-ui-theme .quest-ui-dashboard-notification-surface {
     display: block;
     height: 44px;
     inset: 0;
@@ -2970,16 +3166,18 @@
     position: absolute;
     width: 100%;
     z-index: 2;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-surface-rect {
-    fill: color-mix(in srgb, #202126 88%, #2d2637 12%);
+}.quest-ui-theme .quest-ui-dashboard-notification-surface-rect {
     height: 34px;
+    width: calc(100% - 10px);
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-surface-rect {
+    fill: color-mix(in srgb, #202126 88%, #2d2637 12%);
     rx: 17px;
     ry: 17px;
     stroke: rgba(255,255,255,.13);
     stroke-width: 1;
     transition: fill 150ms ease, stroke 150ms ease;
     vector-effect: non-scaling-stroke;
-    width: calc(100% - 10px);
     x: 5px;
     y: 5px;
 }.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-mounted .quest-ui-dashboard-notification-surface-rect,
@@ -2987,24 +3185,26 @@
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-exiting .quest-ui-dashboard-notification-surface-rect {
     fill: color-mix(in srgb, #202126 92%, var(--quest-ui-notification-tone) 8%);
     stroke: color-mix(in srgb, rgba(255,255,255,.13) 70%, var(--quest-ui-notification-tone) 30%);
-}.quest-ui-theme-default .quest-ui-dashboard-notification-icon {
+}.quest-ui-theme .quest-ui-dashboard-notification-icon {
     display: block;
-    fill: none;
     height: 17px;
     left: 22px;
     margin: 0;
     padding: 0;
     position: absolute;
+    top: 22px;
+    width: 17px;
+    z-index: 4;
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-icon {
+    fill: none;
     stroke: currentColor;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 1.9;
-    top: 22px;
     transform: translate(-50%, -50%);
     transition: color 150ms ease;
     vector-effect: non-scaling-stroke;
-    width: 17px;
-    z-index: 4;
 }.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-mounted .quest-ui-dashboard-notification-icon,
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-visible .quest-ui-dashboard-notification-icon,
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-exiting .quest-ui-dashboard-notification-icon {
@@ -3013,37 +3213,41 @@
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:focus-visible .quest-ui-dashboard-notification-icon,
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle.is-open .quest-ui-dashboard-notification-icon {
     color: color-mix(in srgb, #fff 78%, var(--brand-360, #949cf7) 22%);
-}.quest-ui-theme-default .quest-ui-dashboard-notification-measure {
+}.quest-ui-theme .quest-ui-dashboard-notification-measure {
     align-items: center;
     box-sizing: border-box;
-    color: transparent;
     display: inline-flex;
-    font-size: 10.5px;
-    font-weight: 700;
     gap: 7px;
     height: 44px;
-    line-height: 44px;
     padding: 0 12px 0 48px;
     pointer-events: none;
-    visibility: hidden;
     white-space: nowrap;
     width: max-content;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-copy {
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-measure {
+    color: transparent;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 44px;
+    visibility: hidden;
+}.quest-ui-theme .quest-ui-dashboard-notification-copy {
     align-items: center;
     display: flex;
     gap: 7px;
     height: 44px;
     left: 48px;
     min-width: 0;
-    opacity: 0;
     overflow: hidden;
     pointer-events: none;
     position: absolute;
     right: 10px;
     top: 0;
-    transition: opacity 110ms ease;
     white-space: nowrap;
     z-index: 5;
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-copy {
+    opacity: 0;
+    transition: opacity 110ms ease;
 }.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-visible .quest-ui-dashboard-notification-copy {
     opacity: 1;
     transition-delay: 205ms;
@@ -3055,38 +3259,36 @@
 }.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-exiting .quest-ui-dashboard-notification-copy {
     opacity: 0;
     transition-delay: 0ms;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-text {
-    color: var(--text-default, #dbdee1);
+}.quest-ui-theme .quest-ui-dashboard-notification-text {
     display: block;
-    font-size: 10.5px;
-    font-weight: 700;
-    line-height: 1.15;
     max-width: 100%;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-unread-chip {
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-text {
+    color: var(--text-default, #dbdee1);
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.15;
+}.quest-ui-theme .quest-ui-dashboard-notification-unread-chip {
+    flex: 0 0 auto;
+    padding: 4px 6px;
+    white-space: nowrap;
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-unread-chip {
     background: color-mix(in srgb, var(--status-danger, #f23f42) 18%, #211719);
     border: 1px solid color-mix(in srgb, var(--status-danger, #f23f42) 42%, rgba(255,255,255,.10));
     border-radius: 999px;
     color: color-mix(in srgb, var(--status-danger, #f23f42) 48%, #fff 52%);
-    flex: 0 0 auto;
     font-size: 9px;
     font-weight: 800;
     line-height: 1;
-    padding: 4px 6px;
-    white-space: nowrap;
 }.quest-ui-theme-default .quest-ui-dashboard-notification-measure .quest-ui-dashboard-notification-unread-chip {
     border-color: transparent;
     color: transparent;
-}.quest-ui-theme-default .quest-ui-dashboard-notification-unread-dot {
-    background: var(--status-danger, #f23f42);
-    border: 2px solid #19191f;
-    border-radius: 50%;
-    box-shadow:
-        0 0 0 1px rgba(255,255,255,.10),
-        0 2px 7px color-mix(in srgb, var(--status-danger, #f23f42) 42%, transparent);
+}.quest-ui-theme .quest-ui-dashboard-notification-unread-dot {
     box-sizing: border-box;
     height: 12px;
     left: 28px;
@@ -3095,6 +3297,14 @@
     top: 4px;
     width: 12px;
     z-index: 50;
+}
+.quest-ui-theme-default .quest-ui-dashboard-notification-unread-dot {
+    background: var(--status-danger, #f23f42);
+    border: 2px solid #19191f;
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,.10),
+        0 2px 7px color-mix(in srgb, var(--status-danger, #f23f42) 42%, transparent);
 }.quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:hover .quest-ui-dashboard-notification-unread-dot,
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle:focus-visible .quest-ui-dashboard-notification-unread-dot,
 .quest-ui-theme-default .quest-ui-dashboard-notification-island.is-idle.is-open .quest-ui-dashboard-notification-unread-dot {
@@ -3110,56 +3320,58 @@
     }
 }
 
-@media (max-width: 720px) {.quest-ui-theme-default .quest-ui-dashboard-actionbar-left {
+@media (max-width: 720px) {.quest-ui-theme .quest-ui-dashboard-actionbar-left {
         flex-wrap: wrap;
-    }
+}
 }
 
 /* v1.6 two-level reward filtering: preset radios above explicit detail checkboxes. */
-.quest-ui-theme-default .quest-ui-reward-filter-stack {
+.quest-ui-theme .quest-ui-reward-filter-stack {
     display: flex;
     flex-direction: column;
     gap: 8px;
     min-width: 0;
-}.quest-ui-theme-default .quest-ui-filter-list-options.is-reward-presets {
+}.quest-ui-theme .quest-ui-filter-list-options.is-reward-presets {
     align-items: center;
     display: grid !important;
     gap: 4px 6px !important;
     grid-template-columns: repeat(5, max-content);
-}.quest-ui-theme-default .quest-ui-filter-list-options.is-reward-details {
+}.quest-ui-theme .quest-ui-filter-list-options.is-reward-details {
     align-items: center;
     display: grid !important;
     gap: 3px 10px !important;
     grid-template-columns: repeat(3, minmax(0, max-content));
-}.quest-ui-theme-default .is-reward-presets .quest-ui-filter-list-row,
-.quest-ui-theme-default .is-reward-details .quest-ui-filter-list-row {
+}.quest-ui-theme .is-reward-presets .quest-ui-filter-list-row,
+.quest-ui-theme .is-reward-details .quest-ui-filter-list-row {
     min-width: 0;
     width: auto;
-}.quest-ui-theme-default .is-reward-presets .quest-ui-filter-list-row {
+}.quest-ui-theme .is-reward-presets .quest-ui-filter-list-row {
     padding-left: 4px !important;
     padding-right: 5px !important;
-}.quest-ui-theme-default .quest-ui-reward-detail-divider {
-    background: rgba(255,255,255,.07);
+}.quest-ui-theme .quest-ui-reward-detail-divider {
     height: 1px;
     width: 100%;
 }
-
-@media (max-width: 720px) {.quest-ui-theme-default .quest-ui-filter-list-options.is-reward-presets,
-.quest-ui-theme-default .quest-ui-filter-list-options.is-reward-details {
-        grid-template-columns: repeat(2, max-content);
-    }
+.quest-ui-theme-default .quest-ui-reward-detail-divider {
+    background: rgba(255,255,255,.07);
 }
 
-@media (max-width: 520px) {.quest-ui-theme-default .quest-ui-filter-list-options.is-reward-presets,
-.quest-ui-theme-default .quest-ui-filter-list-options.is-reward-details {
+@media (max-width: 720px) {.quest-ui-theme .quest-ui-filter-list-options.is-reward-presets,
+.quest-ui-theme .quest-ui-filter-list-options.is-reward-details {
+        grid-template-columns: repeat(2, max-content);
+}
+}
+
+@media (max-width: 520px) {.quest-ui-theme .quest-ui-filter-list-options.is-reward-presets,
+.quest-ui-theme .quest-ui-filter-list-options.is-reward-details {
         grid-template-columns: 1fr;
-    }
+}
 }
 
 /* Balance the Quest List control row between the summary chips and the first Quest card.
  * Move only this row down slightly while reclaiming the same space from the list top padding. */
-.quest-ui-theme-default .quest-ui-dashboard-filter-tools {
+.quest-ui-theme .quest-ui-dashboard-filter-tools {
     margin-top: 9px;
-}.quest-ui-theme-default .quest-ui-dashboard-content {
+}.quest-ui-theme .quest-ui-dashboard-content {
     padding-top: 8px;
 }

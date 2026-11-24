@@ -64,9 +64,9 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/eventLog/presentation.tsx`, `src/eventLog/controls.tsx` - Event/detail rendering, semantic highlighting, filter choices, and sort controls.
 - `src/eventLog/runtime.ts`, `src/eventLog/types.ts`, `src/eventLog/logic.ts`, `src/eventLog/account.ts`, `src/eventLog/validation.ts`, `src/eventLog/page.ts`, `src/eventLog/pagination.ts`, `src/eventLog/virtualization.ts`, `src/eventLog/native.ts`, `src/eventLog/report.ts` - Event capture, account scoping, persistence/querying, validation, and sanitized reports.
 - `src/orion/capabilities.ts`, `src/orion/events.ts` - optional Orion structured-event capability discovery, validation, semantic normalization, and console-shadow reconciliation.
-- `src/orion/scheduler.ts`, `src/orion/schedulerState.ts` - optional Orion scheduler snapshot/subscription and unordered live-batch normalization used only for published scheduler state; no queue order is inferred.
-- `src/dashboard/styles/dashboardPolish.css`, `src/dashboard/styles/dashboardTuning.css`, `src/dashboard/styles/dashboardV12.css`, `src/dashboard/styles/styles.css` - legacy/base Dashboard styling layers retained during the v1.6 transition; consolidate rather than duplicating new overrides.
-- `src/themes/default/dashboard.css` - current v1.6 default Dashboard/theme surface and final layout overrides.
+- `src/orion/schedulerState.ts` - optional Orion scheduler snapshot normalization used by the companion integration; unordered live batches are normalized without inferring queue order.
+- `src/dashboard/styles/styles.css`, `src/dashboard/styles/scrollbar.css` - shared Dashboard/component styling that must stay theme-neutral and consume the QuestUI theme contract.
+- `src/themes/default/dashboard.css` - shared `.quest-ui-theme` Dashboard geometry plus the current `.quest-ui-theme-default` visual skin. Named theme selectors must not own shared geometry.
 - `src/quests/actions/QuestCardActions.tsx` - explicit Accept/Claim, Ignore/Unignore with exact-ID Orion pause when active, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
 - `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAll.ts`, `src/quests/actions/claimAllState.ts` - bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
 - `src/quests/actions/native.ts` - manual Enroll/Claim orchestration delegating to Discord native actions.
@@ -80,9 +80,9 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/updates/runtime.ts`, `src/updates/logic.ts`, `src/updates/questui/native.ts`, `src/updates/questui/engine.ts`, `src/updates/orion/native.ts`, `src/updates/orion/engine.ts` - release discovery/cached scheduling plus signed fail-closed QuestUI updates and managed Orion updates. Both native updaters preflight managed checkouts; Orion preserves explicit Keep/Discard consent and snapshots the known-good Vencord runtime before checkout mutation so build failures restore `dist` without a second build. QuestUI and OrionQuests pre-release opt-ins and release-check health are independent; the legacy `updateIncludePrereleases` key remains the QuestUI channel for migration compatibility, and the existing update-state key migrates its legacy shared successful-check timestamp into both product histories before future checks diverge.
 - `src/orion/companion.ts`, `src/orion/controls.ts`, `src/orion/integration.ts` - companion validation, state machine, scheduler-state refinement, and safe delegation.
 - `src/orion/OrionControls.tsx`, `src/orion/OrionQuestControl.tsx`, `src/orion/icons.tsx` - global/per-Quest controls and shared icons.
-- `src/quests/actions/actions.css`, `src/orion/styles/orion.css`, `src/orion/styles/orionScheduler.css`, `src/quests/reload/reload.css` - action/control styling.
+- `src/quests/actions/actions.css`, `src/orion/styles/orion.css`, `src/quests/reload/reload.css` - action/control styling; component styles stay theme-neutral and consume shared theme tokens.
 - `tests/` - feature-grouped pure regression tests.
-- `scripts/` - Stable/Canary reporter tooling.
+- `scripts/` - Stable/Canary reporter tooling plus the theme-contract verifier used by CI.
 - `.github/workflows/compatibility.yml` - build/type-check, pure tests, Orion matrix, bundle checks, reporters.
 - `docs/RELEASES.md` - release history, current Stable guidance, and publishing checklist.
 
