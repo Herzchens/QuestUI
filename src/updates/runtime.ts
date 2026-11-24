@@ -544,6 +544,11 @@ async function runUpdateCheck(preferences: UpdatePreferences, startedAt: number)
     applyOrionReleaseResult(orionResult, preferences, checkedAt);
     await persistUpdateCheck(questResult, orionResult, wantsOrion, checkedAt);
 
+    // Settings can change while the network requests are in flight. Re-apply the
+    // cached releases through the current policy so a stale prerelease/checkOrion
+    // snapshot cannot overwrite the user's latest choice when this check settles.
+    recomputeCachedPolicy(checkedAt);
+
     snapshot = {
         ...snapshot,
         checking: false,

@@ -26,7 +26,7 @@
     border-radius: 999px;
     bottom: -4px;
     box-sizing: border-box;
-    color: white;
+    color: var(--quest-ui-theme-text-strong);
     display: inline-flex;
     font-size: 8px;
     font-weight: 700;
@@ -55,7 +55,7 @@
     padding: 2px 1px;
     text-align: left;
 }.quest-ui-status-tooltip > strong {
-    color: var(--text-strong, white);
+    color: var(--text-strong, var(--quest-ui-theme-text-strong));
     font-size: 13px;
     line-height: 16px;
 }.quest-ui-status-tooltip-grid {
@@ -95,7 +95,7 @@
     background: var(--background-base-lowest, var(--background-primary, #111214));
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
     border-radius: 12px;
-    box-shadow: var(--shadow-high, 0 12px 34px rgba(0, 0, 0, 0.42));
+    box-shadow: var(--shadow-high, 0 12px 34px var(--quest-ui-theme-popout-shadow));
     color: var(--text-default, var(--header-primary));
     display: flex;
     flex-direction: column;
@@ -169,7 +169,7 @@
     border: 1px solid color-mix(in srgb, var(--brand-500, #5865f2) 34%, transparent);
     border-radius: 8px;
     box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.24),
+        0 1px 3px var(--quest-ui-dashboard-filter-shadow-rest),
         inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 7%, transparent);
     color: var(--interactive-normal);
     display: inline-flex;
@@ -183,19 +183,19 @@
 }.quest-ui-filter-button:hover {
     background: color-mix(in srgb, var(--brand-500, #5865f2) 9%, var(--background-base-low, #1e1f22));
     box-shadow:
-        0 3px 8px rgba(0, 0, 0, 0.28),
+        0 3px 8px var(--quest-ui-dashboard-filter-shadow-hover),
         inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 10%, transparent);
     color: var(--interactive-hover);
     transform: translateY(-1px);
 }.quest-ui-filter-button.is-open {
     background: color-mix(in srgb, var(--brand-500, #5865f2) 15%, var(--background-base-low, #1e1f22));
     box-shadow:
-        0 3px 10px rgba(0, 0, 0, 0.3),
+        0 3px 10px var(--quest-ui-dashboard-filter-shadow-open),
         0 0 0 2px color-mix(in srgb, var(--brand-500, #5865f2) 14%, transparent);
     color: var(--brand-360, #949cf7);
 }.quest-ui-filter-button.is-active {
     box-shadow:
-        0 2px 7px rgba(0, 0, 0, 0.26),
+        0 2px 7px var(--quest-ui-dashboard-filter-shadow-active),
         inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 14%, transparent);
 }.quest-ui-filter-button.is-active.is-open {
     background: color-mix(in srgb, var(--brand-500, #5865f2) 18%, var(--background-base-low, #1e1f22));
@@ -373,7 +373,7 @@
 }.quest-ui-orb-large > strong {
     color: var(--status-warning);
 }.quest-ui-orb-boosted > strong {
-    color: color-mix(in srgb, var(--status-warning) 72%, white);
+    color: color-mix(in srgb, var(--status-warning) 72%, var(--quest-ui-theme-text-strong));
     text-shadow: 0 0 10px color-mix(in srgb, var(--status-warning) 24%, transparent);
 }.quest-ui-orb-glyph {
     flex: 0 0 15px;
@@ -493,7 +493,7 @@
     padding: 9px 12px;
 }.quest-ui-dashboard-primary-action {
     background: var(--brand-500, var(--blurple-50));
-    color: white;
+    color: var(--quest-ui-theme-text-strong);
     flex: 1 1 0;
 }.quest-ui-dashboard-primary-action:hover {
     filter: brightness(1.08);
@@ -533,7 +533,7 @@
     border-radius: 999px;
     box-shadow: none;
     box-sizing: border-box;
-    color: #fff;
+    color: var(--quest-ui-theme-text-strong);
     display: inline-flex;
     font-size: 8px;
     font-weight: 900;
@@ -549,7 +549,7 @@
     width: 12px;
     z-index: 3;
 }.quest-ui-update-attention-badge.is-routine {
-    background: #7d8cff;
+    background: var(--quest-ui-update-routine);
 }.quest-ui-update-attention-badge.is-recommended {
     background: var(--status-warning, #f0b232);
     color: var(--background-base-lowest, #111214);

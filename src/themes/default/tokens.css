@@ -28,6 +28,7 @@
     --quest-ui-theme-text-subtle: #aeb3ba;
     --quest-ui-theme-icon: #d7d9dd;
     --quest-ui-theme-ignored: #c77dff;
+    --quest-ui-notification-info: #c5a4ff;
 
     --quest-ui-theme-border-faint: rgba(255, 255, 255, .065);
     --quest-ui-theme-border-soft: rgba(255, 255, 255, .075);
@@ -38,11 +39,21 @@
 
     --quest-ui-theme-panel-shadow: rgba(0, 0, 0, .52);
     --quest-ui-theme-float-shadow: rgba(0, 0, 0, .45);
+    --quest-ui-theme-popout-shadow: rgba(0, 0, 0, .42);
+    --quest-ui-dashboard-filter-shadow-rest: rgba(0, 0, 0, .24);
+    --quest-ui-dashboard-filter-shadow-hover: rgba(0, 0, 0, .28);
+    --quest-ui-dashboard-filter-shadow-open: rgba(0, 0, 0, .30);
+    --quest-ui-dashboard-filter-shadow-active: rgba(0, 0, 0, .26);
 
     /* Update Center */
     --quest-ui-update-panel: #17171c;
     --quest-ui-update-product-surface: #1b1c21;
     --quest-ui-update-accent: #9d7cff;
+    --quest-ui-update-accent-surface-base: #7c5cff;
+    --quest-ui-update-accent-border-base: #9e80ff;
+    --quest-ui-update-accent-hover-border: #ae94ff;
+    --quest-ui-update-routine: #7d8cff;
+    --quest-ui-update-target-base: #7289ff;
     --quest-ui-update-title: #f4f5f7;
     --quest-ui-update-check-text: #e6e0ff;
     --quest-ui-update-banner-text: #eef0f2;
@@ -56,7 +67,6 @@
     --quest-ui-update-link-hover: #d0d5ff;
     --quest-ui-update-support-link-hover: #d1d6ff;
     --quest-ui-update-settings-hint: #747983;
-    --quest-ui-update-neutral: #666b75;
     --quest-ui-update-state-muted: #737883;
     --quest-ui-update-banner-state-muted: #7c8089;
     --quest-ui-update-checking: #a8acb5;
@@ -95,6 +105,33 @@
     --quest-ui-event-detail-diagnostic-surface: #0a0910;
     --quest-ui-event-detail-diagnostic-code: #b8bdc7;
     --quest-ui-event-portal-title: #8f939c;
+    --quest-ui-event-title: #f4f5f7;
+    --quest-ui-event-control-text: #d7d9dc;
+    --quest-ui-event-panel-shadow: rgba(0, 0, 0, .48);
+    --quest-ui-event-detail-shadow: rgba(0, 0, 0, .5);
+    --quest-ui-event-search-surface-base: #202225;
+    --quest-ui-event-flat-surface-base: #1b1425;
+    --quest-ui-event-flat-hover-base: #21172d;
+    --quest-ui-event-storage-surface-base: #242129;
+    --quest-ui-event-account-change: #f59e42;
+    --quest-ui-event-choice-border: #666b75;
+    --quest-ui-event-choice-accent: #858cff;
+    --quest-ui-event-filter-heading: #9ea2aa;
+    --quest-ui-event-filter-text: #e3e5e8;
+    --quest-ui-event-filter-error: #da373c;
+    --quest-ui-event-filter-warning: #b8860b;
+    --quest-ui-event-filter-success: #248046;
+    --quest-ui-event-filter-info: #378bd8;
+    --quest-ui-event-detail-category-text: #d7dae0;
+    --quest-ui-event-detail-runtime-text: #a8cbf5;
+    --quest-ui-event-detail-quest-text: #b7bdf9;
+    --quest-ui-event-detail-network-text: #f0c96f;
+    --quest-ui-event-detail-diagnostic-text-accent: #c6a4fa;
+    --quest-ui-event-detail-diagnostic-base: #aa70ff;
+    --quest-ui-event-detail-meta-surface-start: #221f30;
+    --quest-ui-event-detail-meta-surface-end: #14121e;
+    --quest-ui-event-detail-meta-icon-base: #9470ff;
+    --quest-ui-event-detail-meta-icon-text: #ad8cff;
     --quest-ui-event-text-normal: var(--text-normal, #dbdee1);
     --quest-ui-event-text-strong: var(--text-normal, #f2f3f5);
     --quest-ui-event-text-muted: var(--text-muted, #949ba4);

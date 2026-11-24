@@ -29,8 +29,11 @@ export function QuestOrbBalance({ closePopout }: { closePopout?: () => void; }) 
     const balance = accountTrusted ? storeBalance : null;
     const relevantFetchError = accountTrusted ? hasFetchError : false;
 
-    useEffect(() => () => {
-        mounted.current = false;
+    useEffect(() => {
+        mounted.current = true;
+        return () => {
+            mounted.current = false;
+        };
     }, []);
 
     useEffect(() => {

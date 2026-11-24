@@ -2,7 +2,7 @@
     background: var(--quest-ui-theme-panel);
     border: 1px solid color-mix(in srgb, var(--quest-ui-theme-accent) 28%, color-mix(in srgb, var(--quest-ui-theme-text-strong) 12%, transparent));
     border-radius: 16px;
-    box-shadow: 0 22px 56px var(--quest-ui-theme-panel-shadow), inset 0 1px 0 rgba(255,255,255,.035);
+    box-shadow: 0 22px 56px var(--quest-ui-theme-panel-shadow), inset 0 1px 0 color-mix(in srgb, var(--quest-ui-theme-text-strong) 3.5%, transparent);
     box-sizing: border-box;
     color: var(--quest-ui-theme-text-normal);
     overflow: hidden;
@@ -32,7 +32,7 @@
 }
 
 .quest-ui-notification-center-unread {
-    background: rgba(255,255,255,.055);
+    background: color-mix(in srgb, var(--quest-ui-theme-text-strong) 5.5%, transparent);
     border: 1px solid var(--quest-ui-theme-border-muted);
     border-radius: 999px;
     color: var(--quest-ui-theme-text-muted);
@@ -46,7 +46,7 @@
 .quest-ui-notification-center-unread.has-unread {
     background: color-mix(in srgb, var(--status-danger, #f23f42) 18%, var(--quest-ui-theme-danger-surface));
     border-color: color-mix(in srgb, var(--status-danger, #f23f42) 42%, color-mix(in srgb, var(--quest-ui-theme-text-strong) 10%, transparent));
-    color: color-mix(in srgb, var(--status-danger, #f23f42) 48%, #fff 52%);
+    color: color-mix(in srgb, var(--status-danger, #f23f42) 48%, var(--quest-ui-theme-text-strong) 52%);
 }
 
 .quest-ui-notification-center-account {
@@ -112,7 +112,7 @@
     background: color-mix(in srgb, var(--status-positive, #23a55a) 13%, var(--quest-ui-theme-success-surface));
     border: 1px solid color-mix(in srgb, var(--status-positive, #23a55a) 32%, var(--quest-ui-theme-border-muted));
     border-radius: 999px;
-    color: color-mix(in srgb, var(--status-positive, #23a55a) 48%, #fff 52%);
+    color: color-mix(in srgb, var(--status-positive, #23a55a) 48%, var(--quest-ui-theme-text-strong) 52%);
     flex: 0 0 auto;
     font-size: 9.5px;
     font-weight: 750;
@@ -165,7 +165,7 @@
 .quest-ui-notification-center-action.is-danger:hover:not(:disabled) {
     background: color-mix(in srgb, var(--status-danger, #f23f42) 10%, var(--quest-ui-theme-danger-hover));
     border-color: color-mix(in srgb, var(--status-danger, #f23f42) 35%, color-mix(in srgb, var(--quest-ui-theme-text-strong) 10%, transparent));
-    color: color-mix(in srgb, var(--status-danger, #f23f42) 60%, #fff 40%);
+    color: color-mix(in srgb, var(--status-danger, #f23f42) 60%, var(--quest-ui-theme-text-strong) 40%);
 }
 
 .quest-ui-notification-center-action:disabled {
@@ -257,7 +257,7 @@
 
 .quest-ui-notification-center-row.is-success .quest-ui-notification-center-row-artwork-fallback {
     background: color-mix(in srgb, var(--status-positive, #23a55a) 12%, var(--quest-ui-theme-success-artwork));
-    color: color-mix(in srgb, var(--status-positive, #23a55a) 70%, #fff 30%);
+    color: color-mix(in srgb, var(--status-positive, #23a55a) 70%, var(--quest-ui-theme-text-strong) 30%);
 }
 
 .quest-ui-notification-center-row.is-warning .quest-ui-notification-center-row-artwork-fallback {
@@ -267,12 +267,12 @@
 
 .quest-ui-notification-center-row.is-error .quest-ui-notification-center-row-artwork-fallback {
     background: color-mix(in srgb, var(--status-danger, #f23f42) 12%, var(--quest-ui-theme-error-artwork));
-    color: color-mix(in srgb, var(--status-danger, #f23f42) 78%, #fff 22%);
+    color: color-mix(in srgb, var(--status-danger, #f23f42) 78%, var(--quest-ui-theme-text-strong) 22%);
 }
 
 .quest-ui-notification-center-row.is-info .quest-ui-notification-center-row-artwork-fallback {
     background: color-mix(in srgb, var(--quest-ui-theme-accent) 10%, var(--quest-ui-theme-info-artwork));
-    color: #c5a4ff;
+    color: var(--quest-ui-notification-info);
 }
 
 .quest-ui-notification-center-task-badge {
