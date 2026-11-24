@@ -10,7 +10,7 @@ QuestUI may:
 
 - add or improve Quest-related UI;
 - display Quest state/progress/reward/artwork/expiry already exposed by Discord;
-- navigate to Quest Home;
+- navigate to Quest Home or a specific Quest via its canonical Discord share URL and native link handling;
 - enroll only after an explicit QuestUI click through Discord's verified native enrollment action;
 - claim only after explicit QuestUI user authorization through Discord's verified native claim action; a single **Claim all** click may authorize only a bounded snapshot of the Quests that are Ready at that click;
 - invoke Discord's native current-Quest refresh after an explicit Reload click;
@@ -71,7 +71,8 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAll.ts`, `src/quests/actions/claimAllState.ts` - bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
 - `src/quests/actions/native.ts` - manual Enroll/Claim orchestration delegating to Discord native actions.
 - `src/quests/data.ts` - normalization/filtering/sorting and live read-only QuestStore snapshot source.
-- `src/quests/presentation.ts`, `src/quests/presentationLogic.ts` - shared native artwork, safe historical presentation metadata and exact/unique Quest identity resolution.
+- `src/quests/presentation.ts`, `src/quests/presentationLogic.ts` - shared native artwork, safe historical presentation metadata, exact/unique Quest identity resolution and validated Quest share URLs.
+- Quest titles and their open glyph share one keyboard-accessible native link. Do not infer Activity launch or popout APIs from task type alone; use only verified Discord-native launch paths and preserve the normal Quest view when unavailable.
 - `src/quests/rewardFilters.ts` - v1.6 reward preset/detail normalization and legacy reward-filter migration helpers.
 - `src/quests/reload/native.ts`, `src/quests/reload/logic.ts`, `src/quests/reload/QuestReloadControl.tsx` - native current-Quest refresh and whole-rotation spinner state.
 - `src/quests/reload/auto.ts`, `src/quests/reload/autoLogic.ts` - background native Quest-list refresh lifecycle plus persisted freshness scheduling. It runs independently of Dashboard visibility and reuses the same Discord-native fetch path so existing QuestStore notifications remain authoritative.

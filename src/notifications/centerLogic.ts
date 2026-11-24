@@ -271,8 +271,8 @@ export function notificationCenterItems(
             title: presentation.title,
             description: presentation.description,
             source: event.source === "orion" ? "OrionQuests" : "QuestUI",
-            questId: event.quest?.id ?? null,
-            questName: event.quest?.name ?? null,
+            questId: presentation.kind === "update" ? null : event.quest?.id ?? null,
+            questName: presentation.kind === "update" ? null : event.quest?.name ?? null,
             eventCode: event.eventCode,
             event
         });

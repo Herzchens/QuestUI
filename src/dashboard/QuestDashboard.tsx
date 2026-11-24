@@ -283,6 +283,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                             ignored={ignoredIds.has(quest.id)}
                             receivesOrbBoost={orbMultiplier.receivesBoost}
                             claimBatchActive={claimBatchActive}
+                            closePopout={closePopout}
                         />
                     ))
                 ) : (

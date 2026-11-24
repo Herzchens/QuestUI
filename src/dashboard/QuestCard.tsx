@@ -1,10 +1,11 @@
 import { findByCodeLazy } from "@webpack";
-import { ThemeStore, useStateFromStores } from "@webpack/common";
+import { MaskedLink, ThemeStore, useStateFromStores } from "@webpack/common";
 
 import type { OrionControlSnapshot } from "../orion/companion";
 import { orionQuestProgressSource, orionQuestTagState, storedQuestTaskProgress, type OrionQuestTagState } from "../orion/controls";
 import { effectiveOrbRewardAmount, formatQuestRewardLabel } from "../orbs/rewards";
 import { resolveQuestArtwork, type QuestTheme } from "../quests/presentation";
+import { questShareUrl } from "../quests/presentationLogic";
 import { QuestOrbIcon } from "../orbs/QuestOrbIcon";
 import { QuestCardActions } from "../quests/actions/QuestCardActions";
 import { expiryUrgency, formatExpiry, formatQuestProgress } from "../quests/data";
@@ -295,12 +296,13 @@ function IgnoredQuestTag() {
     );
 }
 
-export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive }: {
+export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive, closePopout }: {
     quest: NormalizedQuest;
     orionSnapshot: OrionControlSnapshot | null;
     ignored: boolean;
     receivesOrbBoost: boolean;
     claimBatchActive: boolean;
+    closePopout?: () => void;
 }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
@@ -350,7 +352,19 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
 
             <div className="quest-ui-card-main">
                 <div className="quest-ui-card-title-cluster">
-                    <strong className="quest-ui-card-title" title={quest.name}>{quest.name}</strong>
+                    <MaskedLink
+                        href={questShareUrl(quest.id)}
+                        className="quest-ui-card-open-quest"
+                        title={`Open ${quest.name} in Discord`}
+                        onClick={closePopout}
+                        trusted
+                    >
+                        <strong className="quest-ui-card-title">{quest.name}</strong>
+                        <svg className="quest-ui-card-open-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M13 5h6v6M19 5l-9 9" />
+                            <path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" />
+                        </svg>
+                    </MaskedLink>
                     {ignored && <IgnoredQuestTag />}
                     <OrionQuestStateTag state={orionTagState} />
                 </div>

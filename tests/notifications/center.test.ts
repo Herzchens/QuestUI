@@ -10,7 +10,7 @@ import {
 } from "../../src/notifications/centerLogic";
 import type { EventLogEvent } from "../../src/eventLog/types";
 import { normalizePersistedEvent } from "../../src/eventLog/validation";
-import { findQuestByIdentity, safeQuestArtworkUrl, taskTypeForKey } from "../../src/quests/presentationLogic";
+import { findQuestByIdentity, questShareUrl, safeQuestArtworkUrl, taskTypeForKey } from "../../src/quests/presentationLogic";
 import { formatQuestRewardLabel } from "../../src/orbs/rewards";
 import { availableUpdateNoticeVersion, rememberUpdateNotice } from "../../src/updates/notificationLogic";
 
@@ -55,11 +55,11 @@ for (const product of ["QUESTUI", "ORION"]) {
     for (const [outcome, tone] of [["AVAILABLE", "info"], ["SUCCEEDED", "success"], ["FAILED", "error"]]) {
         const item = notificationCenterPresentation(event({
             source: "questui", eventCode: product + "_UPDATE_" + outcome,
-            detail: { fromVersion: "v1.0.0", toVersion: "v1.1.0", restartRequired: true }
+            detail: { fromVersion: "v1.0.0", toVersion: "v1.1.0", restartRequired: true, message: "Build failed" }
         }));
         assert.equal(item?.kind, "update");
         assert.equal(item?.tone, tone);
-        assert.equal(item?.description, outcome === "SUCCEEDED" ? "Restart Discord to apply the update." : outcome === "FAILED" ? item?.description : "");
+        assert.equal(item?.description, outcome === "SUCCEEDED" ? "Restart Discord to apply the update." : outcome === "FAILED" ? "Build failed" : "");
     }
 }
 assert.equal(notificationCenterPresentation(event({ eventCode: "QUESTUI_UPDATE_STARTED" })), null);
@@ -199,5 +199,10 @@ const available = { kind: "available" as const, installed: "v1.0.0", release: {
 assert.equal(availableUpdateNoticeVersion(available), "v1.1.0");
 assert.equal(availableUpdateNoticeVersion({ ...available, suppression: "skipped" }), null);
 assert.equal(availableUpdateNoticeVersion({ ...available, suppression: "snoozed" }), null);
+
+assert.equal(questShareUrl("1516561474498203728"), "https://discord.com/quests/1516561474498203728");
+for (const invalid of [null, "", "unknown", "../shop", "https://example.com", "1516561474498203728?token=x"]) {
+    assert.equal(questShareUrl(invalid), "https://discord.com/quest-home");
+}
 
 console.log("QuestUI Notification Center logic tests - PASS");

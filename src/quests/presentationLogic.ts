@@ -50,3 +50,11 @@ export function normalizeQuestPresentationMetadata(value: Record<string, unknown
     if (light) metadata.artworkLight = light;
     return metadata;
 }
+
+// Use Discord's canonical Quest share URL and delegate routing/eligibility to its
+// native link handler. Never interpret an arbitrary Quest field as a URL.
+export function questShareUrl(id: unknown): string {
+    return typeof id === "string" && /^\d{17,20}$/.test(id)
+        ? `https://discord.com/quests/${id}`
+        : "https://discord.com/quest-home";
+}
