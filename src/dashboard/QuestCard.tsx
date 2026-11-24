@@ -5,7 +5,7 @@ import type { OrionControlSnapshot } from "../orion/companion";
 import { orionQuestProgressSource, orionQuestTagState, storedQuestTaskProgress, type OrionQuestTagState } from "../orion/controls";
 import { effectiveOrbRewardAmount, formatQuestRewardLabel } from "../orbs/rewards";
 import { resolveQuestArtwork, type QuestTheme } from "../quests/presentation";
-import { questShareUrl } from "../quests/presentationLogic";
+import { questQuickOpenTarget } from "../quests/quickOpen";
 import { QuestOrbIcon } from "../orbs/QuestOrbIcon";
 import { QuestCardActions } from "../quests/actions/QuestCardActions";
 import { expiryUrgency, formatExpiry, formatQuestProgress } from "../quests/data";
@@ -312,6 +312,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     const urgency = expiryUrgency(quest.expiresAt, now);
     const taskType = quest.primaryTask?.type ?? quest.tasks[0]?.type ?? "other";
     const primaryTask = quest.primaryTask;
+    const quickOpen = questQuickOpenTarget(quest.id, primaryTask?.key);
     const progressSource = orionQuestProgressSource(orionSnapshot, quest.id);
     const storedCurrent = progressSource === "stored" && primaryTask
         ? storedQuestTaskProgress(quest.rawQuest, primaryTask)
@@ -352,19 +353,23 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
 
             <div className="quest-ui-card-main">
                 <div className="quest-ui-card-title-cluster">
-                    <MaskedLink
-                        href={questShareUrl(quest.id)}
-                        className="quest-ui-card-open-quest"
-                        title={`Open ${quest.name} in Discord`}
-                        onClick={closePopout}
-                        trusted
-                    >
-                        <strong className="quest-ui-card-title">{quest.name}</strong>
-                        <svg className="quest-ui-card-open-icon" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M13 5h6v6M19 5l-9 9" />
-                            <path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" />
-                        </svg>
-                    </MaskedLink>
+                    {quickOpen ? (
+                        <MaskedLink
+                            href={quickOpen.href}
+                            className="quest-ui-card-open-quest"
+                            title={`Open ${quest.name} in Discord`}
+                            onClick={closePopout}
+                            trusted
+                        >
+                            <strong className="quest-ui-card-title">{quest.name}</strong>
+                            <svg className="quest-ui-card-open-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M13 5h6v6M19 5l-9 9" />
+                                <path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" />
+                            </svg>
+                        </MaskedLink>
+                    ) : (
+                        <strong className="quest-ui-card-title" title={quest.name}>{quest.name}</strong>
+                    )}
                     {ignored && <IgnoredQuestTag />}
                     <OrionQuestStateTag state={orionTagState} />
                 </div>

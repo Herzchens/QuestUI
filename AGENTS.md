@@ -71,8 +71,8 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAll.ts`, `src/quests/actions/claimAllState.ts` - bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
 - `src/quests/actions/native.ts` - manual Enroll/Claim orchestration delegating to Discord native actions.
 - `src/quests/data.ts` - normalization/filtering/sorting and live read-only QuestStore snapshot source.
-- `src/quests/presentation.ts`, `src/quests/presentationLogic.ts` - shared native artwork, safe historical presentation metadata, exact/unique Quest identity resolution and validated Quest share URLs.
-- Quest titles and their open glyph share one keyboard-accessible native link. Do not infer Activity launch or popout APIs from task type alone; use only verified Discord-native launch paths and preserve the normal Quest view when unavailable.
+- `src/quests/presentation.ts`, `src/quests/presentationLogic.ts` - shared native artwork, safe historical presentation metadata and exact/unique Quest identity resolution.
+- `src/quests/quickOpen.ts` - exact selected-task Quick Open allowlist and validated Quest targets. Only `WATCH_VIDEO`, `PLAY_ACTIVITY`, and `ACHIEVEMENT_IN_ACTIVITY` qualify; all other titles are plain text. The current intermediate implementation uses a native Quest share link, not a direct player/Activity launcher. Never silently redirect to generic Quest Home, infer support from display categories, auto-enroll, or invoke unverified launch APIs.
 - `src/quests/rewardFilters.ts` - v1.6 reward preset/detail normalization and legacy reward-filter migration helpers.
 - `src/quests/reload/native.ts`, `src/quests/reload/logic.ts`, `src/quests/reload/QuestReloadControl.tsx` - native current-Quest refresh and whole-rotation spinner state.
 - `src/quests/reload/auto.ts`, `src/quests/reload/autoLogic.ts` - background native Quest-list refresh lifecycle plus persisted freshness scheduling. It runs independently of Dashboard visibility and reuses the same Discord-native fetch path so existing QuestStore notifications remain authoritative.
@@ -120,6 +120,7 @@ pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/notifications.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/notifications/logic.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/notifications/center.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/quickOpen.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/eventLog.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/updates/channel.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/updates/logic.test.ts

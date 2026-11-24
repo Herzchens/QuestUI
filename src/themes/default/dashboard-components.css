@@ -580,6 +580,7 @@
     .quest-ui-card-title-cluster {
         align-items: flex-start;
     }
+    .quest-ui-card-title-cluster > .quest-ui-card-title,
     .quest-ui-card-open-quest {
         flex-basis: 100%;
     }

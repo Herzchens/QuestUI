@@ -10,7 +10,7 @@ import {
 } from "../../src/notifications/centerLogic";
 import type { EventLogEvent } from "../../src/eventLog/types";
 import { normalizePersistedEvent } from "../../src/eventLog/validation";
-import { findQuestByIdentity, questShareUrl, safeQuestArtworkUrl, taskTypeForKey } from "../../src/quests/presentationLogic";
+import { findQuestByIdentity, safeQuestArtworkUrl, taskTypeForKey } from "../../src/quests/presentationLogic";
 import { formatQuestRewardLabel } from "../../src/orbs/rewards";
 import { availableUpdateNoticeVersion, rememberUpdateNotice } from "../../src/updates/notificationLogic";
 
@@ -199,10 +199,5 @@ const available = { kind: "available" as const, installed: "v1.0.0", release: {
 assert.equal(availableUpdateNoticeVersion(available), "v1.1.0");
 assert.equal(availableUpdateNoticeVersion({ ...available, suppression: "skipped" }), null);
 assert.equal(availableUpdateNoticeVersion({ ...available, suppression: "snoozed" }), null);
-
-assert.equal(questShareUrl("1516561474498203728"), "https://discord.com/quests/1516561474498203728");
-for (const invalid of [null, "", "unknown", "../shop", "https://example.com", "1516561474498203728?token=x"]) {
-    assert.equal(questShareUrl(invalid), "https://discord.com/quest-home");
-}
 
 console.log("QuestUI Notification Center logic tests - PASS");
