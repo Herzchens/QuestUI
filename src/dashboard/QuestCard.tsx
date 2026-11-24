@@ -363,8 +363,8 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                         >
                             <strong className="quest-ui-card-title">{quest.name}</strong>
                             <svg className="quest-ui-card-open-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M13 5h6v6M19 5l-9 9" />
-                                <path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" />
+                                <path d="M14 3h7v7M21 3 10 14" />
+                                <path d="M11 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-6" />
                             </svg>
                         </MaskedLink>
                     ) : (

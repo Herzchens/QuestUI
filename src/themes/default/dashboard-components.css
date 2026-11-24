@@ -322,7 +322,7 @@
     border-radius: 3px;
     display: inline-flex;
     flex: 0 1 auto;
-    gap: 5px;
+    gap: 6px;
     max-width: 100%;
     min-width: 0;
     text-decoration: none;
@@ -338,13 +338,13 @@
 .quest-ui-card-open-icon {
     color: var(--quest-ui-theme-text-strong);
     fill: none;
-    flex: 0 0 13px;
-    height: 13px;
+    flex: 0 0 16px;
+    height: 16px;
     stroke: currentColor;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-width: 1.8;
-    width: 13px;
+    stroke-width: 2;
+    width: 16px;
 }
 .quest-ui-card-title {
     -webkit-box-orient: vertical;
