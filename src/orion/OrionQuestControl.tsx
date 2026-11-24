@@ -47,10 +47,10 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
             pushDashboardNotice({
                 tone: "success",
                 text: control.action === "start"
-                    ? "Started"
+                    ? "Quest farming started"
                     : control.action === "pause"
-                        ? "Paused"
-                        : "Resumed",
+                        ? "Quest paused"
+                        : "Quest resumed",
                 duration: 2100
             });
         } catch (error) {

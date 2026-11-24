@@ -421,7 +421,7 @@ export function QuestDashboardFilterSortControls() {
 
     return (
         <div className="quest-ui-dashboard-filter-tools">
-            <strong className="quest-ui-dashboard-list-title">Quest List</strong>
+            <h2 className="quest-ui-dashboard-list-title">Quest List</h2>
             <Popout
                 position="bottom"
                 align="right"

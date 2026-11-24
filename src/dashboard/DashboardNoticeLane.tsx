@@ -32,9 +32,8 @@ export function DashboardNoticeLane() {
                 setNotice(next);
                 setPhase("mounted");
 
-                // Give the collapsed node one committed frame before expanding it.
-                // A short timer is more stable in Discord's React surface than swapping
-                // animation classes at the exact keyframe boundary.
+                // Commit the collapsed bell island first, then grow only its right edge.
+                // This keeps the vector child and bell icon on the exact resting center.
                 phaseTimerRef.current = setTimeout(() => {
                     phaseTimerRef.current = null;
                     if (noticeRef.current?.id === next.id) setPhase("visible");
@@ -63,16 +62,30 @@ export function DashboardNoticeLane() {
     }, []);
 
     const shown = notice != null && phase !== "hidden";
+    const displayText = notice?.text ?? "Notification Center";
 
     return (
-        <div className="quest-ui-dashboard-notice-slot">
-            <div
-                className={`quest-ui-dashboard-notice-lane${shown ? ` is-${phase} is-${notice.tone}` : ""}`}
-                aria-live="polite"
-                aria-atomic="true"
-            >
-                {notice && <span className="quest-ui-dashboard-notice-text">{notice.text}</span>}
-            </div>
+        <div
+            className={`quest-ui-dashboard-notification-island${shown ? ` is-${phase} is-${notice.tone}` : " is-idle"}`}
+            aria-label={shown ? undefined : "Notification Center"}
+            aria-live="polite"
+            aria-atomic="true"
+        >
+            <span className="quest-ui-dashboard-notification-bell" aria-hidden="true">
+                <svg className="quest-ui-dashboard-notification-surface" aria-hidden="true">
+                    <rect className="quest-ui-dashboard-notification-surface-rect" />
+                </svg>
+                <svg className="quest-ui-dashboard-notification-icon" viewBox="0 0 24 24">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                    <path d="M10 21h4" />
+                </svg>
+            </span>
+            <span className="quest-ui-dashboard-notification-measure" aria-hidden="true">
+                {displayText}
+            </span>
+            <span className="quest-ui-dashboard-notification-copy">
+                <span className="quest-ui-dashboard-notification-text">{displayText}</span>
+            </span>
         </div>
     );
 }

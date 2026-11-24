@@ -117,7 +117,7 @@ export function ClaimAllControl() {
 
             pushDashboardNotice({
                 tone: "success",
-                text: "All claimed",
+                text: "All rewards claimed",
                 duration: 2200
             });
             void recordQuestUIEvent({

@@ -230,7 +230,7 @@ jobs:
             'QUESTS_FETCH_CURRENT_QUESTS_BEGIN'
             'VIRTUAL_CURRENCY_USER_BALANCE'
             'VirtualCurrencyStore'
-            'text:"Refreshed"'
+            'text:"Quest list refreshed"'
             'OrionQuests'
             'Orion Quest Version Incompatible'
             'v1.6.0-beta1'

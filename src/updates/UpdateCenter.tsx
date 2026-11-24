@@ -539,7 +539,7 @@ export function UpdateCenterIndicator() {
         lastDashboardUpdateNoticeSignature = updateNoticeSignature;
         pushDashboardNotice({
             tone: "info",
-            text: "Update ready",
+            text: "Update available",
             duration: 2400
         });
     }, [updateNoticeSignature]);

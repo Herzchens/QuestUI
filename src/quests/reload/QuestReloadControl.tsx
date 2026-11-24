@@ -102,7 +102,7 @@ export function QuestReloadControl() {
                 setSucceeded(true);
                 pushDashboardNotice({
                     tone: "success",
-                    text: "Refreshed",
+                    text: "Quest list refreshed",
                     duration: 2100
                 });
                 window.setTimeout(() => {

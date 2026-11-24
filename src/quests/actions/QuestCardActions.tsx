@@ -120,7 +120,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 : submittedState(action, userIdAtClick, result.resubmitAfterMs));
             pushDashboardNotice({
                 tone: "success",
-                text: action === "enroll" ? "Accepted" : "Claimed",
+                text: action === "enroll" ? "Quest accepted" : "Reward claimed",
                 duration: 2100
             });
             void recordQuestUIEvent({

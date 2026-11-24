@@ -22,12 +22,12 @@ function showControlSuccess(action: "start" | "pause" | "resume" | "stop"): void
     pushDashboardNotice({
         tone: "success",
         text: action === "start"
-            ? "Started"
+            ? "Orion started"
             : action === "pause"
-                ? "Paused"
+                ? "Orion paused"
                 : action === "resume"
-                    ? "Resumed"
-                    : "Stopped",
+                    ? "Orion resumed"
+                    : "Orion stopped",
         duration: 2100
     });
 }
