@@ -12,16 +12,16 @@ export function questQuickOpenKind(taskKey: unknown): QuestQuickOpenKind | null 
     }
 }
 
-export interface QuestQuickOpenTarget {
-    kind: QuestQuickOpenKind;
-    href: string;
+// Only the selected exact task key qualifies. Do not infer support from a
+// display category or choose a different task from a multi-task Quest.
+export function questQuickOpenTarget(id: unknown, taskKey: unknown): QuestQuickOpenKind | null {
+    return typeof id === "string" && /^\d{17,20}$/.test(id) ? questQuickOpenKind(taskKey) : null;
 }
 
-// Only the selected exact task key qualifies. Do not infer support from the
-// display category or choose a different task from a multi-task Quest.
-// Until a native direct launcher is verified, expose an honest Quest link.
-export function questQuickOpenTarget(id: unknown, taskKey: unknown): QuestQuickOpenTarget | null {
-    const kind = questQuickOpenKind(taskKey);
-    if (!kind || typeof id !== "string" || !/^\d{17,20}$/.test(id)) return null;
-    return { kind, href: `https://discord.com/quests/${id}` };
+export function canLaunchQuestQuickOpen(
+    status: unknown, enrolledAt: unknown, questAccessSuspended: unknown
+): boolean {
+    // The native video opener can enroll implicitly. Keep enrollment separate
+    // from Quick Open and never override Discord's access restrictions.
+    return status === "in-progress" && !!enrolledAt && questAccessSuspended === false;
 }

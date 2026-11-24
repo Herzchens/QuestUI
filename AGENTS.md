@@ -10,7 +10,7 @@ QuestUI may:
 
 - add or improve Quest-related UI;
 - display Quest state/progress/reward/artwork/expiry already exposed by Discord;
-- navigate to Quest Home or a specific Quest via its canonical Discord share URL and native link handling;
+- navigate to Quest Home and open supported in-progress Quest content using Discord-native player/Activity launch actions after an explicit user click;
 - enroll only after an explicit QuestUI click through Discord's verified native enrollment action;
 - claim only after explicit QuestUI user authorization through Discord's verified native claim action; a single **Claim all** click may authorize only a bounded snapshot of the Quests that are Ready at that click;
 - invoke Discord's native current-Quest refresh after an explicit Reload click;
@@ -72,7 +72,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/quests/actions/native.ts` - manual Enroll/Claim orchestration delegating to Discord native actions.
 - `src/quests/data.ts` - normalization/filtering/sorting and live read-only QuestStore snapshot source.
 - `src/quests/presentation.ts`, `src/quests/presentationLogic.ts` - shared native artwork, safe historical presentation metadata and exact/unique Quest identity resolution.
-- `src/quests/quickOpen.ts` - exact selected-task Quick Open allowlist and validated Quest targets. Only `WATCH_VIDEO`, `PLAY_ACTIVITY`, and `ACHIEVEMENT_IN_ACTIVITY` qualify; all other titles are plain text. The current intermediate implementation uses a native Quest share link, not a direct player/Activity launcher. Never silently redirect to generic Quest Home, infer support from display categories, auto-enroll, or invoke unverified launch APIs.
+- `src/quests/quickOpen.ts`, `src/quests/QuickOpenTitle.tsx` - exact selected-task Quick Open allowlist and native video/Activity launch. Only `WATCH_VIDEO`, `PLAY_ACTIVITY`, and `ACHIEVEMENT_IN_ACTIVITY` qualify; all other titles are plain text. Revalidate the account, selected task, enrollment, in-progress state and Quest access at click time. Use the native video modal opener and Quest Activity launch hook; Discord owns its window layout. Never redirect to a browser or generic Quest Home, infer support from display categories, auto-enroll, or invoke unverified launch APIs.
 - `src/quests/rewardFilters.ts` - v1.6 reward preset/detail normalization and legacy reward-filter migration helpers.
 - `src/quests/reload/native.ts`, `src/quests/reload/logic.ts`, `src/quests/reload/QuestReloadControl.tsx` - native current-Quest refresh and whole-rotation spinner state.
 - `src/quests/reload/auto.ts`, `src/quests/reload/autoLogic.ts` - background native Quest-list refresh lifecycle plus persisted freshness scheduling. It runs independently of Dashboard visibility and reuses the same Discord-native fetch path so existing QuestStore notifications remain authoritative.
@@ -324,7 +324,7 @@ Feedback channel is purpose-specific, not toast-only. Short-lived successful act
 - Treat every Discord matcher/finder as a compatibility boundary.
 - Prefer stable code fragments/meaningful properties; avoid broad minified-key lookups.
 - Any finder change requires `WEBPACK_FIND_SIGNATURES` review.
-- Current reporter coverage includes QuestStore, native task/progress selectors, artwork, Orb component, native Enroll, native Claim, and native current-Quest Reload.
+- Current reporter coverage includes QuestStore, native task/progress selectors, artwork, Orb component, native Enroll, native Claim, native video/Activity Quick Open, and native current-Quest Reload.
 - Vencord PluginManager/Commands and `UserStore`/`UserProfileStore` common-store access are not new Discord webpack finders.
 
 ## Verification

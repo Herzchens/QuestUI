@@ -1,11 +1,11 @@
 import { findByCodeLazy } from "@webpack";
-import { MaskedLink, ThemeStore, useStateFromStores } from "@webpack/common";
+import { ThemeStore, useStateFromStores } from "@webpack/common";
 
 import type { OrionControlSnapshot } from "../orion/companion";
 import { orionQuestProgressSource, orionQuestTagState, storedQuestTaskProgress, type OrionQuestTagState } from "../orion/controls";
 import { effectiveOrbRewardAmount, formatQuestRewardLabel } from "../orbs/rewards";
 import { resolveQuestArtwork, type QuestTheme } from "../quests/presentation";
-import { questQuickOpenTarget } from "../quests/quickOpen";
+import { QuestQuickOpenTitle } from "../quests/QuickOpenTitle";
 import { QuestOrbIcon } from "../orbs/QuestOrbIcon";
 import { QuestCardActions } from "../quests/actions/QuestCardActions";
 import { expiryUrgency, formatExpiry, formatQuestProgress } from "../quests/data";
@@ -312,7 +312,6 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     const urgency = expiryUrgency(quest.expiresAt, now);
     const taskType = quest.primaryTask?.type ?? quest.tasks[0]?.type ?? "other";
     const primaryTask = quest.primaryTask;
-    const quickOpen = questQuickOpenTarget(quest.id, primaryTask?.key);
     const progressSource = orionQuestProgressSource(orionSnapshot, quest.id);
     const storedCurrent = progressSource === "stored" && primaryTask
         ? storedQuestTaskProgress(quest.rawQuest, primaryTask)
@@ -353,23 +352,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
 
             <div className="quest-ui-card-main">
                 <div className="quest-ui-card-title-cluster">
-                    {quickOpen ? (
-                        <MaskedLink
-                            href={quickOpen.href}
-                            className="quest-ui-card-open-quest"
-                            title={`Open ${quest.name} in Discord`}
-                            onClick={closePopout}
-                            trusted
-                        >
-                            <strong className="quest-ui-card-title">{quest.name}</strong>
-                            <svg className="quest-ui-card-open-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M14 3h7v7M21 3 10 14" />
-                                <path d="M11 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-6" />
-                            </svg>
-                        </MaskedLink>
-                    ) : (
-                        <strong className="quest-ui-card-title" title={quest.name}>{quest.name}</strong>
-                    )}
+                    <QuestQuickOpenTitle quest={quest} closePopout={closePopout} />
                     {ignored && <IgnoredQuestTag />}
                     <OrionQuestStateTag state={orionTagState} />
                 </div>

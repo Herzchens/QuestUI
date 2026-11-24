@@ -319,12 +319,17 @@
 }
 .quest-ui-card-open-quest {
     align-items: center;
+    background: none;
+    border: 0;
     border-radius: 3px;
+    cursor: pointer;
     display: inline-flex;
     flex: 0 1 auto;
     gap: 6px;
     max-width: 100%;
     min-width: 0;
+    padding: 0;
+    text-align: left;
     text-decoration: none;
 }
 .quest-ui-card-open-quest:hover .quest-ui-card-title {

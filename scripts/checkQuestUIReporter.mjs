@@ -21,6 +21,8 @@ const WEBPACK_FIND_SIGNATURES = [
     'findByCode("QUESTS_FETCH_CURRENT_QUESTS_BEGIN")',
     'findByCode("QUESTS_FETCH_REWARD_CODE_BEGIN", "QUESTS_FETCH_REWARD_CODE_SUCCESS", "QUESTS_FETCH_REWARD_CODE_FAILURE")',
     'findByCode("hasVerifiedEmailOrPhone", "CLAIM_REWARD", "sourceQuestContent")',
+    'findByCode("videoSessionId", "sourceQuestContentCTA", "skipEnrollmentCheck")',
+    'findByCode("launchInGameActivity:", "applicationId:")',
     'findStore("StorefrontProductStore")',
     'findByCode("canUseMoreQuestOrbs", "XBOX_GAME_PASS", "isFractionalPremiumWithNoStandardSub")',
     'findByProps("getBadges")'

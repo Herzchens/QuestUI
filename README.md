@@ -40,7 +40,7 @@ The capture above is a real Discord runtime screenshot supplied by the maintaine
 
 - Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
 
-- Quick Open links for desktop video and Discord Activity Quests (`WATCH_VIDEO`, `PLAY_ACTIVITY`, `ACHIEVEMENT_IN_ACTIVITY` only), independent of Orion; direct native player/Activity launch is not yet implemented
+- Native Quick Open for enrolled, in-progress desktop video and Discord Activity Quests (`WATCH_VIDEO`, `PLAY_ACTIVITY`, `ACHIEVEMENT_IN_ACTIVITY` only), independent of Orion; opens Discord's video modal or invokes its Activity launch hook without external links or implicit enrollment
 - Explicit **Accept Quest**, **Claim Reward**, and bounded sequential **Claim all** actions, with a 1-3 second pause between consecutive native claims
 
 - Account-scoped duplicate-submission guards, compact Dashboard notices for successful in-Dashboard actions, and Vencord-native toasts for failures or utility feedback

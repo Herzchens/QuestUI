@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { questQuickOpenKind, questQuickOpenTarget } from "../../src/quests/quickOpen";
+import { canLaunchQuestQuickOpen, questQuickOpenKind, questQuickOpenTarget } from "../../src/quests/quickOpen";
 
 const id = "1516561474498203728";
 for (const [key, kind] of [
@@ -8,7 +8,7 @@ for (const [key, kind] of [
     ["ACHIEVEMENT_IN_ACTIVITY", "activity"]
 ] as const) {
     assert.equal(questQuickOpenKind(key), kind);
-    assert.deepEqual(questQuickOpenTarget(id, key), { kind, href: `https://discord.com/quests/${id}` });
+    assert.equal(questQuickOpenTarget(id, key), kind);
 }
 
 for (const key of [
@@ -24,5 +24,13 @@ for (const key of [
 for (const invalid of [null, "", "unknown", "../shop", "https://example.com", id + "?token=x", 123]) {
     assert.equal(questQuickOpenTarget(invalid, "WATCH_VIDEO"), null);
 }
+
+assert.equal(canLaunchQuestQuickOpen("in-progress", "2026-11-24T00:00:00Z", false), true);
+for (const status of ["available", "expired", "claimed", "claimable", null]) {
+    assert.equal(canLaunchQuestQuickOpen(status, "2026-11-24T00:00:00Z", false), false);
+}
+assert.equal(canLaunchQuestQuickOpen("in-progress", null, false), false);
+assert.equal(canLaunchQuestQuickOpen("in-progress", "2026-11-24T00:00:00Z", true), false);
+assert.equal(canLaunchQuestQuickOpen("in-progress", "2026-11-24T00:00:00Z", undefined), false);
 
 console.log("QuestUI Quick Open logic tests - PASS");
