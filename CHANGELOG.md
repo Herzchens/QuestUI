@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.6.0-beta2 - 2026-11-24
+
+- Refined the Dashboard layout, toolbar, Quest List, status summaries, reward filtering, and update indicators.
+- Added native View Code actions for supported claimed Quest rewards.
+- Introduced an account-scoped Notification Center backed by sanitized Event Log events, with Quest artwork, unread indicators, and read/clear controls.
+- Redesigned Event Log controls, event details, account filtering, severity presentation, and pagination.
+- Improved Claim All with individual confirmed reward notifications, partial-success preservation, account ownership checks, and a bounded 1-3 second pause between consecutive native claims.
+- Unified Quest artwork and reward presentation, retained safe historical notification metadata, and corrected ambiguous Quest identity resolution.
+- Distinguished submitted Quest actions from confirmed outcomes and hardened cancellation, account transitions, background Quest reload, ignored-Quest processing, update checks, and Dashboard notice lifecycles.
+- Fixed a settings initialization issue that could interrupt Vencord bootstrap.
+- Consolidated Default into a self-contained theme stylesheet set, removed obsolete code and redundant declarations, normalized CSS formatting, and added cross-file ownership verification.
+- Expanded regression coverage and reconciled project documentation with the current runtime and theme architecture.
+- Retained the legacy version metadata bridge and OrionQuests v4.10.7+ core compatibility baseline. Additional built-in themes and independent Quest Home theming remain future work.
+
 ## v1.6.0-beta1 - 2026-11-22
 
 - Introduced the v1.6 default Dashboard redesign with a fixed floating layout, compact toolbar, split Orion Quest and QuestUI status cards, live integration bridge, clickable status summaries, and compact in-Dashboard action feedback while preserving the proven v1.5 normal Quest card geometry.

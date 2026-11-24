@@ -1,6 +1,20 @@
 # Release channels
 
-## Beta - v1.6.0-beta1
+## Beta - v1.6.0-beta2
+
+- Stable remains **v1.5.1** until v1.6 is promoted.
+- Beta release target: **v1.6.0-beta2** (2026-11-24).
+- The reviewed release candidate must be promoted to official `main` before its SSH-signed annotated release tag is published.
+- Users receive this release through Update Center only when QuestUI pre-release updates are enabled.
+- This beta refines the Dashboard, reward filtering, native reward-code actions, Event Log, Update Center, and account-scoped Notification Center.
+- Claim All processes a fixed same-account snapshot, records each confirmed reward separately, and pauses 1-3 seconds between consecutive native claims. Verification and uncertain outcomes stop the batch.
+- Notification presentation shares native artwork and reward-label logic, with bounded historical metadata and safe fallbacks.
+- Default owns its complete stylesheet set. Additional built-in themes, dynamic theme selection, and independent Quest Home theming are not included in this beta.
+- The legacy root `version.ts` remains compatibility metadata; `src/plugin/version.ts` remains the canonical runtime version source.
+- OrionQuests core compatibility remains v4.10.7+.
+- Release validation requires Vencord build/type-check, upstream OrionQuests coexistence, Stable/Canary Patch Reporters, and maintainer live Discord verification.
+
+## Previous Beta - v1.6.0-beta1
 
 - Stable remains **v1.5.1** until v1.6 is promoted.
 - Beta release target: **v1.6.0-beta1** (2026-11-22).
