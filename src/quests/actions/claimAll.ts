@@ -22,6 +22,7 @@ export interface ClaimAllBatchRuntime<T extends ClaimAllQuestLike> {
     currentAccountId(): string | null;
     currentState(questId: string): ClaimAllCurrentState;
     claim(quest: T): Promise<{ storeConfirmed: boolean; }>;
+    shouldContinue?(): boolean;
 }
 
 export class ClaimAllBatchStoppedError<T extends ClaimAllQuestLike = ClaimAllQuestLike> extends Error {
@@ -65,6 +66,15 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
         const quest = quests[index];
         const position = index + 1;
         const result = (): ClaimAllBatchResult => ({ total, claimed, skipped });
+
+        if (runtime.shouldContinue?.() === false) {
+            throw new ClaimAllBatchStoppedError(
+                "Claim all was cancelled before the next reward claim.",
+                result(),
+                position,
+                quest
+            );
+        }
 
         if (runtime.currentAccountId() !== expectedAccountId) {
             throw new ClaimAllBatchStoppedError(
@@ -130,6 +140,15 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
         }
 
         claimed++;
+
+        if (runtime.shouldContinue?.() === false) {
+            throw new ClaimAllBatchStoppedError(
+                "Claim all was cancelled after the current reward claim.",
+                result(),
+                position,
+                quest
+            );
+        }
     }
 
     return { total, claimed, skipped };

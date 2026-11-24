@@ -52,3 +52,15 @@ export function nextQuestAutoReloadDelay(
     if (baseline == null) return 0;
     return Math.max(0, baseline + intervalMs - now);
 }
+
+export function isCurrentQuestAutoReloadRun(
+    started: boolean,
+    expectedGeneration: number,
+    currentGeneration: number,
+    expectedAccountId: string,
+    currentAccountId: string | null
+): boolean {
+    return started
+        && expectedGeneration === currentGeneration
+        && expectedAccountId === currentAccountId;
+}

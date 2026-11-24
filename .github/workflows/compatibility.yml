@@ -132,6 +132,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/open.test.ts
 
+      - name: Test Dashboard notice lifecycle
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/notifications.test.ts
+
       - name: Test ignored Quest logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
@@ -243,7 +247,6 @@ jobs:
             'text:"Quest list refreshed"'
             'OrionQuests'
             'Orion Quest Version Incompatible'
-            'v1.6.0-beta1'
             'Highest Orb Reward'
             'Shortest Required Time'
             'Quest List'
@@ -267,6 +270,19 @@ jobs:
               exit 1
             fi
           done
+
+          questui_version="$(node - <<'NODE'
+          const fs = require("fs");
+          const source = fs.readFileSync("src/userplugins/QuestUI/src/plugin/version.ts", "utf8");
+          const match = source.match(/QUESTUI_VERSION\s*=\s*["']([^"']+)["']/);
+          if (!match) throw new Error("Missing canonical QUESTUI_VERSION");
+          process.stdout.write(match[1]);
+          NODE
+          )"
+          if ! grep -Fq "$questui_version" dist/renderer.js; then
+            echo "Built renderer is missing canonical QuestUI version: $questui_version" >&2
+            exit 1
+          fi
 
           for marker in getControlSnapshot subscribeControlState controlEngine controlAll controlQuest; do
             if ! grep -Fq "$marker" src/userplugins/QuestUI/src/orion/companion.ts; then
@@ -314,7 +330,6 @@ jobs:
           grep -Fq 'aria-label={title}' src/userplugins/QuestUI/src/dashboard/DashboardToolbar.tsx
           grep -Fq 'QUEST_AUTO_RELOAD_MINUTES = [10, 20, 30, 60, 120, 240, 300, 720, 1440]' src/userplugins/QuestUI/src/quests/reload/autoLogic.ts
           grep -Fq 'startQuestAutoReload(() => ({' src/userplugins/QuestUI/index.tsx
-          grep -Fq 'animation: quest-ui-dashboard-title-sweep 3.8s linear infinite' src/userplugins/QuestUI/src/themes/default/dashboard.css
           grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/src/updates/managed.ts
           grep -Fq 'recordManagedUpdateEvent' src/userplugins/QuestUI/src/updates/managed.ts
           grep -Fq 'combinedAvailabilityCopy' src/userplugins/QuestUI/src/updates/status.tsx

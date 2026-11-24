@@ -7,6 +7,7 @@ import { startQuestAutoReload, stopQuestAutoReload } from "./src/quests/reload/a
 import { questAutoReloadMinutesFromStep } from "./src/quests/reload/autoLogic";
 import { QuestButton, QuestsCount } from "./src/dashboard/QuestButton";
 import { resetDashboardNotices } from "./src/dashboard/notifications";
+import { resetClaimAllRuntime } from "./src/quests/actions/claimAllState";
 import { QUESTUI_VERSION } from "./src/plugin/version";
 import settings from "./src/plugin/settings";
 import { updateCheckHoursFromStep } from "./src/updates/logic";
@@ -41,6 +42,7 @@ export default definePlugin({
     },
 
     stop() {
+        resetClaimAllRuntime();
         stopUpdateChecks();
         stopQuestAutoReload();
         stopQuestNotifications();

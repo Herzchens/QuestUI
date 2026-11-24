@@ -19,6 +19,8 @@ let writeChain: Promise<void> = Promise.resolve();
 let questStoreSubscribed = false;
 let userStoreSubscribed = false;
 let expirySweepTimer: ReturnType<typeof setInterval> | null = null;
+let lifecycleStarted = false;
+let lifecycleGeneration = 0;
 
 function notify(): void {
     for (const listener of listeners) listener();
@@ -161,10 +163,14 @@ export async function pruneExpiredIgnoredQuests(accountId = currentAccountId()):
 }
 
 function sweepExpiredIgnoredQuests(): void {
+    if (!lifecycleStarted) return;
     void pruneExpiredIgnoredQuests();
 }
 
 export function startIgnoredQuestLifecycle(): void {
+    if (lifecycleStarted) return;
+    lifecycleStarted = true;
+    const generation = ++lifecycleGeneration;
     preloadIgnoredQuests();
 
     if (!questStoreSubscribed && typeof QuestsStore?.addChangeListener === "function") {
@@ -185,10 +191,15 @@ export function startIgnoredQuestLifecycle(): void {
         expirySweepTimer = setInterval(sweepExpiredIgnoredQuests, 60_000);
     }
 
-    void loadState().then(sweepExpiredIgnoredQuests);
+    void loadState().then(() => {
+        if (!lifecycleStarted || generation !== lifecycleGeneration) return;
+        sweepExpiredIgnoredQuests();
+    });
 }
 
 export function stopIgnoredQuestLifecycle(): void {
+    lifecycleStarted = false;
+    lifecycleGeneration++;
     if (questStoreSubscribed) {
         try { QuestsStore?.removeChangeListener?.(sweepExpiredIgnoredQuests); } catch { }
     }

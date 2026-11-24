@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
     DEFAULT_QUEST_AUTO_RELOAD_MINUTES,
     DEFAULT_QUEST_AUTO_RELOAD_STEP,
+    isCurrentQuestAutoReloadRun,
     nextQuestAutoReloadDelay,
     normalizeQuestAutoReloadMinutes,
     normalizeQuestAutoReloadStep,
@@ -28,6 +29,12 @@ assert.equal(questAutoReloadMarkerLabel(6), "5h");
 assert.equal(questAutoReloadMarkerLabel(7), "12h");
 assert.equal(questAutoReloadMarkerLabel(8), "24h");
 assert.equal(normalizeQuestAutoReloadMinutes(999), 300);
+
+assert.equal(isCurrentQuestAutoReloadRun(true, 4, 4, "user-a", "user-a"), true);
+assert.equal(isCurrentQuestAutoReloadRun(false, 4, 4, "user-a", "user-a"), false);
+assert.equal(isCurrentQuestAutoReloadRun(true, 4, 5, "user-a", "user-a"), false);
+assert.equal(isCurrentQuestAutoReloadRun(true, 4, 4, "user-a", "user-b"), false);
+assert.equal(isCurrentQuestAutoReloadRun(true, 4, 4, "user-a", null), false);
 
 const minute = 60 * 1000;
 assert.equal(nextQuestAutoReloadDelay(null, null, 1_000, 300), 0);

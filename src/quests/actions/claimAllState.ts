@@ -11,6 +11,8 @@ const IDLE_STATE: ClaimAllRuntimeState = {
 };
 
 let state: ClaimAllRuntimeState = IDLE_STATE;
+let generation = 0;
+let activeGeneration = 0;
 const listeners = new Set<() => void>();
 
 function publish(next: ClaimAllRuntimeState): void {
@@ -30,6 +32,7 @@ export function subscribeClaimAllRuntimeState(listener: () => void): () => void 
 export function beginClaimAllRuntime(total: number): boolean {
     if (state.active || !Number.isSafeInteger(total) || total < 1) return false;
 
+    activeGeneration = ++generation;
     publish({
         active: true,
         position: 1,
@@ -38,8 +41,17 @@ export function beginClaimAllRuntime(total: number): boolean {
     return true;
 }
 
-export function updateClaimAllRuntimeProgress(position: number): void {
+export function getClaimAllRuntimeGeneration(): number | null {
+    return state.active ? activeGeneration : null;
+}
+
+export function isClaimAllRuntimeGenerationActive(expectedGeneration: number): boolean {
+    return state.active && activeGeneration === expectedGeneration;
+}
+
+export function updateClaimAllRuntimeProgress(position: number, expectedGeneration?: number): void {
     if (!state.active) return;
+    if (expectedGeneration != null && activeGeneration !== expectedGeneration) return;
 
     const normalized = Math.max(1, Math.min(state.total, Math.floor(position)));
     if (normalized === state.position) return;
@@ -50,7 +62,16 @@ export function updateClaimAllRuntimeProgress(position: number): void {
     });
 }
 
-export function endClaimAllRuntime(): void {
+export function endClaimAllRuntime(expectedGeneration?: number): void {
+    if (expectedGeneration != null && activeGeneration !== expectedGeneration) return;
+    activeGeneration = 0;
+    if (!state.active && state.position === 0 && state.total === 0) return;
+    publish(IDLE_STATE);
+}
+
+export function resetClaimAllRuntime(): void {
+    generation++;
+    activeGeneration = 0;
     if (!state.active && state.position === 0 && state.total === 0) return;
     publish(IDLE_STATE);
 }

@@ -3,7 +3,7 @@ import { UserStore } from "@webpack/common";
 
 import { recordQuestUIEvent } from "../../eventLog/runtime";
 import { isIgnoredQuestStateReady } from "../ignored/runtime";
-import { nextQuestAutoReloadDelay, normalizeQuestAutoReloadMinutes } from "./autoLogic";
+import { isCurrentQuestAutoReloadRun, nextQuestAutoReloadDelay, normalizeQuestAutoReloadMinutes } from "./autoLogic";
 import { reloadQuestList } from "./native";
 
 interface QuestAutoReloadPreferences {
@@ -22,6 +22,7 @@ const READY_RETRY_MS = 1_000;
 let preferenceReader: (() => QuestAutoReloadPreferences) | null = null;
 let timer: ReturnType<typeof setTimeout> | null = null;
 let started = false;
+let lifecycleGeneration = 0;
 let loadPromise: Promise<void> | null = null;
 let persistedReady = false;
 let lastSuccessfulReloadAt: number | null = null;
@@ -127,10 +128,12 @@ export async function markQuestReloadSuccessful(timestamp = Date.now()): Promise
 async function runScheduledReload(): Promise<void> {
     if (!started) return;
 
+    const generation = lifecycleGeneration;
+    const reloadAccountId = accountId();
     const preferences = readPreferences();
     if (!preferences.enabled) return;
 
-    if (!accountId() || !isIgnoredQuestStateReady()) {
+    if (!reloadAccountId || !isIgnoredQuestStateReady()) {
         scheduleAfter(READY_RETRY_MS);
         return;
     }
@@ -139,19 +142,20 @@ async function runScheduledReload(): Promise<void> {
 
     try {
         await reloadQuestList();
+        if (!isCurrentQuestAutoReloadRun(started, generation, lifecycleGeneration, reloadAccountId, accountId())) return;
         await markQuestReloadSuccessful(Date.now());
     } catch (error) {
-        if (started) {
-            void recordQuestUIEvent({
-                severity: "error",
-                eventCode: "QUEST_AUTO_RELOAD_FAILED",
-                summary: "Background Quest list refresh failed",
-                detail: {
-                    message: error instanceof Error ? error.message : String(error),
-                    stack: error instanceof Error ? error.stack ?? null : null
-                }
-            });
-        }
+        if (!isCurrentQuestAutoReloadRun(started, generation, lifecycleGeneration, reloadAccountId, accountId())) return;
+
+        void recordQuestUIEvent({
+            severity: "error",
+            eventCode: "QUEST_AUTO_RELOAD_FAILED",
+            summary: "Background Quest list refresh failed",
+            detail: {
+                message: error instanceof Error ? error.message : String(error),
+                stack: error instanceof Error ? error.stack ?? null : null
+            }
+        });
         scheduleNext();
     }
 }
@@ -173,6 +177,7 @@ export function notifyQuestAutoReloadSettingsChanged(): void {
 
 export function startQuestAutoReload(readPreferences: () => QuestAutoReloadPreferences): void {
     preferenceReader = readPreferences;
+    lifecycleGeneration++;
     started = true;
     currentAccountId = accountId();
     lastAutoAttemptAt = null;
@@ -189,6 +194,7 @@ export function startQuestAutoReload(readPreferences: () => QuestAutoReloadPrefe
 
 export function stopQuestAutoReload(): void {
     started = false;
+    lifecycleGeneration++;
     clearTimer();
 
     if (userStoreSubscribed) {

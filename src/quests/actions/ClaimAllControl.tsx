@@ -9,7 +9,9 @@ import {
 import {
     beginClaimAllRuntime,
     endClaimAllRuntime,
+    getClaimAllRuntimeGeneration,
     getClaimAllRuntimeState,
+    isClaimAllRuntimeGenerationActive,
     subscribeClaimAllRuntimeState,
     updateClaimAllRuntimeProgress,
     type ClaimAllRuntimeState
@@ -94,6 +96,8 @@ export function ClaimAllControl() {
         // This lock is module-global and synchronous. It closes rapid double-click,
         // stale per-card click, and Dashboard close/reopen races before the first await.
         if (!beginClaimAllRuntime(snapshot.length)) return;
+        const runtimeGeneration = getClaimAllRuntimeGeneration();
+        if (runtimeGeneration == null) return;
 
         void recordQuestUIEvent({
             severity: "info",
@@ -110,10 +114,13 @@ export function ClaimAllControl() {
                 {
                     currentAccountId: currentUserId,
                     currentState: currentClaimState,
-                    claim: claimQuestReward
+                    claim: claimQuestReward,
+                    shouldContinue: () => isClaimAllRuntimeGenerationActive(runtimeGeneration)
                 },
-                progress => updateClaimAllRuntimeProgress(progress.position)
+                progress => updateClaimAllRuntimeProgress(progress.position, runtimeGeneration)
             );
+
+            if (!isClaimAllRuntimeGenerationActive(runtimeGeneration)) return;
 
             pushDashboardNotice({
                 tone: "success",
@@ -128,6 +135,8 @@ export function ClaimAllControl() {
                 accountId
             });
         } catch (error) {
+            if (!isClaimAllRuntimeGenerationActive(runtimeGeneration)) return;
+
             const stopped = error instanceof ClaimAllBatchStoppedError ? error : null;
             const isVerification = verificationStop(error);
             const at = stopped?.position ?? (getClaimAllRuntimeState().position || 1);
@@ -157,7 +166,7 @@ export function ClaimAllControl() {
                 accountId
             });
         } finally {
-            endClaimAllRuntime();
+            endClaimAllRuntime(runtimeGeneration);
         }
     };
 

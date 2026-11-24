@@ -8,7 +8,10 @@ import {
 import {
     beginClaimAllRuntime,
     endClaimAllRuntime,
+    getClaimAllRuntimeGeneration,
     getClaimAllRuntimeState,
+    isClaimAllRuntimeGenerationActive,
+    resetClaimAllRuntime,
     updateClaimAllRuntimeProgress
 } from "../../src/quests/actions/claimAllState";
 
@@ -24,6 +27,25 @@ async function main() {
     updateClaimAllRuntimeProgress(99);
     assert.deepEqual(getClaimAllRuntimeState(), { active: true, position: 3, total: 3 });
     endClaimAllRuntime();
+    assert.deepEqual(getClaimAllRuntimeState(), { active: false, position: 0, total: 0 });
+
+    assert.equal(beginClaimAllRuntime(2), true);
+    const staleGeneration = getClaimAllRuntimeGeneration();
+    assert.ok(staleGeneration != null);
+    assert.equal(isClaimAllRuntimeGenerationActive(staleGeneration), true);
+    resetClaimAllRuntime();
+    assert.equal(isClaimAllRuntimeGenerationActive(staleGeneration), false);
+    assert.deepEqual(getClaimAllRuntimeState(), { active: false, position: 0, total: 0 });
+
+    assert.equal(beginClaimAllRuntime(2), true);
+    const currentGeneration = getClaimAllRuntimeGeneration();
+    assert.ok(currentGeneration != null);
+    assert.notEqual(currentGeneration, staleGeneration);
+    updateClaimAllRuntimeProgress(2, staleGeneration);
+    assert.deepEqual(getClaimAllRuntimeState(), { active: true, position: 1, total: 2 });
+    endClaimAllRuntime(staleGeneration);
+    assert.equal(isClaimAllRuntimeGenerationActive(currentGeneration), true);
+    endClaimAllRuntime(currentGeneration);
     assert.deepEqual(getClaimAllRuntimeState(), { active: false, position: 0, total: 0 });
 
     assert.deepEqual(
@@ -140,6 +162,32 @@ async function main() {
             error => error instanceof ClaimAllBatchStoppedError
                 && error.cause === challenge
                 && error.position === 1
+        );
+        assert.deepEqual(order, ["a"]);
+    }
+
+    {
+        let active = true;
+        const order: string[] = [];
+        await assert.rejects(
+            runClaimAllBatch(
+                [quest("a"), quest("b")],
+                "user-a",
+                {
+                    currentAccountId: () => "user-a",
+                    currentState: () => "claimable",
+                    shouldContinue: () => active,
+                    claim: async item => {
+                        order.push(item.id);
+                        active = false;
+                        return { storeConfirmed: true };
+                    }
+                }
+            ),
+            error => error instanceof ClaimAllBatchStoppedError
+                && error.position === 1
+                && error.result.claimed === 1
+                && /cancelled/i.test(error.message)
         );
         assert.deepEqual(order, ["a"]);
     }
