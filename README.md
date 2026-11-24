@@ -22,7 +22,7 @@ The capture above is a real Discord runtime screenshot supplied by the maintaine
 
 - **Dashboard Mode** with a wider live Quest dashboard, enabled by default
 
-- Seven always-visible summary totals: Available, Ready, In Progress, Claimed, Expired, Ignored, and Hidden
+- Eight always-visible summary totals: All, Available, Ready, In Progress, Claimed, Expired, Ignored, and Hidden
 
 - Account-scoped **Ignore / Unignore** with a dedicated Ignored catalogue
 
@@ -172,8 +172,9 @@ QuestUI mirrors Discord's native Quest Orb multiplier identity in the Dashboard 
 
 The title uses a seamless right-to-left color sweep. `prefers-reduced-motion` disables the motion and keeps the title readable.
 
-The summary row always renders all seven counters, including zero values:
+The summary row always renders all eight counters, including zero values:
 
+- **Neutral** - All
 - **Red** - Available
 - **Green** - Ready
 - **Yellow** - In Progress
@@ -225,7 +226,7 @@ Only the **current elapsed value** (`03:02`) receives completion-stage color. Th
 
 The color progression is semantic progress, not urgency: muted at the beginning, then Discord brand tones, then positive green as completion approaches.
 
-Dashboard expiry copy is shown whenever Discord provides a valid Quest expiry. The separate **Expired Age** filter controls how much expired history is visible; the recommended/default history window is 15 days and **All** removes that limit.
+Dashboard expiry copy is shown whenever Discord provides a valid Quest expiry. The separate **Expired Age** filter offers 7d, 15d, 30d, 90d, and **All**; v1.6 defaults to **All** (`0`) so the complete expired history remains visible until the user narrows it.
 
 ### Runtime metadata and Orb balance
 
@@ -291,7 +292,7 @@ Smart Start/Pause/Resume -> Stop -> Claim All -> Reload -> Update -> Event Log -
 The Quest List row owns its own controls separately:
 
 ```text
-Quest List -> Sort -> Filter -> QuestUI Settings
+Quest List -> Sort -> Filter
 ```
 
 State rules:

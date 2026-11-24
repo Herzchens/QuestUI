@@ -54,15 +54,6 @@ export function safeOpenRelease(product: UpdateProduct, release: UpdateRelease):
     VencordNative.native.openExternal(release.htmlUrl);
 }
 
-export function formatTimestamp(timestamp: number | null): string {
-    if (!Number.isFinite(timestamp)) return "Never";
-    try {
-        return new Date(Number(timestamp)).toLocaleString();
-    } catch {
-        return "Unknown";
-    }
-}
-
 export function formatCompactTimestamp(timestamp: number | null): string {
     if (!Number.isFinite(timestamp)) return "Never";
     try {
@@ -77,19 +68,6 @@ export function formatCompactTimestamp(timestamp: number | null): string {
     }
 }
 
-export function stateCopy(product: UpdateProduct, state: PluginUpdateState): string {
-    if (state.kind === "not-installed") return "Not installed";
-    if (state.kind === "disabled") return "Update checks disabled";
-    if (state.kind === "idle") return state.installed ? `Installed ${state.installed}` : "Waiting for first check";
-    if (state.kind === "custom-version") return state.installed
-        ? `Custom version ${state.installed}; automatic version comparison is disabled.`
-        : "Installed version is unavailable.";
-    if (state.kind === "up-to-date") return `${state.installed} is up to date.`;
-    if (state.kind === "error") return state.message;
-    if (state.suppression === "skipped") return `${state.release.tagName} is available, but this version is skipped.`;
-    if (state.suppression === "snoozed") return `${state.release.tagName} is available; reminder snoozed until ${formatTimestamp(state.snoozeUntil)}.`;
-    return `${state.installed} → ${state.release.tagName}`;
-}
 
 type UpdateVisualTone = "current" | "available" | "warning" | "error" | "muted";
 

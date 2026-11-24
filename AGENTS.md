@@ -51,9 +51,9 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/dashboard/QuestButton.tsx` - shortcuts, status indicators, counters, dashboard/open-home behavior.
 - `src/dashboard/QuestDashboard.tsx` - Dashboard orchestration, summary/empty state, filtering/sorting application, and Orion/Orb composition.
 - `src/dashboard/QuestCard.tsx` - Quest card artwork, reward/progress presentation, expiry, and per-card Orion state.
-- `src/dashboard/DashboardToolbar.tsx`, `src/dashboard/state.ts` - Dashboard sort/filter/QuestUI-settings/home controls plus shared filter/reset/partition state helpers.
+- `src/dashboard/DashboardToolbar.tsx`, `src/dashboard/state.ts` - Dashboard sort/filter/home controls plus shared filter/reset/partition state helpers; QuestUI/Orion settings controls live in their product status cards.
 - `src/dashboard/open.ts` - registered Dashboard opener used by notification click-through; prefers the top-bar surface, falls back to the settings-bar surface, and leaves Quest Home as the no-Dashboard fallback.
-- `src/dashboard/QuestDashboardShell.tsx` - visible **Quest Dashboard** title/native Quest icon, Nitro/Xbox+ source tag, and fixed header tools.
+- `src/dashboard/QuestDashboardShell.tsx`, `src/dashboard/DashboardNoticeLane.tsx`, `src/dashboard/notifications.ts` - visible **Quest Dashboard** shell/header tools plus lifecycle-bound compact Dashboard notices.
 - `src/dashboard/sort.ts` - persistent Dashboard sort modes, accepted-Quest pinning, and normalized required-time ordering.
 - `src/quests/ignored/runtime.ts`, `src/quests/ignored/logic.ts` - account-scoped persisted Ignore/Unignore presentation state and pure normalization/update logic.
 - `src/notifications/runtime.ts`, `src/notifications/logic.ts` - QuestStore new-Available/completion observation, Event Log problem observation, Vencord notification delivery, deduplication, and pure transition/severity logic.
@@ -66,7 +66,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/orion/capabilities.ts`, `src/orion/events.ts` - optional Orion structured-event capability discovery, validation, semantic normalization, and console-shadow reconciliation.
 - `src/orion/schedulerState.ts` - optional Orion scheduler snapshot normalization used by the companion integration; unordered live batches are normalized without inferring queue order.
 - `src/dashboard/styles/styles.css`, `src/dashboard/styles/scrollbar.css` - shared Dashboard/component styling that must stay theme-neutral and consume the QuestUI theme contract.
-- `src/themes/default/dashboard.css` - shared `.quest-ui-theme` Dashboard geometry plus the current `.quest-ui-theme-default` visual skin. Named theme selectors must not own shared geometry.
+- `src/themes/runtime.ts`, `src/themes/default/tokens.css`, `src/themes/default/dashboard.css` - canonical theme-root application, Default visual tokens, shared `.quest-ui-theme` Dashboard mechanics, and the `.quest-ui-theme-default` skin. Named theme selectors must not own shared geometry/interaction mechanics.
 - `src/quests/actions/QuestCardActions.tsx` - explicit Accept/Claim, Ignore/Unignore with exact-ID Orion pause when active, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
 - `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAll.ts`, `src/quests/actions/claimAllState.ts` - bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
 - `src/quests/actions/native.ts` - manual Enroll/Claim orchestration delegating to Discord native actions.
@@ -113,6 +113,7 @@ pnpm exec tsx src/userplugins/QuestUI/tests/orbs/balance.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/sort.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/rewardFilters.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/open.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/notifications.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/notifications/logic.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/notifications/center.test.ts
@@ -124,6 +125,8 @@ pnpm exec tsx src/userplugins/QuestUI/tests/updates/orionNative.test.ts
 pnpm build
 pnpm test:ts
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
+node src/userplugins/QuestUI/scripts/checkThemeContract.mjs --self-test
+node src/userplugins/QuestUI/scripts/checkThemeContract.mjs
 ```
 
 Do not install packages from inside QuestUI. Never claim hosted CI passed without inspecting the actual jobs.
@@ -188,7 +191,7 @@ Smart Start/Pause/Resume -> Stop -> Claim All -> Reload -> Update -> Event Log -
 The Quest List row is separate and keeps:
 
 ```text
-Quest List -> Sort -> Filter -> QuestUI Settings
+Quest List -> Sort -> Filter
 ```
 
 Global state rules:
@@ -245,13 +248,13 @@ Feedback channel is purpose-specific, not toast-only. Short-lived successful act
 - Read Discord's explicit `premiumOrbQuantity` reward value instead of multiplying locally. Show it only when native eligibility says the account receives the multiplier; otherwise show base `orbQuantity`.
 - Title sweep is a seamless linear right-to-left loop with an exact repeat period; no reset/transition frame.
 - The top action bar keeps action controls on the left, the notification island in its reserved middle region, and **Market -> Home** fixed on the right. Sort/Filter are not part of that action bar.
-- The Quest List row keeps **Quest List -> Sort -> Filter -> QuestUI Settings** together; the QuestUI Settings gear opens Vencord's native plugin settings modal for QuestUI and closes the Dashboard first.
-- Summary stays on one row and always renders Available, Ready, In Progress, Claimed, Expired, Ignored, and Hidden, including zero values.
+- The Quest List row keeps **Quest List -> Sort -> Filter** together; the QuestUI Settings gear opens Vencord's native plugin settings modal for QuestUI and closes the Dashboard first.
+- Summary stays on one row and always renders All, Available, Ready, In Progress, Claimed, Expired, Ignored, and Hidden, including zero values.
 - The five Discord status counts come from the full non-ignored live Quest snapshot; Ignored is a separate local-presentation count; Hidden counts only non-ignored cards removed by Dashboard filters.
 - In Progress and Ready are the accepted-active bucket and remain above Available/Claimed/Expired under every sort mode.
 - Required-time sorting compares normalized timed-task seconds; achievement/count targets are never interpreted as durations.
 - Timed progress uses `mm:ss / mm:ss`; only the current elapsed value is stage-colored. Prefix/target remain neutral.
-- If Discord supplies a valid expiry, Dashboard expiry copy remains visible. Expired-history visibility is a separate filter with a 15-day recommended default and an unlimited All mode; never mutate underlying expiry/status to achieve either behavior.
+- If Discord supplies a valid expiry, Dashboard expiry copy remains visible. Expired-history visibility is a separate 7d / 15d / 30d / 90d / All filter. v1.6 defaults to All (`dashboardExpiredAgeDays = 0`); never mutate underlying expiry/status to achieve presentation filtering.
 
 ## Ignore / Unignore invariants
 
@@ -322,7 +325,7 @@ Feedback channel is purpose-specific, not toast-only. Short-lived successful act
 
 Run the full local gate for source changes. For updater changes, run both managed-updater real-git suites. For companion changes, also run Orion pause/resume, structured-event, and scheduler regression tests and build/type-check both plugins together.
 
-Manual checks should cover the affected states. For the current Stable surface this includes header Nitro/Xbox+ source-badge layout; the seven-item one-line summary; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; 10k+ large-log rendering/pagination when relevant; account switching/legacy visibility; Orion STARTED/WAITING/PAUSED/STOPPED tags when supported; Accept/Claim plus Claim all sequential progress and stop-on-verification behavior; global/per-Quest Orion transitions; concurrency; Reload whole rotations; Update Center current/update/error states including Orion Keep/Discard divergence handling and stale-decision refusal; dark/light/custom themes; and plugin replacement/reload safety.
+Manual checks should cover the affected states. For the current Stable surface this includes header Nitro/Xbox+ source-badge layout; the eight-item one-line summary including All; Filter/Sort/Home behavior; expired-age presets/custom/All plus always-visible expiry copy; accepted-Quest pinning; required-time sorting; native Orb balance including zero; runtime version/health chips; Event Log search/filter/category/sort/day grouping/detail/report/clear/open-file flows; 10k+ large-log rendering/pagination when relevant; account switching/legacy visibility; Orion STARTED/WAITING/PAUSED/STOPPED tags when supported; Accept/Claim plus Claim all sequential progress and stop-on-verification behavior; global/per-Quest Orion transitions; concurrency; Reload whole rotations; Update Center current/update/error states including Orion Keep/Discard divergence handling and stale-decision refusal; dark/light/custom themes; and plugin replacement/reload safety.
 
 For Ignore/Notification changes, additionally verify account-scoped Ignore persistence, active Orion exact-ID pause before Ignore, no auto-resume on Unignore, expiry immediately ending Ignore plus best-effort stale-ID cleanup, Ignored-vs-Hidden counts, exclusion from all attention surfaces, startup/account-switch hydration, one-shot New-Available and In-Progress→Ready notifications, no startup/backlog notification, notification setting toggles, actionable error/terminal-warning notifications, retry/fallback suppression, duplicate suppression, and notification click behavior.
 
@@ -334,7 +337,7 @@ Automated checks do not substitute for live Discord evidence. State exactly what
 - The old `feat/quest-actions-orion-controls` QuestUI beta and `Herzchens/discord-quest-completer:feat/per-quest-pause-resume` companion fork are historical only; do not target them for current release work.
 - Current Orion integration targets upstream `nyxxbit/discord-quest-completer` v4.10.7+; the maintained coexistence CI gate tracks upstream `main`. Structured-event and scheduler capabilities are optional and must not silently raise the hard core-control minimum.
 - Orion managed updates are QuestUI-owned source-management only: require exactly one official-origin `main` checkout, validate target tag/version/current-main ancestry, preserve safe upstream-rewrite recovery, and never depend on an Orion updater API. Clean linear/rewrite-safe checkouts update automatically. Dirty or locally divergent `main` checkouts must surface **Keep** / **Discard & update**; Keep is non-destructive, while Discard is honored only after revalidating branch, HEAD, fetched upstream, target and a content-aware tracked/index/untracked fingerprint immediately before reset/clean. Non-ignored untracked files may be removed only under that explicit Discard choice. Orion tags are not assumed to carry QuestUI's pinned SSH-signature guarantee.
-- Dashboard update status sits immediately after the QuestUI version chip and uses one compact combined status surface rather than separate availability pills or a stretched full-width strip. The current state copy is **You are up to date**; update/error/checking states keep their state-specific copy. Scheduled-check frequency `0` is manual-only and must surface the explicit manual-check warning in the Update Center.
+- Dashboard update status is product-scoped: Orion and QuestUI each render their compact update state inside their own product status card beside that product's runtime/version identity. Update/error/checking states remain independent between products. Scheduled-check frequency `0` is manual-only and must surface the explicit manual-check warning in the Update Center.
 - Keep QuestUI and Orion source/license boundaries separate in packages.
 - Git tags/releases require maintainer approval. Verify the intended target SHA, tag availability, CI evidence, actual runtime evidence, and tag signature before publishing.
 

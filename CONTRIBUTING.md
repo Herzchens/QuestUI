@@ -37,6 +37,7 @@ pnpm exec tsx src/userplugins/QuestUI/tests/orbs/balance.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/sort.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/rewardFilters.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/open.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/notifications.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/notifications/logic.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/notifications/center.test.ts
@@ -48,6 +49,8 @@ pnpm exec tsx src/userplugins/QuestUI/tests/updates/orionNative.test.ts
 pnpm build
 pnpm test:ts
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
+node src/userplugins/QuestUI/scripts/checkThemeContract.mjs --self-test
+node src/userplugins/QuestUI/scripts/checkThemeContract.mjs
 ```
 
 Do not install packages inside QuestUI; it uses Vencord's toolchain.
@@ -110,7 +113,7 @@ Smart Start/Pause/Resume -> Stop -> Claim All -> Reload -> Update -> Event Log -
 The Quest List row is separate:
 
 ```text
-Quest List -> Sort -> Filter -> QuestUI Settings
+Quest List -> Sort -> Filter
 ```
 
 State rules:
@@ -186,12 +189,12 @@ Keep the current presentation contracts unless a change explicitly targets them:
 - use Discord's native Quest multiplier eligibility classifier to distinguish `NITRO` from `XBOX_GAME_PASS`; never infer Xbox from reward values or from `!Nitro`;
 - show **Nitro** for the Nitro source and **Xbox+** with the Xbox brand mark for the Xbox Game Pass source. Prefer Discord's native classifier, then its `MORE_QUEST_ORBS` perk source if the webpack classifier surface is unavailable. If both sources are present, mirror Discord's Nitro precedence;
 - title color sweep is a seamless linear right-to-left loop with no reset frame;
-- summary remains one line below tools and always renders Available / Ready / In Progress / Claimed / Expired / Ignored / Hidden, including zero values;
+- summary remains one line below tools and always renders All / Available / Ready / In Progress / Claimed / Expired / Ignored / Hidden, including zero values;
 - the five Discord status counts come from the full non-ignored live Quest snapshot; Ignored is a separate local count; Hidden reflects only normal filtering of non-ignored cards;
 - In Progress / Ready are the accepted-active bucket and stay above Available/Claimed/Expired under every sort mode;
 - required-time sorting compares normalized timed-task seconds and excludes achievement/count targets;
 - timed progress displays `mm:ss / mm:ss` and only the current elapsed value receives completion-stage color;
-- valid expiry copy stays visible; expired-history visibility is controlled separately by the age filter (15-day recommended default, All for unlimited history).
+- valid expiry copy stays visible; expired-history visibility is controlled separately by the 7d / 15d / 30d / 90d / All age filter, with v1.6 defaulting to All.
 
 ## Event Log
 
@@ -241,8 +244,8 @@ The managed updaters have dedicated real-Git regression coverage. QuestUI self-u
 Current manual coverage should include:
 
 - title/native Quest icon/Nitro-or-Xbox+ badge without overlap;
-- seven-item summary including zero/ Ignored / Hidden counts and even spacing;
-- top action-bar controls including Notification Island plus fixed Market/Home destinations, and the separate Quest List Sort/Filter/QuestUI Settings row;
+- eight-item summary including All / zero / Ignored / Hidden counts and even spacing;
+- top action-bar controls including Notification Island plus fixed Market/Home destinations, the separate Quest List Sort/Filter row, and per-product QuestUI/Orion settings gears;
 - expired-age 7/15/30/90/All filtering plus expiry copy outside 15 days;
 - accepted-Quest pinning and required-time sorting;
 - native Orb balance including zero and runtime version/health chips;

@@ -283,10 +283,7 @@
     line-height: 1.35;
 }
 
-@keyframes quest-ui-update-dot-pulse {
-    from { opacity: .35; }
-    to { opacity: 1; }
-}.quest-ui-update-settings-control {
+.quest-ui-update-settings-control {
     align-items: center;
     background: var(--background-mod-subtle, rgba(255, 255, 255, .045));
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, .09));

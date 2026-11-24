@@ -20,7 +20,6 @@ import {
 } from "./native";
 import { isExplicitRewardCodeConfig } from "./responses";
 import { getClaimAllRuntimeState } from "./claimAllState";
-import type { QuestActionResult } from "./native";
 import type { NormalizedQuest } from "../data";
 import settings from "../../plugin/settings";
 

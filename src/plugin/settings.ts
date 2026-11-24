@@ -219,12 +219,6 @@ export default definePluginSettings({
         description: "Legacy Dashboard reward filter retained for migration.",
         options: REWARD_FILTER_OPTIONS
     },
-    dashboardIncludeUnknownRewards: {
-        type: OptionType.BOOLEAN,
-        displayName: "Dashboard • Include Unknown Rewards",
-        description: "Keep unknown reward formats while a reward filter is active.",
-        default: true
-    },
     dashboardShowPlay: {
         type: OptionType.BOOLEAN,
         displayName: "Dashboard • Play",
@@ -353,7 +347,6 @@ export default definePluginSettings({
     dashboardRewardCustomKinds: { hidden: true },
     dashboardRewardFilterV2Initialized: { hidden: true },
     dashboardRewardFilter: { hidden: true },
-    dashboardIncludeUnknownRewards: { hidden: true },
     dashboardShowPlay: { hidden: true },
     dashboardShowStream: { hidden: true },
     dashboardShowVideo: { hidden: true },

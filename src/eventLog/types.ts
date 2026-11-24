@@ -64,7 +64,3 @@ export interface EventLogQueryResult {
     hasMore: boolean;
 }
 
-export interface EventLogInfo {
-    path: string;
-    size: number;
-}

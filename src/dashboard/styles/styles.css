@@ -26,7 +26,7 @@
     border-radius: 999px;
     bottom: -4px;
     box-sizing: border-box;
-    color: var(--text-strong, var(--header-primary, #f2f3f5));
+    color: var(--white-500, #fff);
     display: inline-flex;
     font-size: 8px;
     font-weight: 700;
@@ -113,16 +113,6 @@
     font-size: 12px;
     gap: 8px;
     margin-top: 5px;
-}.quest-ui-dashboard-summary > span {
-    align-items: center;
-    display: inline-flex;
-    gap: 5px;
-}.quest-ui-dashboard-summary > span::before {
-    background: currentColor;
-    border-radius: 999px;
-    content: "";
-    height: 6px;
-    width: 6px;
 }.quest-ui-summary-in-progress {
     color: var(--status-warning);
 }.quest-ui-summary-claimable {

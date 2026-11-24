@@ -80,6 +80,10 @@ jobs:
         working-directory: vencord
         run: pnpm install --frozen-lockfile
 
+      - name: Verify settings bootstrap contract
+        working-directory: vencord
+        run: node src/userplugins/QuestUI/tests/settings/bootstrap.test.mjs
+
       - name: Test Quest action logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/actionResponses.test.ts

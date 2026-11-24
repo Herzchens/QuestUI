@@ -86,10 +86,6 @@ export function compareSemver(left: unknown, right: unknown): number | null {
     return compareParsedSemver(parsedLeft, parsedRight);
 }
 
-export function isPrereleaseVersion(value: unknown): boolean {
-    return (parseSemver(value)?.prerelease.length ?? 0) > 0;
-}
-
 export function isCurrentUpdateCheckRun(
     started: boolean,
     expectedGeneration: number,

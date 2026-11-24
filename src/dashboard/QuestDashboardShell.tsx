@@ -142,7 +142,7 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
     const showOrionControls = orionIntegration === true && isOrionCommandReady();
 
     return (
-        <div className={dashboardThemeClassName("quest-ui-dashboard-shell", "has-dashboard-tools", showOrionControls && "has-orion-control")}>
+        <div className={dashboardThemeClassName("quest-ui-dashboard-shell", showOrionControls && "has-orion-control")}>
             <div className="quest-ui-dashboard-topbar">
                 <QuestDashboardDisplayTitle />
                 <QuestOrbBalance closePopout={closePopout} />
