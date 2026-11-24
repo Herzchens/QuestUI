@@ -1,19 +1,13 @@
 .quest-ui-update-center-button {
     color: var(--interactive-normal, #b5bac1);
-}
-
-.quest-ui-update-center-button.is-open {
+}.quest-ui-update-center-button.is-open {
     background: color-mix(in srgb, var(--brand-500, #5865f2) 10%, var(--background-mod-subtle, transparent));
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 38%, var(--border-subtle, transparent));
     color: var(--brand-360, #949cf7);
-}
-
-.quest-ui-update-center-button.has-update {
+}.quest-ui-update-center-button.has-update {
     border-color: color-mix(in srgb, var(--status-positive, #23a55a) 46%, var(--border-subtle, transparent));
     color: var(--status-positive, #23a55a);
-}
-
-.quest-ui-update-center-icon {
+}.quest-ui-update-center-icon {
     fill: none;
     height: 18px;
     stroke: currentColor;
@@ -21,18 +15,14 @@
     stroke-linejoin: round;
     stroke-width: 2;
     width: 18px;
-}
-
-.quest-ui-update-center-button.is-checking .quest-ui-update-center-icon {
+}.quest-ui-update-center-button.is-checking .quest-ui-update-center-icon {
     animation: quest-ui-update-check-pulse 900ms ease-in-out infinite alternate;
 }
 
 @keyframes quest-ui-update-check-pulse {
     from { opacity: .45; transform: translateY(-1px); }
     to { opacity: 1; transform: translateY(1px); }
-}
-
-.quest-ui-update-count {
+}.quest-ui-update-count {
     align-items: center;
     background: var(--status-positive, #23a55a);
     border: 2px solid var(--background-base-lowest, var(--background-primary, #111214));
@@ -50,9 +40,7 @@
     position: absolute;
     right: -4px;
     top: -4px;
-}
-
-.quest-ui-update-panel {
+}.quest-ui-update-panel {
     background: var(--background-floating, var(--background-base-low, #1e1f22));
     border: 1px solid var(--border-normal, var(--border-subtle, rgba(255, 255, 255, .12)));
     border-radius: 12px;
@@ -64,32 +52,22 @@
     max-width: calc(100vw - 24px);
     padding: 12px;
     width: 420px;
-}
-
-.quest-ui-update-panel-heading,
+}.quest-ui-update-panel-heading,
 .quest-ui-update-panel-title {
     align-items: center;
     display: flex;
-}
-
-.quest-ui-update-panel-heading {
+}.quest-ui-update-panel-heading {
     gap: 12px;
     justify-content: space-between;
-}
-
-.quest-ui-update-panel-title {
+}.quest-ui-update-panel-title {
     gap: 9px;
     min-width: 0;
-}
-
-.quest-ui-update-panel-title > div {
+}.quest-ui-update-panel-title > div {
     display: flex;
     flex-direction: column;
     gap: 1px;
     min-width: 0;
-}
-
-.quest-ui-update-panel-title-icon {
+}.quest-ui-update-panel-title-icon {
     align-items: center;
     background: color-mix(in srgb, var(--brand-500, #5865f2) 13%, var(--background-mod-subtle, transparent));
     border: 1px solid color-mix(in srgb, var(--brand-360, #949cf7) 28%, var(--border-subtle, transparent));
@@ -100,9 +78,7 @@
     height: 30px;
     justify-content: center;
     width: 30px;
-}
-
-.quest-ui-update-panel-title-icon svg {
+}.quest-ui-update-panel-title-icon svg {
     fill: none;
     height: 17px;
     stroke: currentColor;
@@ -110,26 +86,17 @@
     stroke-linejoin: round;
     stroke-width: 2;
     width: 17px;
-}
-
-.quest-ui-update-panel-heading strong,
+}.quest-ui-update-panel-heading strong,
 .quest-ui-update-card-heading strong,
 .quest-ui-update-settings-control strong {
     color: var(--text-strong, var(--header-primary));
-}
-
-.quest-ui-update-panel-heading strong {
+}.quest-ui-update-panel-heading strong {
     font-size: 13.5px;
-}
-
-.quest-ui-update-panel-heading span,
-.quest-ui-update-card-heading span,
-.quest-ui-update-last-check {
+}.quest-ui-update-panel-heading span,
+.quest-ui-update-card-heading span {
     color: var(--text-muted);
     font-size: 10.5px;
-}
-
-.quest-ui-update-check-button,
+}.quest-ui-update-check-button,
 .quest-ui-update-card-actions > button,
 .quest-ui-update-settings-control > button {
     background: var(--background-mod-subtle, rgba(255, 255, 255, .06));
@@ -142,125 +109,30 @@
     min-height: 28px;
     padding: 5px 9px;
     transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
-}
-
-.quest-ui-update-check-button {
+}.quest-ui-update-check-button {
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 26%, var(--border-subtle, transparent));
     color: var(--brand-360, #949cf7);
-}
-
-.quest-ui-update-check-button:hover:not(:disabled),
+}.quest-ui-update-check-button:hover:not(:disabled),
 .quest-ui-update-card-actions > button:hover:not(:disabled),
 .quest-ui-update-settings-control > button:hover:not(:disabled) {
     background: var(--background-mod-strong, rgba(255, 255, 255, .11));
     border-color: var(--border-normal, rgba(255, 255, 255, .18));
     color: var(--interactive-hover, #dbdee1);
-}
-
-.quest-ui-update-check-button:disabled,
+}.quest-ui-update-check-button:disabled,
 .quest-ui-update-card-actions > button:disabled,
 .quest-ui-update-settings-control > button:disabled {
     cursor: not-allowed;
     opacity: .5;
-}
-
-.quest-ui-update-overview {
-    align-items: center;
-    background: var(--background-mod-subtle, rgba(255, 255, 255, .05));
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, .08));
-    border-radius: 9px;
-    display: flex;
-    gap: 9px;
-    padding: 8px 9px;
-}
-
-.quest-ui-update-overview-dot {
-    background: var(--interactive-muted, #80848e);
-    border-radius: 50%;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--interactive-muted, #80848e) 13%, transparent);
-    flex: 0 0 7px;
-    height: 7px;
-    width: 7px;
-}
-
-.quest-ui-update-overview > div {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-}
-
-.quest-ui-update-overview strong {
-    color: var(--text-default, var(--header-secondary));
-    font-size: 11.5px;
-}
-
-.quest-ui-update-overview span:not(.quest-ui-update-overview-dot) {
-    color: var(--text-muted);
-    font-size: 10px;
-    line-height: 1.35;
-}
-
-.quest-ui-update-overview.is-current {
-    background: color-mix(in srgb, var(--status-positive, #23a55a) 6%, var(--background-mod-subtle, transparent));
-    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 24%, var(--border-subtle, transparent));
-}
-
-.quest-ui-update-overview.is-current .quest-ui-update-overview-dot {
-    background: var(--status-positive, #23a55a);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--status-positive, #23a55a) 14%, transparent);
-}
-
-.quest-ui-update-overview.has-update {
-    background: color-mix(in srgb, var(--brand-500, #5865f2) 7%, var(--background-mod-subtle, transparent));
-    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 28%, var(--border-subtle, transparent));
-}
-
-.quest-ui-update-overview.has-update .quest-ui-update-overview-dot {
-    background: var(--brand-360, #949cf7);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-360, #949cf7) 14%, transparent);
-}
-
-.quest-ui-update-overview.has-error {
-    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 30%, var(--border-subtle, transparent));
-}
-
-.quest-ui-update-overview.has-error .quest-ui-update-overview-dot {
-    background: var(--status-danger, #f23f42);
-}
-
-.quest-ui-update-status-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.quest-ui-update-status-row {
-    align-items: center;
-    background: var(--background-mod-subtle, rgba(255, 255, 255, .045));
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, .075));
-    border-radius: 8px;
-    display: grid;
-    gap: 7px;
-    grid-template-columns: max-content minmax(0, 1fr);
-    min-height: 34px;
-    padding: 6px 8px;
-}
-
-.quest-ui-update-product-status {
+}.quest-ui-update-product-status {
     align-items: center;
     display: inline-flex;
     gap: 5px;
     min-width: 0;
     white-space: nowrap;
-}
-
-.quest-ui-update-product-status strong {
+}.quest-ui-update-product-status strong {
     color: var(--text-default, var(--header-secondary));
     font-size: 10.5px;
-}
-
-.quest-ui-update-product-mark {
+}.quest-ui-update-product-mark {
     align-items: center;
     border-radius: 50%;
     display: inline-flex;
@@ -270,93 +142,32 @@
     height: 16px;
     justify-content: center;
     width: 16px;
-}
-
-.quest-ui-update-product-version,
+}.quest-ui-update-product-version,
 .quest-ui-update-product-arrow {
     color: var(--text-muted);
     font-family: var(--font-code, ui-monospace, SFMono-Regular, Consolas, monospace);
     font-size: 10px;
-}
-
-.quest-ui-update-product-target {
+}.quest-ui-update-product-target {
     color: var(--brand-360, #949cf7);
     font-family: var(--font-code, ui-monospace, SFMono-Regular, Consolas, monospace);
     font-size: 10px;
     font-weight: 750;
-}
-
-.quest-ui-update-product-status.is-current .quest-ui-update-product-mark {
+}.quest-ui-update-product-status.is-current .quest-ui-update-product-mark {
     background: color-mix(in srgb, var(--status-positive, #23a55a) 14%, transparent);
     color: var(--status-positive, #23a55a);
-}
-
-.quest-ui-update-product-status.is-available .quest-ui-update-product-mark {
+}.quest-ui-update-product-status.is-available .quest-ui-update-product-mark {
     background: color-mix(in srgb, var(--brand-500, #5865f2) 16%, transparent);
     color: var(--brand-360, #949cf7);
-}
-
-.quest-ui-update-product-status.is-warning .quest-ui-update-product-mark {
+}.quest-ui-update-product-status.is-warning .quest-ui-update-product-mark {
     background: color-mix(in srgb, var(--status-warning, #f0b232) 14%, transparent);
     color: var(--status-warning, #f0b232);
-}
-
-.quest-ui-update-product-status.is-error .quest-ui-update-product-mark {
+}.quest-ui-update-product-status.is-error .quest-ui-update-product-mark {
     background: color-mix(in srgb, var(--status-danger, #f23f42) 14%, transparent);
     color: var(--status-danger, #f23f42);
-}
-
-.quest-ui-update-product-status.is-muted .quest-ui-update-product-mark {
+}.quest-ui-update-product-status.is-muted .quest-ui-update-product-mark {
     background: var(--background-mod-strong, rgba(255, 255, 255, .09));
     color: var(--text-muted);
-}
-
-.quest-ui-update-status-details {
-    align-items: flex-end;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-}
-
-.quest-ui-update-status-copy {
-    color: var(--text-muted);
-    font-size: 10px;
-    line-height: 1.3;
-    min-width: 0;
-    overflow: hidden;
-    text-align: right;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.quest-ui-update-status-error {
-    color: var(--status-danger, #f23f42);
-    font-size: 9.5px;
-    line-height: 1.3;
-    max-width: 100%;
-    overflow: hidden;
-    text-align: right;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.quest-ui-update-status-health {
-    color: var(--text-muted);
-    font-size: 9.5px;
-    line-height: 1.3;
-    text-align: right;
-}
-
-.quest-ui-update-list {
-    border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, .08));
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    padding-top: 9px;
-}
-
-.quest-ui-update-card {
+}.quest-ui-update-card {
     background: var(--background-mod-subtle, rgba(255, 255, 255, .045));
     border: 1px solid color-mix(in srgb, var(--brand-360, #949cf7) 24%, var(--border-subtle, transparent));
     border-radius: 9px;
@@ -364,31 +175,21 @@
     flex-direction: column;
     gap: 7px;
     padding: 9px;
-}
-
-.quest-ui-update-card.is-suppressed {
+}.quest-ui-update-card.is-suppressed {
     opacity: .72;
-}
-
-.quest-ui-update-card-heading {
+}.quest-ui-update-card-heading {
     align-items: flex-start;
     display: flex;
     gap: 8px;
     justify-content: space-between;
-}
-
-.quest-ui-update-card-heading > div {
+}.quest-ui-update-card-heading > div {
     display: flex;
     flex-direction: column;
     gap: 1px;
     min-width: 0;
-}
-
-.quest-ui-update-card-heading strong {
+}.quest-ui-update-card-heading strong {
     font-size: 11.5px;
-}
-
-.quest-ui-update-channel {
+}.quest-ui-update-channel {
     background: color-mix(in srgb, var(--status-positive, #23a55a) 10%, transparent);
     border: 1px solid color-mix(in srgb, var(--status-positive, #23a55a) 28%, transparent);
     border-radius: 999px;
@@ -397,48 +198,32 @@
     font-size: 9px !important;
     font-weight: 750;
     padding: 2px 6px;
-}
-
-.quest-ui-update-channel.is-prerelease {
+}.quest-ui-update-channel.is-prerelease {
     background: color-mix(in srgb, var(--status-warning, #f0b232) 10%, transparent);
     border-color: color-mix(in srgb, var(--status-warning, #f0b232) 30%, transparent);
     color: var(--status-warning, #f0b232) !important;
-}
-
-.quest-ui-update-release-name {
+}.quest-ui-update-release-name {
     color: var(--text-default, var(--header-secondary));
     font-size: 10.5px;
     line-height: 1.35;
-}
-
-.quest-ui-update-suppressed-copy {
+}.quest-ui-update-suppressed-copy {
     color: var(--text-muted);
     font-size: 10px;
-}
-
-.quest-ui-update-result {
+}.quest-ui-update-result {
     border-radius: 6px;
     font-size: 10px;
     line-height: 1.35;
     padding: 5px 7px;
-}
-
-.quest-ui-update-result.is-success {
+}.quest-ui-update-result.is-success {
     background: color-mix(in srgb, var(--status-positive, #23a55a) 9%, transparent);
     color: var(--status-positive, #23a55a);
-}
-
-.quest-ui-update-result.is-error {
+}.quest-ui-update-result.is-error {
     background: color-mix(in srgb, var(--status-danger, #f23f42) 9%, transparent);
     color: var(--status-danger, #f23f42);
-}
-
-.quest-ui-update-result.is-warning {
+}.quest-ui-update-result.is-warning {
     background: color-mix(in srgb, var(--status-warning, #f0b232) 9%, transparent);
     color: var(--status-warning, #f0b232);
-}
-
-.quest-ui-update-decision {
+}.quest-ui-update-decision {
     background: color-mix(in srgb, var(--status-warning, #f0b232) 6%, var(--background-mod-subtle, transparent));
     border: 1px solid color-mix(in srgb, var(--status-warning, #f0b232) 28%, var(--border-subtle, transparent));
     border-radius: 7px;
@@ -446,28 +231,20 @@
     flex-direction: column;
     gap: 5px;
     padding: 7px;
-}
-
-.quest-ui-update-decision > strong {
+}.quest-ui-update-decision > strong {
     color: var(--status-warning, #f0b232);
     font-size: 10.5px;
-}
-
-.quest-ui-update-decision > span {
+}.quest-ui-update-decision > span {
     color: var(--text-muted);
     font-size: 9.5px;
     line-height: 1.35;
     overflow-wrap: anywhere;
-}
-
-.quest-ui-update-decision-actions {
+}.quest-ui-update-decision-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
     margin-top: 2px;
-}
-
-.quest-ui-update-decision-actions > button {
+}.quest-ui-update-decision-actions > button {
     background: var(--background-mod-subtle, rgba(255, 255, 255, .06));
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, .1));
     border-radius: 7px;
@@ -477,149 +254,39 @@
     font-weight: 700;
     min-height: 27px;
     padding: 4px 8px;
-}
-
-.quest-ui-update-decision-actions > button:hover:not(:disabled) {
+}.quest-ui-update-decision-actions > button:hover:not(:disabled) {
     background: var(--background-mod-strong, rgba(255, 255, 255, .11));
     color: var(--interactive-hover, #dbdee1);
-}
-
-.quest-ui-update-decision-actions > button:disabled {
+}.quest-ui-update-decision-actions > button:disabled {
     cursor: not-allowed;
     opacity: .5;
-}
-
-.quest-ui-update-decision-actions > .is-destructive {
+}.quest-ui-update-decision-actions > .is-destructive {
     background: color-mix(in srgb, var(--status-danger, #f23f42) 8%, var(--background-mod-subtle, transparent));
     border-color: color-mix(in srgb, var(--status-danger, #f23f42) 32%, var(--border-subtle, transparent));
     color: var(--status-danger, #f23f42);
-}
-
-.quest-ui-update-card-actions {
+}.quest-ui-update-card-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-}
-
-.quest-ui-update-card-actions > button:first-child {
+}.quest-ui-update-card-actions > button:first-child {
     background: color-mix(in srgb, var(--brand-500, #5865f2) 13%, var(--background-mod-subtle, transparent));
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 32%, transparent);
     color: var(--brand-360, #949cf7);
-}
-
-.quest-ui-update-card-actions > .quest-ui-update-restart {
+}.quest-ui-update-card-actions > .quest-ui-update-restart {
     background: color-mix(in srgb, var(--status-positive, #23a55a) 11%, var(--background-mod-subtle, transparent));
     border-color: color-mix(in srgb, var(--status-positive, #23a55a) 32%, transparent);
     color: var(--status-positive, #23a55a);
-}
-
-.quest-ui-update-last-check {
-    border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, .08));
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding-top: 8px;
-}
-
-.quest-ui-update-manual-warning {
+}.quest-ui-update-manual-warning {
     color: var(--status-warning, #f0b232);
     font-size: 10.5px;
     font-weight: 650;
     line-height: 1.35;
 }
 
-.quest-ui-dashboard-update-slot {
-    align-items: center;
-    display: inline-flex;
-    flex: 0 0 auto;
-    justify-content: flex-start;
-    max-width: none;
-    min-width: 0;
-    overflow: visible;
-}
-
-.quest-ui-dashboard-update-chip {
-    align-items: center;
-    background: var(--background-mod-subtle, rgba(255, 255, 255, .05));
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, .08));
-    border-radius: 6px;
-    color: var(--text-muted);
-    display: inline-flex;
-    flex: 0 0 auto;
-    font-size: 10.5px;
-    gap: 6px;
-    line-height: 1;
-    max-width: none;
-    min-height: 22px;
-    min-width: 0;
-    overflow: visible;
-    padding: 3px 8px;
-    width: auto;
-    white-space: nowrap;
-}
-
-.quest-ui-dashboard-update-chip-copy {
-    align-items: center;
-    color: currentColor;
-    display: inline-flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 4px;
-    min-width: 0;
-    overflow: visible;
-    white-space: nowrap;
-}
-
-.quest-ui-dashboard-update-chip-copy > span {
-    display: inline;
-    flex: 0 0 auto;
-    overflow: visible;
-    text-overflow: clip;
-    white-space: nowrap;
-}
-
-.quest-ui-dashboard-update-chip-dot {
-    background: currentColor;
-    border-radius: 50%;
-    flex: 0 0 6px;
-    height: 6px;
-    width: 6px;
-}
-
-.quest-ui-dashboard-update-chip.is-current {
-    background: color-mix(in srgb, var(--status-positive, #23a55a) 11%, var(--background-mod-subtle, transparent));
-    border-color: color-mix(in srgb, var(--status-positive, #23a55a) 34%, var(--border-subtle, transparent));
-    color: color-mix(in srgb, var(--status-positive, #23a55a) 82%, var(--text-muted));
-}
-
-.quest-ui-dashboard-update-chip.has-update {
-    background: color-mix(in srgb, var(--brand-500, #5865f2) 10%, var(--background-mod-subtle, transparent));
-    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 30%, var(--border-subtle, transparent));
-    color: var(--brand-360, #949cf7);
-}
-
-.quest-ui-dashboard-update-chip.has-error {
-    background: color-mix(in srgb, var(--status-danger, #f23f42) 9%, var(--background-mod-subtle, transparent));
-    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 30%, var(--border-subtle, transparent));
-    color: var(--status-danger, #f23f42);
-}
-
-.quest-ui-dashboard-update-chip.is-checking {
-    background: var(--background-mod-subtle, rgba(255, 255, 255, .05));
-    border-color: var(--border-normal, rgba(255, 255, 255, .18));
-    color: var(--text-muted);
-}
-
-.quest-ui-dashboard-update-chip.is-checking .quest-ui-dashboard-update-chip-dot {
-    animation: quest-ui-update-dot-pulse 850ms ease-in-out infinite alternate;
-}
-
 @keyframes quest-ui-update-dot-pulse {
     from { opacity: .35; }
     to { opacity: 1; }
-}
-
-.quest-ui-update-settings-control {
+}.quest-ui-update-settings-control {
     align-items: center;
     background: var(--background-mod-subtle, rgba(255, 255, 255, .045));
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, .09));
@@ -630,64 +297,44 @@
     justify-content: space-between;
     padding: 8px 9px;
     width: 100%;
-}
-
-.quest-ui-update-settings-control.has-update {
+}.quest-ui-update-settings-control.has-update {
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 30%, var(--border-subtle, transparent));
-}
-
-.quest-ui-update-settings-summary {
+}.quest-ui-update-settings-summary {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     gap: 5px;
     min-width: 0;
-}
-
-.quest-ui-update-settings-headline {
+}.quest-ui-update-settings-headline {
     align-items: baseline;
     display: flex;
     gap: 7px;
     min-width: 0;
-}
-
-.quest-ui-update-settings-headline > strong {
+}.quest-ui-update-settings-headline > strong {
     font-size: 11px;
-}
-
-.quest-ui-update-settings-headline > span {
+}.quest-ui-update-settings-headline > span {
     color: var(--text-muted);
     font-size: 10px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.quest-ui-update-settings-products {
+}.quest-ui-update-settings-products {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-}
-
-.quest-ui-update-product-status.is-compact {
+}.quest-ui-update-product-status.is-compact {
     background: var(--background-mod-subtle, rgba(255, 255, 255, .04));
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, .08));
     border-radius: 999px;
     gap: 4px;
     min-height: 22px;
     padding: 0 7px 0 4px;
-}
-
-.quest-ui-update-product-status.is-compact.is-current {
+}.quest-ui-update-product-status.is-compact.is-current {
     border-color: color-mix(in srgb, var(--status-positive, #23a55a) 24%, var(--border-subtle, transparent));
-}
-
-.quest-ui-update-product-status.is-compact.is-available {
+}.quest-ui-update-product-status.is-compact.is-available {
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 34%, var(--border-subtle, transparent));
-}
-
-.quest-ui-update-product-new {
+}.quest-ui-update-product-new {
     background: color-mix(in srgb, var(--brand-500, #5865f2) 16%, transparent);
     border-radius: 999px;
     color: var(--brand-360, #949cf7);
@@ -695,267 +342,57 @@
     font-weight: 850;
     letter-spacing: .2px;
     padding: 2px 4px;
-}
-
-.quest-ui-update-settings-control > button {
+}.quest-ui-update-settings-control > button {
     flex: 0 0 auto;
     min-height: 27px;
     padding: 4px 9px;
 }
 
-@media (max-width: 700px) {
-    .quest-ui-update-panel {
+@media (max-width: 700px) {.quest-ui-update-panel {
         width: min(400px, calc(100vw - 24px));
-    }
-
-    .quest-ui-dashboard-update-slot {
-        justify-content: flex-start;
-        width: auto;
-    }
-
-    .quest-ui-dashboard-update-chip {
-        max-width: 100%;
     }
 }
 
-@media (max-width: 520px) {
-    .quest-ui-update-panel {
+@media (max-width: 520px) {.quest-ui-update-panel {
         width: min(360px, calc(100vw - 20px));
-    }
-
-    .quest-ui-update-status-row {
-        align-items: flex-start;
-        grid-template-columns: 1fr;
-    }
-
-    .quest-ui-update-status-details {
-        align-items: flex-start;
-    }
-
-    .quest-ui-update-status-copy,
-    .quest-ui-update-status-error,
-    .quest-ui-update-status-health {
-        text-align: left;
-        white-space: normal;
-    }
-
-    .quest-ui-update-card-actions > button {
+    }.quest-ui-update-card-actions > button {
         flex: 1 1 auto;
-    }
-
-    .quest-ui-update-settings-control {
+    }.quest-ui-update-settings-control {
         align-items: stretch;
         flex-direction: column;
-    }
-
-    .quest-ui-update-settings-control > button {
+    }.quest-ui-update-settings-control > button {
         align-self: flex-end;
     }
 }
 
-
-/* v1.6 Update Center: one surface, one summary line, two product rows. */
-.quest-ui-update-panel.quest-ui-update-panel-v16 {
-    background: #17171c;
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 12px;
-    box-shadow: 0 16px 42px rgba(0,0,0,.48);
-    gap: 0;
-    padding: 0;
-    width: 420px;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
-    border-bottom: 1px solid rgba(255,255,255,.065);
-    min-height: 54px;
-    padding: 9px 11px 9px 12px;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title {
-    gap: 8px;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon {
-    background: transparent;
-    border: 1px solid rgba(255,255,255,.10);
-    border-radius: 7px;
-    color: #aeb4ff;
-    flex-basis: 28px;
-    height: 28px;
-    width: 28px;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title > div > strong {
-    font-size: 13px;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title > div > span {
-    color: #777c86;
-    font-size: 9.5px;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-check-button {
-    background: transparent;
-    border-color: rgba(174,180,255,.22);
-    color: #aeb4ff;
-    min-height: 28px;
-}
-
-.quest-ui-update-summary-line {
-    align-items: center;
-    border-bottom: 1px solid rgba(255,255,255,.055);
-    color: #a9adb5;
-    display: flex;
-    font-size: 10.5px;
-    font-weight: 650;
-    gap: 7px;
-    min-height: 35px;
-    padding: 0 12px;
-}
-
-.quest-ui-update-summary-dot {
-    background: #80848e;
-    border-radius: 50%;
-    flex: 0 0 6px;
-    height: 6px;
-    width: 6px;
-}
-
-.quest-ui-update-summary-line.is-current .quest-ui-update-summary-dot {
-    background: #23a55a;
-}
-
-.quest-ui-update-summary-line.has-update {
-    color: #b9bfff;
-}
-
-.quest-ui-update-summary-line.has-update .quest-ui-update-summary-dot {
-    background: #7d8cff;
-}
-
-.quest-ui-update-summary-line.has-error {
-    color: #f07275;
-}
-
-.quest-ui-update-summary-line.has-error .quest-ui-update-summary-dot {
-    background: #f23f42;
-}
-
-.quest-ui-update-product-list {
-    display: flex;
-    flex-direction: column;
-    padding: 3px 12px;
-}
-
-.quest-ui-update-product-row {
-    align-items: center;
-    display: grid;
-    gap: 12px;
-    grid-template-columns: minmax(0,1fr) auto;
-    min-height: 48px;
-    padding: 6px 0;
-}
-
-.quest-ui-update-product-row + .quest-ui-update-product-row {
-    border-top: 1px solid rgba(255,255,255,.055);
-}
-
+/* v1.6 Update Center structural carry-over.
+ * Final geometry and visual rules live below; keep only declarations that are
+ * not superseded by the refined surface.
+ */
 .quest-ui-update-product-row-meta {
-    align-items: flex-end;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    max-width: 170px;
     min-width: 0;
 }
-
 .quest-ui-update-product-row-meta > strong {
-    color: #c8cbd1;
-    font-size: 10px;
     font-weight: 700;
 }
-
-.quest-ui-update-product-row.is-current .quest-ui-update-product-row-meta > strong {
-    color: #5fd88a;
-}
-
-.quest-ui-update-product-row.is-available .quest-ui-update-product-row-meta > strong {
-    color: #9ca7ff;
-}
-
-.quest-ui-update-product-row.is-error .quest-ui-update-product-row-meta > strong {
-    color: #f07275;
-}
-
 .quest-ui-update-product-row-meta > span {
-    color: #6f747d;
-    font-size: 9px;
     max-width: 100%;
     overflow: hidden;
-    text-align: right;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
-
-.quest-ui-update-panel-v16 > .quest-ui-update-manual-warning {
-    border-top: 1px solid rgba(255,255,255,.055);
-    color: #f0b232;
-    font-size: 9.5px;
-    padding: 8px 12px;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-list {
-    border-top: 1px solid rgba(255,255,255,.065);
-    gap: 0;
-    padding: 0 12px 8px;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-card {
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    padding: 10px 0 2px;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-card + .quest-ui-update-card {
-    border-top: 1px solid rgba(255,255,255,.055);
-}
-
 .quest-ui-update-panel-v16 .quest-ui-update-card-actions > button {
-    background: #222329;
+    background: var(--quest-ui-theme-control-hover);
     border-color: rgba(255,255,255,.08);
 }
-
 .quest-ui-update-panel-v16 .quest-ui-update-card-actions > button:first-child {
     background: #5865f2;
     border-color: #5865f2;
-    color: #fff;
+    color: var(--quest-ui-theme-text-strong);
 }
-
-@media (max-width: 520px) {
-    .quest-ui-update-panel.quest-ui-update-panel-v16 {
-        width: min(390px, calc(100vw - 20px));
-    }
-
-    .quest-ui-update-product-row {
-        grid-template-columns: 1fr;
-        gap: 3px;
-    }
-
-    .quest-ui-update-product-row-meta {
-        align-items: flex-start;
-        max-width: none;
-    }
-
-    .quest-ui-update-product-row-meta > span {
-        text-align: left;
-    }
-}
-
 
 /* v1.6 Update Center visual pass - follows the approved dashboard mock. */
 .quest-ui-update-panel.quest-ui-update-panel-v16 {
-    background: #17171c !important;
+    background: var(--quest-ui-update-panel) !important;
     border: 1px solid rgba(255,255,255,.10) !important;
     border-radius: 14px !important;
     box-shadow: 0 18px 48px rgba(0,0,0,.52) !important;
@@ -963,9 +400,7 @@
     overflow: hidden;
     padding: 0 !important;
     width: 520px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
     align-items: center;
     border-bottom: 0 !important;
     display: flex;
@@ -973,68 +408,50 @@
     justify-content: space-between;
     min-height: 74px !important;
     padding: 14px 16px 12px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title {
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-title {
     align-items: center;
     display: flex;
     gap: 12px !important;
     min-width: 0;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon {
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon {
     background: rgba(124,92,255,.10) !important;
     border: 1px solid rgba(158,128,255,.36) !important;
     border-radius: 10px !important;
-    color: #9d7cff !important;
+    color: var(--quest-ui-update-accent) !important;
     flex: 0 0 42px !important;
     height: 42px !important;
     width: 42px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon svg {
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon svg {
     height: 22px !important;
     width: 22px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title > strong {
-    color: #f4f5f7;
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-title > strong {
+    color: var(--quest-ui-update-title);
     font-size: 21px !important;
     font-weight: 800;
     letter-spacing: -.02em;
     line-height: 1;
     margin-top: 5px;
     white-space: nowrap;
-}
-
-.quest-ui-update-panel-heading-actions {
+}.quest-ui-update-panel-heading-actions {
     align-items: center;
     display: flex;
     flex: 0 0 auto;
     gap: 10px;
-}
-
-.quest-ui-update-panel-last-check {
-    color: #8d919a;
+}.quest-ui-update-panel-last-check {
+    color: var(--quest-ui-theme-text-muted);
     font-size: 9.5px;
     white-space: nowrap;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-check-button {
+}.quest-ui-update-panel-v16 .quest-ui-update-check-button {
     background: rgba(255,255,255,.025) !important;
     border: 1px solid rgba(157,124,255,.55) !important;
     border-radius: 8px !important;
-    color: #e6e0ff !important;
+    color: var(--quest-ui-update-check-text) !important;
     min-height: 32px !important;
     padding: 5px 10px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-check-button:hover:not(:disabled) {
+}.quest-ui-update-panel-v16 .quest-ui-update-check-button:hover:not(:disabled) {
     background: rgba(157,124,255,.09) !important;
     border-color: rgba(174,148,255,.76) !important;
-}
-
-.quest-ui-update-banner {
+}.quest-ui-update-banner {
     align-items: center;
     background: rgba(255,255,255,.025);
     border: 1px solid rgba(255,255,255,.08);
@@ -1044,28 +461,20 @@
     margin: 0 14px 12px;
     min-height: 54px;
     padding: 9px 11px;
-}
-
-.quest-ui-update-banner.is-current {
+}.quest-ui-update-banner.is-current {
     background: rgba(35,165,90,.075);
     border-color: rgba(35,165,90,.46);
-}
-
-.quest-ui-update-banner.has-update {
+}.quest-ui-update-banner.has-update {
     background: rgba(88,101,242,.085);
     border-color: rgba(125,140,255,.48);
-}
-
-.quest-ui-update-banner.has-error {
+}.quest-ui-update-banner.has-error {
     background: rgba(242,63,66,.07);
     border-color: rgba(242,63,66,.44);
-}
-
-.quest-ui-update-banner-mark {
+}.quest-ui-update-banner-mark {
     align-items: center;
-    background: #666b75;
+    background: var(--quest-ui-update-neutral);
     border-radius: 50%;
-    color: #111216;
+    color: var(--quest-ui-theme-panel);
     display: inline-flex;
     flex: 0 0 22px;
     font-size: 12px;
@@ -1073,191 +482,123 @@
     height: 22px;
     justify-content: center;
     width: 22px;
-}
-
-.quest-ui-update-banner.is-current .quest-ui-update-banner-mark {
-    background: #49d67d;
-}
-
-.quest-ui-update-banner.has-update .quest-ui-update-banner-mark {
-    background: #8c98ff;
-}
-
-.quest-ui-update-banner.has-error .quest-ui-update-banner-mark {
-    background: #f06467;
-}
-
-.quest-ui-update-banner > div {
+}.quest-ui-update-banner.is-current .quest-ui-update-banner-mark {
+    background: var(--quest-ui-update-banner-current);
+}.quest-ui-update-banner.has-update .quest-ui-update-banner-mark {
+    background: var(--quest-ui-update-banner-available);
+}.quest-ui-update-banner.has-error .quest-ui-update-banner-mark {
+    background: var(--quest-ui-update-banner-error);
+}.quest-ui-update-banner > div {
     display: flex;
     flex-direction: column;
     gap: 1px;
     min-width: 0;
-}
-
-.quest-ui-update-banner > div > strong {
-    color: #eef0f2;
+}.quest-ui-update-banner > div > strong {
+    color: var(--quest-ui-update-banner-text);
     font-size: 11.5px;
     font-weight: 750;
     line-height: 1.25;
-}
-
-.quest-ui-update-banner > div > span {
-    color: #8e939c;
+}.quest-ui-update-banner > div > span {
+    color: var(--quest-ui-update-banner-muted);
     font-size: 9.5px;
     line-height: 1.3;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-product-list {
+}.quest-ui-update-panel-v16 .quest-ui-update-product-list {
     display: flex;
     flex-direction: column;
     gap: 7px;
     padding: 0 14px 14px !important;
-}
-
-.quest-ui-update-product-entry {
-    background: #1b1c21;
+}.quest-ui-update-product-entry {
+    background: var(--quest-ui-update-product-surface);
     border: 1px solid rgba(255,255,255,.085);
     border-radius: 10px;
     overflow: hidden;
-}
-
-.quest-ui-update-product-entry.is-current {
+}.quest-ui-update-product-entry.is-current {
     border-color: rgba(255,255,255,.085);
-}
-
-.quest-ui-update-product-entry.is-available {
+}.quest-ui-update-product-entry.is-available {
     border-color: rgba(125,140,255,.34);
-}
-
-.quest-ui-update-product-entry.is-error {
+}.quest-ui-update-product-entry.is-error {
     border-color: rgba(242,63,66,.34);
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-product-row {
+}.quest-ui-update-panel-v16 .quest-ui-update-product-row {
     align-items: center;
     display: grid !important;
     gap: 12px !important;
     grid-template-columns: minmax(0,1fr) auto 34px !important;
     min-height: 58px !important;
     padding: 9px 10px 9px 12px !important;
-}
-
-.quest-ui-update-product-identity {
+}.quest-ui-update-product-identity {
     min-width: 0;
-}
-
-.quest-ui-update-product-identity > div {
+}.quest-ui-update-product-identity > div {
     align-items: center;
     display: flex;
     gap: 7px;
     min-width: 0;
-}
-
-.quest-ui-update-product-identity strong {
-    color: #f0f1f3;
+}.quest-ui-update-product-identity strong {
+    color: var(--quest-ui-update-product-title);
     font-size: 12px;
     font-weight: 800;
     white-space: nowrap;
-}
-
-.quest-ui-update-row-version,
+}.quest-ui-update-row-version,
 .quest-ui-update-row-target,
 .quest-ui-update-row-arrow {
     font-family: var(--font-code, ui-monospace, SFMono-Regular, Consolas, monospace);
     font-size: 9.5px;
-}
-
-.quest-ui-update-row-version {
+}.quest-ui-update-row-version {
     background: color-mix(in srgb, var(--blue-345, #5c9ded) 12%, transparent);
     border: 1px solid color-mix(in srgb, var(--blue-345, #5c9ded) 42%, transparent);
     border-radius: 999px;
     color: var(--blue-330, #79b5f8);
     padding: 2px 6px;
-}
-
-.quest-ui-update-row-version.is-beta {
+}.quest-ui-update-row-version.is-beta {
     background: color-mix(in srgb, var(--status-warning, #f0b232) 12%, transparent);
     border-color: color-mix(in srgb, var(--status-warning, #f0b232) 42%, transparent);
     color: var(--status-warning, #f0b232);
-}
-
-.quest-ui-update-row-version.is-alpha {
+}.quest-ui-update-row-version.is-alpha {
     background: color-mix(in srgb, var(--status-danger, #f23f42) 12%, transparent);
     border-color: color-mix(in srgb, var(--status-danger, #f23f42) 42%, transparent);
-    color: #ff7b7e;
-}
-
-.quest-ui-update-row-version.is-prerelease {
+    color: var(--quest-ui-update-alpha);
+}.quest-ui-update-row-version.is-prerelease {
     background: color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 42%, transparent);
     color: var(--brand-360, #949cf7);
-}
-
-.quest-ui-update-row-version.is-unknown {
+}.quest-ui-update-row-version.is-unknown {
     background: rgba(255,255,255,.04);
     border-color: rgba(255,255,255,.10);
     color: var(--text-muted, #949ba4);
-}
-
-.quest-ui-update-row-arrow {
-    color: #666b75;
-}
-
-.quest-ui-update-row-target {
-    color: #aeb7ff;
+}.quest-ui-update-row-arrow {
+    color: var(--quest-ui-update-neutral);
+}.quest-ui-update-row-target {
+    color: var(--quest-ui-update-link);
     font-weight: 700;
-}
-
-.quest-ui-update-row-target.is-stable {
+}.quest-ui-update-row-target.is-stable {
     color: var(--blue-330, #79b5f8);
-}
-
-.quest-ui-update-row-target.is-beta {
+}.quest-ui-update-row-target.is-beta {
     color: var(--status-warning, #f0b232);
-}
-
-.quest-ui-update-row-target.is-alpha {
-    color: #ff7b7e;
-}
-
-.quest-ui-update-row-target.is-prerelease {
+}.quest-ui-update-row-target.is-alpha {
+    color: var(--quest-ui-update-alpha);
+}.quest-ui-update-row-target.is-prerelease {
     color: var(--brand-360, #949cf7);
-}
-
-.quest-ui-update-row-target.is-unknown {
+}.quest-ui-update-row-target.is-unknown {
     color: var(--text-muted, #949ba4);
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-product-row-meta {
+}.quest-ui-update-panel-v16 .quest-ui-update-product-row-meta {
     align-items: flex-start !important;
     display: flex;
     flex-direction: column;
     gap: 2px !important;
     max-width: 170px !important;
-}
-
-.quest-ui-update-product-row-meta > strong {
+}.quest-ui-update-product-row-meta > strong {
     align-items: center;
-    color: #c9ccd2;
+    color: var(--quest-ui-update-meta);
     display: inline-flex;
     font-size: 10px !important;
     gap: 5px;
     white-space: nowrap;
-}
-
-.quest-ui-update-product-entry.is-current .quest-ui-update-product-row-meta > strong {
-    color: #59d484 !important;
-}
-
-.quest-ui-update-product-entry.is-available .quest-ui-update-product-row-meta > strong {
-    color: #9ca7ff !important;
-}
-
-.quest-ui-update-product-entry.is-error .quest-ui-update-product-row-meta > strong {
-    color: #f07578 !important;
-}
-
-.quest-ui-update-row-state-mark {
+}.quest-ui-update-product-entry.is-current .quest-ui-update-product-row-meta > strong {
+    color: var(--quest-ui-update-current) !important;
+}.quest-ui-update-product-entry.is-available .quest-ui-update-product-row-meta > strong {
+    color: var(--quest-ui-update-available) !important;
+}.quest-ui-update-product-entry.is-error .quest-ui-update-product-row-meta > strong {
+    color: var(--quest-ui-update-error) !important;
+}.quest-ui-update-row-state-mark {
     align-items: center;
     background: currentColor;
     border-radius: 50%;
@@ -1270,26 +611,20 @@
     justify-content: center;
     line-height: 1;
     width: 15px;
-}
-
-.quest-ui-update-product-row-meta > strong .quest-ui-update-row-state-mark {
-    color: #111216;
-}
-
-.quest-ui-update-product-row-meta > span {
-    color: #777c85 !important;
+}.quest-ui-update-product-row-meta > strong .quest-ui-update-row-state-mark {
+    color: var(--quest-ui-theme-panel);
+}.quest-ui-update-product-row-meta > span {
+    color: var(--quest-ui-update-muted) !important;
     font-size: 8.8px !important;
     line-height: 1.2;
     text-align: left !important;
     white-space: nowrap;
-}
-
-.quest-ui-update-github-button {
+}.quest-ui-update-github-button {
     align-items: center;
     background: rgba(255,255,255,.025);
     border: 1px solid rgba(255,255,255,.09);
     border-radius: 8px;
-    color: #d8dae0;
+    color: var(--quest-ui-update-icon);
     cursor: pointer;
     display: inline-flex;
     height: 32px;
@@ -1297,116 +632,63 @@
     padding: 0;
     transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
     width: 32px;
-}
-
-.quest-ui-update-github-button:hover {
+}.quest-ui-update-github-button:hover {
     background: rgba(255,255,255,.07);
     border-color: rgba(255,255,255,.16);
-    color: #fff;
-}
-
-.quest-ui-update-github-icon {
+    color: var(--quest-ui-theme-text-strong);
+}.quest-ui-update-github-icon {
     height: 17px;
     width: 17px;
-}
-
-.quest-ui-update-product-expanded {
+}.quest-ui-update-product-expanded {
     border-top: 1px solid rgba(255,255,255,.06);
     padding: 0 11px 9px;
-}
-
-.quest-ui-update-product-expanded .quest-ui-update-card {
+}.quest-ui-update-product-expanded .quest-ui-update-card {
     background: transparent !important;
     border: 0 !important;
     border-radius: 0 !important;
     padding: 9px 0 0 !important;
-}
-
-.quest-ui-update-panel-v16 > .quest-ui-update-manual-warning {
+}.quest-ui-update-panel-v16 > .quest-ui-update-manual-warning {
     background: rgba(240,178,50,.04);
     border-top: 1px solid rgba(255,255,255,.055);
-    color: #e7b84e;
+    color: var(--quest-ui-update-warning);
     font-size: 9.5px;
     padding: 8px 14px 10px;
 }
 
-@media (max-width: 560px) {
-    .quest-ui-update-panel.quest-ui-update-panel-v16 {
+@media (max-width: 560px) {.quest-ui-update-panel.quest-ui-update-panel-v16 {
         width: min(520px, calc(100vw - 20px)) !important;
-    }
-
-    .quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
+    }.quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
         align-items: flex-start;
         flex-direction: column;
         gap: 9px;
-    }
-
-    .quest-ui-update-panel-heading-actions {
+    }.quest-ui-update-panel-heading-actions {
         justify-content: space-between;
         width: 100%;
-    }
-
-    .quest-ui-update-panel-v16 .quest-ui-update-product-row {
+    }.quest-ui-update-panel-v16 .quest-ui-update-product-row {
         grid-template-columns: minmax(0,1fr) 32px !important;
-    }
-
-    .quest-ui-update-panel-v16 .quest-ui-update-product-row-meta {
+    }.quest-ui-update-panel-v16 .quest-ui-update-product-row-meta {
         grid-column: 1 / -1;
         grid-row: 2;
-    }
-
-    .quest-ui-update-github-button {
+    }.quest-ui-update-github-button {
         grid-column: 2;
         grid-row: 1;
     }
 }
 
-
-/* Product state mark owns its fill independently from the label color. */
-.quest-ui-update-row-state-mark {
-    background: #666b75 !important;
-    color: #111216 !important;
-}
-
-.quest-ui-update-product-entry.is-current .quest-ui-update-row-state-mark {
-    background: #59d484 !important;
-}
-
-.quest-ui-update-product-entry.is-available .quest-ui-update-row-state-mark {
-    background: #9ca7ff !important;
-}
-
-.quest-ui-update-product-entry.is-error .quest-ui-update-row-state-mark {
-    background: #f07578 !important;
-}
-
-.quest-ui-update-product-entry.is-warning .quest-ui-update-row-state-mark {
-    background: #e7b84e !important;
-}
-
-
 /* v1.6 Update Center refinement - golden-ratio rhythm: 8 / 13 / 21 / 34. */
 .quest-ui-update-panel.quest-ui-update-panel-v16 {
-    width: 500px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
+    width: min(500px, calc(100vw - 20px)) !important;
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
     min-height: 68px !important;
     padding: 13px 13px 8px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title {
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-title {
     gap: 8px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon {
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon {
     border-radius: 8px !important;
     flex-basis: 34px !important;
     height: 34px !important;
     width: 34px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon .quest-ui-update-center-icon {
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon .quest-ui-update-center-icon {
     display: block;
     fill: none !important;
     height: 18px !important;
@@ -1416,46 +698,32 @@
     stroke-linejoin: round;
     stroke-width: 2 !important;
     width: 18px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title > strong {
+}.quest-ui-update-panel-v16 .quest-ui-update-panel-title > strong {
     font-size: 17px !important;
     margin-top: 3px !important;
-}
-
-.quest-ui-update-panel-heading-actions {
+}.quest-ui-update-panel-heading-actions {
     align-items: flex-end !important;
     flex-direction: column !important;
     gap: 5px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-check-button {
+}.quest-ui-update-panel-v16 .quest-ui-update-check-button {
     min-height: 29px !important;
     padding: 4px 10px !important;
-}
-
-.quest-ui-update-panel-last-check {
+}.quest-ui-update-panel-last-check {
     font-size: 8.5px !important;
     padding-right: 2px;
-}
-
-.quest-ui-update-banner {
+}.quest-ui-update-banner {
     gap: 8px !important;
     margin: 0 13px 13px !important;
     min-height: 50px !important;
     padding: 8px 13px !important;
-}
-
-.quest-ui-update-banner-mark {
+}.quest-ui-update-banner-mark {
     background: transparent !important;
     border: 0;
-    color: #7c8089;
+    color: var(--quest-ui-update-banner-state-muted);
     flex-basis: 21px !important;
     height: 21px !important;
     width: 21px !important;
-}
-
-.quest-ui-update-banner-mark svg {
+}.quest-ui-update-banner-mark svg {
     fill: none;
     height: 21px;
     stroke: currentColor;
@@ -1463,135 +731,91 @@
     stroke-linejoin: round;
     stroke-width: 2.2;
     width: 21px;
-}
-
-.quest-ui-update-banner.is-current .quest-ui-update-banner-mark {
-    color: #49d67d !important;
-}
-
-.quest-ui-update-banner.has-update .quest-ui-update-banner-mark {
-    color: #8c98ff !important;
-}
-
-.quest-ui-update-banner.has-error .quest-ui-update-banner-mark {
-    color: #f06467 !important;
-}
-
-.quest-ui-update-banner.is-checking .quest-ui-update-banner-mark {
-    color: #a8acb5 !important;
-}
-
-.quest-ui-update-banner.is-checking .quest-ui-update-banner-mark svg {
+}.quest-ui-update-banner.is-current .quest-ui-update-banner-mark {
+    color: var(--quest-ui-update-banner-current) !important;
+}.quest-ui-update-banner.has-update .quest-ui-update-banner-mark {
+    color: var(--quest-ui-update-banner-available) !important;
+}.quest-ui-update-banner.has-error .quest-ui-update-banner-mark {
+    color: var(--quest-ui-update-banner-error) !important;
+}.quest-ui-update-banner.is-checking .quest-ui-update-banner-mark {
+    color: var(--quest-ui-update-checking) !important;
+}.quest-ui-update-banner.is-checking .quest-ui-update-banner-mark svg {
     animation: quest-ui-update-check-pulse 850ms ease-in-out infinite alternate;
-}
-
-.quest-ui-update-banner > div > strong {
+}.quest-ui-update-banner > div > strong {
     font-size: 12px !important;
-}
-
-.quest-ui-update-banner > div > span {
+}.quest-ui-update-banner > div > span {
     font-size: 9px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-product-list {
+}.quest-ui-update-panel-v16 .quest-ui-update-product-list {
     gap: 8px !important;
     padding: 0 13px 13px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-product-row {
+}.quest-ui-update-panel-v16 .quest-ui-update-product-row {
     gap: 13px !important;
     grid-template-columns: minmax(0,1fr) 150px 34px !important;
     min-height: 63px !important;
     padding: 8px 10px 8px 13px !important;
-}
-
-.quest-ui-update-product-identity > div {
+}.quest-ui-update-product-identity > div {
     gap: 6px !important;
-}
-
-.quest-ui-update-product-identity strong {
+}.quest-ui-update-product-identity strong {
     font-size: 12px !important;
-}
-
-.quest-ui-update-row-version,
+}.quest-ui-update-row-version,
 .quest-ui-update-row-target {
     border-radius: 999px;
     font-size: 9px !important;
     line-height: 1;
     padding: 3px 6px !important;
-}
-
-.quest-ui-update-row-version.is-old-version {
+}.quest-ui-update-row-version.is-old-version {
     background: rgba(242,63,66,.12) !important;
     border: 1px solid rgba(242,63,66,.36) !important;
-    color: #f47b7e !important;
-}
-
-.quest-ui-update-row-target {
+    color: var(--quest-ui-update-old-version) !important;
+}.quest-ui-update-row-target {
     background: rgba(114,137,255,.13);
     border: 1px solid rgba(114,137,255,.34);
-    color: #aab4ff !important;
-}
-
-.quest-ui-update-row-arrow {
-    color: #818690 !important;
+    color: var(--quest-ui-update-target);
+}.quest-ui-update-row-arrow {
+    color: var(--quest-ui-update-arrow) !important;
     font-size: 10px !important;
-}
-
-.quest-ui-update-panel-v16 .quest-ui-update-product-row-meta {
+}.quest-ui-update-panel-v16 .quest-ui-update-product-row-meta {
     align-items: flex-start !important;
     gap: 4px !important;
     max-width: 150px !important;
-}
-
-.quest-ui-update-product-row-meta > strong {
+}.quest-ui-update-product-row-meta > strong {
     font-size: 12.5px !important;
     gap: 6px !important;
-}
-
-.quest-ui-update-row-state-mark {
+}.quest-ui-update-row-state-mark {
     align-items: center;
     background: transparent !important;
-    color: #737883 !important;
+    border-radius: 0 !important;
+    color: var(--quest-ui-update-state-muted) !important;
     display: inline-flex;
     flex: 0 0 17px !important;
     height: 17px !important;
     justify-content: center;
     width: 17px !important;
-}
-
-.quest-ui-update-row-state-mark svg {
-    fill: none;
+}.quest-ui-update-row-state-mark svg {
+    display: block !important;
+    fill: none !important;
     height: 16px;
-    stroke: currentColor;
+    stroke: currentColor !important;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 2.25;
     width: 16px;
-}
-
-.quest-ui-update-product-entry.is-current .quest-ui-update-row-state-mark {
-    color: #59d484 !important;
-}
-
-.quest-ui-update-product-entry.is-available .quest-ui-update-row-state-mark {
-    color: #9ca7ff !important;
-}
-
-.quest-ui-update-product-entry.is-error .quest-ui-update-row-state-mark {
-    color: #f07578 !important;
-}
-
-.quest-ui-update-product-row-meta > span {
+}.quest-ui-update-product-entry.is-current .quest-ui-update-row-state-mark {
+    color: var(--quest-ui-update-current) !important;
+}.quest-ui-update-product-entry.is-available .quest-ui-update-row-state-mark {
+    color: var(--quest-ui-update-available) !important;
+}.quest-ui-update-product-entry.is-error .quest-ui-update-row-state-mark {
+    color: var(--quest-ui-update-error) !important;
+}.quest-ui-update-product-entry.is-warning .quest-ui-update-row-state-mark {
+    color: var(--quest-ui-update-warning) !important;
+}.quest-ui-update-product-row-meta > span {
     font-size: 8.5px !important;
     white-space: normal !important;
-}
-
-.quest-ui-update-release-link {
+}.quest-ui-update-release-link {
     align-items: center;
     background: transparent;
     border: 0;
-    color: #aeb7ff;
+    color: var(--quest-ui-update-link);
     cursor: pointer;
     display: inline-flex;
     font: inherit;
@@ -1600,14 +824,10 @@
     gap: 4px;
     padding: 0;
     text-align: left;
-}
-
-.quest-ui-update-release-link:hover {
-    color: #d0d5ff;
+}.quest-ui-update-release-link:hover {
+    color: var(--quest-ui-update-link-hover);
     text-decoration: underline;
-}
-
-.quest-ui-update-release-link svg {
+}.quest-ui-update-release-link svg {
     fill: none;
     height: 12px;
     stroke: currentColor;
@@ -1615,61 +835,19 @@
     stroke-linejoin: round;
     stroke-width: 1.7;
     width: 12px;
-}
-
-.quest-ui-update-github-button {
+}.quest-ui-update-github-button {
     height: 34px !important;
     width: 34px !important;
-}
-
-.quest-ui-update-github-icon {
+}.quest-ui-update-github-icon {
     height: 16px !important;
     width: 16px !important;
-}
-
-/* The release-note link now owns navigation; avoid duplicate release action below. */
-.quest-ui-update-product-expanded .quest-ui-update-card-actions > button:nth-child(2) {
-    /* no-op selector retained intentionally; action ordering is dynamic */
-}
-
-
-/* v1.6 state glyph correction: semantic state uses the glyph itself, never a filled dot. */
-.quest-ui-update-product-entry.is-current .quest-ui-update-row-state-mark,
-.quest-ui-update-product-entry.is-available .quest-ui-update-row-state-mark,
-.quest-ui-update-product-entry.is-error .quest-ui-update-row-state-mark,
-.quest-ui-update-product-entry.is-warning .quest-ui-update-row-state-mark,
-.quest-ui-update-row-state-mark {
-    background: transparent !important;
-    border-radius: 0 !important;
-}
-
-.quest-ui-update-product-entry.is-current .quest-ui-update-row-state-mark {
-    color: #59d484 !important;
-}
-
-.quest-ui-update-product-entry.is-available .quest-ui-update-row-state-mark {
-    color: #9ca7ff !important;
-}
-
-.quest-ui-update-product-entry.is-error .quest-ui-update-row-state-mark {
-    color: #f07578 !important;
-}
-
-.quest-ui-update-product-entry.is-warning .quest-ui-update-row-state-mark {
-    color: #e7b84e !important;
-}
-
-.quest-ui-update-row-state-mark svg {
-    display: block !important;
-    fill: none !important;
-    stroke: currentColor !important;
 }
 
 /* Lightweight support footer. */
 .quest-ui-update-support-footer {
     align-items: center;
     border-top: 1px solid rgba(255,255,255,.055);
-    color: #777c85;
+    color: var(--quest-ui-update-muted);
     display: flex;
     flex-wrap: wrap;
     font-size: 9px;
@@ -1678,27 +856,21 @@
     line-height: 1.35;
     padding: 9px 13px 10px;
     text-align: center;
-}
-
-.quest-ui-update-support-footer > button {
+}.quest-ui-update-support-footer > button {
     align-items: center;
     background: transparent;
     border: 0;
-    color: #aeb7ff;
+    color: var(--quest-ui-update-link);
     cursor: pointer;
     display: inline-flex;
     font: inherit;
     font-weight: 700;
     gap: 3px;
     padding: 0;
-}
-
-.quest-ui-update-support-footer > button:hover {
-    color: #d1d6ff;
+}.quest-ui-update-support-footer > button:hover {
+    color: var(--quest-ui-update-support-link-hover);
     text-decoration: underline;
-}
-
-.quest-ui-update-support-footer > button svg {
+}.quest-ui-update-support-footer > button svg {
     fill: none;
     height: 10px;
     stroke: currentColor;
@@ -1708,38 +880,30 @@
     width: 10px;
 }
 
-
 /* v1.6 fallback update path in plugin settings. */
 .quest-ui-update-panel-title-block {
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
-}
-
-.quest-ui-update-panel-settings-hint {
-    color: #747983;
+}.quest-ui-update-panel-settings-hint {
+    color: var(--quest-ui-update-settings-hint);
     font-size: 8.5px;
     line-height: 11px;
     padding-left: 42px;
     white-space: nowrap;
-}
-
-.quest-ui-update-panel-settings-hint > button {
+}.quest-ui-update-panel-settings-hint > button {
     background: transparent;
     border: 0;
-    color: #aeb7ff;
+    color: var(--quest-ui-update-link);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
     padding: 0;
-}
-
-.quest-ui-update-panel-settings-hint > button:hover {
-    color: #d0d5ff;
+}.quest-ui-update-panel-settings-hint > button:hover {
+    color: var(--quest-ui-update-link-hover);
     text-decoration: underline;
 }
-
 
 /* v1.6 Update Center header separation and product release metadata. */
 .quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
@@ -1749,51 +913,39 @@
     column-gap: 21px !important;
     min-height: 72px !important;
     padding: 13px !important;
-}
-
-.quest-ui-update-panel-title-block {
+}.quest-ui-update-panel-title-block {
     display: flex !important;
     flex-direction: column !important;
     gap: 5px !important;
     min-width: 0 !important;
     overflow: hidden;
-}
-
-.quest-ui-update-panel-settings-hint {
+}.quest-ui-update-panel-settings-hint {
     box-sizing: border-box;
     display: block !important;
     max-width: 300px;
     padding-left: 42px !important;
     white-space: normal !important;
     overflow-wrap: anywhere;
-}
-
-.quest-ui-update-panel-heading-actions {
+}.quest-ui-update-panel-heading-actions {
     align-items: flex-end !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 5px !important;
     min-width: max-content;
-}
-
-.quest-ui-update-panel-last-check {
+}.quest-ui-update-panel-last-check {
     display: block !important;
     max-width: 160px;
     overflow: hidden;
     text-align: right;
     text-overflow: ellipsis;
     white-space: nowrap !important;
-}
-
-.quest-ui-update-product-identity {
+}.quest-ui-update-product-identity {
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
-}
-
-.quest-ui-update-product-release-date {
-    color: #6f747d;
+}.quest-ui-update-product-release-date {
+    color: var(--quest-ui-update-date);
     display: block;
     font-size: 8.8px;
     line-height: 1.2;
@@ -1802,27 +954,21 @@
     white-space: nowrap;
 }
 
-@media (max-width: 560px) {
-    .quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
+@media (max-width: 560px) {.quest-ui-update-panel-v16 .quest-ui-update-panel-heading {
         grid-template-columns: 1fr !important;
         row-gap: 8px !important;
-    }
-
-    .quest-ui-update-panel-heading-actions {
+    }.quest-ui-update-panel-v16 .quest-ui-update-product-row {
+        grid-template-columns: minmax(0,1fr) 32px !important;
+    }.quest-ui-update-panel-heading-actions {
         align-items: flex-start !important;
         min-width: 0;
-    }
-
-    .quest-ui-update-panel-last-check {
+    }.quest-ui-update-panel-last-check {
         max-width: 100%;
         text-align: left;
-    }
-
-    .quest-ui-update-panel-settings-hint {
+    }.quest-ui-update-panel-settings-hint {
         max-width: none;
     }
 }
-
 
 /* v1.6 update badge + checking indicator cleanup. */
 .quest-ui-update-count {
@@ -1831,25 +977,17 @@
     outline: 0 !important;
     right: -3px !important;
     top: -3px !important;
-}
-
-.quest-ui-update-banner.is-checking .quest-ui-update-banner-mark svg {
+}.quest-ui-update-banner.is-checking .quest-ui-update-banner-mark svg {
     animation: none !important;
-}
-
-.quest-ui-update-check-spinner {
+}.quest-ui-update-check-spinner {
     animation: quest-ui-update-spinner-rotate 780ms linear infinite !important;
     transform-origin: 50% 50%;
-}
-
-.quest-ui-update-check-spinner-track {
+}.quest-ui-update-check-spinner-track {
     fill: none;
     opacity: .22;
     stroke: currentColor;
     stroke-width: 1.8;
-}
-
-.quest-ui-update-check-spinner-arc {
+}.quest-ui-update-check-spinner-arc {
     fill: none;
     stroke: currentColor;
     stroke-linecap: round;

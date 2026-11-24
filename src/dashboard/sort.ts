@@ -8,6 +8,19 @@ export type DashboardSortMode =
     | "name-asc"
     | "name-desc";
 
+export const DASHBOARD_SORT_OPTIONS: ReadonlyArray<{
+    value: DashboardSortMode;
+    label: string;
+    default?: true;
+}> = [
+    { value: "expiring", label: "Expiring Soon", default: true },
+    { value: "orb-reward", label: "Highest Orb Reward" },
+    { value: "required-time-asc", label: "Shortest Required Time" },
+    { value: "required-time-desc", label: "Longest Required Time" },
+    { value: "name-asc", label: "Name A → Z" },
+    { value: "name-desc", label: "Name Z → A" }
+];
+
 const STATUS_SORT_ORDER: Record<QuestStatus, number> = {
     "in-progress": 0,
     claimable: 1,

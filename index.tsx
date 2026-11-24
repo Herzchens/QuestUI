@@ -1,7 +1,3 @@
-import "./src/dashboard/styles/detailStatus.css";
-import "./src/eventLog/styles/eventLogPolish.css";
-import "./src/eventLog/styles/eventLogRuntimeFix.css";
-
 import definePlugin from "@utils/types";
 
 import { startEventLogCapture, stopEventLogCapture } from "./src/eventLog/runtime";

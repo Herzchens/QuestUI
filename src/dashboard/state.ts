@@ -16,8 +16,6 @@ export const DASHBOARD_SETTING_KEYS = [
     "dashboardExpiredAgeDays",
     "dashboardRewardPreset",
     "dashboardRewardCustomKinds",
-    "dashboardRewardFilter",
-    "dashboardIncludeUnknownRewards",
     "dashboardShowPlay",
     "dashboardShowStream",
     "dashboardShowVideo",
@@ -64,11 +62,8 @@ export function ensureDashboardV16FilterDefaults(): void {
     settings.store.dashboardShowClaimed = true;
     settings.store.dashboardShowExpired = true;
     settings.store.dashboardExpiredAgeDays = 0;
-    settings.store.dashboardRewardPreset = "all";
-    settings.store.dashboardRewardPreset = "all";
-    settings.store.dashboardRewardPreset = "all";
-    settings.store.dashboardRewardFilter = "all";
-    settings.store.dashboardIncludeUnknownRewards = true;
+    // Reward selection has its own migration above. Fresh settings already default to All,
+    // while existing v1.5 selections must survive the v1.6 status/task baseline migration.
     settings.store.dashboardShowPlay = true;
     settings.store.dashboardShowStream = true;
     settings.store.dashboardShowVideo = true;
@@ -85,25 +80,7 @@ export function clearDashboardFilters(): void {
     settings.store.dashboardShowExpired = true;
     settings.store.dashboardShowIgnored = true;
     settings.store.dashboardExpiredAgeDays = 0;
-    settings.store.dashboardRewardFilter = "all";
-    settings.store.dashboardIncludeUnknownRewards = true;
-    settings.store.dashboardShowPlay = true;
-    settings.store.dashboardShowStream = true;
-    settings.store.dashboardShowVideo = true;
-    settings.store.dashboardShowActivity = true;
-    settings.store.dashboardShowOther = true;
-}
-
-export function restoreRecommendedFilters(): void {
-    settings.store.dashboardShowAvailable = true;
-    settings.store.dashboardShowInProgress = true;
-    settings.store.dashboardShowClaimable = true;
-    settings.store.dashboardShowClaimed = false;
-    settings.store.dashboardShowExpired = false;
-    settings.store.dashboardShowIgnored = false;
-    settings.store.dashboardExpiredAgeDays = 15;
-    settings.store.dashboardRewardFilter = "all";
-    settings.store.dashboardIncludeUnknownRewards = true;
+    settings.store.dashboardRewardPreset = "all";
     settings.store.dashboardShowPlay = true;
     settings.store.dashboardShowStream = true;
     settings.store.dashboardShowVideo = true;

@@ -14,19 +14,47 @@ export type RewardKind =
 export type RewardFilter = "all" | readonly RewardKind[];
 export type DashboardRewardPreset = "all" | "orbs" | "collectible" | "in-game" | "custom";
 
-export const REWARD_DETAIL_KINDS: readonly RewardKind[] = [
-    "orbs",
-    "avatar-decoration",
-    "profile-effect",
-    "nameplate",
-    "profile-frame",
-    "bundle",
-    "collectible",
-    "nitro-credits",
-    "reward-code",
-    "in-game",
-    "unknown"
+export const REWARD_DETAIL_OPTIONS: ReadonlyArray<{ value: RewardKind; label: string; }> = [
+    { value: "orbs", label: "Orbs" },
+    { value: "avatar-decoration", label: "Avatar Decoration" },
+    { value: "profile-effect", label: "Profile Effect" },
+    { value: "nameplate", label: "Nameplate" },
+    { value: "profile-frame", label: "Profile Frame" },
+    { value: "bundle", label: "Bundle" },
+    { value: "collectible", label: "Other Collectible" },
+    { value: "nitro-credits", label: "Nitro Credits" },
+    { value: "reward-code", label: "Gift Code" },
+    { value: "in-game", label: "In Game Item" },
+    { value: "unknown", label: "Unknown / Future" }
 ];
+
+export const REWARD_DETAIL_KINDS: readonly RewardKind[] =
+    REWARD_DETAIL_OPTIONS.map(option => option.value);
+
+export const REWARD_FILTER_OPTIONS = [
+    { label: "All rewards", value: "all", default: true },
+    { label: "Orbs", value: "orbs" },
+    { label: "Reward Code", value: "reward-code" },
+    { label: "In-game Reward", value: "in-game" },
+    { label: "Avatar Decoration", value: "avatar-decoration" },
+    { label: "Profile Effect", value: "profile-effect" },
+    { label: "Nameplate", value: "nameplate" },
+    { label: "Profile Frame", value: "profile-frame" },
+    { label: "Bundle", value: "bundle" },
+    { label: "Collectible", value: "collectible" },
+    { label: "Nitro Credits", value: "nitro-credits" }
+] as const;
+
+export const DASHBOARD_REWARD_PRESET_OPTIONS = [
+    { label: "All", value: "all", default: true },
+    { label: "Orbs", value: "orbs" },
+    { label: "Collectible", value: "collectible" },
+    { label: "In Game Reward", value: "in-game" },
+    { label: "Custom", value: "custom" }
+] as const;
+
+export const DEFAULT_DASHBOARD_REWARD_CUSTOM_KINDS =
+    REWARD_DETAIL_KINDS.join(",");
 
 export const COLLECTIBLE_REWARD_KINDS: readonly RewardKind[] = [
     "avatar-decoration",

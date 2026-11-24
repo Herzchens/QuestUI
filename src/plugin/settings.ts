@@ -4,6 +4,12 @@ import { OptionType } from "@utils/types";
 import { isOrionCommandReady, isOrionInstalled } from "../orion/integration";
 import { notifyQuestAutoReloadSettingsChanged } from "../quests/reload/auto";
 import {
+    DASHBOARD_REWARD_PRESET_OPTIONS,
+    DEFAULT_DASHBOARD_REWARD_CUSTOM_KINDS,
+    REWARD_FILTER_OPTIONS
+} from "../quests/rewardFilters";
+import { DASHBOARD_SORT_OPTIONS } from "../dashboard/sort";
+import {
     DEFAULT_QUEST_AUTO_RELOAD_STEP,
     QUEST_AUTO_RELOAD_STEP_MARKERS,
     questAutoReloadMarkerLabel
@@ -11,40 +17,6 @@ import {
 import { DEFAULT_UPDATE_CHECK_STEP, UPDATE_CHECK_STEP_MARKERS, updateCheckMarkerLabel } from "../updates/logic";
 import { UpdateSettingsControl } from "../updates/UpdateCenter";
 import { notifyUpdateSettingsChanged } from "../updates/runtime";
-
-const rewardOptions = [
-    { label: "All rewards", value: "all", default: true },
-    { label: "Orbs", value: "orbs" },
-    { label: "Reward Code", value: "reward-code" },
-    { label: "In-game Reward", value: "in-game" },
-    { label: "Avatar Decoration", value: "avatar-decoration" },
-    { label: "Profile Effect", value: "profile-effect" },
-    { label: "Nameplate", value: "nameplate" },
-    { label: "Profile Frame", value: "profile-frame" },
-    { label: "Bundle", value: "bundle" },
-    { label: "Collectible", value: "collectible" },
-    { label: "Nitro Credits", value: "nitro-credits" }
-] as const;
-
-const dashboardRewardPresetOptions = [
-    { label: "All", value: "all", default: true },
-    { label: "Orbs", value: "orbs" },
-    { label: "Collectible", value: "collectible" },
-    { label: "In Game Reward", value: "in-game" },
-    { label: "Custom", value: "custom" }
-] as const;
-
-const DEFAULT_DASHBOARD_REWARD_CUSTOM_KINDS =
-    "orbs,avatar-decoration,profile-effect,nameplate,profile-frame,bundle,collectible,nitro-credits,reward-code,in-game,unknown";
-
-const dashboardSortOptions = [
-    { label: "Expiring Soon", value: "expiring", default: true },
-    { label: "Highest Orb Reward", value: "orb-reward" },
-    { label: "Shortest Required Time", value: "required-time-asc" },
-    { label: "Longest Required Time", value: "required-time-desc" },
-    { label: "Name A → Z", value: "name-asc" },
-    { label: "Name Z → A", value: "name-desc" }
-] as const;
 
 function noShortcutButtons(this: any): boolean {
     return !this.store.showQuestsButtonTopBar && !this.store.showQuestsButtonSettingsBar;
@@ -173,7 +145,7 @@ export default definePluginSettings({
         type: OptionType.SELECT,
         displayName: "Dashboard • Sort",
         description: "Choose how Quest cards are ordered.",
-        options: dashboardSortOptions
+        options: DASHBOARD_SORT_OPTIONS
     },
     dashboardShowAvailable: {
         type: OptionType.BOOLEAN,
@@ -227,7 +199,7 @@ export default definePluginSettings({
         type: OptionType.SELECT,
         displayName: "Dashboard • Reward Preset",
         description: "Internal Dashboard reward preset.",
-        options: dashboardRewardPresetOptions
+        options: DASHBOARD_REWARD_PRESET_OPTIONS
     },
     dashboardRewardCustomKinds: {
         type: OptionType.STRING,
@@ -245,7 +217,7 @@ export default definePluginSettings({
         type: OptionType.SELECT,
         displayName: "Dashboard • Legacy Reward Filter",
         description: "Legacy Dashboard reward filter retained for migration.",
-        options: rewardOptions
+        options: REWARD_FILTER_OPTIONS
     },
     dashboardIncludeUnknownRewards: {
         type: OptionType.BOOLEAN,
@@ -321,7 +293,7 @@ export default definePluginSettings({
         type: OptionType.SELECT,
         displayName: "Detailed Status • Filter • Reward",
         description: "Choose which rewards can affect Detailed Status.",
-        options: rewardOptions
+        options: REWARD_FILTER_OPTIONS
     },
     detailedIncludeUnknownRewards: {
         type: OptionType.BOOLEAN,

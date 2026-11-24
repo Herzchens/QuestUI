@@ -3,16 +3,19 @@ import { openPluginModal } from "@components/settings";
 import { NavigationRouter, Popout, useRef, useState } from "@webpack/common";
 
 import settings from "../plugin/settings";
+import { dashboardThemeClassName } from "../themes/runtime";
 import { useIgnoredQuests } from "../quests/ignored/runtime";
 import { useQuestSnapshot } from "../quests/data";
 import {
+    DASHBOARD_REWARD_PRESET_OPTIONS,
+    REWARD_DETAIL_OPTIONS,
     dashboardRewardKindsForPreset,
     normalizeDashboardRewardPreset,
     serializeDashboardRewardKinds,
     type DashboardRewardPreset,
     type RewardKind
 } from "../quests/rewardFilters";
-import { normalizeDashboardSortMode, type DashboardSortMode } from "./sort";
+import { DASHBOARD_SORT_OPTIONS, normalizeDashboardSortMode, type DashboardSortMode } from "./sort";
 import {
     DASHBOARD_SETTING_KEYS,
     dashboardFilterCount,
@@ -121,19 +124,17 @@ function SortIcon() {
     );
 }
 
-function FilterCheckRow({ checked, label, tone, onClick, disabled = false }: {
+function FilterCheckRow({ checked, label, tone, onClick }: {
     checked: boolean;
     label: string;
     tone?: "available" | "ready" | "progress" | "claimed" | "expired" | "ignored";
     onClick: () => void;
-    disabled?: boolean;
 }) {
     return (
         <button
             type="button"
             className={`quest-ui-filter-list-row${checked ? " is-checked" : ""}${tone ? ` is-${tone}` : ""}`}
             aria-pressed={checked}
-            disabled={disabled}
             onClick={onClick}
         >
             <span className="quest-ui-filter-list-box" aria-hidden="true">
@@ -169,19 +170,35 @@ function FilterRadioRow({ checked, label, onClick }: {
     );
 }
 
+const EXPIRED_HISTORY_OPTIONS = [
+    { days: 7, label: "7d" },
+    { days: 15, label: "15d" },
+    { days: 30, label: "30d" },
+    { days: 90, label: "90d" },
+    { days: 0, label: "All" }
+] as const;
+
+function expiredHistoryOptionIndex(days: number): number {
+    const exact = EXPIRED_HISTORY_OPTIONS.findIndex(option => option.days === days);
+    if (exact >= 0) return exact;
+
+    const bounded = EXPIRED_HISTORY_OPTIONS.findIndex(option => option.days > 0 && days <= option.days);
+    return bounded >= 0 ? bounded : EXPIRED_HISTORY_OPTIONS.length - 1;
+}
+
 function ExpiredHistorySteps({ value, onChange }: {
     value: number;
     onChange: (index: number) => void;
 }) {
     const trackRef = useRef<HTMLDivElement | null>(null);
-    const labels = ["7d", "15d", "30d", "90d", "All"] as const;
 
     const indexFromPointer = (clientX: number): number => {
         const rect = trackRef.current?.getBoundingClientRect();
         if (!rect || rect.width <= 0) return value;
 
         const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-        return Math.max(0, Math.min(4, Math.round(ratio * 4)));
+        const lastIndex = EXPIRED_HISTORY_OPTIONS.length - 1;
+        return Math.max(0, Math.min(lastIndex, Math.round(ratio * lastIndex)));
     };
 
     const updateFromPointer = (clientX: number) => {
@@ -216,7 +233,7 @@ function ExpiredHistorySteps({ value, onChange }: {
                 <span className="quest-ui-history-steps-line" aria-hidden="true" />
                 <span className="quest-ui-history-steps-fill" aria-hidden="true" />
                 <div className="quest-ui-history-steps-nodes" role="radiogroup" aria-label="Expired Quest history">
-                    {labels.map((label, index) => {
+                    {EXPIRED_HISTORY_OPTIONS.map(({ label }, index) => {
                         const selected = index === value;
                         const reached = index <= value;
                         return (
@@ -234,7 +251,7 @@ function ExpiredHistorySteps({ value, onChange }: {
                                         onChange(Math.max(0, value - 1));
                                     } else if (event.key === "ArrowRight" || event.key === "ArrowUp") {
                                         event.preventDefault();
-                                        onChange(Math.min(4, value + 1));
+                                        onChange(Math.min(EXPIRED_HISTORY_OPTIONS.length - 1, value + 1));
                                     } else if (event.key === "Home") {
                                         event.preventDefault();
                                         onChange(0);
@@ -260,7 +277,6 @@ function ExpiredHistorySteps({ value, onChange }: {
 function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
     const store = settings.store;
     const expiredAgeDays = Math.max(0, Math.floor(Number(store.dashboardExpiredAgeDays ?? 0)) || 0);
-    const expiredAgePresets = [7, 15, 30, 90, 0] as const;
     const rewardPreset = normalizeDashboardRewardPreset(store.dashboardRewardPreset);
     const activeRewardKinds = dashboardRewardKindsForPreset(rewardPreset, store.dashboardRewardCustomKinds);
     const activeRewardKindSet = new Set(activeRewardKinds);
@@ -278,18 +294,10 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
         store.dashboardRewardPreset = "custom";
     };
 
-    const expiredAgeSliderIndex = (() => {
-        const exact = expiredAgePresets.indexOf(expiredAgeDays as any);
-        if (exact >= 0) return exact;
-        if (expiredAgeDays <= 7) return 0;
-        if (expiredAgeDays <= 15) return 1;
-        if (expiredAgeDays <= 30) return 2;
-        if (expiredAgeDays <= 90) return 3;
-        return 4;
-    })();
+    const expiredAgeSliderIndex = expiredHistoryOptionIndex(expiredAgeDays);
 
     return (
-        <div className="quest-ui-filter-list quest-ui-theme-default" role="group" aria-label="Quest filters">
+        <div className={dashboardThemeClassName("quest-ui-filter-list")} role="group" aria-label="Quest filters">
             <div className="quest-ui-filter-list-scroll">
                 <section className="quest-ui-filter-list-section">
                     <h3>Status</h3>
@@ -314,7 +322,7 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
                         <ExpiredHistorySteps
                             value={expiredAgeSliderIndex}
                             onChange={index => {
-                                store.dashboardExpiredAgeDays = expiredAgePresets[index];
+                                store.dashboardExpiredAgeDays = EXPIRED_HISTORY_OPTIONS[index]?.days ?? 0;
                             }}
                         />
                     </section>
@@ -324,25 +332,25 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
                     <h3>Reward</h3>
                     <div className="quest-ui-reward-filter-stack">
                         <div className="quest-ui-filter-list-options is-radio-options is-reward-presets" role="radiogroup" aria-label="Reward preset">
-                            <FilterRadioRow checked={rewardPreset === "all"} label="All" onClick={() => selectRewardPreset("all")} />
-                            <FilterRadioRow checked={rewardPreset === "orbs"} label="Orbs" onClick={() => selectRewardPreset("orbs")} />
-                            <FilterRadioRow checked={rewardPreset === "collectible"} label="Collectible" onClick={() => selectRewardPreset("collectible")} />
-                            <FilterRadioRow checked={rewardPreset === "in-game"} label="In Game Reward" onClick={() => selectRewardPreset("in-game")} />
-                            <FilterRadioRow checked={rewardPreset === "custom"} label="Custom" onClick={() => selectRewardPreset("custom")} />
+                            {DASHBOARD_REWARD_PRESET_OPTIONS.map(option => (
+                                <FilterRadioRow
+                                    key={option.value}
+                                    checked={rewardPreset === option.value}
+                                    label={option.label}
+                                    onClick={() => selectRewardPreset(option.value)}
+                                />
+                            ))}
                         </div>
                         <div className="quest-ui-reward-detail-divider" aria-hidden="true" />
                         <div className="quest-ui-filter-list-options is-reward-details" role="group" aria-label="Detailed reward types">
-                            <FilterCheckRow checked={activeRewardKindSet.has("orbs")} label="Orbs" onClick={() => toggleRewardKind("orbs")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("avatar-decoration")} label="Avatar Decoration" onClick={() => toggleRewardKind("avatar-decoration")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("profile-effect")} label="Profile Effect" onClick={() => toggleRewardKind("profile-effect")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("nameplate")} label="Nameplate" onClick={() => toggleRewardKind("nameplate")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("profile-frame")} label="Profile Frame" onClick={() => toggleRewardKind("profile-frame")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("bundle")} label="Bundle" onClick={() => toggleRewardKind("bundle")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("collectible")} label="Other Collectible" onClick={() => toggleRewardKind("collectible")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("nitro-credits")} label="Nitro Credits" onClick={() => toggleRewardKind("nitro-credits")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("reward-code")} label="Gift Code" onClick={() => toggleRewardKind("reward-code")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("in-game")} label="In Game Item" onClick={() => toggleRewardKind("in-game")} />
-                            <FilterCheckRow checked={activeRewardKindSet.has("unknown")} label="Unknown / Future" onClick={() => toggleRewardKind("unknown")} />
+                            {REWARD_DETAIL_OPTIONS.map(option => (
+                                <FilterCheckRow
+                                    key={option.value}
+                                    checked={activeRewardKindSet.has(option.value)}
+                                    label={option.label}
+                                    onClick={() => toggleRewardKind(option.value)}
+                                />
+                            ))}
                         </div>
                     </div>
                 </section>
@@ -364,18 +372,9 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
     );
 }
 
-const DASHBOARD_SORT_OPTIONS: ReadonlyArray<{ value: DashboardSortMode; label: string; }> = [
-    { value: "expiring", label: "Expiring Soon" },
-    { value: "orb-reward", label: "Highest Orb Reward" },
-    { value: "required-time-asc", label: "Shortest Required Time" },
-    { value: "required-time-desc", label: "Longest Required Time" },
-    { value: "name-asc", label: "Name A → Z" },
-    { value: "name-desc", label: "Name Z → A" }
-];
-
 function DashboardSorts({ mode, onChange }: { mode: DashboardSortMode; onChange: (mode: DashboardSortMode) => void; }) {
     return (
-        <div className="quest-ui-sort-list quest-ui-theme-default" role="menu" aria-label="Sort quests">
+        <div className={dashboardThemeClassName("quest-ui-sort-list")} role="menu" aria-label="Sort quests">
             <span className="quest-ui-sort-list-title">Sort by</span>
             {DASHBOARD_SORT_OPTIONS.map(option => {
                 const selected = option.value === mode;
@@ -536,12 +535,3 @@ export function QuestDashboardHomeControl({ closePopout }: { closePopout?: () =>
     );
 }
 
-export function QuestDashboardToolbar({ closePopout }: { closePopout?: () => void; }) {
-    return (
-        <div className="quest-ui-dashboard-local-tools">
-            <QuestDashboardFilterSortControls />
-            <QuestPluginSettingsControl pluginName="QuestUI" title="QuestUI Settings" closePopout={closePopout} />
-            <QuestDashboardHomeControl closePopout={closePopout} />
-        </div>
-    );
-}

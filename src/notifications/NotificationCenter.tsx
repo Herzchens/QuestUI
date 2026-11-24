@@ -4,6 +4,7 @@ import { showToast, ThemeStore, UserStore, useEffect, useState, useStateFromStor
 import { queryEventLog, subscribeEventLog } from "../eventLog/runtime";
 import type { EventLogEvent } from "../eventLog/types";
 import { useQuestSnapshot, type NormalizedQuest, type QuestTaskType } from "../quests/data";
+import { dashboardThemeClassName } from "../themes/runtime";
 import {
     notificationCenterItems,
     unreadNotificationCenterCount,
@@ -357,7 +358,7 @@ export function NotificationCenterPanel({ feed }: { feed: NotificationCenterFeed
     };
 
     return (
-        <div className="quest-ui-notification-center-panel" role="dialog" aria-label="Notification Center">
+        <div className={dashboardThemeClassName("quest-ui-notification-center-panel")} role="dialog" aria-label="Notification Center">
             <div className="quest-ui-notification-center-header">
                 <div>
                     <strong>Notification Center</strong>

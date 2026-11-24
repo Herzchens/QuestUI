@@ -14,6 +14,7 @@ import {
     SortIcon
 } from "./controls";
 import { EventLogWindowedScroller } from "./EventLogWindowedScroller";
+import { dashboardThemeClassName } from "../themes/runtime";
 import { inferEventCategory } from "./logic";
 import { queryEventLogPage } from "./page";
 import type { EventLogCursor } from "./pagination";
@@ -44,7 +45,6 @@ import { clearEventLog, getEventLogInfo, openEventLogFolder, subscribeEventLog }
 import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort, EventLogSource } from "./types";
 
 import "./styles/eventLog.css";
-import "./styles/eventLogPagination.css";
 
 type EventLogStorageInfo = {
     path: string;
@@ -370,7 +370,7 @@ function EventLogPanel() {
     };
 
     return (
-        <div className="quest-ui-event-log-panel" role="dialog" aria-label="QuestUI Event Log">
+        <div className={dashboardThemeClassName("quest-ui-event-log-panel")} role="dialog" aria-label="QuestUI Event Log">
             <div className="quest-ui-event-log-header">
                 <div>
                     <strong>Event Log</strong>

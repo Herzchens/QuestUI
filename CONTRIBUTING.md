@@ -6,7 +6,7 @@ Read `README.md`, `AGENTS.md`, `CHANGELOG.md`, and `docs/RELEASES.md` before cha
 
 ## Scope
 
-QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-authorized native Accept/Claim actions including bounded sequential Claim all, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide account-scoped Ignore/Unignore presentation preferences, provide sanitized QuestUI/Orion diagnostics, send local Vencord/native desktop notifications, optionally delegate controls to a separately installed compatible OrionQuests companion, and update a clean official OrionQuests source checkout after an explicit Update click.
+QuestUI is a standalone Vencord userplugin. It may improve Discord Quest UI, perform explicit user-authorized native Accept/Claim actions including bounded sequential Claim all, request Discord's native Quest-list refresh, display native Orb/runtime metadata, provide account-scoped Ignore/Unignore presentation preferences, provide sanitized QuestUI/Orion diagnostics, send local Vencord/native desktop notifications, present an account-scoped Event Log-backed Notification Center, optionally delegate controls to a separately installed compatible OrionQuests companion, and update supported official source checkouts through the explicit managed-update flows.
 
 Do not turn QuestUI into a Quest farming engine. Do not add automatic enrollment/claim, progress spoofing, heartbeats, targeted quest execution, challenge bypasses, private Orion farming imports, or a companion-bot/backend/DM requirement just to deliver QuestUI notifications.
 
@@ -27,20 +27,26 @@ pnpm exec tsx src/userplugins/QuestUI/tests/quests/actionSafety.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/claimAll.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/orion/companion.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/orion/controls.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/orion/status.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/orion/events.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/orion/scheduler.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/reload.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/quests/autoReload.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/shortcut.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/orbs/balance.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/sort.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/rewardFilters.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/open.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/notifications/logic.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/notifications/center.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/eventLog.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/updates/channel.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/updates/logic.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/updates/questuiNative.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/updates/orionNative.test.ts
 pnpm build
-pnpm testTsc
+pnpm test:ts
 node src/userplugins/QuestUI/scripts/checkQuestUIReporter.mjs --self-test
 ```
 
@@ -95,10 +101,16 @@ Optional additive capabilities are feature-detected independently:
 - `getSchedulerSnapshot()` + `subscribeSchedulerState()` supply live scheduler metadata. Treat the current batch as unordered and never infer queue position or future execution order.
 - Absence of either capability must not disable the core v4.10.7+ Orion control integration.
 
-Global UI order:
+Dashboard action-bar order when Orion controls are available:
 
 ```text
-Smart Start/Pause/Resume → Stop → Claim All → Reload → Update → Event Log → Sort → Filter → Home
+Smart Start/Pause/Resume -> Stop -> Claim All -> Reload -> Update -> Event Log -> Notification Island -> Market -> Home
+```
+
+The Quest List row is separate:
+
+```text
+Quest List -> Sort -> Filter -> QuestUI Settings
 ```
 
 State rules:
@@ -123,7 +135,7 @@ Per-Quest UI:
 - claimable → control disappears and Claim appears;
 - never implement targeted Start; Orion owns scheduling/concurrency.
 
-Use Vencord's native toast API for explicit control success/failure feedback. Never fabricate a Discord channel to invoke slash callbacks.
+Use the feedback surface that matches the outcome: short-lived successful Dashboard actions may use the Dashboard notification island, while failures and outcomes that must remain visible independently of that island use Vencord's native object-form toast API. Do not duplicate the same result across both surfaces without a specific UX reason. Never fabricate a Discord channel to invoke slash callbacks.
 
 ## Ignore / Unignore
 
@@ -156,6 +168,14 @@ QuestUI notification delivery stays local-first through Vencord's Notifications 
 - Suppress short-lived duplicate notifications for the same source/event code/Quest/summary while preserving distinct failures.
 - Allow desktop Event Log persistence to settle before deciding a new sanitized row is absent.
 - Normal notification persistence/delivery behavior belongs to Vencord's notification settings and Notification Log rather than a QuestUI-owned OS-notification subsystem.
+
+### Notification Center
+
+- Treat the Center as an account-scoped Dashboard inbox backed by sanitized Event Log events, not as a second event database.
+- Persist only Center presentation state (initialization/read-through/clear-through) per account; clearing the Center must not clear Event Log.
+- Account switches must change both the visible feed and read/clear state without leaking another account's inbox.
+- Keep the whitelist intentionally narrower than Event Log: user-facing new-Quest, successful Accept/Claim/Claim All outcomes, and actionable failure/verification states belong; routine lifecycle, progress/completion, updater, retry, and generic runtime noise do not.
+- Quest artwork/task badges are optional presentation and must fail safely when the live Quest cannot be resolved.
 
 ## Dashboard presentation
 
@@ -200,7 +220,7 @@ Keep the current presentation contracts unless a change explicitly targets them:
 - If it settles mid-rotation, finish the current rotation and stop on `animationiteration`.
 - Coalesce overlapping native requests and synchronously guard duplicate clicks.
 - Success with no new Quest remains success.
-- Keep Reload independent of Orion, theme-readable, and on Vencord native toast feedback.
+- Keep Reload independent of Orion and theme-readable. Manual success may use the Dashboard notice island; failures use a Vencord critical toast.
 
 ## Webpack / patch compatibility
 
@@ -222,14 +242,15 @@ Current manual coverage should include:
 
 - title/native Quest icon/Nitro-or-Xbox+ badge without overlap;
 - seven-item summary including zero/ Ignored / Hidden counts and even spacing;
-- Sort/Filter/Home controls and custom popouts;
-- expired-age 7/15/30/90/All/custom filtering plus expiry copy outside 15 days;
+- top action-bar controls including Notification Island plus fixed Market/Home destinations, and the separate Quest List Sort/Filter/QuestUI Settings row;
+- expired-age 7/15/30/90/All filtering plus expiry copy outside 15 days;
 - accepted-Quest pinning and required-time sorting;
 - native Orb balance including zero and runtime version/health chips;
 - Ignore persistence/account isolation, expiry ending Ignore and cleaning stale IDs, Ignored catalogue visibility, Ignored-vs-Hidden counts, and exclusion from all normal attention surfaces;
 - active Orion exact-ID Pause on Ignore, no global Stop, and no auto-Resume on Unignore;
 - one-shot real New-Available and In-Progress → Ready-to-Claim notifications with no startup/backlog duplicate;
 - Problems notification behavior when explicitly testing that path, without misrepresenting automated coverage as live evidence;
+- Notification Center per-account feed isolation, unread/read/clear behavior, Event Log preservation, whitelist behavior, artwork fallback, and bell unread state;
 - Event Log persistence/search/source/level/category/sort/day grouping/detail/report/open/clear flows and scrollbar behavior;
 - large Event Log pagination/windowing on a 10k+ persisted history when that path changes;
 - Event Log account switching and legacy-row visibility;

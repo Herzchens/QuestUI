@@ -4,37 +4,6 @@ QuestUI is a standalone Vencord userplugin for quick access to Discord Quests an
 
 QuestUI is UI-focused rather than a Quest-completion engine. It performs only explicit user-authorized native Quest actions: **Accept Quest**, per-card **Claim Reward**, and bounded sequential **Claim all** for a fixed snapshot of Ready rewards. It does not generate Quest progress, spoof games/streams, claim rewards in the background without user authorization, or bypass Discord challenges.
 
-## Release status
-
-> [!IMPORTANT]
-> **v1.6.0-beta1** is the current Beta candidate. **v1.5.1** remains the current Stable release. Beta users must enable QuestUI pre-release updates; managed in-app installation still requires the signed Beta tag to target an official `main` commit.
->
-> v1.6.0-beta1 introduces the redesigned default Dashboard, compact action feedback, split Orion Quest / QuestUI status cards, rebuilt Filter and Sort controls, achievement segmented progress, and the redesigned Update Center. The runtime version remains canonical at `src/plugin/version.ts`; root `version.ts` remains compatibility metadata for supported older updaters.
->
-> Ignoring never changes Discord enrollment, progress, completion, or claim state. When a compatible OrionQuests companion explicitly reports that exact Quest as active, QuestUI pauses only that Quest before saving Ignore so hidden work does not continue farming invisibly. Unignore never auto-resumes or starts Orion.
->
-> Orion companion controls still require upstream `nyxxbit/discord-quest-completer` **v4.10.7 or newer**. Structured Event Log events and scheduler metadata remain additive capabilities; compatible builds without them keep the sanitized Event Log console fallback and simply omit unavailable scheduler metadata rather than losing the core integration.
->
-> v1.5.1 release preparation adds managed-updater layout-transition regression coverage and a compatibility contract for the v1.4.7 updater target format. Clean v1.5.0 checkouts manually recovered with Git are also covered as valid modern-only update sources.
->
-> v1.5.0 release preparation includes maintainer live Discord/Vencord smoke validation of the final beta candidate before Stable promotion. Automated gates cover the full logic suite, background Quest reload scheduling, both managed updater integration suites, Vencord build/type-check, upstream Orion coexistence, and semantic Stable/Canary Patch Reporters.
->
-> v1.4.7 release preparation verified the full logic and updater integration suites, Vencord build/type-check, upstream Orion coexistence, and semantic Stable/Canary Patch Reporter gates. Managed QuestUI updates now trust only clean official-main-history sources and still require a pinned-key signed target release.
->
-> v1.4.6 release preparation verified build/type-check, upstream Orion coexistence, and both Stable and Canary patch reporters after the top-bar compatibility fix. No new live Discord mutation path is claimed for this compatibility/documentation release.
->
-> v1.4.5 release preparation included maintainer live Discord validation of the repaired Claim Reward path on the current Stable desktop client. The reward claim completed successfully after the Discord action-resolver compatibility fix. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks gate the final release target.
->
-> v1.4.4 release preparation included maintainer live Discord validation of the Orb balance Shop shortcut, including automatic Dashboard dismissal before Shop navigation. The final release target is gated on build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks.
->
-> v1.4.3 release preparation included maintainer live Discord validation of the reported Claim Reward path: the reward was claimed successfully without the previous false `QUEST_CLAIM_FAILED` result. Existing historical Event Log rows are intentionally not rewritten. Build/type-check, upstream Orion coexistence, and Stable/Canary reporter checks gate the final release target.
->
-> v1.4.2 release preparation included maintainer live Discord validation of the final Dashboard update-status presentation, including the compact **You are up to date** state. Build/type-check, upstream Orion coexistence, Stable/Canary reporter checks, and temporary real-Git updater regression suites provide automated coverage; a destructive Orion managed update against a real user checkout was not performed as live release evidence.
->
-> v1.4.1 release preparation included maintainer live Discord Stable validation of the final Dashboard/header presentation, including the Quest title/icon layout, Claim All placement/count badge, and Orb balance styling. The sequential Claim All mutation path was not separately exercised as part of that final UI pass; its batching and fail-closed safety behavior is covered by automated regression tests and CI rather than being presented as live mutation evidence.
->
-> v1.4.0 release preparation included maintainer live Discord validation of Ignore against an active Orion Quest and a real Ready-to-Claim Vencord/Desktop notification. The Problems notification path is covered by automated logic/CI but was not separately forced in live Discord. Automated checks are not presented as proof of untested runtime behavior.
-
 ## Screenshots
 
 <p align="center">
@@ -59,19 +28,21 @@ The capture above is a real Discord runtime screenshot supplied by the maintaine
 
 - Configurable Vencord notifications for **New Quest Available**, **Ready to Claim**, and actionable runtime problems; all three categories are enabled by default
 
+- Account-scoped **Notification Center** backed by Event Log events, with per-account unread/read/clear presentation state and Quest artwork for supported user-facing events
+
 - Persistent Dashboard sorting, expired-history age filtering, and a compact Home action
 
 - Native current Orb balance plus Orion Quest / QuestUI runtime version metadata
 
 - Persistent **Event Log** with account-aware searchable/filterable diagnostics, per-event details, sanitized one-click bug reports, complete pagination, and large-log windowed rendering
 
-- Dashboard/Settings **Update Center** with per-product release-check health and last-success timestamps, independent QuestUI/OrionQuests pre-release opt-ins, a pinned-signature managed QuestUI updater, and an explicit QuestUI-owned OrionQuests source updater. One release feed can fail without erasing the other product's successful state or cached release result. Clean official `main` checkouts update directly; dirty/divergent official-main checkouts present **Keep** or **Discard & update**, with destructive consent rebound to the exact checkout snapshot before reset/clean. Vencord rebuilds after update and rolls back the previous commit on build failure.
+- Dashboard/Settings **Update Center** with per-product release-check health and last-success timestamps plus independent QuestUI/OrionQuests pre-release opt-ins. QuestUI self-update requires a clean official-history checkout and a pinned-key signed annotated release target on official `main`; it never discards dirty QuestUI work. OrionQuests source update is a separate QuestUI-owned path for the official upstream `main` checkout; dirty or locally divergent Orion work presents **Keep** or **Discard & update**, and destructive consent is rebound to the exact revalidated checkout snapshot before reset/clean. Vencord rebuilds after managed updates and restores the known-good runtime snapshot on guarded target-build failure.
 
 - Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
 
 - Explicit **Accept Quest**, **Claim Reward**, and bounded sequential **Claim all** actions
 
-- Account-scoped duplicate-submission guards and Vencord-native toast feedback
+- Account-scoped duplicate-submission guards, compact Dashboard notices for successful in-Dashboard actions, and Vencord-native toasts for failures or utility feedback
 
 - Floating filters for status, reward category, Quest type, expired history, and the separate Ignored catalogue
 
@@ -154,7 +125,7 @@ git clone https://github.com/nyxxbit/discord-quest-completer.git OrionQuests
 
 cd ../..
 pnpm build
-pnpm testTsc
+pnpm test:ts
 pnpm inject
 ```
 
@@ -220,7 +191,8 @@ The Filter popout supports:
 - Status: Available, Ready, In Progress, Claimed, Expired
 - Ignored catalogue: show locally ignored Quests separately from normal status filtering
 - Expired history (when Expired is enabled): stepped 7d, 15d, 30d, 90d, or All history
-- Reward: All rewards, Orbs only, Non-Orb rewards
+- Reward presets: All, Orbs, Collectible, In Game Reward, or Custom
+- Custom reward types: Orbs, Avatar Decoration, Profile Effect, Nameplate, Profile Frame, Bundle, Other Collectible, Nitro Credits, Gift Code, In Game Item, and Unknown / Future
 - Quest type: Play, Stream, Video, Activity, Other / Unknown
 
 The Sort popout supports **Expiring Soon**, **Highest Orb Reward**, **Shortest Required Time**, **Longest Required Time**, **Name A → Z**, and **Name Z → A**. Expiring Soon is the default/fallback sort mode. Required-time sorting compares normalized timed-task seconds; achievement/count objectives are not misread as durations.
@@ -277,9 +249,15 @@ QuestUI has three separately configurable notification categories in the QuestUI
 
 QuestUI uses Vencord's Notifications API instead of a companion bot, backend, DM relay, or parallel OS-notification system. Delivery therefore follows Vencord's notification configuration: Vencord in-app notification, native desktop notification when Discord is unfocused, or native desktop notification always. Vencord also persists normal notifications into its Notification Log according to the user's global log settings.
 
-New-Quest notifications establish the initial QuestStore/account contents as a baseline, so startup, account hydration, and Ignore/Unignore do not create a synthetic "new Quest" alert. Ready-to-Claim notifications likewise do not replay existing completed Quests on startup, account switch, Ignore/Unignore hydration, or setting enablement. Progress ticks and unchanged re-renders do not notify. Clicking either Quest notification opens Discord Quest Home.
+New-Quest notifications establish the initial QuestStore/account contents as a baseline, so startup, account hydration, and Ignore/Unignore do not create a synthetic "new Quest" alert. Ready-to-Claim notifications likewise do not replay existing completed Quests on startup, account switch, Ignore/Unignore hydration, or setting enablement. Progress ticks and unchanged re-renders do not notify. Clicking a QuestUI/Vencord notification opens the Quest Dashboard when a registered Dashboard surface is available and falls back to Discord Quest Home otherwise.
 
 Problem notifications ignore normal retry/fallback/recovery warnings, establish existing Event Log history as a baseline rather than a notification backlog, and deduplicate the same short-lived actionable problem. Ignored Quests do not produce QuestUI completion/problem attention while ignored.
+
+### Notification Center
+
+The Dashboard notification island opens QuestUI's account-scoped **Notification Center**. The Center reuses sanitized Event Log events as its event source instead of creating a second event database. It stores only per-account presentation state such as the initialization baseline, read-through position, and clear-through position; clearing the Notification Center does not delete Event Log history.
+
+The Center intentionally shows a narrower user-facing inbox than Event Log. Its current scope includes newly available Quests, successful Quest acceptance, successful reward claims and Claim All completion, plus actionable failures such as accept/claim/Claim All failures, Orion task failures, blocked Quests, auto-start failures, and claim verification/action-required states. Routine Orion start/stop events, Quest start/completion progress, Ready-to-Claim transitions, updater chatter, network retry diagnostics, and generic runtime noise stay out of the Center. Account switching changes both the visible feed and its read/clear state without leaking another account's inbox.
 
 ## Manual Accept and Claim
 
@@ -304,10 +282,16 @@ The integration is intentionally narrow. QuestUI validates the registered `orion
 
 OrionQuests **v4.10.7+** exposes the core source-of-truth engine/task control state expected by QuestUI. QuestUI consumes the companion snapshot/subscription surface rather than maintaining a mirrored engine/task state. Farming logic, queueing, concurrency, progress generation, task lifecycle, and engine lifecycle remain Orion-owned.
 
-Global header order:
+Dashboard action-bar order when Orion controls are available:
 
 ```text
-Smart Start/Pause/Resume → Stop → Claim All → Reload → Update → Event Log → Sort → Filter → Settings → Home
+Smart Start/Pause/Resume -> Stop -> Claim All -> Reload -> Update -> Event Log -> Notification Island -> Market -> Home
+```
+
+The Quest List row owns its own controls separately:
+
+```text
+Quest List -> Sort -> Filter -> QuestUI Settings
 ```
 
 State rules:
@@ -361,7 +345,7 @@ Structured Orion events and scheduler metadata are capability-detected independe
 
 Reload uses Discord's own current-Quest fetch-and-dispatch action located by `QUESTS_FETCH_CURRENT_QUESTS_BEGIN`.
 
-- Manual Reload starts the native request immediately and keeps the existing whole-rotation spinner and toast behavior.
+- Manual Reload starts the native request immediately, keeps the whole-rotation spinner, uses a compact Dashboard notice on success, and uses a Vencord critical toast on failure.
 - Background auto reload is enabled by default at **5h** and supports **10m / 20m / 30m / 1h / 2h / 4h / 5h / 12h / 24h**.
 - Background reload runs from the plugin lifecycle even when the Dashboard is closed and reuses the same Discord-native fetch path.
 - Successful background refreshes stay silent. If the fetch exposes a newly Available Quest, the existing **New Quest Available** QuestStore observer notifies the user.
@@ -405,9 +389,9 @@ For the v1.1.0 Stable promotion, the implementation checkpoint `5f11470` was als
 
 QuestUI is maintained by [Herzchens](https://github.com/Herzchens).
 
-It is a standalone extraction/refactor of the Quest interface originally built for [nicola02nb/completeDiscordQuest](https://github.com/nicola02nb/completeDiscordQuest). The original completion engine was removed. Later QuestUI work added narrowly scoped manual actions and optional Orion companion controls without moving farming/progress generation back into QuestUI.
+QuestUI began by extracting and refactoring the small Quest shortcut/status surface from [nicola02nb/completeDiscordQuest](https://github.com/nicola02nb/completeDiscordQuest): the Quest icon/shortcut and its status-dot indicator. The completion engine was not carried into QuestUI. The Dashboard, Quest cards, manual actions, Event Log, notifications, Notification Center, updater, reward filtering, and Orion companion controls were developed independently in QuestUI.
 
-Credit to **nicola02nb** for the original Quest UI implementation and to Vencord contributors for the plugin framework.
+Credit to **nicola02nb** for the original Quest shortcut icon/status-dot UI seed and to Vencord contributors for the plugin framework.
 
 QuestUI is maintained independently and is not affiliated with or endorsed by `completeDiscordQuest`, OrionQuests, Discord, or Vencord.
 

@@ -68,7 +68,6 @@ export interface QuestScope {
     statuses: Record<QuestStatus, boolean>;
     expiredAgeDays: number | null;
     rewards: RewardFilter;
-    includeUnknownRewards: boolean;
     taskTypes: Record<QuestTaskType, boolean>;
 }
 
@@ -86,14 +85,6 @@ const EMPTY_COUNTS: QuestStatusCounts = {
     claimable: 0,
     claimed: 0,
     expired: 0
-};
-
-const STATUS_SORT_ORDER: Record<QuestStatus, number> = {
-    "in-progress": 0,
-    claimable: 1,
-    available: 2,
-    claimed: 3,
-    expired: 4
 };
 
 // Discord's native Quest task selector/details helper. It chooses the task from
@@ -616,7 +607,6 @@ export function dashboardScopeFromSettings(store: any): QuestScope {
         },
         expiredAgeDays: normalizeExpiredAgeDays(store.dashboardExpiredAgeDays),
         rewards: selectedRewardKinds,
-        includeUnknownRewards: selectedRewardKinds === "all" || selectedRewardKinds.includes("unknown"),
         taskTypes: {
             play: store.dashboardShowPlay !== false,
             stream: store.dashboardShowStream !== false,
@@ -643,7 +633,6 @@ export function detailedScopeFromSettings(store: any): QuestScope {
             store.detailedRewardFilter,
             store.detailedIncludeUnknownRewards !== false
         ),
-        includeUnknownRewards: store.detailedIncludeUnknownRewards !== false,
         taskTypes: {
             play: store.detailedShowPlay !== false,
             stream: store.detailedShowStream !== false,
@@ -676,19 +665,6 @@ export function prioritizedAttention(counts: AttentionCounts): { status: Attenti
     if (counts.claimable > 0) return { status: "claimable", count: counts.claimable };
     if (counts.available > 0) return { status: "available", count: counts.available };
     return null;
-}
-
-export function sortDashboardQuests(quests: NormalizedQuest[]): NormalizedQuest[] {
-    return [...quests].sort((left, right) => {
-        const statusDifference = STATUS_SORT_ORDER[left.status] - STATUS_SORT_ORDER[right.status];
-        if (statusDifference !== 0) return statusDifference;
-
-        const leftExpiry = left.expiresAt ?? Number.POSITIVE_INFINITY;
-        const rightExpiry = right.expiresAt ?? Number.POSITIVE_INFINITY;
-        if (leftExpiry !== rightExpiry) return leftExpiry - rightExpiry;
-
-        return left.name.localeCompare(right.name);
-    });
 }
 
 export function formatExpiry(expiresAt: number | null, now = Date.now()): string | null {

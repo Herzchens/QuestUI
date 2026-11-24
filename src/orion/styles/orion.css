@@ -1,36 +1,12 @@
 .quest-ui-dashboard-shell {
     position: relative;
     width: min(640px, calc(100vw - 24px));
-}
-
-.quest-ui-dashboard-shell > .quest-ui-dashboard {
+}.quest-ui-dashboard-shell > .quest-ui-dashboard {
     width: 100%;
-}
-
-.quest-ui-dashboard-shell.has-dashboard-tools .quest-ui-dashboard-heading {
-    box-sizing: border-box;
-    padding-right: 40px;
-}
-
-.quest-ui-dashboard-shell.has-dashboard-tools.has-orion-control .quest-ui-dashboard-heading {
-    padding-right: 120px;
-}
-
-.quest-ui-dashboard-header-tools {
+}.quest-ui-orion-controls {
     display: inline-flex;
     gap: 6px;
-    position: absolute;
-    right: 55px;
-    top: 14px;
-    z-index: 3;
-}
-
-.quest-ui-orion-controls {
-    display: inline-flex;
-    gap: 6px;
-}
-
-.quest-ui-orion-icon-button {
+}.quest-ui-orion-icon-button {
     align-items: center;
     background: var(--background-mod-strong, rgba(255, 255, 255, 0.12));
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
@@ -42,21 +18,12 @@
     justify-content: center;
     padding: 0;
     width: 34px;
-}
-
-.quest-ui-orion-icon-button svg {
+}.quest-ui-orion-icon-button svg {
     fill: currentColor;
     height: 17px;
     width: 17px;
-}
-
-.quest-ui-orion-icon-button.is-start,
-.quest-ui-orion-icon-button.is-resume { color: var(--status-positive); }
-.quest-ui-orion-icon-button.is-pause { color: var(--status-warning, #f0b232); }
-.quest-ui-orion-icon-button.is-stop { color: var(--status-danger); }
-.quest-ui-orion-icon-button:hover:not(:disabled) { background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18)); }
-.quest-ui-orion-icon-button:focus-visible { outline: 2px solid var(--focus-primary, var(--brand-500)); outline-offset: 2px; }
-.quest-ui-orion-icon-button:disabled { cursor: default; opacity: 0.45; }
+}.quest-ui-orion-icon-button.is-start,
+.quest-ui-orion-icon-button.is-resume { color: var(--status-positive); }.quest-ui-orion-icon-button.is-pause { color: var(--status-warning, #f0b232); }.quest-ui-orion-icon-button.is-stop { color: var(--status-danger); }.quest-ui-orion-icon-button:hover:not(:disabled) { background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18)); }.quest-ui-orion-icon-button:focus-visible { outline: 2px solid var(--focus-primary, var(--brand-500)); outline-offset: 2px; }.quest-ui-orion-icon-button:disabled { cursor: default; opacity: 0.45; }
 
 @keyframes quest-ui-orion-connected-breathe {
     0%, 100% {
@@ -78,9 +45,7 @@
         opacity: 1;
         box-shadow: 0 0 8px 2px color-mix(in srgb, var(--status-warning, #f0b232) 40%, transparent);
     }
-}
-
-.quest-ui-orion-status {
+}.quest-ui-orion-status {
     align-items: center;
     color: var(--text-muted);
     display: inline-flex;
@@ -88,39 +53,27 @@
     font-size: 12px;
     gap: 7px;
     min-width: 0;
-}
-
-.quest-ui-orion-status-dot {
+}.quest-ui-orion-status-dot {
     background: var(--interactive-muted);
     border-radius: 999px;
     flex: 0 0 8px;
     height: 8px;
     width: 8px;
-}
-
-.quest-ui-orion-status.is-connected .quest-ui-orion-status-dot {
+}.quest-ui-orion-status.is-connected .quest-ui-orion-status-dot {
     animation: quest-ui-orion-connected-breathe 2.7s ease-in-out infinite;
     background: var(--status-positive);
-}
-
-.quest-ui-orion-status.is-connected.is-engine-idle .quest-ui-orion-status-dot {
+}.quest-ui-orion-status.is-connected.is-engine-idle .quest-ui-orion-status-dot {
     animation: none;
     background: var(--interactive-muted);
     box-shadow: none;
     opacity: 1;
-}
-
-.quest-ui-orion-status.is-starting .quest-ui-orion-status-dot {
+}.quest-ui-orion-status.is-starting .quest-ui-orion-status-dot {
     animation: quest-ui-orion-starting-breathe 1.65s ease-in-out infinite;
     background: var(--status-warning, #f0b232);
-}
-
-.quest-ui-orion-status.is-disabled .quest-ui-orion-status-dot,
+}.quest-ui-orion-status.is-disabled .quest-ui-orion-status-dot,
 .quest-ui-orion-status.is-integration-off .quest-ui-orion-status-dot {
     background: var(--interactive-muted);
-}
-
-.quest-ui-orion-status-warning,
+}.quest-ui-orion-status-warning,
 .quest-ui-orion-status-question {
     align-items: center;
     display: inline-flex;
@@ -130,66 +83,19 @@
     justify-content: center;
     line-height: 1;
     width: 12px;
-}
-
-.quest-ui-orion-status-warning {
+}.quest-ui-orion-status-warning {
     color: var(--status-warning, #f0b232);
-}
-
-.quest-ui-orion-status-question {
+}.quest-ui-orion-status-question {
     color: var(--text-muted);
-}
-
-.quest-ui-orion-status.is-connected {
+}.quest-ui-orion-status.is-connected {
     color: var(--text-default, var(--header-secondary));
-}
-
-.quest-ui-orion-status.is-version-incompatible,
+}.quest-ui-orion-status.is-version-incompatible,
 .quest-ui-orion-status.is-integration-unavailable {
     color: var(--status-warning, #f0b232);
 }
 
-.quest-ui-orion-task-badge {
-    align-items: center;
-    background: var(--background-mod-subtle, rgba(255, 255, 255, 0.05));
-    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
-    border-radius: 999px;
-    display: inline-flex;
-    flex: 0 0 auto;
-    font-size: 9.5px;
-    font-weight: 800;
-    letter-spacing: 0.25px;
-    line-height: 1;
-    min-height: 19px;
-    padding: 3px 7px;
-    white-space: nowrap;
-}
-
-.quest-ui-orion-task-badge.is-running {
-    background: color-mix(in srgb, var(--status-positive) 11%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
-    border-color: color-mix(in srgb, var(--status-positive) 52%, transparent);
-    color: var(--status-positive);
-}
-
-.quest-ui-orion-task-badge.is-queued {
-    background: color-mix(in srgb, var(--brand-500, #5865f2) 11%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
-    border-color: color-mix(in srgb, var(--brand-500, #5865f2) 52%, transparent);
-    color: var(--brand-360, #949cf7);
-}
-
-.quest-ui-orion-task-badge.is-paused {
-    background: color-mix(in srgb, var(--status-warning, #f0b232) 10%, var(--background-mod-subtle, rgba(255, 255, 255, 0.05)));
-    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 52%, transparent);
-    color: var(--status-warning, #f0b232);
-}
-
-.quest-ui-orion-task-badge.is-stopped {
-    color: var(--text-muted);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .quest-ui-orion-status.is-connected .quest-ui-orion-status-dot,
-    .quest-ui-orion-status.is-starting .quest-ui-orion-status-dot {
+@media (prefers-reduced-motion: reduce) {.quest-ui-orion-status.is-connected .quest-ui-orion-status-dot,
+.quest-ui-orion-status.is-starting .quest-ui-orion-status-dot {
         animation: none;
         box-shadow: none;
         opacity: 1;

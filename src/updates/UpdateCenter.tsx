@@ -5,8 +5,9 @@ import { Popout, useEffect, useRef, useState } from "@webpack/common";
 
 import { checkForUpdates, getInstalledRelease, getUpdateSnapshot, subscribeUpdateState, type PluginUpdateState, type UpdateProduct, type UpdateSnapshot } from "./runtime";
 import { managedNative as Native, runManagedReleaseUpdate, runOrionUpdateDecision, saveSkippedUpdate, saveUpdateReminder, toastFailure, type AvailableUpdateState, type ManagedReleaseUpdateResult, type UpdatePendingAction } from "./managed";
-import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, dashboardAvailabilityLines, formatCompactTimestamp, healthForProduct, productLabel, safeOpenRelease, updateProductTone, visibleReleaseVersion, visibleUpdate } from "./status";
+import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, formatCompactTimestamp, healthForProduct, productLabel, safeOpenRelease, updateProductTone, visibleReleaseVersion, visibleUpdate } from "./status";
 import { pushDashboardNotice } from "../dashboard/notifications";
+import { dashboardThemeClassName } from "../themes/runtime";
 import { versionChannelClass } from "./channel";
 
 import "./styles.css";
@@ -366,10 +367,10 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
             ? availabilityCopy
             : hasError
                 ? "QuestUI or OrionQuest update checks need attention."
-                : "OrionQuest and QuestUI are up to dated.";
+                : "OrionQuest and QuestUI are up to date.";
 
     return (
-        <div className="quest-ui-update-panel quest-ui-update-panel-v16" role="group" aria-label="Plugin updates">
+        <div className={dashboardThemeClassName("quest-ui-update-panel", "quest-ui-update-panel-v16")} role="group" aria-label="Plugin updates">
             <header className="quest-ui-update-panel-heading">
                 <div className="quest-ui-update-panel-title-block">
                     <div className="quest-ui-update-panel-title">
@@ -572,49 +573,6 @@ export function UpdateCenterIndicator() {
                 </button>
             )}
         </Popout>
-    );
-}
-
-export function DashboardUpdateNotice() {
-    const snapshot = useUpdateSnapshot();
-    const questUIVersion = visibleReleaseVersion(snapshot.questUI);
-    const orionVersion = visibleReleaseVersion(snapshot.orion);
-    const hasUpdate = questUIVersion != null || orionVersion != null;
-    const hasError = snapshot.questUIHealth.error != null
-        || snapshot.orionHealth.error != null
-        || snapshot.questUI.kind === "error"
-        || snapshot.orion.kind === "error";
-
-    const allCurrent = snapshot.questUI.kind === "up-to-date"
-        && (
-            snapshot.orion.kind === "up-to-date"
-            || snapshot.orion.kind === "not-installed"
-            || snapshot.orion.kind === "disabled"
-        );
-
-    if (!snapshot.checking && !hasUpdate && !hasError && !allCurrent) return null;
-
-    const [primaryCopy, secondaryCopy] = dashboardAvailabilityLines(snapshot);
-    const ariaCopy = secondaryCopy ? `${primaryCopy} ${secondaryCopy}` : primaryCopy;
-
-    return (
-        <div className="quest-ui-dashboard-update-slot" aria-label={ariaCopy}>
-            <span className={`quest-ui-dashboard-update-chip${
-                snapshot.checking
-                    ? " is-checking"
-                    : hasUpdate
-                        ? " has-update"
-                        : hasError
-                            ? " has-error"
-                            : " is-current"
-            }`}>
-                <span className="quest-ui-dashboard-update-chip-dot" aria-hidden="true" />
-                <span className="quest-ui-dashboard-update-chip-copy">
-                    <span>{primaryCopy}</span>
-                    {secondaryCopy && <span>{secondaryCopy}</span>}
-                </span>
-            </span>
-        </div>
     );
 }
 

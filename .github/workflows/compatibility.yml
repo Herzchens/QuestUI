@@ -308,12 +308,12 @@ jobs:
           grep -Fq 'aria-label={title}' src/userplugins/QuestUI/src/dashboard/DashboardToolbar.tsx
           grep -Fq 'QUEST_AUTO_RELOAD_MINUTES = [10, 20, 30, 60, 120, 240, 300, 720, 1440]' src/userplugins/QuestUI/src/quests/reload/autoLogic.ts
           grep -Fq 'startQuestAutoReload(() => ({' src/userplugins/QuestUI/index.tsx
-          grep -Fq 'animation: quest-ui-dashboard-title-sweep 3.8s linear infinite' src/userplugins/QuestUI/src/dashboard/styles/dashboardPolish.css
+          grep -Fq 'animation: quest-ui-dashboard-title-sweep 3.8s linear infinite' src/userplugins/QuestUI/src/themes/default/dashboard.css
           grep -Fq 'updateOrionRelease' src/userplugins/QuestUI/src/updates/managed.ts
           grep -Fq 'recordManagedUpdateEvent' src/userplugins/QuestUI/src/updates/managed.ts
           grep -Fq 'combinedAvailabilityCopy' src/userplugins/QuestUI/src/updates/status.tsx
-          grep -Fq 'dashboardAvailabilityLines' src/userplugins/QuestUI/src/updates/status.tsx
-          grep -Fq 'quest-ui-dashboard-update-chip-copy' src/userplugins/QuestUI/src/updates/styles.css
+          grep -Fq 'DashboardProductUpdateNotice' src/userplugins/QuestUI/src/updates/UpdateCenter.tsx
+          grep -Fq 'quest-ui-product-update-chip' src/userplugins/QuestUI/src/themes/default/dashboard.css
           grep -Fq 'automaticChecksEnabled' src/userplugins/QuestUI/src/updates/runtime.ts
           grep -Fq 'updateIncludeOrionPrereleases' src/userplugins/QuestUI/src/plugin/settings.ts
           grep -Fq 'questUIIncludePrereleases: settings.store.updateIncludePrereleases' src/userplugins/QuestUI/index.tsx

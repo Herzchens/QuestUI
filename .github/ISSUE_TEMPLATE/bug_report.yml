@@ -10,7 +10,7 @@ body:
       value: |
         Thank you for reporting a QuestUI problem.
 
-        This form is for issues caused by QuestUI itself, including the Dashboard, native Accept/Claim, Reload, Orb/runtime metadata, Orion controls, and Event Log diagnostics. Quest completion/progress automation itself belongs to the completion engine.
+        This form is for issues caused by QuestUI itself, including the Dashboard, Notification Center, native Accept/Claim/View Code, Reload, Update Center, Orb/runtime metadata, Orion controls, and Event Log diagnostics. Quest completion/progress automation itself belongs to the completion engine.
 
         Do not include Discord tokens, account credentials, private account data, or other sensitive information in logs or screenshots.
 
@@ -54,9 +54,11 @@ body:
         - Dashboard or Quest cards
         - Dashboard filters or sorting
         - Orb balance or rewards
-        - Manual Accept or Claim
+        - Manual Accept, Claim, or View Code
         - Orion status or controls
+        - Notification Center
         - Event Log or diagnostic report
+        - Update Center or managed update
         - Native Reload
         - Quest Home navigation
         - Top-bar button
@@ -108,7 +110,7 @@ body:
     attributes:
       label: QuestUI version or commit
       description: Provide the QuestUI version and commit SHA when available.
-      placeholder: v1.3.0 / abc1234
+      placeholder: v1.x.x / abc1234
     validations:
       required: false
 
@@ -118,9 +120,9 @@ body:
       label: Enabled QuestUI settings
       description: Select every QuestUI setting that was enabled when the problem occurred.
       options:
-        - label: Show Quests button in top bar
-        - label: Show Quests button in settings bar
-        - label: Show Quest Home counters
+        - label: Top Bar Button
+        - label: Settings Bar Button
+        - label: Quest Home Counters
         - label: Dashboard Mode
         - label: Dashboard Orion Integration
         - label: Detailed Status

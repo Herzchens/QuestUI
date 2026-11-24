@@ -181,9 +181,9 @@ The earlier Stable release contained the Dashboard/read-only-era feature set bef
 
 ## Publishing checklist
 
-1. Merge/promote the reviewed release-prep commit to `main`; Stable tags must target the final `main` commit, not a feature-branch-only SHA.
+1. Merge/promote the reviewed release-prep commit to `main`; release tags must target the final `main` commit, not a feature-branch-only SHA.
 2. Confirm the intended release tag does not already exist locally or on the remote, and confirm the local `main` SHA exactly matches `origin/main`.
-3. Confirm `version.ts`, README, changelog, and this document all name the same release version.
+3. Confirm canonical `src/plugin/version.ts`, legacy compatibility `version.ts`, the changelog, and this document name the intended release version. README is evergreen documentation and is not release-version metadata.
 4. Confirm the latest QuestUI Compatibility workflow for the exact release target is green, including build/type-check, Stable/Canary reporters, and the maintained upstream Orion `main` coexistence job.
 5. Distinguish automated compatibility evidence from live Discord runtime evidence. State exactly what was and was not manually tested.
 6. Create a **signed annotated tag**, verify that its peeled commit is the intended `main` SHA, and verify the signature locally before pushing the tag.

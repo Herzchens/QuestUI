@@ -45,8 +45,10 @@ body:
         - Manual Quest actions
         - Orion integration
         - Event Log or diagnostics
+        - Notification Center
+        - Update Center or managed updates
         - Discord or Vencord compatibility
-        - Installation or updates
+        - Installation
         - Documentation
         - Other
     validations:

@@ -159,26 +159,6 @@ export function combinedAvailabilityCopy(snapshot: UpdateSnapshot): string {
     return "You are up to date";
 }
 
-export function dashboardAvailabilityLines(snapshot: UpdateSnapshot): readonly [string, string | null] {
-    const questUIVersion = visibleReleaseVersion(snapshot.questUI);
-    const orionVersion = visibleReleaseVersion(snapshot.orion);
-
-    if (snapshot.checking) return ["Checking updates…", null];
-    if (orionVersion && questUIVersion) {
-        return [`OrionQuest ${orionVersion} and`, `QuestUI ${questUIVersion} are available`];
-    }
-    if (orionVersion) return [`OrionQuest ${orionVersion}`, "is available"];
-    if (questUIVersion) return [`QuestUI ${questUIVersion}`, "is available"];
-
-    const questUIError = productCheckFailed(snapshot, "questui");
-    const orionError = productCheckFailed(snapshot, "orion");
-    if (questUIError && orionError) return ["Update checks", "need attention"];
-    if (questUIError) return ["QuestUI update check", "needs attention"];
-    if (orionError) return ["OrionQuests update check", "needs attention"];
-
-    return ["You are up to date", null];
-}
-
 export function UpdateProductStatus({ product, state, health, compact = false }: {
     product: UpdateProduct;
     state: PluginUpdateState;

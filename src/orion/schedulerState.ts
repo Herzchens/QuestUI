@@ -78,16 +78,3 @@ export function normalizeOrionSchedulerSnapshot(value: unknown): OrionSchedulerS
         quests
     };
 }
-
-export function schedulerLaneCopy(lane: OrionSchedulerLaneSnapshot): string {
-    if (lane.limit == null) return "Idle";
-    return `${lane.running}/${lane.limit} running · ${lane.waiting} waiting`;
-}
-
-export function schedulerQuestEntries(snapshot: OrionSchedulerSnapshot): Array<[string, OrionSchedulerQuestSnapshot]> {
-    return Object.entries(snapshot.quests).sort(([leftId, left], [rightId, right]) => {
-        if (left.lane !== right.lane) return left.lane === "game" ? -1 : 1;
-        if (left.state !== right.state) return left.state === "running" ? -1 : 1;
-        return leftId.localeCompare(rightId);
-    });
-}

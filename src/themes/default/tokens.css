@@ -1,0 +1,105 @@
+/* Shared visual contract for the default QuestUI theme.
+ * Component styles own geometry and behavior; theme roots own visual values.
+ * Future dashboard themes can override this contract without copying component CSS.
+ */
+.quest-ui-theme-default {
+    --quest-ui-theme-accent: #a970ff;
+
+    --quest-ui-theme-panel: #111216;
+    --quest-ui-theme-surface: #17181d;
+    --quest-ui-theme-surface-avatar: #24252b;
+    --quest-ui-theme-control: #191a1f;
+    --quest-ui-theme-control-hover: #222329;
+    --quest-ui-theme-artwork: #1d1f23;
+
+    --quest-ui-theme-danger-surface: #211719;
+    --quest-ui-theme-danger-hover: #1b191c;
+    --quest-ui-theme-success-surface: #181b19;
+    --quest-ui-theme-success-artwork: #1b201d;
+    --quest-ui-theme-warning-artwork: #201d17;
+    --quest-ui-theme-error-artwork: #21191b;
+    --quest-ui-theme-info-artwork: #1d1c23;
+
+    --quest-ui-theme-text-strong: #fff;
+    --quest-ui-theme-text-primary: var(--header-primary, #f2f3f5);
+    --quest-ui-theme-text-normal: var(--text-default, #dbdee1);
+    --quest-ui-theme-text-muted: var(--text-muted, #949ba4);
+    --quest-ui-theme-text-secondary: #b5bac1;
+    --quest-ui-theme-text-subtle: #aeb3ba;
+    --quest-ui-theme-icon: #d7d9dd;
+    --quest-ui-theme-ignored: #c77dff;
+
+    --quest-ui-theme-border-faint: rgba(255, 255, 255, .065);
+    --quest-ui-theme-border-soft: rgba(255, 255, 255, .075);
+    --quest-ui-theme-border-muted: rgba(255, 255, 255, .08);
+    --quest-ui-theme-border-control: rgba(255, 255, 255, .105);
+    --quest-ui-theme-border-strong: rgba(255, 255, 255, .14);
+    --quest-ui-theme-row-hover: rgba(255, 255, 255, .022);
+
+    --quest-ui-theme-panel-shadow: rgba(0, 0, 0, .52);
+    --quest-ui-theme-float-shadow: rgba(0, 0, 0, .45);
+
+    /* Update Center */
+    --quest-ui-update-panel: #17171c;
+    --quest-ui-update-product-surface: #1b1c21;
+    --quest-ui-update-accent: #9d7cff;
+    --quest-ui-update-title: #f4f5f7;
+    --quest-ui-update-check-text: #e6e0ff;
+    --quest-ui-update-banner-text: #eef0f2;
+    --quest-ui-update-banner-muted: #8e939c;
+    --quest-ui-update-product-title: #f0f1f3;
+    --quest-ui-update-meta: #c9ccd2;
+    --quest-ui-update-muted: #777c85;
+    --quest-ui-update-date: #6f747d;
+    --quest-ui-update-icon: #d8dae0;
+    --quest-ui-update-link: #aeb7ff;
+    --quest-ui-update-link-hover: #d0d5ff;
+    --quest-ui-update-support-link-hover: #d1d6ff;
+    --quest-ui-update-settings-hint: #747983;
+    --quest-ui-update-neutral: #666b75;
+    --quest-ui-update-state-muted: #737883;
+    --quest-ui-update-banner-state-muted: #7c8089;
+    --quest-ui-update-checking: #a8acb5;
+    --quest-ui-update-current: #59d484;
+    --quest-ui-update-available: #9ca7ff;
+    --quest-ui-update-error: #f07578;
+    --quest-ui-update-warning: #e7b84e;
+    --quest-ui-update-banner-current: #49d67d;
+    --quest-ui-update-banner-available: #8c98ff;
+    --quest-ui-update-banner-error: #f06467;
+    --quest-ui-update-alpha: #ff7b7e;
+    --quest-ui-update-old-version: #f47b7e;
+    --quest-ui-update-target: #aab4ff;
+    --quest-ui-update-arrow: #818690;
+
+    /* Event Log */
+    --quest-ui-event-panel-start: #100d17;
+    --quest-ui-event-panel-end: #0e0b14;
+    --quest-ui-event-detail-end: #0c0a12;
+    --quest-ui-event-control-surface: #24262b;
+    --quest-ui-event-control-hover: #34373d;
+    --quest-ui-event-control-pressed: #2b2e33;
+    --quest-ui-event-action-island: #19191f;
+    --quest-ui-event-island-surface: #1d1a1c;
+    --quest-ui-event-island-border: #2c2d34;
+    --quest-ui-event-confirm-surface: #202026;
+    --quest-ui-event-confirm-hover: #292930;
+    --quest-ui-event-portal-surface: #202126;
+    --quest-ui-event-island-text: #f4f4f5;
+    --quest-ui-event-detail-action-text: #d9dce2;
+    --quest-ui-event-detail-heading: #f5f6f8;
+    --quest-ui-event-detail-text: #f0f1f4;
+    --quest-ui-event-detail-label: #a6aab3;
+    --quest-ui-event-detail-diagnostic-label: #9da1aa;
+    --quest-ui-event-detail-diagnostic-text: #e6e8ec;
+    --quest-ui-event-detail-diagnostic-surface: #0a0910;
+    --quest-ui-event-detail-diagnostic-code: #b8bdc7;
+    --quest-ui-event-portal-title: #8f939c;
+    --quest-ui-event-text-normal: var(--text-normal, #dbdee1);
+    --quest-ui-event-text-strong: var(--text-normal, #f2f3f5);
+    --quest-ui-event-text-muted: var(--text-muted, #949ba4);
+    --quest-ui-event-text-muted-soft: var(--text-muted, #b5bac1);
+    --quest-ui-event-interactive-normal: var(--interactive-normal, #b5bac1);
+
+
+}
