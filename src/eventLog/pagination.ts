@@ -1,4 +1,4 @@
-import type { EventLogEvent, EventLogSeverity, EventLogSort } from "./types";
+import type { EventLogAccountScope, EventLogEvent, EventLogSeverity, EventLogSort } from "./types";
 
 export interface EventLogCursor {
     version: 1;
@@ -11,12 +11,14 @@ export interface EventLogCursor {
 export interface EventLogPageQuery {
     query?: string;
     source?: "all" | "orion" | "questui";
-    severity?: "all" | EventLogSeverity;
-    category?: "all" | "quest" | "runtime" | "network" | "diagnostic";
+    severity?: "all" | EventLogSeverity | EventLogSeverity[];
+    category?: "all" | "quest" | "runtime" | "network" | "diagnostic" | Array<"quest" | "runtime" | "network" | "diagnostic">;
     sort?: EventLogSort;
     pageSize?: number;
     cursor?: EventLogCursor | null;
     sessionId?: string | null;
+    accountScope?: "all" | EventLogAccountScope | EventLogAccountScope[];
+    currentAccountId?: string | null;
     accountId?: string;
     includeLegacy?: boolean;
 }

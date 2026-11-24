@@ -1,8 +1,5 @@
 import type { PluginNative } from "@utils/types";
-import { UserStore } from "@webpack/common";
-
 import { queryEventLog } from "./runtime";
-import { UNAVAILABLE_ACCOUNT_SCOPE } from "./account";
 import {
     pageSortedEventLogEvents,
     sortEventLogEvents,
@@ -22,15 +19,6 @@ const memorySessions = new Map<string, {
     events: EventLogPageResult["events"];
 }>();
 
-function currentAccountId(): string {
-    try {
-        const id = UserStore?.getCurrentUser?.()?.id;
-        return typeof id === "string" && id.trim() ? id.trim() : UNAVAILABLE_ACCOUNT_SCOPE;
-    } catch {
-        return UNAVAILABLE_ACCOUNT_SCOPE;
-    }
-}
-
 function normalizedSort(options: EventLogPageQuery): NonNullable<EventLogPageQuery["sort"]> {
     return options.sort === "oldest" || options.sort === "severity" ? options.sort : "newest";
 }
@@ -42,6 +30,8 @@ function sessionSignature(options: EventLogPageQuery): string {
         options.severity ?? "all",
         options.category ?? "all",
         normalizedSort(options),
+        options.accountScope ?? "all",
+        options.currentAccountId ?? "",
         options.accountId ?? "",
         options.includeLegacy !== false
     ]);
@@ -76,6 +66,9 @@ async function memoryPage(options: EventLogPageQuery): Promise<EventLogPageResul
             category: options.category,
             sort,
             limit: 5000,
+            accountScope: options.accountScope,
+            currentAccountId: options.currentAccountId,
+            accountId: options.accountId,
             includeLegacy: options.includeLegacy
         });
         const events = sortEventLogEvents(result.events, sort);
@@ -98,15 +91,14 @@ async function memoryPage(options: EventLogPageQuery): Promise<EventLogPageResul
 }
 
 export async function queryEventLogPage(options: EventLogPageQuery): Promise<EventLogPageResult> {
-    const scopedOptions: EventLogPageQuery = {
+    const globalOptions: EventLogPageQuery = {
         ...options,
-        accountId: currentAccountId(),
         includeLegacy: options.includeLegacy !== false
     };
 
-    if (!Native) return memoryPage(scopedOptions);
+    if (!Native) return memoryPage(globalOptions);
     try {
-        return await Native.queryEventPage(scopedOptions) as EventLogPageResult;
+        return await Native.queryEventPage(globalOptions) as EventLogPageResult;
     } catch {
         // Desktop builds ship renderer and native helper together. Falling back to the legacy
         // 5,000-row query here would silently reintroduce incomplete history traversal.

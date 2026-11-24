@@ -1,4 +1,5 @@
 export type EventLogSource = "orion" | "questui";
+export type EventLogAccountScope = "current" | "other";
 export type EventLogSeverity = "info" | "success" | "warning" | "error";
 export type EventLogCategory = "quest" | "runtime" | "network" | "diagnostic";
 export type EventLogCaptureSource = "questui" | "console-preview" | "orion-api";
@@ -28,6 +29,8 @@ export interface EventLogEvent {
     timestamp: number;
     /** Discord account that owned the client state when this event was captured. */
     accountId?: string | null;
+    /** Username captured with the owner so shared history can label non-current accounts. */
+    accountUsername?: string | null;
     source: EventLogSource;
     severity: EventLogSeverity;
     category?: EventLogCategory;
@@ -41,11 +44,15 @@ export interface EventLogEvent {
 export interface EventLogQuery {
     query?: string;
     source?: "all" | EventLogSource;
-    severity?: "all" | EventLogSeverity;
-    category?: "all" | EventLogCategory;
+    severity?: "all" | EventLogSeverity | EventLogSeverity[];
+    category?: "all" | EventLogCategory | EventLogCategory[];
     sort?: EventLogSort;
     limit?: number;
-    /** Internal renderer-provided account scope. Omitted only for low-level maintenance. */
+    /** Multi-select account relationship filter used by the Event Log viewer. */
+    accountScope?: "all" | EventLogAccountScope | EventLogAccountScope[];
+    /** Current Discord account used to evaluate current/other relationship filters. */
+    currentAccountId?: string | null;
+    /** Optional exact account scope retained for low-level callers and account-local clear flows. */
     accountId?: string;
     /** Include pre-account-scope rows as visibly legacy/unscoped history. */
     includeLegacy?: boolean;

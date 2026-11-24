@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
     assessClaimResponse,
     assessEnrollResponse,
+    isExplicitRewardCodeConfig,
     isQuestVerificationError,
     selectClaimTarget
 } from "../../src/quests/actions/responses";
@@ -26,6 +27,15 @@ assert.equal(selectClaimTarget({ rewards: [{ type: 99 }], platforms: [0] }), nul
 assert.equal(selectClaimTarget({ rewards: [{ type: 4 }], platforms: [5] }), null);
 assert.equal(selectClaimTarget({ rewards: "unexpected", platforms: [] }), null);
 assert.equal(selectClaimTarget({ rewards: [{ type: 4 }], platforms: "desktop" }), null);
+
+assert.equal(isExplicitRewardCodeConfig(undefined), false);
+assert.equal(isExplicitRewardCodeConfig({ rewards: [], platforms: [] }), false);
+assert.equal(isExplicitRewardCodeConfig({ rewards: [{ type: 1 }], platforms: [] }), true);
+assert.equal(isExplicitRewardCodeConfig({ rewards: [{ type: 1 }, { type: 1 }], platforms: [] }), true);
+assert.equal(isExplicitRewardCodeConfig({ rewards: [{ type: 1 }, { type: 2 }], platforms: [3] }), false);
+assert.equal(isExplicitRewardCodeConfig({ rewards: [{ type: 2 }], platforms: [3] }), false);
+assert.equal(isExplicitRewardCodeConfig({ rewards: [{ type: 4 }], platforms: [] }), false);
+assert.equal(isExplicitRewardCodeConfig({ rewards: [{ type: 99 }], platforms: [] }), false);
 
 assert.equal(assessClaimResponse({ status: 200, body: { claimed_at: "2026-08-17T12:00:00Z", errors: [] } }), "success");
 assert.equal(assessClaimResponse({ body: { user_status: { claimed_at: "2026-08-17T12:00:00Z" }, errors: [] } }), "success");

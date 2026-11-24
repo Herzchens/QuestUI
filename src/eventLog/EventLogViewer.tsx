@@ -1,6 +1,6 @@
 import { Popout, showToast, UserStore, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
 
-import { isLegacyUnscopedEvent } from "./account";
+import { collectEventAccountUsernames, isLegacyUnscopedEvent } from "./account";
 import {
     BroomIcon,
     CheckIcon,
@@ -10,7 +10,7 @@ import {
     EventLogSortMenu,
     FilterIcon,
     FolderIcon,
-    SortChevronIcon,
+    SearchIcon,
     SortIcon
 } from "./controls";
 import { EventLogWindowedScroller } from "./EventLogWindowedScroller";
@@ -19,25 +19,29 @@ import { queryEventLogPage } from "./page";
 import type { EventLogCursor } from "./pagination";
 import {
     BugLogIcon,
+    CalendarDaysIcon,
+    DatabaseIcon,
     EventDetail,
     SemanticText,
+    SeverityIcon,
     buildVirtualRows,
     categoryLabel,
     copyDiagnosticReport,
     dayLabel,
+    eventListSummary,
     eventRenderKey,
     formatStorageBytes,
     isAccountChangeEvent,
     matchingTone,
-    severityGlyph,
     sourceLabel,
     storageTone,
     timeLabel,
+    visualSeverity,
     virtualRowHeight,
     type EventLogVirtualRow
 } from "./presentation";
 import { clearEventLog, getEventLogInfo, openEventLogFolder, subscribeEventLog } from "./runtime";
-import type { EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort, EventLogSource } from "./types";
+import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort, EventLogSource } from "./types";
 
 import "./styles/eventLog.css";
 import "./styles/eventLogPagination.css";
@@ -52,6 +56,17 @@ type EventLogStorageInfo = {
 const EVENT_LOG_PAGE_SIZE = 250;
 const EVENT_LOG_AUTO_LOAD_DELAY_MS = 750;
 const EVENT_LOG_LOAD_MARGIN_PX = 96;
+const ALL_EVENT_LOG_SEVERITIES: readonly EventLogSeverity[] = ["error", "warning", "success", "info"];
+const ALL_EVENT_LOG_CATEGORIES: readonly EventLogCategory[] = ["quest", "runtime", "network", "diagnostic"];
+const ALL_EVENT_LOG_ACCOUNT_SCOPES: readonly EventLogAccountScope[] = ["current", "other"];
+
+function toggleOrderedSelection<T extends string>(current: readonly T[], value: T, order: readonly T[]): T[] {
+    const next = new Set(current);
+    if (next.has(value)) next.delete(value);
+    else next.add(value);
+    return order.filter(item => next.has(item));
+}
+
 function EventLogPanel() {
     const currentUserId = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.id ?? null);
     const currentUsername = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.username ?? null);
@@ -62,8 +77,9 @@ function EventLogPanel() {
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [query, setQuery] = useState("");
     const [source, setSource] = useState<"all" | EventLogSource>("all");
-    const [severity, setSeverity] = useState<"all" | EventLogSeverity>("all");
-    const [category, setCategory] = useState<"all" | EventLogCategory>("all");
+    const [accountScopes, setAccountScopes] = useState<EventLogAccountScope[]>(() => [...ALL_EVENT_LOG_ACCOUNT_SCOPES]);
+    const [severities, setSeverities] = useState<EventLogSeverity[]>(() => [...ALL_EVENT_LOG_SEVERITIES]);
+    const [categories, setCategories] = useState<EventLogCategory[]>(() => [...ALL_EVENT_LOG_CATEGORIES]);
     const [sort, setSort] = useState<EventLogSort>("newest");
     const [sortOpen, setSortOpen] = useState(false);
     const [filterOpen, setFilterOpen] = useState(false);
@@ -87,10 +103,28 @@ function EventLogPanel() {
     const atHeadRef = useRef(true);
 
     const virtualRows = useMemo(() => buildVirtualRows(events), [events]);
+    const accountUsernameById = useMemo(() => {
+        const names = collectEventAccountUsernames(events);
+        if (currentUserId && currentUsername) names.set(currentUserId, currentUsername);
+
+        for (const event of events) {
+            if (!event.accountId || names.has(event.accountId)) continue;
+            try {
+                const cachedUsername = UserStore?.getUser?.(event.accountId)?.username;
+                if (typeof cachedUsername === "string" && cachedUsername.trim()) {
+                    names.set(event.accountId, cachedUsername.trim());
+                }
+            } catch { }
+        }
+        return names;
+    }, [events, currentUserId, currentUsername]);
+    const accountScopeFilter: "all" | EventLogAccountScope[] = accountScopes.length === ALL_EVENT_LOG_ACCOUNT_SCOPES.length ? "all" : accountScopes;
+    const severityFilter: "all" | EventLogSeverity[] = severities.length === ALL_EVENT_LOG_SEVERITIES.length ? "all" : severities;
+    const categoryFilter: "all" | EventLogCategory[] = categories.length === ALL_EVENT_LOG_CATEGORIES.length ? "all" : categories;
 
     useEffect(() => {
         const generation = ++requestGenerationRef.current;
-        const queryIdentity = JSON.stringify([query, source, severity, category, sort, currentUserId]);
+        const queryIdentity = JSON.stringify([query, source, accountScopeFilter, severityFilter, categoryFilter, sort, currentUserId]);
         const hardReset = queryIdentityRef.current !== queryIdentity;
         queryIdentityRef.current = queryIdentity;
 
@@ -115,7 +149,7 @@ function EventLogPanel() {
 
         const timer = setTimeout(() => {
             void Promise.all([
-                queryEventLogPage({ query, source, severity, category, sort, pageSize: EVENT_LOG_PAGE_SIZE, includeLegacy: true }),
+                queryEventLogPage({ query, source, accountScope: accountScopeFilter, currentAccountId: currentUserId, severity: severityFilter, category: categoryFilter, sort, pageSize: EVENT_LOG_PAGE_SIZE, includeLegacy: true }),
                 getEventLogInfo() as Promise<EventLogStorageInfo>
             ]).then(([result, nextInfo]) => {
                 if (generation !== requestGenerationRef.current) return;
@@ -141,7 +175,7 @@ function EventLogPanel() {
         }, hardReset ? 120 : 0);
 
         return () => clearTimeout(timer);
-    }, [query, source, severity, category, sort, currentUserId, refreshNonce]);
+    }, [query, source, accountScopeFilter, severityFilter, categoryFilter, sort, currentUserId, refreshNonce]);
 
     useEffect(() => subscribeEventLog(() => {
         void (getEventLogInfo() as Promise<EventLogStorageInfo>).then(setInfo).catch(() => undefined);
@@ -204,8 +238,10 @@ function EventLogPanel() {
             const result = await queryEventLogPage({
                 query,
                 source,
-                severity,
-                category,
+                accountScope: accountScopeFilter,
+                currentAccountId: currentUserId,
+                severity: severityFilter,
+                category: categoryFilter,
                 sort,
                 pageSize: EVENT_LOG_PAGE_SIZE,
                 cursor,
@@ -256,35 +292,64 @@ function EventLogPanel() {
         scheduleNextPage();
     };
 
-    if (selected) return <EventDetail event={selected} availableEvents={events} onBack={() => setSelected(null)} />;
+    if (selected) {
+        const selectedOwner = selected.accountId && selected.accountId !== currentUserId
+            ? selected.accountUsername ?? accountUsernameById.get(selected.accountId) ?? null
+            : null;
+        return (
+            <EventDetail
+                event={selected}
+                availableEvents={events}
+                accountLabel={isLegacyUnscopedEvent(selected)
+                    ? "Legacy · unscoped"
+                    : selected.accountId !== currentUserId
+                        ? selectedOwner ?? "Username unavailable"
+                        : "Current account"}
+                onBack={() => setSelected(null)}
+            />
+        );
+    }
 
     const maxBytes = Number(info.maxBytes) || 0;
     const compactToBytes = Number(info.compactToBytes) || 0;
     const storageState = storageTone(info.size, maxBytes);
-    const storageLabel = maxBytes > 0 ? `${formatStorageBytes(info.size)} / ${formatStorageBytes(maxBytes)}` : formatStorageBytes(info.size);
+    const storageUsedLabel = formatStorageBytes(info.size);
+    const storageLimitLabel = maxBytes > 0 ? formatStorageBytes(maxBytes) : null;
     const storageTitle = maxBytes > 0
         ? `Event Log storage: ${formatStorageBytes(info.size)} of ${formatStorageBytes(maxBytes)}. After exceeding the hard limit, QuestUI compacts the file toward ${formatStorageBytes(compactToBytes)}.`
         : `Event Log storage: ${formatStorageBytes(info.size)}.`;
     const matchState = matchingTone(total);
     const matchingLabel = `${total.toLocaleString()} matching`;
-    const activeFilterCount = Number(source !== "all") + Number(severity !== "all") + Number(category !== "all");
+    const activeFilterCount = Number(source !== "all")
+        + Number(accountScopes.length !== ALL_EVENT_LOG_ACCOUNT_SCOPES.length)
+        + Number(severities.length !== ALL_EVENT_LOG_SEVERITIES.length)
+        + Number(categories.length !== ALL_EVENT_LOG_CATEGORIES.length);
 
     const renderVirtualRow = (row: EventLogVirtualRow | undefined) => {
         if (!row) return null;
-        if (row.kind === "day") return <div className="quest-ui-event-day quest-ui-event-virtual-day"><span>{dayLabel(row.timestamp)}</span></div>;
+        if (row.kind === "day") return (
+            <div className="quest-ui-event-day quest-ui-event-virtual-day">
+                <CalendarDaysIcon />
+                <span>{dayLabel(row.timestamp)}</span>
+                <span className="quest-ui-event-day-line" aria-hidden="true" />
+            </div>
+        );
 
         const event = row.event;
         const eventCategory = inferEventCategory(event);
         const legacy = isLegacyUnscopedEvent(event);
         const accountChange = isAccountChangeEvent(event);
-        const accountUsername = accountChange && !legacy ? currentUsername : null;
+        const displaySeverity = visualSeverity(event);
+        const accountUsername = !legacy && event.accountId && event.accountId !== currentUserId
+            ? event.accountUsername ?? accountUsernameById.get(event.accountId) ?? null
+            : null;
         return (
             <article className={`quest-ui-event-row is-${event.severity} is-category-${eventCategory}${accountChange ? " is-account-change" : ""}`}>
                 <div className="quest-ui-event-time-cell">
                     <span className="quest-ui-event-time">{timeLabel(event.timestamp)}</span>
                     {accountUsername && <span className="quest-ui-event-account-name" title={accountUsername}>{accountUsername}</span>}
                 </div>
-                <span className="quest-ui-event-severity" aria-hidden="true">{severityGlyph(event.severity)}</span>
+                <span className={`quest-ui-event-severity is-${displaySeverity}`} aria-hidden="true"><SeverityIcon severity={displaySeverity} /></span>
                 <div className="quest-ui-event-copy">
                     <div>
                         <span className={`quest-ui-event-source is-${event.source}`}>{sourceLabel(event.source)}</span>
@@ -292,11 +357,11 @@ function EventLogPanel() {
                         {legacy && <span className="quest-ui-event-account-legacy" title="Recorded before account-aware Event Log; account owner is unknown">LEGACY</span>}
                         {event.quest?.name && <strong>{event.quest.name}</strong>}
                     </div>
-                    <span><SemanticText text={event.summary} /></span>
+                    <span><SemanticText text={eventListSummary(event)} /></span>
                 </div>
                 <div className="quest-ui-event-row-actions">
                     <button type="button" className="quest-ui-event-view-detail" onClick={() => setSelected(event)}>View details</button>
-                    {(event.severity === "error" || event.severity === "warning") && (
+                    {(displaySeverity === "error" || displaySeverity === "warning") && (
                         <button type="button" className="quest-ui-event-row-bug" onClick={() => void copyDiagnosticReport(event, events)} title="Copy diagnostic report" aria-label="Copy diagnostic report"><BugLogIcon /></button>
                     )}
                 </div>
@@ -313,13 +378,20 @@ function EventLogPanel() {
                 <div className="quest-ui-event-log-header-meta">
                     {newEventsAvailable && <button type="button" className="quest-ui-event-new-events" onClick={() => setRefreshNonce(value => value + 1)}>New events</button>}
                     <span className={`quest-ui-event-storage is-${storageState}`} title={storageTitle} aria-label={storageTitle}>
-                        <span className="quest-ui-event-storage-dot" aria-hidden="true" />
-                        {storageLabel}
+                        <DatabaseIcon />
+                        <span className="quest-ui-event-storage-used">{storageUsedLabel}</span>
+                        {storageLimitLabel && (
+                            <>
+                                <span className="quest-ui-event-storage-separator" aria-hidden="true">/</span>
+                                <span className="quest-ui-event-storage-limit">{storageLimitLabel}</span>
+                            </>
+                        )}
                     </span>
                 </div>
             </div>
 
             <div className="quest-ui-event-search-shell">
+                <SearchIcon />
                 <input className="quest-ui-event-search" value={query} onChange={event => setQuery(event.currentTarget.value)} placeholder="Search quest, event code, HTTP status…" />
                 <span className={`quest-ui-event-match-count is-${matchState}`} title={matchingLabel}>{matchingLabel}</span>
             </div>
@@ -338,8 +410,7 @@ function EventLogPanel() {
                                 aria-haspopup="menu"
                             >
                                 <SortIcon />
-                                <span>{EVENT_LOG_SORT_OPTIONS.find(option => option.value === sort)?.label ?? "Newest first"}</span>
-                                <SortChevronIcon />
+                                <span>Sort: {EVENT_LOG_SORT_OPTIONS.find(option => option.value === sort)?.label ?? "Newest first"}</span>
                             </button>
                         )}
                     </Popout>
@@ -354,11 +425,13 @@ function EventLogPanel() {
                         renderPopout={() => (
                             <EventLogCombinedFilterMenu
                                 source={source}
-                                severity={severity}
-                                category={category}
+                                accountScopes={accountScopes}
+                                severities={severities}
+                                categories={categories}
                                 onSourceChange={setSource}
-                                onSeverityChange={setSeverity}
-                                onCategoryChange={setCategory}
+                                onAccountScopeToggle={value => setAccountScopes(current => toggleOrderedSelection(current, value, ALL_EVENT_LOG_ACCOUNT_SCOPES))}
+                                onSeverityToggle={value => setSeverities(current => toggleOrderedSelection(current, value, ALL_EVENT_LOG_SEVERITIES))}
+                                onCategoryToggle={value => setCategories(current => toggleOrderedSelection(current, value, ALL_EVENT_LOG_CATEGORIES))}
                             />
                         )}
                     >
@@ -455,7 +528,7 @@ function EventLogPanel() {
                     containerRef={listRef}
                     className="quest-ui-event-virtual-list"
                     rowCount={virtualRows.length}
-                    rowHeight={row => virtualRowHeight(virtualRows[row])}
+                    rowHeight={row => virtualRowHeight(virtualRows[row], currentUserId)}
                     renderRow={row => renderVirtualRow(virtualRows[row])}
                     footerHeight={hasMore || loadingMore ? 34 : 0}
                     renderFooter={() => hasMore || loadingMore ? <div className="quest-ui-event-page-footer">{loadingMore ? `Loading ${EVENT_LOG_PAGE_SIZE} more events…` : "Scroll to continue…"}</div> : null}

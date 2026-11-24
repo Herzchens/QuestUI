@@ -63,31 +63,25 @@ function managedUpdateSeverity(
 function managedUpdateSummary(
     product: UpdateProduct,
     outcome: ManagedUpdateEventOutcome,
-    result: ManagedReleaseUpdateResult | null,
-    installed: string,
-    target: string
+    _result: ManagedReleaseUpdateResult | null,
+    _installed: string,
+    _target: string
 ): string {
     const label = productLabel(product);
-    const fromVersion = result?.fromVersion ?? installed;
-    const toVersion = result?.toVersion ?? target;
 
     switch (outcome) {
         case "started":
-            return label + " managed update started: " + installed + " -> " + target;
+            return label + " update started";
         case "decision-required":
-            return label + " update needs a local-work decision: " + (result?.decision?.summary ?? "local checkout differs");
+            return label + " update needs attention";
         case "discard-confirmed":
-            return label + " local-work discard confirmed; revalidating the exact checkout snapshot";
+            return label + " discard confirmed";
         case "kept":
-            return label + " local work kept; update skipped";
+            return label + " update skipped";
         case "succeeded":
-            return label + " updated " + fromVersion + " -> " + toVersion
-                + (result?.method ? " via " + result.method : "");
+            return label + " update completed";
         case "failed":
-            return label + " update stopped"
-                + (result?.phase ? " at " + result.phase : "")
-                + " (" + (result?.status ?? "failed") + "): "
-                + (result?.message ?? "unknown failure");
+            return label + " update stopped";
     }
 }
 
@@ -122,6 +116,7 @@ function recordManagedUpdateEvent(
         summary: managedUpdateSummary(product, outcome, result, installed, target),
         detail: {
             product,
+            message: result?.message ?? null,
             status: result?.status ?? outcome,
             phase: result?.phase ?? null,
             updateMethod: result?.method ?? null,

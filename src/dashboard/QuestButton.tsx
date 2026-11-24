@@ -93,9 +93,14 @@ function UpdateAttentionBadge({ level }: { level: Exclude<UpdateAttentionLevel, 
 function CriticalUpdateIcon({ iconProps }: { iconProps: any; }) {
     return (
         <span className="quest-ui-icon-wrap quest-ui-critical-update-icon-wrap">
-            <svg {...iconProps} className="quest-ui-critical-update-icon" viewBox="0 0 20 20" aria-hidden="true">
-                <circle cx="10" cy="10" r="8" />
-                <path d="M10 5.7v5.5M10 14.2v.1" />
+            <svg {...iconProps} className="quest-ui-critical-update-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2a10 10 0 0 1 7.38 16.75" />
+                <path d="m16 12-4-4-4 4" />
+                <path d="M12 16V8" />
+                <path d="M2.5 8.875a10 10 0 0 0-.5 3" />
+                <path d="M2.83 16a10 10 0 0 0 2.43 3.4" />
+                <path d="M4.636 5.235a10 10 0 0 1 .891-.857" />
+                <path d="M8.644 21.42a10 10 0 0 0 7.631-.38" />
             </svg>
         </span>
     );

@@ -7,6 +7,7 @@ import { checkForUpdates, getInstalledRelease, getUpdateSnapshot, subscribeUpdat
 import { managedNative as Native, runManagedReleaseUpdate, runOrionUpdateDecision, saveSkippedUpdate, saveUpdateReminder, toastFailure, type AvailableUpdateState, type ManagedReleaseUpdateResult, type UpdatePendingAction } from "./managed";
 import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, dashboardAvailabilityLines, formatCompactTimestamp, healthForProduct, productLabel, safeOpenRelease, updateProductTone, visibleReleaseVersion, visibleUpdate } from "./status";
 import { pushDashboardNotice } from "../dashboard/notifications";
+import { versionChannelClass } from "./channel";
 
 import "./styles.css";
 
@@ -437,13 +438,13 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
                                 <div className="quest-ui-update-product-identity">
                                     <div>
                                         <strong>{productLabel(product)}</strong>
-                                        <span className={`quest-ui-update-row-version${target ? " is-old-version" : ""}`}>
+                                        <span className={`quest-ui-update-row-version ${versionChannelClass(state.installed)}${target ? " is-old-version" : ""}`}>
                                             {state.installed ?? "-"}
                                         </span>
                                         {target && (
                                             <>
                                                 <span className="quest-ui-update-row-arrow" aria-hidden="true">→</span>
-                                                <span className="quest-ui-update-row-target">{target}</span>
+                                                <span className={`quest-ui-update-row-target ${versionChannelClass(target)}`}>{target}</span>
                                             </>
                                         )}
                                     </div>

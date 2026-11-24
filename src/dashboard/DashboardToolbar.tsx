@@ -430,7 +430,10 @@ export function QuestDashboardFilterSortControls() {
                         title={activeFilterCount > 0 ? `${activeFilterCount} active filters` : "Filters off"}
                     >
                         <FilterIcon />
-                        <span>Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span>
+                        <span>Filter</span>
+                        {activeFilterCount > 0 && (
+                            <span className="quest-ui-filter-count-badge" aria-hidden="true">{activeFilterCount}</span>
+                        )}
                     </button>
                 )}
             </Popout>

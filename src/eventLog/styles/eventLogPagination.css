@@ -34,7 +34,7 @@
     box-sizing: border-box;
     height: 100%;
     margin: 0;
-    padding: 8px 2px 3px;
+    padding: 9px 2px 5px;
 }
 
 .quest-ui-event-virtual-list .quest-ui-event-row {

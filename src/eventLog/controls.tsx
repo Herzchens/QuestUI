@@ -1,4 +1,4 @@
-import type { EventLogCategory, EventLogSeverity, EventLogSort, EventLogSource } from "./types";
+import type { EventLogAccountScope, EventLogCategory, EventLogSeverity, EventLogSort, EventLogSource } from "./types";
 
 export const EVENT_LOG_SORT_OPTIONS: ReadonlyArray<{ value: EventLogSort; label: string; }> = [
     { value: "newest", label: "Newest first" },
@@ -47,7 +47,11 @@ export function SortChevronIcon() {
 export function SortIcon() {
     return (
         <svg className="quest-ui-event-control-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M5 7h14M5 12h10M5 17h6" />
+            <path d="M5 4v16" />
+            <path d="m2.5 17.5 2.5 2.5 2.5-2.5" />
+            <path d="M11 7h9" />
+            <path d="M11 12h7" />
+            <path d="M11 17h5" />
         </svg>
     );
 }
@@ -80,10 +84,27 @@ export function CategoryIcon() {
     );
 }
 
+export function SearchIcon() {
+    return (
+        <svg className="quest-ui-event-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+        </svg>
+    );
+}
+
 export function FilterIcon() {
     return (
         <svg className="quest-ui-event-control-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 6h16M7 12h10M10 18h4" />
+            <path d="M5 3v8" />
+            <circle cx="5" cy="15" r="2" />
+            <path d="M5 19v2" />
+            <path d="M12 3v2" />
+            <circle cx="12" cy="9" r="2" />
+            <path d="M12 13v8" />
+            <path d="M19 3v8" />
+            <circle cx="19" cy="15" r="2" />
+            <path d="M19 19v2" />
         </svg>
     );
 }
@@ -125,18 +146,25 @@ export function CloseIcon() {
 export function EventLogSortMenu({ mode, onChange }: { mode: EventLogSort; onChange: (mode: EventLogSort) => void; }) {
     return (
         <div className="quest-ui-event-sort-menu" role="menu" aria-label="Sort Event Log">
-            <div className="quest-ui-event-sort-menu-heading">
-                <strong>Sort events</strong>
-                <span>Order the current log view</span>
-            </div>
-            <div className="quest-ui-event-sort-options">
-                {EVENT_LOG_SORT_OPTIONS.map(option => (
-                    <button key={option.value} type="button" className={option.value === mode ? "is-selected" : ""} role="menuitemradio" aria-checked={option.value === mode} onClick={() => onChange(option.value)}>
+            <span className="quest-ui-event-sort-list-title">Sort by</span>
+            {EVENT_LOG_SORT_OPTIONS.map(option => {
+                const selected = option.value === mode;
+                return (
+                    <button
+                        key={option.value}
+                        type="button"
+                        className={selected ? "is-selected" : ""}
+                        role="menuitemradio"
+                        aria-checked={selected}
+                        onClick={() => onChange(option.value)}
+                    >
                         <span>{option.label}</span>
-                        {option.value === mode && <span className="quest-ui-event-sort-check" aria-hidden="true">✓</span>}
+                        <span className="quest-ui-event-sort-radio" aria-hidden="true">
+                            {selected && <span />}
+                        </span>
                     </button>
-                ))}
-            </div>
+                );
+            })}
         </div>
     );
 }
@@ -149,51 +177,127 @@ export function filterOptionTone<T extends string>(options: ReadonlyArray<EventL
     return options.find(option => option.value === value)?.tone ?? "neutral";
 }
 
-export function EventLogCombinedFilterMenu({
-    source,
-    severity,
-    category,
-    onSourceChange,
-    onSeverityChange,
-    onCategoryChange
-}: {
-    source: "all" | EventLogSource;
-    severity: "all" | EventLogSeverity;
-    category: "all" | EventLogCategory;
-    onSourceChange: (value: "all" | EventLogSource) => void;
-    onSeverityChange: (value: "all" | EventLogSeverity) => void;
-    onCategoryChange: (value: "all" | EventLogCategory) => void;
+function EventLogFilterCheckRow({ checked, label, tone = "neutral", onClick }: {
+    checked: boolean;
+    label: string;
+    tone?: ChoiceTone;
+    onClick: () => void;
 }) {
     return (
-        <div className="quest-ui-event-filter-menu quest-ui-event-combined-filter-menu" role="menu" aria-label="Filter Event Log">
-            <div className="quest-ui-event-filter-menu-heading">
-                <strong>Filter events</strong>
-                <span>Source, level and category</span>
-            </div>
+        <button
+            type="button"
+            className={`quest-ui-event-filter-list-row is-check tone-${tone}${checked ? " is-checked" : ""}`}
+            aria-pressed={checked}
+            onClick={onClick}
+        >
+            <span className="quest-ui-event-filter-list-box" aria-hidden="true">
+                {checked && (
+                    <svg viewBox="0 0 16 16">
+                        <path d="m3.2 8.2 3 3 6.6-6.6" />
+                    </svg>
+                )}
+            </span>
+            <span>{label}</span>
+        </button>
+    );
+}
 
-            <section className="quest-ui-event-filter-section">
-                <span>Source</span>
-                <div className="quest-ui-event-filter-options">
+function EventLogFilterRadioRow({ checked, label, tone = "neutral", onClick }: {
+    checked: boolean;
+    label: string;
+    tone?: ChoiceTone;
+    onClick: () => void;
+}) {
+    return (
+        <button
+            type="button"
+            className={`quest-ui-event-filter-list-row is-radio tone-${tone}${checked ? " is-checked" : ""}`}
+            role="radio"
+            aria-checked={checked}
+            onClick={onClick}
+        >
+            <span className="quest-ui-event-filter-list-box" aria-hidden="true">
+                {checked && <span className="quest-ui-event-filter-list-radio-dot" />}
+            </span>
+            <span>{label}</span>
+        </button>
+    );
+}
+
+export function EventLogCombinedFilterMenu({
+    source,
+    accountScopes,
+    severities,
+    categories,
+    onSourceChange,
+    onAccountScopeToggle,
+    onSeverityToggle,
+    onCategoryToggle
+}: {
+    source: "all" | EventLogSource;
+    accountScopes: readonly EventLogAccountScope[];
+    severities: readonly EventLogSeverity[];
+    categories: readonly EventLogCategory[];
+    onSourceChange: (value: "all" | EventLogSource) => void;
+    onAccountScopeToggle: (value: EventLogAccountScope) => void;
+    onSeverityToggle: (value: EventLogSeverity) => void;
+    onCategoryToggle: (value: EventLogCategory) => void;
+}) {
+    return (
+        <div className="quest-ui-event-filter-menu" role="group" aria-label="Filter Event Log">
+            <section className="quest-ui-event-filter-list-section">
+                <h3>Source</h3>
+                <div className="quest-ui-event-filter-list-options is-radio-options" role="radiogroup" aria-label="Event source">
                     {EVENT_LOG_SOURCE_OPTIONS.map(option => (
-                        <Choice key={option.value} value={option.value} active={option.value === source} tone={option.tone} onClick={onSourceChange}>{option.label}</Choice>
+                        <EventLogFilterRadioRow
+                            key={option.value}
+                            checked={source === option.value}
+                            label={option.label}
+                            tone={option.tone}
+                            onClick={() => onSourceChange(option.value)}
+                        />
+                    ))}
+                </div>
+                <div className="quest-ui-event-filter-list-options quest-ui-event-filter-account-options" aria-label="Account source">
+                    <EventLogFilterCheckRow
+                        checked={accountScopes.includes("current")}
+                        label="Current account"
+                        onClick={() => onAccountScopeToggle("current")}
+                    />
+                    <EventLogFilterCheckRow
+                        checked={accountScopes.includes("other")}
+                        label="Other account"
+                        onClick={() => onAccountScopeToggle("other")}
+                    />
+                </div>
+            </section>
+
+            <section className="quest-ui-event-filter-list-section">
+                <h3>Level</h3>
+                <div className="quest-ui-event-filter-list-options">
+                    {EVENT_LOG_SEVERITY_OPTIONS.filter(option => option.value !== "all").map(option => (
+                        <EventLogFilterCheckRow
+                            key={option.value}
+                            checked={severities.includes(option.value as EventLogSeverity)}
+                            label={option.label}
+                            tone={option.tone}
+                            onClick={() => onSeverityToggle(option.value as EventLogSeverity)}
+                        />
                     ))}
                 </div>
             </section>
 
-            <section className="quest-ui-event-filter-section">
-                <span>Level</span>
-                <div className="quest-ui-event-filter-options">
-                    {EVENT_LOG_SEVERITY_OPTIONS.map(option => (
-                        <Choice key={option.value} value={option.value} active={option.value === severity} tone={option.tone} onClick={onSeverityChange}>{option.label}</Choice>
-                    ))}
-                </div>
-            </section>
-
-            <section className="quest-ui-event-filter-section">
-                <span>Category</span>
-                <div className="quest-ui-event-filter-options">
-                    {EVENT_LOG_CATEGORY_OPTIONS.map(option => (
-                        <Choice key={option.value} value={option.value} active={option.value === category} tone={option.tone} onClick={onCategoryChange}>{option.label}</Choice>
+            <section className="quest-ui-event-filter-list-section">
+                <h3>Category</h3>
+                <div className="quest-ui-event-filter-list-options">
+                    {EVENT_LOG_CATEGORY_OPTIONS.filter(option => option.value !== "all").map(option => (
+                        <EventLogFilterCheckRow
+                            key={option.value}
+                            checked={categories.includes(option.value as EventLogCategory)}
+                            label={option.label}
+                            tone={option.tone}
+                            onClick={() => onCategoryToggle(option.value as EventLogCategory)}
+                        />
                     ))}
                 </div>
             </section>

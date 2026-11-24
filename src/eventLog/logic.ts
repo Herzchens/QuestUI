@@ -554,6 +554,7 @@ export function eventSearchText(event: EventLogEvent): string {
     return [
         event.source,
         event.severity,
+        event.accountUsername,
         inferEventCategory(event),
         event.eventCode,
         event.summary,

@@ -87,7 +87,7 @@
 }
 
 .quest-ui-event-log-panel .quest-ui-event-day {
-    margin: 10px 0 5px;
+    margin: 8px 0 4px;
 }
 
 .quest-ui-event-log-panel .quest-ui-event-row {
@@ -536,19 +536,21 @@
 }
 
 .quest-ui-event-flat-control {
-    min-height: 31px;
-    padding: 5px 9px;
-    border: 1px solid var(--quest-ui-event-control-border, rgba(255, 255, 255, 0.14));
-    border-radius: 7px;
-    background: var(--quest-ui-event-control-bg, #24262b);
-    color: #d7d9dc;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    align-items: center;
+    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 86%, #1b1425 14%);
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 9px;
+    box-shadow: none;
+    color: var(--interactive-normal, #b5bac1);
     cursor: pointer;
     display: inline-flex;
-    align-items: center;
-    gap: 6px;
     font: inherit;
     font-size: 11px;
+    font-weight: 700;
+    gap: 7px;
+    height: 30px;
+    min-height: 30px;
+    padding: 0 9px;
     white-space: nowrap;
     transition:
         background-color 110ms ease,
@@ -559,20 +561,19 @@
 
 .quest-ui-event-flat-control:hover,
 .quest-ui-event-flat-control.is-open {
-    border-color: var(--quest-ui-event-control-border-hover, rgba(255, 255, 255, 0.26));
-    background: var(--quest-ui-event-control-hover, #34373d);
+    background: color-mix(in srgb, var(--background-mod-stronger, #34363c) 84%, #21172d 16%);
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 34%, rgba(255,255,255,.12));
     color: #fff;
 }
 
 .quest-ui-event-flat-control:active {
-    background: var(--quest-ui-event-control-pressed, #2b2e33);
+    background: color-mix(in srgb, var(--background-mod-stronger, #34363c) 90%, #21172d 10%);
 }
 
-.quest-ui-event-flat-control .quest-ui-event-control-icon,
-.quest-ui-event-flat-control .quest-ui-event-sort-chevron {
-    width: 14px;
-    height: 14px;
-    flex: 0 0 14px;
+.quest-ui-event-flat-control .quest-ui-event-control-icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
     fill: none;
     stroke: currentColor;
     stroke-width: 1.7;
@@ -581,12 +582,12 @@
 }
 
 .quest-ui-event-sort-trigger {
-    min-width: 132px;
-    justify-content: space-between;
+    min-width: max-content;
+    justify-content: flex-start;
 }
 
 .quest-ui-event-sort-trigger > span {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     text-align: left;
 }
 
@@ -595,20 +596,36 @@
 }
 
 .quest-ui-event-filter-launcher.has-active-filter {
-    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 58%, rgba(255,255,255,.14));
-    color: var(--brand-360, #949cf7);
+    border-color: rgba(255,255,255,.11);
+    color: var(--interactive-normal, #b5bac1);
+}
+
+.quest-ui-event-filter-launcher.has-active-filter:hover,
+.quest-ui-event-filter-launcher.has-active-filter.is-open {
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 34%, rgba(255,255,255,.12));
+    color: #fff;
 }
 
 .quest-ui-event-filter-count {
-    display: grid;
-    min-width: 15px;
-    height: 15px;
-    place-items: center;
-    padding: 0 3px;
+    align-items: center;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.12);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--brand-500, #5865f2) 22%, transparent);
-    color: currentColor;
-    font: 750 8.5px/1 var(--font-code);
+    color: var(--text-muted, #949ba4);
+    display: inline-flex;
+    font: 750 9px/1 var(--font-code);
+    font-variant-numeric: tabular-nums;
+    height: 16px;
+    justify-content: center;
+    min-width: 16px;
+    padding: 0 4px;
+}
+
+.quest-ui-event-filter-launcher:hover .quest-ui-event-filter-count,
+.quest-ui-event-filter-launcher.is-open .quest-ui-event-filter-count {
+    background: rgba(255,255,255,.11);
+    border-color: rgba(255,255,255,.18);
+    color: #d7d9dc;
 }
 
 .quest-ui-event-log-panel .quest-ui-event-log-actions > .quest-ui-event-action-island {
@@ -619,7 +636,7 @@
     gap: 8px;
     width: max-content;
     min-width: 96px;
-    max-width: 272px;
+    max-width: 280px;
     height: 48px;
     padding: 6px 7px;
     overflow: hidden;
@@ -662,9 +679,9 @@
 }
 
 .quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-island-icon-button:hover {
-    border-color: #3c3d45;
-    background: #242429;
-    color: #fff;
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 44%, #2c2d34);
+    background: color-mix(in srgb, #1d1a1c 92%, var(--status-warning, #f0b232) 8%);
+    color: var(--status-warning, #f0b232);
 }
 
 .quest-ui-event-island-icon-button:active {
@@ -686,7 +703,7 @@
     gap: 0;
     width: 36px;
     min-width: 36px;
-    max-width: 188px;
+    max-width: 196px;
     height: 36px;
     overflow: hidden;
     border: 1px solid #2c2d34;
@@ -700,7 +717,8 @@
 }
 
 .quest-ui-event-clean-island.is-expanded {
-    width: 188px;
+    width: 196px;
+    margin-right: -5px;
     border-color: color-mix(in srgb, var(--status-danger, #f23f42) 34%, #2c2d34);
     background: color-mix(in srgb, #1d1a1c 91%, var(--status-danger, #f23f42) 9%);
 }
@@ -735,9 +753,14 @@
         transform 110ms ease;
 }
 
+.quest-ui-event-clean-island:not(.is-expanded):has(.quest-ui-event-clean-trigger:hover) {
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 44%, #2c2d34);
+    background: color-mix(in srgb, #1d1a1c 92%, var(--status-danger, #f23f42) 8%);
+}
+
 .quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:hover {
-    background: rgba(255,255,255,.07);
-    color: var(--status-warning, #f0b232);
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 10%, transparent);
+    color: var(--status-danger, #f23f42);
 }
 
 .quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:active {
@@ -784,10 +807,12 @@
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: space-between;
+    gap: 6px;
     min-width: 0;
     max-width: 0;
     height: 100%;
+    padding: 0 6px 0 5px;
     overflow: hidden;
     opacity: 0;
     white-space: nowrap;
@@ -798,7 +823,7 @@
 }
 
 .quest-ui-event-clean-island.is-expanded .quest-ui-event-clear-confirm {
-    max-width: 150px;
+    max-width: 158px;
     opacity: 1;
     pointer-events: auto;
     transition:
@@ -808,6 +833,8 @@
 
 .quest-ui-event-clear-confirm-text {
     min-width: 70px;
+    flex: 1 1 auto;
+    padding-left: 1px;
     color: var(--status-danger, #f23f42);
     font-size: 10px;
     font-weight: 750;
@@ -817,7 +844,10 @@
 .quest-ui-event-clear-confirm-actions {
     display: flex;
     align-items: center;
-    gap: 2px;
+    flex: 0 0 auto;
+    gap: 4px;
+    margin-left: 7px;
+    padding-right: 1px;
 }
 
 .quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clear-confirm-button {

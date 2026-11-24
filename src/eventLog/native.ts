@@ -2,7 +2,7 @@ import { app, IpcMainInvokeEvent, shell } from "electron";
 import { appendFile, mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
 import { join } from "path";
 
-import { eventBelongsToAccount, eventVisibleForAccount } from "./account";
+import { collectEventAccountUsernames, eventBelongsToAccount, eventMatchesAccountScopes, eventVisibleForAccount } from "./account";
 import { eventSearchText, inferEventCategory } from "./logic";
 import {
     pageSortedEventLogEvents,
@@ -10,7 +10,7 @@ import {
     type EventLogPageQuery,
     type EventLogPageResult
 } from "./pagination";
-import type { EventLogEvent, EventLogSort } from "./types";
+import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort } from "./types";
 import { normalizePersistedEvent } from "./validation";
 
 
@@ -35,9 +35,11 @@ let nextPageSessionId = 0;
 interface NormalizedQueryOptions {
     query: string;
     source: "all" | "orion" | "questui";
-    severity: "all" | "info" | "success" | "warning" | "error";
-    category: "all" | "quest" | "runtime" | "network" | "diagnostic";
+    severity: "all" | EventLogSeverity[];
+    category: "all" | EventLogCategory[];
     sort: EventLogSort;
+    accountScope: "all" | EventLogAccountScope[];
+    currentAccountId: string | null;
     accountId: string | null;
     includeLegacy: boolean;
 }
@@ -121,13 +123,24 @@ function safeParse(line: string): EventLogEvent | null {
     }
 }
 
+function normalizeSelection<T extends string>(value: unknown, allowed: readonly T[]): "all" | T[] {
+    if (value === "all" || value == null) return "all";
+    const input = Array.isArray(value) ? value : [value];
+    const selected = allowed.filter(item => input.includes(item));
+    if (selected.length === allowed.length) return "all";
+    if (!Array.isArray(value) && selected.length === 0) return "all";
+    return selected;
+}
+
 function normalizeQueryOptions(options: any = {}): NormalizedQueryOptions {
     return {
         query: typeof options.query === "string" ? options.query.trim().toLowerCase() : "",
         source: options.source === "orion" || options.source === "questui" ? options.source : "all",
-        severity: ["info", "success", "warning", "error"].includes(options.severity) ? options.severity : "all",
-        category: ["quest", "runtime", "network", "diagnostic"].includes(options.category) ? options.category : "all",
+        severity: normalizeSelection<EventLogSeverity>(options.severity, ["error", "warning", "success", "info"]),
+        category: normalizeSelection<EventLogCategory>(options.category, ["quest", "runtime", "network", "diagnostic"]),
         sort: options.sort === "oldest" || options.sort === "severity" ? options.sort : "newest",
+        accountScope: normalizeSelection<EventLogAccountScope>(options.accountScope, ["current", "other"]),
+        currentAccountId: typeof options.currentAccountId === "string" && options.currentAccountId.length > 0 ? options.currentAccountId : null,
         accountId: typeof options.accountId === "string" && options.accountId.length > 0 ? options.accountId : null,
         includeLegacy: options.includeLegacy !== false
     };
@@ -140,6 +153,8 @@ function querySignature(options: NormalizedQueryOptions): string {
         options.severity,
         options.category,
         options.sort,
+        options.accountScope,
+        options.currentAccountId,
         options.accountId,
         options.includeLegacy
     ]);
@@ -154,11 +169,19 @@ function filterAndSortEvents(text: string, options: NormalizedQueryOptions): Eve
         events.push({ ...event, category: inferEventCategory(event) });
     }
 
-    let filtered = events;
+    const accountNames = collectEventAccountUsernames(events);
+    let filtered = events.map(event => (
+        event.accountId && !event.accountUsername && accountNames.has(event.accountId)
+            ? { ...event, accountUsername: accountNames.get(event.accountId)! }
+            : event
+    ));
     if (options.accountId) filtered = filtered.filter(event => eventVisibleForAccount(event, options.accountId!, options.includeLegacy));
+    if (options.accountScope !== "all") {
+        filtered = filtered.filter(event => eventMatchesAccountScopes(event, options.currentAccountId, options.accountScope));
+    }
     if (options.source !== "all") filtered = filtered.filter(event => event.source === options.source);
-    if (options.severity !== "all") filtered = filtered.filter(event => event.severity === options.severity);
-    if (options.category !== "all") filtered = filtered.filter(event => event.category === options.category);
+    if (options.severity !== "all") filtered = filtered.filter(event => options.severity.includes(event.severity));
+    if (options.category !== "all") filtered = filtered.filter(event => options.category.includes(event.category as EventLogCategory));
     if (options.query) filtered = filtered.filter(event => eventSearchText(event).includes(options.query));
     return sortEventLogEvents(filtered, options.sort);
 }

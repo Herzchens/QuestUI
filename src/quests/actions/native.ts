@@ -1,9 +1,10 @@
 import { findByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { SettingsRouter, UserStore } from "@webpack/common";
 
 import {
     assessClaimResponse,
     assessEnrollResponse,
+    isExplicitRewardCodeConfig,
     isQuestVerificationError,
     selectClaimTarget
 } from "./responses";
@@ -22,6 +23,7 @@ const SUBMITTED_ACTION_HOLD_MS = 15000;
 
 type NativeEnrollQuest = (questId: string, context: { questContent: number; }) => Promise<unknown>;
 type NativeClaimQuestReward = (questId: string, platform: number, location: number) => Promise<unknown>;
+type NativeFetchQuestRewardCode = (questId: string) => Promise<unknown>;
 type QuestActionKind = "enroll" | "claim";
 type StoreWaitResult = "confirmed" | "timeout" | "unavailable" | "account-changed";
 
@@ -64,6 +66,12 @@ const { claimQuestReward: nativeClaimQuestReward } = mapMangledModuleLazy(
     ],
     { claimQuestReward: isNativeClaimQuestRewardExport }
 ) as { claimQuestReward: NativeClaimQuestReward; };
+
+const nativeFetchQuestRewardCode = findByCodeLazy(
+    "QUESTS_FETCH_REWARD_CODE_BEGIN",
+    "QUESTS_FETCH_REWARD_CODE_SUCCESS",
+    "QUESTS_FETCH_REWARD_CODE_FAILURE"
+) as NativeFetchQuestRewardCode;
 
 const inFlightActions = new Set<string>();
 const submittedActions = new Set<string>();
@@ -411,6 +419,42 @@ export async function enrollQuest(quest: NormalizedQuest): Promise<QuestActionRe
         return { storeConfirmed: false, resubmitAfterMs: SUBMITTED_ACTION_HOLD_MS };
     } finally {
         inFlightActions.delete(key);
+    }
+}
+
+
+export async function openQuestRewardCode(quest: NormalizedQuest): Promise<void> {
+    const userId = requireCurrentUserId();
+    const rawQuest = currentQuest(quest.id);
+    ensureCurrentQuestShape(rawQuest);
+
+    if (String(rawQuest.id) !== String(quest.id)) {
+        throw new QuestActionError("Quest state changed unexpectedly. Open Quest Home and try again.");
+    }
+    if (!rawQuest.userStatus?.claimedAt) {
+        throw new QuestActionError("Claim this Quest reward before viewing its code.");
+    }
+    if (!isExplicitRewardCodeConfig(rawQuest.config.rewardsConfig)) {
+        throw new QuestActionError("Discord does not identify this Quest as a reward-code Quest.");
+    }
+
+    try {
+        await nativeFetchQuestRewardCode(rawQuest.id);
+    } catch (error) {
+        throw new QuestActionError(
+            apiErrorMessage(error, "Discord could not load this Quest reward code."),
+            error
+        );
+    }
+
+    if (currentUserId() !== userId) {
+        throw new QuestActionError("Discord account changed while loading the Quest reward code.");
+    }
+
+    try {
+        await SettingsRouter.openUserSettings("gift_panel");
+    } catch (error) {
+        throw new QuestActionError("Discord could not open Gift Inventory.", error);
     }
 }
 

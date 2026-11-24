@@ -94,6 +94,21 @@ function rewardModalKind(rewards: unknown): RewardModalKind | null {
     return "reward-code";
 }
 
+
+/**
+ * True only when Discord explicitly models this Quest as a reward-code Quest.
+ * The claim path intentionally supports older configs with missing rewards, but View Code must
+ * fail closed instead of guessing because it is a post-claim presentation action.
+ */
+export function isExplicitRewardCodeConfig(rewardsConfig: unknown): boolean {
+    if (!isRecord(rewardsConfig)) return false;
+    const rewards = rewardsConfig.rewards;
+    if (!Array.isArray(rewards) || rewards.length === 0) return false;
+    if (rewardModalKind(rewards) !== "reward-code") return false;
+
+    return rewards.some(reward => isPlainRecord(reward) && reward.type === REWARD_CODE);
+}
+
 /** Classify Discord's native enroll action result. Unknown shapes fail closed. */
 export function assessEnrollResponse(response: unknown): EnrollResponseAssessment {
     if (!isPlainRecord(response) || typeof response.type !== "string") return "invalid";

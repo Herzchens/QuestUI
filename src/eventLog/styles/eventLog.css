@@ -132,17 +132,34 @@
     align-items: center;
     gap: 8px;
     margin: 12px 0 5px;
-    color: var(--text-muted);
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
+    color: var(--text-normal, #dbdee1);
+    font-size: 11px;
+    font-weight: 750;
 }
 
-.quest-ui-event-day::before,
-.quest-ui-event-day::after {
-    content: "";
+.quest-ui-event-day-icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    fill: none;
+    stroke: var(--text-muted, #949ba4);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.quest-ui-event-day > span:not(.quest-ui-event-day-line) {
+    flex: 0 0 auto;
+    color: #f4f5f7;
+    font-weight: 800;
+    text-shadow: 0 0 8px rgba(255,255,255,.05);
+    white-space: nowrap;
+}
+
+.quest-ui-event-day-line {
     height: 1px;
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 24px;
     background: var(--background-modifier-accent);
 }
 
@@ -169,15 +186,18 @@
     place-items: center;
     width: 18px;
     height: 18px;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: 800;
+    color: var(--text-muted);
 }
 
-.quest-ui-event-row.is-error .quest-ui-event-severity { color: var(--status-danger); background: color-mix(in srgb, var(--status-danger) 12%, transparent); }
-.quest-ui-event-row.is-warning .quest-ui-event-severity { color: var(--status-warning); background: color-mix(in srgb, var(--status-warning) 12%, transparent); }
-.quest-ui-event-row.is-success .quest-ui-event-severity { color: var(--status-positive); background: color-mix(in srgb, var(--status-positive) 12%, transparent); }
-.quest-ui-event-row.is-info .quest-ui-event-severity { color: var(--text-muted); background: var(--background-modifier-hover); }
+.quest-ui-event-severity-icon {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 
 .quest-ui-event-copy {
     min-width: 0;
@@ -312,24 +332,41 @@
 
 .quest-ui-event-copy-report .quest-ui-event-log-icon,
 .quest-ui-event-row-bug .quest-ui-event-log-icon {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .quest-ui-event-row-bug {
     display: grid;
     place-items: center;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
+    min-height: 26px;
     padding: 0;
-    border: 0;
-    border-radius: 6px;
-    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--text-muted) 5%, transparent);
     color: var(--text-muted);
     cursor: pointer;
+    transition:
+        background-color 110ms ease,
+        border-color 110ms ease,
+        color 110ms ease,
+        transform 110ms ease;
 }
 
 .quest-ui-event-row-bug:hover {
-    background: color-mix(in srgb, var(--status-danger) 10%, transparent);
-    color: var(--status-danger);
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 52%, transparent);
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-event-row-bug:active {
+    transform: scale(.94);
 }

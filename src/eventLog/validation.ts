@@ -40,6 +40,8 @@ export function normalizePersistedEvent(value: unknown): EventLogEvent | null {
 
     const hasAccountId = Object.prototype.hasOwnProperty.call(raw, "accountId");
     if (hasAccountId && raw.accountId != null && typeof raw.accountId !== "string") return null;
+    const hasAccountUsername = Object.prototype.hasOwnProperty.call(raw, "accountUsername");
+    if (hasAccountUsername && raw.accountUsername != null && typeof raw.accountUsername !== "string") return null;
 
     const category = EVENT_CATEGORIES.has(raw.category as EventLogCategory)
         ? raw.category as EventLogCategory
@@ -76,6 +78,11 @@ export function normalizePersistedEvent(value: unknown): EventLogEvent | null {
     if (hasAccountId) {
         event.accountId = typeof raw.accountId === "string" && raw.accountId.trim()
             ? raw.accountId.trim()
+            : null;
+    }
+    if (hasAccountUsername) {
+        event.accountUsername = typeof raw.accountUsername === "string" && raw.accountUsername.trim()
+            ? raw.accountUsername.trim()
             : null;
     }
 

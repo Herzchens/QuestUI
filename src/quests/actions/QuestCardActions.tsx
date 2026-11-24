@@ -11,7 +11,8 @@ import {
     isOrionCommandReady
 } from "../../orion/integration";
 import { OrionQuestControl } from "../../orion/OrionQuestControl";
-import { claimQuestReward, enrollQuest, QuestActionError } from "./native";
+import { claimQuestReward, enrollQuest, openQuestRewardCode, QuestActionError } from "./native";
+import { isExplicitRewardCodeConfig } from "./responses";
 import { getClaimAllRuntimeState } from "./claimAllState";
 import type { QuestActionResult } from "./native";
 import type { NormalizedQuest } from "../data";
@@ -67,6 +68,8 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
         : quest.status === "claimable"
             ? "claim"
             : null;
+    const showViewCode = quest.status === "claimed"
+        && isExplicitRewardCodeConfig(quest.rawQuest?.config?.rewardsConfig);
     const currentUserIdFromStore = useStateFromStores([UserStore], currentUserId);
     const { orionIntegration } = settings.use(["orionIntegration"]);
     const [pending, setPending] = useState(false);
@@ -166,6 +169,21 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                     stack: error instanceof Error ? error.stack ?? null : null
                 }
             });
+            showToast({ text: message, variant: "critical", duration: 6000 });
+        } finally {
+            setPending(false);
+        }
+    };
+
+    const viewCode = async () => {
+        if (!showViewCode || pending || currentUserIdFromStore == null) return;
+        setPending(true);
+        try {
+            await openQuestRewardCode(quest);
+        } catch (error) {
+            const message = error instanceof QuestActionError
+                ? error.message
+                : "Discord could not open this Quest reward code.";
             showToast({ text: message, variant: "critical", duration: 6000 });
         } finally {
             setPending(false);
@@ -272,7 +290,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
         && submitted.userId === currentUserIdFromStore;
     const showOrionControl = quest.status === "in-progress" && orionIntegration && isOrionCommandReady();
 
-    if (!action && !showOrionControl && !canToggleIgnored) return null;
+    if (!action && !showViewCode && !showOrionControl && !canToggleIgnored) return null;
 
     return (
         <span className="quest-ui-card-actions">
@@ -289,7 +307,20 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 </button>
             )}
 
-            {!action && showOrionControl && <OrionQuestControl quest={quest} />}
+            {!action && showViewCode && (
+                <button
+                    type="button"
+                    className="quest-ui-card-action quest-ui-card-action-view-code"
+                    disabled={pending || currentUserIdFromStore == null}
+                    aria-busy={pending}
+                    onClick={() => void viewCode()}
+                    title="Open this claimed reward code in Discord Gift Inventory"
+                >
+                    {pending ? "Opening…" : "View Code"}
+                </button>
+            )}
+
+            {!action && !showViewCode && showOrionControl && <OrionQuestControl quest={quest} />}
 
             {canToggleIgnored && (
                 <button

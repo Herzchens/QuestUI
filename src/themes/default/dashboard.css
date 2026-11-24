@@ -783,6 +783,30 @@
     padding: 0 9px;
 }
 
+.quest-ui-theme-default .quest-ui-filter-count-badge {
+    align-items: center;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+    color: var(--text-muted, #949ba4);
+    display: inline-flex;
+    font-size: 9px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 750;
+    height: 16px;
+    justify-content: center;
+    line-height: 1;
+    min-width: 16px;
+    padding: 0 4px;
+}
+
+.quest-ui-theme-default .quest-ui-filter-button:hover .quest-ui-filter-count-badge,
+.quest-ui-theme-default .quest-ui-filter-button.is-open .quest-ui-filter-count-badge {
+    background: rgba(255,255,255,.11);
+    border-color: rgba(255,255,255,.18);
+    color: #d7d9dc;
+}
+
 .quest-ui-theme-default .quest-ui-dashboard-filter-control svg {
     flex-basis: 16px;
     height: 16px;
@@ -1294,7 +1318,10 @@
 
 .quest-ui-theme-default .quest-ui-dashboard-summary > .quest-ui-summary-chip:hover {
     background: color-mix(in srgb, var(--quest-ui-summary-color) 15%, transparent);
-    border-color: color-mix(in srgb, var(--quest-ui-summary-color) 68%, transparent);
+    border-color: color-mix(in srgb, var(--quest-ui-summary-color) 72%, transparent);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--quest-ui-summary-color) 14%, transparent),
+        0 0 10px color-mix(in srgb, var(--quest-ui-summary-color) 20%, transparent);
     transform: translateY(-1px);
 }
 

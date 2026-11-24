@@ -1,7 +1,7 @@
 import type { PluginNative } from "@utils/types";
 import { UserStore } from "@webpack/common";
 
-import { eventBelongsToAccount, eventVisibleForAccount, normalizeEventAccountId, UNAVAILABLE_ACCOUNT_SCOPE } from "./account";
+import { collectEventAccountUsernames, eventBelongsToAccount, eventMatchesAccountScopes, eventVisibleForAccount, normalizeEventAccountId, UNAVAILABLE_ACCOUNT_SCOPE } from "./account";
 import {
     classifyConsoleEvent,
     consoleArgsToText,
@@ -46,6 +46,7 @@ const ORION_SHADOW_MATCH_WINDOW_MS = 250;
 const ORION_REBIND_INTERVAL_MS = 1000;
 type PendingOrionConsole = OrionConsoleShadowCandidate & {
     accountId: string | null;
+    accountUsername: string | null;
     classified: ReturnType<typeof classifyConsoleEvent>;
     timer: ReturnType<typeof setTimeout>;
 };
@@ -61,6 +62,7 @@ let orionRebindTimer: ReturnType<typeof setInterval> | null = null;
 let watchedUserStore: any = null;
 let onCurrentUserChanged: (() => void) | null = null;
 let knownAccountId: string | null = null;
+let knownAccountUsername: string | null = null;
 
 function eventId(): string {
     try { return globalThis.crypto?.randomUUID?.() ?? `evt-${Date.now()}-${Math.random().toString(16).slice(2)}`; }
@@ -70,6 +72,17 @@ function eventId(): string {
 function currentEventLogAccountId(): string | null {
     try { return normalizeEventAccountId(UserStore?.getCurrentUser?.()?.id); }
     catch { return null; }
+}
+
+function currentEventLogAccountUsername(): string | null {
+    try {
+        const username = UserStore?.getCurrentUser?.()?.username;
+        return typeof username === "string" && username.trim()
+            ? sanitizeEventText(username.trim(), 80)
+            : null;
+    } catch {
+        return null;
+    }
 }
 
 function notify(): void {
@@ -97,19 +110,29 @@ export async function recordQuestUIEvent(input: {
     captureSource?: EventLogEvent["captureSource"];
     timestamp?: number;
     accountId?: string | null;
+    accountUsername?: string | null;
 }): Promise<EventLogEvent> {
     const source = input.source ?? "questui";
     const eventCode = sanitizeEventText(input.eventCode, 120);
     const summary = sanitizeEventText(input.summary, 240);
     const suppliedTimestamp = Number(input.timestamp);
+    const currentAccountId = currentEventLogAccountId();
     const accountId = Object.prototype.hasOwnProperty.call(input, "accountId")
         ? normalizeEventAccountId(input.accountId)
-        : currentEventLogAccountId();
+        : currentAccountId;
+    const accountUsername = Object.prototype.hasOwnProperty.call(input, "accountUsername")
+        ? (typeof input.accountUsername === "string" && input.accountUsername.trim()
+            ? sanitizeEventText(input.accountUsername.trim(), 80)
+            : null)
+        : accountId != null && accountId === currentAccountId
+            ? currentEventLogAccountUsername()
+            : null;
     const event: EventLogEvent = {
         schemaVersion: 1,
         id: eventId(),
         timestamp: Number.isFinite(suppliedTimestamp) && suppliedTimestamp > 0 ? suppliedTimestamp : Date.now(),
         accountId,
+        accountUsername,
         source,
         severity: input.severity,
         category: input.category ?? inferEventCategory({ source, eventCode, summary }),
@@ -142,11 +165,28 @@ function memoryQuery(options: EventLogQuery): EventLogQueryResult {
     const sort = options.sort ?? "newest";
     const limit = Math.max(1, Math.min(5000, options.limit ?? 200));
     const includeLegacy = options.includeLegacy !== false;
-    let events = [...memoryEvents];
+    const accountScope = options.accountScope == null || options.accountScope === "all"
+        ? "all"
+        : Array.isArray(options.accountScope) ? options.accountScope : [options.accountScope];
+    const accountNames = collectEventAccountUsernames(memoryEvents);
+    let events = memoryEvents.map(event => (
+        event.accountId && !event.accountUsername && accountNames.has(event.accountId)
+            ? { ...event, accountUsername: accountNames.get(event.accountId)! }
+            : event
+    ));
     if (options.accountId) events = events.filter(event => eventVisibleForAccount(event, options.accountId!, includeLegacy));
+    if (accountScope !== "all") {
+        events = events.filter(event => eventMatchesAccountScopes(event, options.currentAccountId, accountScope));
+    }
     if (source !== "all") events = events.filter(event => event.source === source);
-    if (severity !== "all") events = events.filter(event => event.severity === severity);
-    if (category !== "all") events = events.filter(event => inferEventCategory(event) === category);
+    if (severity !== "all") {
+        const selectedSeverities = Array.isArray(severity) ? severity : [severity];
+        events = events.filter(event => selectedSeverities.includes(event.severity));
+    }
+    if (category !== "all") {
+        const selectedCategories = Array.isArray(category) ? category : [category];
+        events = events.filter(event => selectedCategories.includes(inferEventCategory(event)));
+    }
     if (query) events = events.filter(event => eventSearchText(event).includes(query));
     if (sort === "oldest") events.sort((a, b) => a.timestamp - b.timestamp);
     else if (sort === "severity") events.sort((a, b) => severityRank(a.severity) - severityRank(b.severity) || b.timestamp - a.timestamp);
@@ -155,14 +195,13 @@ function memoryQuery(options: EventLogQuery): EventLogQueryResult {
 }
 
 export async function queryEventLog(options: EventLogQuery): Promise<EventLogQueryResult> {
-    const scopedOptions: EventLogQuery = {
+    const globalOptions: EventLogQuery = {
         ...options,
-        accountId: currentEventLogAccountId() ?? UNAVAILABLE_ACCOUNT_SCOPE,
         includeLegacy: options.includeLegacy !== false
     };
-    if (!Native) return memoryQuery(scopedOptions);
-    try { return await Native.queryEvents(scopedOptions) as EventLogQueryResult; }
-    catch { return memoryQuery(scopedOptions); }
+    if (!Native) return memoryQuery(globalOptions);
+    try { return await Native.queryEvents(globalOptions) as EventLogQueryResult; }
+    catch { return memoryQuery(globalOptions); }
 }
 
 export async function clearEventLog(): Promise<void> {
@@ -207,7 +246,8 @@ function recordClassifiedOrionConsole(candidate: PendingOrionConsole): void {
         detail: classified.detail,
         captureSource: "console-preview",
         timestamp: candidate.capturedAt,
-        accountId: candidate.accountId
+        accountId: candidate.accountId,
+        accountUsername: candidate.accountUsername
     });
 }
 
@@ -236,6 +276,7 @@ function queueOrionConsoleCandidate(level: ConsoleLevel, text: string): void {
         id,
         capturedAt,
         accountId: currentEventLogAccountId(),
+        accountUsername: currentEventLogAccountUsername(),
         eventCode: classified.eventCode,
         severity: classified.severity,
         category: classified.category,
@@ -326,17 +367,26 @@ function refreshOrionEventSource(): void {
 function reconcileEventLogAccount(): void {
     if (!captureStarted) return;
     const current = currentEventLogAccountId();
+    const currentUsername = currentEventLogAccountUsername();
     // A transient null is not an account transition. Preserve the last confirmed identity until
     // Discord publishes a different non-null user, matching Orion's own account watcher rule.
     if (current == null) return;
     if (knownAccountId == null) {
         knownAccountId = current;
+        knownAccountUsername = currentUsername;
         notify();
         return;
     }
-    if (current === knownAccountId) return;
+    if (current === knownAccountId) {
+        if (currentUsername) knownAccountUsername = currentUsername;
+        return;
+    }
 
+    const previousAccountId = knownAccountId;
+    const previousAccountUsername = knownAccountUsername;
     knownAccountId = current;
+    knownAccountUsername = currentUsername;
+
     // Flush old console shadows with the account captured alongside each shadow, then invalidate
     // the structured callback generation so an old subscription cannot survive the identity swap.
     if (orionEventIdentity || orionEventMethod || orionEventUnsubscribe) detachOrionEventSource(true);
@@ -347,14 +397,21 @@ function reconcileEventLogAccount(): void {
         severity: "info",
         category: "diagnostic",
         eventCode: "QUESTUI_ACCOUNT_CHANGED",
-        summary: "Discord account changed; Event Log switched to the current account",
-        accountId: current
+        summary: "Discord account changed",
+        detail: {
+            message: "Event Log continues showing shared history across Discord accounts.",
+            previousAccountId,
+            previousAccountUsername
+        },
+        accountId: current,
+        accountUsername: currentUsername
     });
 }
 
 function armAccountWatcher(): void {
     if (onCurrentUserChanged) return;
     knownAccountId = currentEventLogAccountId();
+    knownAccountUsername = currentEventLogAccountUsername();
     const store = UserStore as any;
     if (typeof store?.addChangeListener !== "function") return;
 
@@ -370,6 +427,7 @@ function disarmAccountWatcher(): void {
     onCurrentUserChanged = null;
     watchedUserStore = null;
     knownAccountId = null;
+    knownAccountUsername = null;
 }
 
 function captureConsole(level: ConsoleLevel, args: unknown[]): void {

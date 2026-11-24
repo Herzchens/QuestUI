@@ -209,8 +209,13 @@ export function UpdateProductStatus({ product, state, health, compact = false }:
 export function UpdateCenterIcon() {
     return (
         <svg className="quest-ui-update-center-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M11 3h2v9.17l2.59-2.58L17 11l-5 5-5-5 1.41-1.41L11 12.17V3Z" />
-            <path d="M5 17h2v2h10v-2h2v4H5v-4Z" />
+            <path d="M12 2a10 10 0 0 1 7.38 16.75" />
+            <path d="m16 12-4-4-4 4" />
+            <path d="M12 16V8" />
+            <path d="M2.5 8.875a10 10 0 0 0-.5 3" />
+            <path d="M2.83 16a10 10 0 0 0 2.43 3.4" />
+            <path d="M4.636 5.235a10 10 0 0 1 .891-.857" />
+            <path d="M8.644 21.42a10 10 0 0 0 7.631-.38" />
         </svg>
     );
 }

@@ -14,8 +14,12 @@
 }
 
 .quest-ui-update-center-icon {
-    fill: currentColor;
+    fill: none;
     height: 18px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
     width: 18px;
 }
 
@@ -99,8 +103,12 @@
 }
 
 .quest-ui-update-panel-title-icon svg {
-    fill: currentColor;
+    fill: none;
     height: 17px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
     width: 17px;
 }
 
@@ -1160,11 +1168,35 @@
 }
 
 .quest-ui-update-row-version {
-    background: rgba(114,137,255,.14);
-    border: 1px solid rgba(114,137,255,.28);
+    background: color-mix(in srgb, var(--blue-345, #5c9ded) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--blue-345, #5c9ded) 42%, transparent);
     border-radius: 999px;
-    color: #9da9ff;
+    color: var(--blue-330, #79b5f8);
     padding: 2px 6px;
+}
+
+.quest-ui-update-row-version.is-beta {
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 12%, transparent);
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 42%, transparent);
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-update-row-version.is-alpha {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 12%, transparent);
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 42%, transparent);
+    color: #ff7b7e;
+}
+
+.quest-ui-update-row-version.is-prerelease {
+    background: color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
+    border-color: color-mix(in srgb, var(--brand-360, #949cf7) 42%, transparent);
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-update-row-version.is-unknown {
+    background: rgba(255,255,255,.04);
+    border-color: rgba(255,255,255,.10);
+    color: var(--text-muted, #949ba4);
 }
 
 .quest-ui-update-row-arrow {
@@ -1174,6 +1206,26 @@
 .quest-ui-update-row-target {
     color: #aeb7ff;
     font-weight: 700;
+}
+
+.quest-ui-update-row-target.is-stable {
+    color: var(--blue-330, #79b5f8);
+}
+
+.quest-ui-update-row-target.is-beta {
+    color: var(--status-warning, #f0b232);
+}
+
+.quest-ui-update-row-target.is-alpha {
+    color: #ff7b7e;
+}
+
+.quest-ui-update-row-target.is-prerelease {
+    color: var(--brand-360, #949cf7);
+}
+
+.quest-ui-update-row-target.is-unknown {
+    color: var(--text-muted, #949ba4);
 }
 
 .quest-ui-update-panel-v16 .quest-ui-update-product-row-meta {
@@ -1354,9 +1406,16 @@
     width: 34px !important;
 }
 
-.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon svg {
-    height: 16px !important;
-    width: 16px !important;
+.quest-ui-update-panel-v16 .quest-ui-update-panel-title-icon .quest-ui-update-center-icon {
+    display: block;
+    fill: none !important;
+    height: 18px !important;
+    overflow: visible;
+    stroke: currentColor !important;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2 !important;
+    width: 18px !important;
 }
 
 .quest-ui-update-panel-v16 .quest-ui-update-panel-title > strong {

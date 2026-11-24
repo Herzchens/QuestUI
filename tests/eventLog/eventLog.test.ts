@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 
 import {
+    collectEventAccountUsernames,
     eventBelongsToAccount,
+    eventMatchesAccountScopes,
     eventVisibleForAccount,
     isLegacyUnscopedEvent,
     normalizeEventAccountId,
@@ -101,6 +103,56 @@ assert.equal(eventVisibleForAccount({}, UNAVAILABLE_ACCOUNT_SCOPE, true), true);
 assert.equal(sameEventAccountScope({}, { accountId: null }), true);
 assert.equal(sameEventAccountScope({ accountId: "111" }, { accountId: "111" }), true);
 assert.equal(sameEventAccountScope({ accountId: "111" }, { accountId: "222" }), false);
+assert.equal(eventMatchesAccountScopes({ accountId: "111" }, "111", ["current"]), true);
+assert.equal(eventMatchesAccountScopes({ accountId: "222" }, "111", ["current"]), false);
+assert.equal(eventMatchesAccountScopes({ accountId: "222" }, "111", ["other"]), true);
+assert.equal(eventMatchesAccountScopes({ accountId: "111" }, "111", ["other"]), false);
+assert.equal(eventMatchesAccountScopes({}, "111", ["other"]), true);
+assert.equal(eventMatchesAccountScopes({ accountId: "111" }, "111", ["current", "other"]), true);
+assert.equal(eventMatchesAccountScopes({ accountId: "222" }, "111", ["current", "other"]), true);
+assert.equal(eventMatchesAccountScopes({ accountId: "111" }, "111", []), false);
+
+const accountNames = collectEventAccountUsernames([
+    {
+        schemaVersion: 1,
+        id: "older-name",
+        timestamp: 100,
+        accountId: "111",
+        accountUsername: "oldname",
+        source: "questui",
+        severity: "info",
+        captureSource: "questui",
+        eventCode: "TEST",
+        summary: "old"
+    },
+    {
+        schemaVersion: 1,
+        id: "switch",
+        timestamp: 300,
+        accountId: "222",
+        accountUsername: "pnuyn",
+        source: "questui",
+        severity: "info",
+        captureSource: "questui",
+        eventCode: "QUESTUI_ACCOUNT_CHANGED",
+        summary: "Discord account changed",
+        detail: { previousAccountId: "111", previousAccountUsername: "itzherzchen" }
+    },
+    {
+        schemaVersion: 1,
+        id: "newer-name",
+        timestamp: 200,
+        accountId: "111",
+        accountUsername: "intermediate",
+        source: "questui",
+        severity: "info",
+        captureSource: "questui",
+        eventCode: "TEST",
+        summary: "middle"
+    }
+]);
+assert.equal(accountNames.get("111"), "itzherzchen");
+assert.equal(accountNames.get("222"), "pnuyn");
 
 const validPersistedLegacy = normalizePersistedEvent({
     schemaVersion: 1,
@@ -119,6 +171,22 @@ assert.equal(validPersistedLegacy.id, "legacy-1");
 assert.equal(validPersistedLegacy.accountId, undefined);
 assert.equal(validPersistedLegacy.category, undefined);
 assert.deepEqual(validPersistedLegacy.quest, { id: null, name: "Quest", taskType: null });
+
+const validPersistedAccountOwner = normalizePersistedEvent({
+    schemaVersion: 1,
+    id: "owned-1",
+    timestamp: 456,
+    accountId: "222",
+    accountUsername: "itzherzchen",
+    source: "questui",
+    severity: "info",
+    captureSource: "questui",
+    eventCode: "OWNED_OK",
+    summary: "owned row"
+});
+assert.ok(validPersistedAccountOwner);
+assert.equal(validPersistedAccountOwner.accountId, "222");
+assert.equal(validPersistedAccountOwner.accountUsername, "itzherzchen");
 assert.equal(normalizePersistedEvent({}), null);
 assert.equal(normalizePersistedEvent({ id: "bad", timestamp: Number.NaN, source: "questui", severity: "info", captureSource: "questui", eventCode: "BAD", summary: "bad" }), null);
 assert.equal(normalizePersistedEvent({ id: "bad", timestamp: 123, source: "discord", severity: "info", captureSource: "questui", eventCode: "BAD", summary: "bad" }), null);

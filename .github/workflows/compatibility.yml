@@ -220,6 +220,8 @@ jobs:
             '/shop'
             'QUESTS_ENROLL_BEGIN'
             'QUESTS_CLAIM_REWARD_BEGIN'
+            'QUESTS_FETCH_REWARD_CODE_BEGIN'
+            'View Code'
             'Claim all'
             'QUESTS_FETCH_CURRENT_QUESTS_BEGIN'
             'VIRTUAL_CURRENCY_USER_BALANCE'

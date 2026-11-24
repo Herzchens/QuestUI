@@ -143,7 +143,7 @@
     color: var(--text-default, var(--header-primary));
     display: flex;
     flex-direction: column;
-    max-height: min(760px, calc(100vh - 72px));
+    max-height: min(668px, calc(100vh - 72px));
     overflow: hidden;
     width: min(640px, calc(100vw - 24px));
 }
