@@ -20,6 +20,12 @@ assert.match(questCardSource, /M28 10\.5 H46\.5 L54\.5 18\.5 V37\.5 L43\.5 45\.5
 assert.doesNotMatch(css, /quest-ui-update-panel-heading::after\s*\{[^}]*content:\s*""/, "Obsidian Update Center heading separator returned");
 assert.doesNotMatch(css, /Single-choice groups use Discord-like radio circles/, "stale Dashboard radio presentation returned");
 assert.doesNotMatch(css, /Event Log radio controls: solid selected circle/, "stale Event Log radio presentation returned");
+assert.doesNotMatch(css, /\.quest-ui-theme \.quest-ui-reload-icon-button,\s*\.quest-ui-theme \.quest-ui-update-center-button,\s*\.quest-ui-theme \.quest-ui-home-button\s*\{[^}]*flex:\s*0 0 40px/s, "legacy 40px utility sizing returned");
+assert.doesNotMatch(css, /\.quest-ui-theme \.quest-ui-orion-icon-button,\s*\.quest-ui-theme \.quest-ui-toolbar-button,\s*\.quest-ui-theme \.quest-ui-reload-icon-button\s*\{[^}]*height:\s*32px/s, "stale 32px Reload sizing returned");
+assert.doesNotMatch(css, /\.quest-ui-theme-obsidian \.quest-ui-orion-status-copy,\s*\.quest-ui-theme-obsidian \.quest-ui-product-update-chip\s*\{[^}]*font-size:\s*10\.5px/s, "stale updater font-size baseline returned");
+assert.doesNotMatch(css, /background:\s*#858cff;\s*border-radius:\s*1px;/, "legacy square single-choice dot returned");
+assert.doesNotMatch(css, /\.quest-ui-theme-obsidian\.quest-ui-dashboard-choice-list\s*\{[^}]*background:\s*#131724\s*!important/s, "dead choice-list shell override returned");
+assert.doesNotMatch(css, /\.quest-ui-event-log-panel \.quest-ui-event-log-panel \.quest-ui-event-log-actions button:hover/, "dead nested Event Log hover selector returned");
 assert.doesNotMatch(css, /\.quest-ui-detailed-count\s*\{[^}]*border-radius:\s*2px/, "Obsidian Detailed Status square badge returned");
 assert.match(css, /\.quest-ui-update-attention-badge\s*\{[\s\S]*?border-radius:\s*50%/, "Obsidian update attention badge must stay circular");
 

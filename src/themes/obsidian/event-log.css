@@ -392,8 +392,7 @@
     overscroll-behavior: contain;
 }
 .quest-ui-event-log-panel .quest-ui-event-log-header,
-.quest-ui-event-log-panel .quest-ui-event-search,
-.quest-ui-event-log-panel .quest-ui-event-log-actions {
+.quest-ui-event-log-panel .quest-ui-event-search {
     flex: 0 0 auto;
 }
 .quest-ui-event-log-panel .quest-ui-event-log-header {
@@ -403,11 +402,6 @@
     margin: 12px 0 9px;
     border-color: var(--border-subtle, color-mix(in srgb, var(--quest-ui-theme-text-strong) 10%, transparent));
 
-}
-.quest-ui-event-log-panel .quest-ui-event-log-actions button,
-.quest-ui-event-log-panel .quest-ui-event-log-panel .quest-ui-event-log-actions button:hover {
-    background: var(--background-mod-strong, color-mix(in srgb, var(--quest-ui-theme-text-strong) 9%, transparent));
-    color: var(--text-default, var(--header-primary));
 }
 .quest-ui-event-log-panel .quest-ui-event-list {
     flex: 1 1 auto;
@@ -787,8 +781,7 @@
     stroke-linejoin: round;
 }
 .quest-ui-event-island-icon-button .quest-ui-event-action-icon,
-.quest-ui-event-clean-trigger .quest-ui-event-action-icon,
-.quest-ui-event-clear-confirm-button .quest-ui-event-action-icon {
+.quest-ui-event-clean-trigger .quest-ui-event-action-icon {
     width: 18px;
     height: 18px;
     stroke-width: 1.8;
@@ -1497,7 +1490,6 @@
 
 /* Event Detail redesign: visual hierarchy follows the refined Event Log mock. */
 .quest-ui-event-detail.quest-ui-event-detail {
-    box-sizing: border-box;
     width: min(760px, calc(100vw - 28px));
     height: min(650px, calc(100vh - 82px));
     max-height: min(650px, calc(100vh - 82px));
@@ -2219,17 +2211,16 @@
 .quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(button[role="menuitemradio"]:hover, button[role="menuitemradio"].is-selected, .quest-ui-event-filter-list-row:hover, .quest-ui-event-filter-list-row.is-checked) {
     background: linear-gradient(135deg, rgba(207,177,230,.13), rgba(94,42,128,.12)) !important;
 }
-.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(.quest-ui-event-sort-radio, .quest-ui-event-filter-list-box) {
-    border-radius: 0 !important; clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); background: #090a10; border-color: #766d82;
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface .quest-ui-event-filter-list-row:not(.is-radio) .quest-ui-event-filter-list-box {
+    border-radius: 0 !important;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    background: #090a10;
+    border-color: #766d82;
 }
-.quest-ui-theme-obsidian.quest-ui-event-menu-surface .quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box {
-    clip-path: polygon(50% 0, 86% 14%, 100% 50%, 86% 86%, 50% 100%, 14% 86%, 0 50%, 14% 14%);
-}
-.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(button[role="menuitemradio"].is-selected .quest-ui-event-sort-radio, .quest-ui-event-filter-list-row.is-checked .quest-ui-event-filter-list-box) {
-    background: linear-gradient(145deg, #8e3fd2, #431864); border-color: #c778ff; box-shadow: 0 0 6px rgba(180,85,244,.30);
-}
-.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(.quest-ui-event-sort-radio > span, .quest-ui-event-filter-list-radio-dot) {
-    border-radius: 0 !important; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); background: #f0dcff;
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface .quest-ui-event-filter-list-row:not(.is-radio).is-checked .quest-ui-event-filter-list-box {
+    background: linear-gradient(145deg, #8e3fd2, #431864);
+    border-color: #c778ff;
+    box-shadow: 0 0 6px rgba(180,85,244,.30);
 }
 .quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-back, .quest-ui-event-copy-report) {
     --quest-ui-event-detail-action-rim: #81778d;

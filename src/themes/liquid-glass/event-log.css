@@ -374,8 +374,7 @@
     overscroll-behavior: contain;
 }
 .quest-ui-event-log-panel .quest-ui-event-log-header,
-.quest-ui-event-log-panel .quest-ui-event-search,
-.quest-ui-event-log-panel .quest-ui-event-log-actions {
+.quest-ui-event-log-panel .quest-ui-event-search {
     flex: 0 0 auto;
 }
 .quest-ui-event-log-panel .quest-ui-event-log-header {
@@ -385,11 +384,6 @@
     margin: 12px 0 9px;
     border-color: var(--border-subtle, color-mix(in srgb, var(--quest-ui-theme-text-strong) 10%, transparent));
 
-}
-.quest-ui-event-log-panel .quest-ui-event-log-actions button,
-.quest-ui-event-log-panel .quest-ui-event-log-panel .quest-ui-event-log-actions button:hover {
-    background: var(--quest-ui-glass-specular), var(--background-mod-strong, color-mix(in srgb, var(--quest-ui-theme-text-strong) 9%, transparent));
-    color: var(--text-default, var(--header-primary));
 }
 .quest-ui-event-log-panel .quest-ui-event-list {
     flex: 1 1 auto;
@@ -766,8 +760,7 @@
     stroke-linejoin: round;
 }
 .quest-ui-event-island-icon-button .quest-ui-event-action-icon,
-.quest-ui-event-clean-trigger .quest-ui-event-action-icon,
-.quest-ui-event-clear-confirm-button .quest-ui-event-action-icon {
+.quest-ui-event-clean-trigger .quest-ui-event-action-icon {
     width: 18px;
     height: 18px;
     stroke-width: 1.8;
@@ -1494,7 +1487,6 @@
 
 /* Event Detail redesign: visual hierarchy follows the refined Event Log mock. */
 .quest-ui-event-detail.quest-ui-event-detail {
-    box-sizing: border-box;
     width: min(760px, calc(100vw - 28px));
     height: min(650px, calc(100vh - 82px));
     max-height: min(650px, calc(100vh - 82px));

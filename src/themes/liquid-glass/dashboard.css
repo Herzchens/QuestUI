@@ -461,7 +461,6 @@
 :where(.quest-ui-theme-liquid-glass) .quest-ui-home-button:hover {
     background: var(--quest-ui-glass-control);
     border-color: var(--quest-ui-theme-border-control);
-    color: #fff;
     box-shadow: var(--quest-ui-glass-control-rim);
 }
 :where(.quest-ui-theme-liquid-glass) .quest-ui-home-button:hover {
@@ -870,18 +869,12 @@
     border-color: color-mix(in srgb, #ff8d9d 45%, rgba(255,255,255,.22));
     box-shadow: var(--quest-ui-glass-control-rim);
 }
-.quest-ui-theme-liquid-glass .quest-ui-toolbar-button,
-.quest-ui-theme-liquid-glass .quest-ui-reload-icon-button {
+.quest-ui-theme-liquid-glass .quest-ui-toolbar-button {
     border-radius: 9px;
 }
 .quest-ui-theme .quest-ui-toolbar-button.quest-ui-claim-all-button {
     min-width: 108px;
     padding: 0 12px;
-}
-.quest-ui-theme .quest-ui-reload-icon-button,
-.quest-ui-theme .quest-ui-update-center-button,
-.quest-ui-theme .quest-ui-home-button {
-    flex: 0 0 40px;
 }
 .quest-ui-theme .quest-ui-event-log-button {
     flex: 0 0 auto;
@@ -1155,13 +1148,11 @@
 .quest-ui-theme .quest-ui-orion-status {
     gap: 5px;
 }
-.quest-ui-theme .quest-ui-orion-status-copy,
-.quest-ui-theme .quest-ui-product-update-chip {
+.quest-ui-theme .quest-ui-orion-status-copy {
     min-height: 23px;
     padding: 5px 8px;
 }
-.quest-ui-theme-liquid-glass .quest-ui-orion-status-copy,
-.quest-ui-theme-liquid-glass .quest-ui-product-update-chip {
+.quest-ui-theme-liquid-glass .quest-ui-orion-status-copy {
     font-size: 10.5px;
 }
 .quest-ui-theme .quest-ui-orion-status-dot {
@@ -1288,8 +1279,7 @@
     font-size: 16px;
 }
 .quest-ui-theme .quest-ui-orion-icon-button,
-.quest-ui-theme .quest-ui-toolbar-button,
-.quest-ui-theme .quest-ui-reload-icon-button {
+.quest-ui-theme .quest-ui-toolbar-button {
     height: 32px;
     min-height: 32px;
 }
@@ -1931,11 +1921,6 @@
     font-weight: 650;
 
 }
-.quest-ui-theme .quest-ui-orion-status.is-compact .quest-ui-orion-status-dot {
-    flex-basis: 6px;
-    height: 6px;
-    width: 6px;
-}
 
 /* Keep each plugin half as one compact left-aligned group.
  * Any spare width belongs after the controls, before the center separator.
@@ -1981,16 +1966,14 @@
 
 /* Utility actions read as circular icon pills. */
 .quest-ui-theme .quest-ui-reload-icon-button,
-.quest-ui-theme .quest-ui-update-center-button,
-.quest-ui-theme .quest-ui-home-button {
-    flex-basis: 34px;
+.quest-ui-theme .quest-ui-update-center-button {
+    flex: 0 0 34px;
     height: 34px;
     min-height: 34px;
     width: 34px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-reload-icon-button,
-.quest-ui-theme-liquid-glass .quest-ui-update-center-button,
-.quest-ui-theme-liquid-glass .quest-ui-home-button {
+.quest-ui-theme-liquid-glass .quest-ui-update-center-button {
     border-radius: 999px;
 }
 
@@ -2916,8 +2899,10 @@
     left: 9px;
     pointer-events: none;
     position: absolute;
-    right: 9px;
     top: 8px;
+}
+.quest-ui-theme .quest-ui-history-steps-line {
+    right: 9px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-history-steps-line,
 .quest-ui-theme-liquid-glass .quest-ui-history-steps-fill {

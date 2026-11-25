@@ -123,14 +123,22 @@
     background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, .1));
     border-radius: 7px;
-    color: var(--interactive-normal, #b5bac1);
     cursor: pointer;
     font-size: 11px;
     font-weight: 650;
-    min-height: 28px;
-    padding: 5px 9px;
     transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
+.quest-ui-update-card-actions > button,
+.quest-ui-update-settings-control > button {
+    color: var(--interactive-normal, #b5bac1);
+}
+
+.quest-ui-update-check-button,
+.quest-ui-update-card-actions > button {
+    min-height: 28px;
+    padding: 5px 9px;
+}
+
 .quest-ui-update-check-button {
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 26%, var(--border-subtle, transparent));
     color: var(--brand-360, #949cf7);
