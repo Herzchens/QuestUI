@@ -695,7 +695,7 @@
 :where(.quest-ui-theme-liquid-glass) .quest-ui-toolbar-button.quest-ui-claim-all-button:not(:disabled) {
     border-color: color-mix(in srgb, #65e9a6 48%, rgba(255,255,255,.26));
     box-shadow: var(--quest-ui-glass-control-rim);
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 14%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 26%, transparent);
 }
 :where(.quest-ui-theme-liquid-glass) .quest-ui-toolbar-button.quest-ui-claim-all-button:not(:disabled):hover {
     border-color: color-mix(in srgb, var(--status-positive, #23a55a) 78%, rgba(255, 255, 255, 0.18));
@@ -705,7 +705,7 @@
 }
 .quest-ui-claim-all-count {
     align-items: center;
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 24%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 36%, transparent);
     border-radius: 999px;
     box-sizing: border-box;
     display: inline-flex;
@@ -751,7 +751,7 @@
     border: 1px solid var(--quest-ui-dashboard-border);
     border-radius: 26px;
     box-shadow: var(--quest-ui-glass-panel-shadow);
-    backdrop-filter: blur(22px) saturate(1.25);
+    backdrop-filter: blur(20px) saturate(1.55);
 }
 .quest-ui-theme .quest-ui-dashboard-topbar {
     align-items: center;
@@ -817,7 +817,7 @@
     margin-left: auto;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-orb-balance {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #b6a3ff 17%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #b6a3ff 26%, transparent);
     border-color: color-mix(in srgb, var(--quest-ui-theme-accent) 42%, rgba(255,255,255,.22));
     box-shadow: var(--quest-ui-glass-control-rim);
 }
@@ -856,17 +856,17 @@
 }
 .quest-ui-theme-liquid-glass .quest-ui-orion-icon-button.is-start,
 .quest-ui-theme-liquid-glass .quest-ui-orion-icon-button.is-resume {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 14%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 26%, transparent);
     border-color: color-mix(in srgb, #65e9a6 45%, rgba(255,255,255,.22));
     box-shadow: var(--quest-ui-glass-control-rim);
 }
 .quest-ui-theme-liquid-glass .quest-ui-orion-icon-button.is-pause {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ffd179 14%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ffd179 26%, transparent);
     border-color: color-mix(in srgb, #ffd179 45%, rgba(255,255,255,.22));
     box-shadow: var(--quest-ui-glass-control-rim);
 }
 .quest-ui-theme-liquid-glass .quest-ui-orion-icon-button.is-stop {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ff8d9d 14%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ff8d9d 26%, transparent);
     border-color: color-mix(in srgb, #ff8d9d 45%, rgba(255,255,255,.22));
     box-shadow: var(--quest-ui-glass-control-rim);
 }
@@ -949,23 +949,23 @@
     box-shadow: var(--quest-ui-glass-control-rim);
 }
 .quest-ui-theme-liquid-glass .quest-ui-product-update-chip.is-current {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 14%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 26%, transparent);
     border-color: color-mix(in srgb, #65e9a6 40%, rgba(255,255,255,.23));
     color: #65e9a6;
 }
 .quest-ui-theme-liquid-glass .quest-ui-product-update-chip.is-available {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #d8b4fe 14%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #d8b4fe 26%, transparent);
     border-color: color-mix(in srgb, #d8b4fe 40%, rgba(255,255,255,.23));
     color: #d8b4fe;
 }
 .quest-ui-theme-liquid-glass .quest-ui-product-update-chip.is-error {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ff9b9d 14%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ff9b9d 26%, transparent);
     border-color: color-mix(in srgb, #ff9b9d 40%, rgba(255,255,255,.23));
     color: #ff9b9d;
 }
 .quest-ui-theme-liquid-glass .quest-ui-product-update-chip.is-warning {
     color: #ffd179;
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ffd179 14%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ffd179 26%, transparent);
     border-color: color-mix(in srgb, #ffd179 40%, rgba(255,255,255,.23));
 }
 .quest-ui-theme-liquid-glass .quest-ui-product-update-chip.is-checking .quest-ui-product-update-mark {
@@ -1052,7 +1052,7 @@
     border-radius: 5px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-achievement-progress-segments > span.is-filled {
-    background: linear-gradient(180deg,#d6cbff,#987cf1 52%,#8173e0);
+    background: linear-gradient(180deg,#c9b0ff,#9b75ff 42%,#7060e8);
     border-color: color-mix(in srgb,#c084fc 70%,transparent);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.36);
 }
@@ -1659,8 +1659,8 @@
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip {
     --quest-ui-summary-color: var(--interactive-normal, #b5bac1);
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-summary-color) 11%, transparent);
-    border: 1px solid color-mix(in srgb, var(--quest-ui-summary-color) 35%, rgba(255,255,255,.19));
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-summary-color) 22%, transparent);
+    border: 1px solid color-mix(in srgb, var(--quest-ui-summary-color) 54%, rgba(255,255,255,.12));
     border-radius: 999px;
     color: var(--quest-ui-summary-color);
     font: inherit;
@@ -1673,7 +1673,7 @@
     transform: translateY(-1px);
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip:hover {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-summary-color) 20%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-summary-color) 30%, transparent);
     border-color: color-mix(in srgb, var(--quest-ui-summary-color) 72%, transparent);
     box-shadow: var(--quest-ui-glass-control-rim);
 }
@@ -1681,7 +1681,7 @@
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--quest-ui-summary-color) 34%, transparent);
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip.is-selected {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-summary-color) 26%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-summary-color) 38%, transparent);
     border-color: color-mix(in srgb, var(--quest-ui-summary-color) 82%, transparent);
     box-shadow: var(--quest-ui-glass-control-rim), 0 0 0 1px color-mix(in srgb, var(--quest-ui-summary-color) 25%, transparent);
 }
@@ -1697,7 +1697,7 @@
 }
 .quest-ui-theme-liquid-glass .quest-ui-summary-chip-count {
 
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-summary-color) 17%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-summary-color) 26%, transparent);
     border: 1px solid color-mix(in srgb, var(--quest-ui-summary-color) 22%, transparent);
     border-radius: 999px;
     color: currentColor;
@@ -1707,25 +1707,25 @@
     --quest-ui-summary-color: #f4f5f7;
 }
 .quest-ui-theme-liquid-glass .quest-ui-summary-available {
-    --quest-ui-summary-color: #ff929e;
+    --quest-ui-summary-color: #ff8296;
 }
 .quest-ui-theme-liquid-glass .quest-ui-summary-claimable {
-    --quest-ui-summary-color: #8df0bc;
+    --quest-ui-summary-color: #72f4ae;
 }
 .quest-ui-theme-liquid-glass .quest-ui-summary-in-progress {
-    --quest-ui-summary-color: #ffda8a;
+    --quest-ui-summary-color: #ffd06b;
 }
 .quest-ui-theme-liquid-glass .quest-ui-summary-claimed {
-    --quest-ui-summary-color: #a0d5ff;
+    --quest-ui-summary-color: #79c6ff;
 }
 .quest-ui-theme-liquid-glass .quest-ui-summary-expired {
     --quest-ui-summary-color: #c8cedd;
 }
 .quest-ui-theme-liquid-glass .quest-ui-summary-ignored {
-    --quest-ui-summary-color: #d5b2ff;
+    --quest-ui-summary-color: #cba2ff;
 }
 .quest-ui-theme-liquid-glass .quest-ui-summary-hidden {
-    --quest-ui-summary-color: #d5b2ff;
+    --quest-ui-summary-color: #cba2ff;
 }
 
 @media (max-width: 760px) {
@@ -1758,16 +1758,16 @@
     --quest-ui-summary-color: #f4f5f7;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-available {
-    --quest-ui-summary-color: #ff929e;
+    --quest-ui-summary-color: #ff8296;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimable {
-    --quest-ui-summary-color: #8df0bc;
+    --quest-ui-summary-color: #72f4ae;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-in-progress {
-    --quest-ui-summary-color: #ffda8a;
+    --quest-ui-summary-color: #ffd06b;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimed {
-    --quest-ui-summary-color: #a0d5ff;
+    --quest-ui-summary-color: #79c6ff;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-expired {
     --quest-ui-summary-color: #c8cedd;
@@ -1790,10 +1790,10 @@
 
 /* Distinguish Ignored from Hidden while keeping Hidden violet as approved. */
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-ignored {
-    --quest-ui-summary-color: #ffb1e5;
+    --quest-ui-summary-color: #ff9add;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-hidden {
-    --quest-ui-summary-color: #d5b2ff;
+    --quest-ui-summary-color: #cba2ff;
 }
 
 /* Plugin status chrome and category counts. */
@@ -1830,7 +1830,7 @@
     padding: 3px 6px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-version-chip {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #b6a3ff 15%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #b6a3ff 24%, transparent);
     border-color: color-mix(in srgb, #b6a3ff 40%, rgba(255,255,255,.23));
     border-radius: 999px;
     font-size: 9.5px;
@@ -1839,22 +1839,22 @@
 
 /* Same tag recipe for every release channel; only the hue changes. */
 .quest-ui-theme-liquid-glass .quest-ui-version-chip.is-stable {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #a1d2ff 15%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #a1d2ff 24%, transparent);
     border-color: color-mix(in srgb, #a1d2ff 40%, rgba(255,255,255,.23));
     color: #a1d2ff;
 }
 .quest-ui-theme-liquid-glass .quest-ui-version-chip.is-beta {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ffda8a 15%, transparent);
-    border-color: color-mix(in srgb, #ffda8a 40%, rgba(255,255,255,.23));
-    color: #ffda8a;
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ffd06b 24%, transparent);
+    border-color: color-mix(in srgb, #ffd06b 40%, rgba(255,255,255,.23));
+    color: #ffd06b;
 }
 .quest-ui-theme-liquid-glass .quest-ui-version-chip.is-alpha {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ff9ba5 15%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #ff9ba5 24%, transparent);
     border-color: color-mix(in srgb, #ff9ba5 40%, rgba(255,255,255,.23));
     color: #ff9ba5;
 }
 .quest-ui-theme-liquid-glass .quest-ui-version-chip.is-prerelease {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #c7b8ff 15%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #c7b8ff 24%, transparent);
     border-color: color-mix(in srgb, #c7b8ff 40%, rgba(255,255,255,.23));
     color: #c7b8ff;
 }
@@ -2376,7 +2376,7 @@
 
 /* Claimed: a complete violet ring with a cleaner blue check. */
 .quest-ui-theme-liquid-glass .quest-ui-progress-claimed .quest-ui-progress-state-ring {
-    stroke: #a6b8ff;
+    stroke: #849eff;
 }
 .quest-ui-theme .quest-ui-progress-state-icon.is-claimed {
     height: 28px;
@@ -2388,7 +2388,7 @@
     stroke-width: 2.6;
 }
 .quest-ui-theme-liquid-glass .quest-ui-progress-state-icon.is-claimed {
-    color: #a0dcff;
+    color: #79d5ff;
 }
 
 /* Expired: neutral completed ring, semantic red X. */
@@ -2466,6 +2466,23 @@
     inset: 0;
     position: absolute;
 }
+/* A narrow directional optical rim; the mask leaves the card interior clear.
+ * No extra backdrop sampling, layout changes or pointer interception. */
+@supports (mask-composite: exclude) {
+    .quest-ui-theme-liquid-glass .quest-ui-card::before {
+        background: conic-gradient(from 120deg, rgba(149,204,255,.48), rgba(203,223,255,.08) 23%, rgba(255,255,255,.46) 48%, rgba(193,215,255,.09) 72%, rgba(149,204,255,.48));
+        border-radius: inherit;
+        box-sizing: border-box;
+        content: "";
+        inset: 0;
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        padding: 1px;
+        pointer-events: none;
+        position: absolute;
+        z-index: 2;
+    }
+}
 .quest-ui-theme .quest-ui-card > :not(.quest-ui-card-backdrop) {
     position: relative;
     z-index: 1;
@@ -2514,7 +2531,7 @@
 /* Translucent surfaces over the actual Discord backdrop. */
 .quest-ui-theme-liquid-glass.quest-ui-dashboard-shell {
     background-color: var(--quest-ui-dashboard-base) !important;
-    background-image: radial-gradient(ellipse at 8% 0%, rgba(138,136,214,.17), transparent 59%), radial-gradient(ellipse at 94% 100%, rgba(83,153,186,.14), transparent 65%), linear-gradient(145deg, rgba(42,42,75,.12), rgba(9,17,36,.08)) !important;
+    background-image: radial-gradient(ellipse at 8% 0%, rgba(130,99,240,.23), transparent 59%), radial-gradient(ellipse at 94% 100%, rgba(49,158,205,.19), transparent 65%), linear-gradient(145deg, rgba(42,42,75,.12), rgba(9,17,36,.08)) !important;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard,
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-actionbar,
@@ -2534,7 +2551,7 @@
 .quest-ui-theme-liquid-glass .quest-ui-default-status-product.is-questui,
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control.quest-ui-sort-button,
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control.quest-ui-filter-button {
-    background-color: var(--quest-ui-glass-filter-fill, rgba(218,230,255,.065)) !important;
+    background-color: var(--quest-ui-glass-filter-fill, rgba(158,186,255,.05)) !important;
     background-image: var(--quest-ui-glass-sheen) !important;
 }
 .quest-ui-theme-liquid-glass .quest-ui-card,
@@ -2556,14 +2573,14 @@
     width: 94%;
 }
 .quest-ui-theme-liquid-glass .quest-ui-card-backdrop > img {
-    filter: blur(24px) saturate(1.45) brightness(1.04);
-    opacity: .53;
+    filter: blur(24px) saturate(1.75) brightness(1.08);
+    opacity: .60;
 }
 .quest-ui-theme-liquid-glass .quest-ui-card-backdrop::after {
-    background: linear-gradient(160deg, rgba(233,238,255,.11), transparent 26%, rgba(12,18,40,.13) 62%, rgba(191,200,255,.07)), linear-gradient(90deg, rgba(16,22,44,.22), rgba(16,22,44,.38) 40%, rgba(16,22,44,.72) 77%, rgba(16,22,44,.86));
+    background: radial-gradient(ellipse 56% 34% at 2% 0%, rgba(221,239,255,.075), transparent 100%), linear-gradient(90deg, rgba(12,20,42,.12), rgba(12,20,42,.32) 35%, rgba(12,20,42,.75) 68%, rgba(12,20,42,.87));
 }
 .quest-ui-theme-liquid-glass .quest-ui-card:hover .quest-ui-card-backdrop > img {
-    opacity: .61;
+    opacity: .67;
 }
 
 /* Dropdown reset: intentionally plain, Discord-like checklist/menu surfaces. */

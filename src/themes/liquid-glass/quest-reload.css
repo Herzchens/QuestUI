@@ -37,7 +37,7 @@
     }
 }
 .quest-ui-reload-icon-button.is-success {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 18%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 26%, transparent);
     border-color: color-mix(in srgb, var(--status-positive, #23a55a) 52%, transparent);
     color: #8df0bc;
 }

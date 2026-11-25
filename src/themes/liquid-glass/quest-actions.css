@@ -6,7 +6,7 @@
 }
 .quest-ui-card-action {
     align-items: center;
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #b6a3ff 25%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #b6a3ff 32%, transparent);
     border: 1px solid color-mix(in srgb, #b6a3ff 45%, rgba(255,255,255,.22));
     border-radius: 9px;
     color: #fff;
@@ -32,7 +32,7 @@
     opacity: 0.55;
 }
 .quest-ui-card-action-claim {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 23%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #65e9a6 30%, transparent);
     border-color: color-mix(in srgb, #65e9a6 45%, rgba(255,255,255,.22));
 }
 .quest-ui-card-action-claim:hover:not(:disabled),

@@ -235,16 +235,16 @@
     border-color: var(--border-normal, rgba(255, 255, 255, 0.14));
 }
 .quest-ui-card-in-progress {
-    --quest-ui-accent: var(--status-warning);
+    --quest-ui-accent: #ffd06b;
 }
 .quest-ui-card-claimable {
-    --quest-ui-accent: var(--status-positive);
+    --quest-ui-accent: #72f4ae;
 }
 .quest-ui-card-available {
-    --quest-ui-accent: var(--status-danger);
+    --quest-ui-accent: #ff8296;
 }
 .quest-ui-card-claimed {
-    --quest-ui-accent: var(--blurple-50, var(--brand-500));
+    --quest-ui-accent: #79c6ff;
 }
 .quest-ui-card-expired {
     --quest-ui-accent: var(--interactive-muted);
@@ -431,7 +431,7 @@
     color: var(--brand-360, #949cf7);
 }
 .quest-ui-orb-large > strong {
-    color: var(--status-warning);
+    color: #ffd06b;
 }
 .quest-ui-orb-boosted > strong {
     color: color-mix(in srgb, var(--status-warning) 72%, var(--quest-ui-theme-text-strong));
@@ -460,10 +460,10 @@
     white-space: normal;
 }
 .quest-ui-expiry-normal {
-    color: var(--status-positive);
+    color: #72e8ac;
 }
 .quest-ui-expiry-warning {
-    color: var(--status-warning);
+    color: #ffd06b;
 }
 .quest-ui-expiry-danger,
 .quest-ui-expiry-expired {
