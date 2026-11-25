@@ -1343,10 +1343,12 @@
     width: 100%;
 }
 .quest-ui-event-sort-menu > button:hover {
-    background: color-mix(in srgb, var(--quest-ui-theme-text-strong) 5.5%, transparent);
+    background: var(--quest-ui-glass-control-hover);
+    box-shadow: var(--quest-ui-glass-control-rim);
 }
 .quest-ui-event-sort-menu > button.is-selected {
-    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--brand-500, #5865f2) 22%, transparent);
+    box-shadow: var(--quest-ui-glass-control-rim);
     color: var(--quest-ui-theme-text-strong);
 }
 .quest-ui-event-sort-radio {
@@ -1409,12 +1411,15 @@
     text-align: left;
 }
 .quest-ui-event-filter-list-row:hover {
-    background: color-mix(in srgb, var(--quest-ui-theme-text-strong) 5.5%, transparent);
+    background: var(--quest-ui-glass-control-hover);
+    box-shadow: var(--quest-ui-glass-control-rim);
 }
 .quest-ui-event-filter-list-box {
     align-items: center;
+    background: var(--quest-ui-glass-control);
     border: 1px solid var(--quest-ui-event-choice-border);
     border-radius: 4px;
+    box-shadow: var(--quest-ui-glass-control-rim);
     box-sizing: border-box;
     display: inline-flex;
     flex: 0 0 19px;
@@ -1423,36 +1428,25 @@
     width: 19px;
 }
 .quest-ui-event-filter-list-row.is-checked .quest-ui-event-filter-list-box {
-    background: var(--brand-500, #5865f2);
-    border-color: var(--brand-500, #5865f2);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-glass-choice-tone, var(--brand-500, #5865f2)) 52%, transparent);
+    border-color: color-mix(in srgb, var(--quest-ui-glass-choice-tone, var(--brand-500, #5865f2)) 72%, var(--quest-ui-theme-text-strong));
 }
 .quest-ui-event-filter-list-row.tone-error.is-checked .quest-ui-event-filter-list-box {
-    background: var(--quest-ui-event-filter-error);
-    border-color: var(--quest-ui-event-filter-error);
+    --quest-ui-glass-choice-tone: var(--quest-ui-event-filter-error);
 }
 .quest-ui-event-filter-list-row.tone-warning.is-checked .quest-ui-event-filter-list-box {
-    background: var(--quest-ui-event-filter-warning);
-    border-color: var(--quest-ui-event-filter-warning);
+    --quest-ui-glass-choice-tone: var(--quest-ui-event-filter-warning);
 }
 .quest-ui-event-filter-list-row.tone-success.is-checked .quest-ui-event-filter-list-box,
 .quest-ui-event-filter-list-row.tone-orion.is-checked .quest-ui-event-filter-list-box {
-    background: var(--quest-ui-event-filter-success);
-    border-color: var(--quest-ui-event-filter-success);
+    --quest-ui-glass-choice-tone: var(--quest-ui-event-filter-success);
 }
 .quest-ui-event-filter-list-row.tone-info.is-checked .quest-ui-event-filter-list-box,
 .quest-ui-event-filter-list-row.tone-runtime.is-checked .quest-ui-event-filter-list-box {
-    background: var(--quest-ui-event-filter-info);
-    border-color: var(--quest-ui-event-filter-info);
+    --quest-ui-glass-choice-tone: var(--quest-ui-event-filter-info);
 }
 .quest-ui-event-filter-list-row.tone-network.is-checked .quest-ui-event-filter-list-box {
-    background: var(--quest-ui-event-filter-warning);
-    border-color: var(--quest-ui-event-filter-warning);
-}
-.quest-ui-event-filter-list-row.tone-quest.is-checked .quest-ui-event-filter-list-box,
-.quest-ui-event-filter-list-row.tone-diagnostic.is-checked .quest-ui-event-filter-list-box,
-.quest-ui-event-filter-list-row.tone-questui.is-checked .quest-ui-event-filter-list-box {
-    background: var(--brand-500, #5865f2);
-    border-color: var(--brand-500, #5865f2);
+    --quest-ui-glass-choice-tone: var(--quest-ui-event-filter-warning);
 }
 .quest-ui-event-filter-list-box svg {
     fill: none;
@@ -1473,10 +1467,11 @@
     }
 }
 
-/* Event Log radio controls: solid selected circle + white center dot. */
+/* Event Log radio controls share the glass lens treatment. */
 .quest-ui-event-sort-radio,
 .quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box {
-    background: transparent;
+    background: var(--quest-ui-glass-control);
+    box-shadow: var(--quest-ui-glass-control-rim);
     border: 1px solid var(--quest-ui-event-choice-border);
     border-radius: 50%;
     box-sizing: border-box;
@@ -1486,9 +1481,8 @@
 }
 .quest-ui-event-sort-menu > button.is-selected .quest-ui-event-sort-radio,
 .quest-ui-event-filter-list-row.is-radio.is-checked .quest-ui-event-filter-list-box {
-    background: var(--quest-ui-glass-specular), var(--brand-500, #5865f2);
-    border-color: var(--brand-500, #5865f2);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 8%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-glass-choice-tone, var(--brand-500, #5865f2)) 52%, transparent);
+    border-color: color-mix(in srgb, var(--quest-ui-glass-choice-tone, var(--brand-500, #5865f2)) 72%, var(--quest-ui-theme-text-strong));
 }
 .quest-ui-event-sort-radio > span,
 .quest-ui-event-filter-list-radio-dot {

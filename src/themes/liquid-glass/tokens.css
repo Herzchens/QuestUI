@@ -11,12 +11,9 @@
     --quest-ui-theme-panel: rgba(26,31,52,.94);
     --quest-ui-theme-surface: rgba(204,216,255,.075);
     --quest-ui-theme-surface-avatar: rgba(191,207,255,.12);
-    --quest-ui-theme-control: rgba(218,230,255,.095);
-    --quest-ui-theme-control-hover: rgba(218,230,255,.19);
     --quest-ui-theme-artwork: rgba(99,109,161,.24);
 
     --quest-ui-theme-danger-surface: rgba(117,49,67,.36);
-    --quest-ui-theme-danger-hover: rgba(145,61,80,.40);
     --quest-ui-theme-success-surface: rgba(42,107,87,.32);
     --quest-ui-theme-success-artwork: rgba(42,103,89,.32);
     --quest-ui-theme-warning-artwork: rgba(120,90,45,.32);

@@ -1009,18 +1009,25 @@
     padding: 0 11px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control {
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     border: 1px solid var(--quest-ui-theme-border-control);
     border-radius: 9px;
-    color: var(--interactive-normal,#b5bac1);
+    color: var(--quest-ui-theme-text-normal);
     font: inherit;
     font-size: 11.5px;
     font-weight: 700;
     box-shadow: var(--quest-ui-glass-control-rim);
 }
+.quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control.is-active {
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--brand-500, #5865f2) 16%, transparent);
+    border-color: color-mix(in srgb, var(--quest-ui-theme-accent) 44%, transparent);
+    color: var(--quest-ui-theme-text-strong);
+    box-shadow: var(--quest-ui-glass-control-rim);
+}
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control:hover,
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control.is-open {
-    --quest-ui-glass-filter-fill: rgba(218,230,255,.19);
-    background: var(--quest-ui-glass-control-hover);
+.quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control.is-open,
+.quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control:active {
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.19);
     border-color: rgba(233,241,255,.43);
     color: #fff;
     box-shadow: var(--quest-ui-glass-control-rim);
@@ -1306,8 +1313,9 @@
     padding: 0 4px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-count-badge {
-    background: rgba(255,255,255,.075);
-    border: 1px solid rgba(255,255,255,.12);
+    background: var(--quest-ui-glass-control);
+    border: 1px solid var(--quest-ui-theme-border-control);
+    box-shadow: var(--quest-ui-glass-control-rim);
     border-radius: 999px;
     color: var(--text-muted, #949ba4);
     font-size: 9px;
@@ -1317,9 +1325,9 @@
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-button:hover .quest-ui-filter-count-badge,
 .quest-ui-theme-liquid-glass .quest-ui-filter-button.is-open .quest-ui-filter-count-badge {
-    background: rgba(255,255,255,.11);
-    border-color: rgba(255,255,255,.18);
-    color: #d7d9dc;
+    background: var(--quest-ui-glass-control-hover);
+    border-color: var(--quest-ui-theme-border-strong);
+    color: var(--quest-ui-theme-text-strong);
 }
 .quest-ui-theme .quest-ui-dashboard-filter-control svg {
     flex-basis: 16px;
@@ -2513,9 +2521,6 @@
 .quest-ui-theme-liquid-glass .quest-ui-default-status-product.is-questui {
     background: #1a1a20;
 }
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control {
-    background: var(--quest-ui-glass-control);
-}
 .quest-ui-theme-liquid-glass .quest-ui-card,
 .quest-ui-theme-liquid-glass .quest-ui-card:not(.quest-ui-card-achievement) {
     background: var(--quest-ui-dashboard-card);
@@ -2548,10 +2553,8 @@
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-actionbar-destinations,
 .quest-ui-theme-liquid-glass .quest-ui-default-status-product,
 .quest-ui-theme-liquid-glass .quest-ui-default-status-product.is-orion,
-.quest-ui-theme-liquid-glass .quest-ui-default-status-product.is-questui,
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control.quest-ui-sort-button,
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-filter-control.quest-ui-filter-button {
-    background-color: var(--quest-ui-glass-filter-fill, rgba(158,186,255,.05)) !important;
+.quest-ui-theme-liquid-glass .quest-ui-default-status-product.is-questui {
+    background-color: rgba(158,186,255,.05) !important;
     background-image: var(--quest-ui-glass-sheen) !important;
 }
 .quest-ui-theme-liquid-glass .quest-ui-card,
@@ -2583,18 +2586,17 @@
     opacity: .67;
 }
 
-/* Dropdown reset: intentionally plain, Discord-like checklist/menu surfaces. */
-.quest-ui-theme.quest-ui-filter-list,
-.quest-ui-theme.quest-ui-dashboard-choice-list {
+/* Glass dropdown surfaces and tactile selection controls. */
+.quest-ui-theme.quest-ui-filter-list {
     box-sizing: border-box;
 }
 .quest-ui-theme-liquid-glass.quest-ui-filter-list,
 .quest-ui-theme-liquid-glass.quest-ui-dashboard-choice-list {
-    background: var(--quest-ui-glass-panel-background);
+    background: var(--quest-ui-glass-sheen), var(--quest-ui-event-portal-surface);
     border: 1px solid var(--quest-ui-theme-border-control);
     border-radius: 16px;
-    box-shadow: var(--quest-ui-glass-panel-shadow);
-    color: #dbdee1;
+    box-shadow: var(--quest-ui-glass-panel-shadow), 0 2px 10px var(--quest-ui-theme-float-shadow);
+    color: var(--quest-ui-theme-text-normal);
     backdrop-filter: blur(16px) saturate(1.15);
 }
 .quest-ui-theme.quest-ui-filter-list {
@@ -2632,7 +2634,8 @@
     text-align: left;
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-row:hover:not(:disabled) {
-    background: rgba(255,255,255,.055);
+    background: var(--quest-ui-glass-control-hover);
+    box-shadow: var(--quest-ui-glass-control-rim);
 }
 .quest-ui-theme .quest-ui-filter-list-row:disabled {
     cursor: default;
@@ -2650,12 +2653,14 @@
     width: 19px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-box {
-    border: 1px solid #666b75;
+    background: var(--quest-ui-glass-control);
+    border: 1px solid var(--quest-ui-theme-border-strong);
     border-radius: 4px;
+    box-shadow: var(--quest-ui-glass-control-rim);
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-row.is-checked .quest-ui-filter-list-box {
-    background: #5865f2;
-    border-color: #5865f2;
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-glass-choice-tone, var(--brand-500, #5865f2)) 52%, transparent);
+    border-color: color-mix(in srgb, var(--quest-ui-glass-choice-tone, var(--brand-500, #5865f2)) 72%, var(--quest-ui-theme-text-strong));
 }
 .quest-ui-theme .quest-ui-filter-list-box svg {
     fill: none;
@@ -2677,66 +2682,7 @@
     width: 9px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-radio-dot {
-    background: #858cff;
-    border-radius: 50%;
-}
-
-/* Shared single-choice menu for Sort and Dashboard themes. */
-.quest-ui-theme .quest-ui-dashboard-choice-list-title {
-    display: block;
-    padding: 5px 8px 6px;
-}
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-choice-list-title {
-    color: #8f939c;
-    font-size: 10px;
-    font-weight: 700;
-}
-.quest-ui-theme .quest-ui-dashboard-choice-list > button {
-    align-items: center;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    min-height: 32px;
-    padding: 5px 8px;
-    width: 100%;
-}
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-choice-list > button {
-    background: transparent;
-    border: 0;
-    border-radius: 8px;
-    color: #d7d9dd;
-    font: inherit;
-    font-size: 11.5px;
-    text-align: left;
-}
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-choice-list > button:hover {
-    background: rgba(255,255,255,.055);
-}
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-choice-list > button.is-selected {
-    background: rgba(88,101,242,.12);
-    color: #fff;
-}
-.quest-ui-theme .quest-ui-dashboard-choice-list-radio {
-    align-items: center;
-    display: inline-flex;
-    flex: 0 0 16px;
-    height: 16px;
-    justify-content: center;
-    width: 16px;
-}
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-choice-list-radio {
-    border: 1px solid #666b75;
-    border-radius: 50%;
-}
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-choice-list > button.is-selected .quest-ui-dashboard-choice-list-radio {
-    border-color: #858cff;
-}
-.quest-ui-theme .quest-ui-dashboard-choice-list-radio > span {
-    height: 8px;
-    width: 8px;
-}
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-choice-list-radio > span {
-    background: #858cff;
+    background: var(--quest-ui-theme-text-strong);
     border-radius: 50%;
 }
 
@@ -2777,44 +2723,31 @@
 
 /* Exact colors used by the Dashboard summary chips. */
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-row.is-available.is-checked .quest-ui-filter-list-box {
-    background: #f23f42;
-    border-color: #f23f42;
+    --quest-ui-glass-choice-tone: #f23f42;
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-row.is-ready.is-checked .quest-ui-filter-list-box {
-    background: #3ddc84;
-    border-color: #3ddc84;
+    --quest-ui-glass-choice-tone: #3ddc84;
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-row.is-progress.is-checked .quest-ui-filter-list-box {
-    background: #f0b232;
-    border-color: #f0b232;
+    --quest-ui-glass-choice-tone: #f0b232;
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-row.is-claimed.is-checked .quest-ui-filter-list-box {
-    background: #49a9f8;
-    border-color: #49a9f8;
+    --quest-ui-glass-choice-tone: #49a9f8;
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-row.is-expired.is-checked .quest-ui-filter-list-box {
-    background: #a9abb4;
-    border-color: #a9abb4;
+    --quest-ui-glass-choice-tone: #a9abb4;
 }
 .quest-ui-theme-liquid-glass .quest-ui-filter-list-row.is-ignored.is-checked .quest-ui-filter-list-box {
-    background: #f06ac8;
-    border-color: #f06ac8;
+    --quest-ui-glass-choice-tone: #f06ac8;
 }
 
 /* Single-choice groups use Discord-like radio circles, matching the supplied reference. */
 .quest-ui-theme .quest-ui-filter-list-options.is-radio-options .quest-ui-filter-list-row {
     padding-right: 10px;
 }
-.quest-ui-theme-liquid-glass .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-box {
-    background: #5865f2;
-    border-color: #5865f2;
-}
 .quest-ui-theme .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-radio-dot {
     height: 7px;
     width: 7px;
-}
-.quest-ui-theme-liquid-glass .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-radio-dot {
-    background: #fff;
 }
 
 @media (max-width: 720px) {
@@ -2883,18 +2816,12 @@
     padding: 7px !important;
     width: 250px !important;
 }
-.quest-ui-theme-liquid-glass.quest-ui-dashboard-choice-list {
-    background: var(--quest-ui-glass-panel-background) !important;
-    border: 1px solid var(--quest-ui-theme-border-control) !important;
-    border-radius: 16px !important;
-    box-shadow: var(--quest-ui-glass-panel-shadow) !important;
-}
 .quest-ui-theme.quest-ui-dashboard-choice-list > .quest-ui-dashboard-choice-list-title {
     display: block !important;
     padding: 5px 8px 7px !important;
 }
 .quest-ui-theme-liquid-glass.quest-ui-dashboard-choice-list > .quest-ui-dashboard-choice-list-title {
-    color: #8f939c !important;
+    color: var(--quest-ui-theme-text-muted) !important;
     font-size: 10px !important;
     font-weight: 700 !important;
     line-height: 14px;
@@ -2915,7 +2842,7 @@
     background: transparent !important;
     border: 0 !important;
     border-radius: 8px !important;
-    color: #d7d9dd !important;
+    color: var(--quest-ui-theme-text-normal) !important;
     font: inherit !important;
     font-size: 11.5px !important;
     text-align: left !important;
@@ -2928,10 +2855,12 @@
     white-space: nowrap;
 }
 .quest-ui-theme-liquid-glass.quest-ui-dashboard-choice-list > button:hover {
-    background: rgba(255,255,255,.055) !important;
+    background: var(--quest-ui-glass-control-hover) !important;
+    box-shadow: var(--quest-ui-glass-control-rim);
 }
 .quest-ui-theme-liquid-glass.quest-ui-dashboard-choice-list > button.is-selected {
-    background: rgba(88,101,242,.12) !important;
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--brand-500, #5865f2) 28%, transparent) !important;
+    box-shadow: var(--quest-ui-glass-control-rim);
     color: #fff !important;
 }
 .quest-ui-theme.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio {
@@ -2946,12 +2875,14 @@
     width: 18px !important;
 }
 .quest-ui-theme-liquid-glass.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio {
-    border: 1px solid #666b75 !important;
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
+    border: 1px solid var(--quest-ui-theme-border-strong) !important;
+    box-shadow: var(--quest-ui-glass-control-rim);
     border-radius: 50% !important;
 }
 .quest-ui-theme-liquid-glass.quest-ui-dashboard-choice-list > button.is-selected > .quest-ui-dashboard-choice-list-radio {
-    background: #5865f2 !important;
-    border-color: #5865f2 !important;
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--brand-500, #5865f2) 52%, transparent) !important;
+    border-color: color-mix(in srgb, var(--brand-500, #5865f2) 58%, var(--quest-ui-theme-text-strong)) !important;
 }
 .quest-ui-theme.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio > span {
     display: block !important;
@@ -2993,14 +2924,16 @@
     border-radius: 999px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-history-steps-line {
-    background: rgba(255,255,255,.12);
+    background: var(--quest-ui-glass-control);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,.18);
 }
 .quest-ui-theme .quest-ui-history-steps-fill {
     right: auto;
     width: calc((100% - 18px) * var(--quest-ui-history-step) / 4);
 }
 .quest-ui-theme-liquid-glass .quest-ui-history-steps-fill {
-    background: #5865f2;
+    background: linear-gradient(180deg, rgba(255,255,255,.43), transparent), color-mix(in srgb, var(--brand-500, #5865f2) 76%, transparent);
+    box-shadow: inset 0 -1px 1px rgba(152,198,255,.32);
 }
 .quest-ui-theme .quest-ui-history-steps-nodes {
     inset: 0;
@@ -3018,7 +2951,7 @@
 .quest-ui-theme-liquid-glass .quest-ui-history-steps-nodes > button {
     background: transparent;
     border: 0;
-    color: #747983;
+    color: var(--quest-ui-theme-text-muted);
     font: inherit;
 }
 .quest-ui-theme .quest-ui-history-step-node {
@@ -3031,9 +2964,10 @@
     width: 18px;
 }
 .quest-ui-theme-liquid-glass .quest-ui-history-step-node {
-    background: #202126;
-    border: 2px solid #666b75;
+    background: var(--quest-ui-glass-control);
+    border: 2px solid var(--quest-ui-theme-border-strong);
     border-radius: 50%;
+    box-shadow: var(--quest-ui-glass-control-rim);
     transition:
         background-color 100ms ease,
         border-color 100ms ease,
@@ -3087,8 +3021,8 @@
     color: #b8bcc5;
 }
 .quest-ui-theme-liquid-glass .quest-ui-history-steps-nodes > button.is-reached .quest-ui-history-step-node {
-    background: #5865f2;
-    border-color: #5865f2;
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-glass-choice-tone, var(--brand-500, #5865f2)) 52%, transparent);
+    border-color: color-mix(in srgb, var(--quest-ui-glass-choice-tone, var(--brand-500, #5865f2)) 72%, var(--quest-ui-theme-text-strong));
 }
 .quest-ui-theme-liquid-glass .quest-ui-history-steps-nodes > button.is-reached .quest-ui-history-step-node > span {
     background: #fff;
@@ -3097,11 +3031,9 @@
     color: #f2f3f5;
 }
 .quest-ui-theme-liquid-glass .quest-ui-history-steps-nodes > button.is-selected .quest-ui-history-step-node {
-    background: #5865f2;
-    border-color: #5865f2;
-    box-shadow:
-        0 0 0 1px rgba(88,101,242,.28),
-        0 0 9px rgba(88,101,242,.30);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--brand-500, #5865f2) 72%, transparent);
+    border-color: color-mix(in srgb, var(--brand-500, #5865f2) 55%, var(--quest-ui-theme-text-strong));
+    box-shadow: var(--quest-ui-glass-control-rim), 0 0 0 1px rgba(148,178,255,.24), 0 0 9px rgba(88,101,242,.30);
 }
 
 /* Keep labels centered under the true node center even though the button itself is only 18px. */
