@@ -15,9 +15,6 @@
     --quest-ui-theme-control-hover: #202437;
     --quest-ui-theme-artwork: #141824;
 
-    --quest-ui-theme-danger-surface: #211719;
-    --quest-ui-theme-danger-hover: #1b191c;
-    --quest-ui-theme-success-surface: #181b19;
     --quest-ui-theme-success-artwork: #1b201d;
     --quest-ui-theme-warning-artwork: #201d17;
     --quest-ui-theme-error-artwork: #21191b;
@@ -33,11 +30,8 @@
     --quest-ui-theme-ignored: #c77dff;
     --quest-ui-notification-info: #c5a4ff;
 
-    --quest-ui-theme-border-faint: rgba(255, 255, 255, .065);
-    --quest-ui-theme-border-soft: rgba(255, 255, 255, .075);
     --quest-ui-theme-border-muted: rgba(255, 255, 255, .08);
     --quest-ui-theme-border-control: rgba(255, 255, 255, .105);
-    --quest-ui-theme-border-strong: rgba(255, 255, 255, .14);
     --quest-ui-theme-row-hover: rgba(255, 255, 255, .022);
 
     --quest-ui-theme-panel-shadow: rgba(0, 0, 0, .52);

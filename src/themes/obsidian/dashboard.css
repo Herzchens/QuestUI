@@ -3109,8 +3109,12 @@
     color: #b8bcc5;
 }
 .quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button.is-reached .quest-ui-history-step-node {
-    --quest-ui-history-node-rim: #a861dd;
-    --quest-ui-history-node-face: #2a1239;
+    --quest-ui-history-node-rim: #c778ff;
+    --quest-ui-history-node-face: linear-gradient(145deg, #9344d0 0%, #55207f 50%, #2f103f 100%);
+}
+.quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button.is-reached .quest-ui-history-step-node > span {
+    background: #f4e6ff;
+    box-shadow: 0 0 4px rgba(244,230,255,.50);
 }
 .quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button.is-selected {
     color: #f2f3f5;

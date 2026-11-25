@@ -98,7 +98,7 @@ export function DashboardNoticeLane() {
                     >
                         <span className="quest-ui-dashboard-notification-bell" aria-hidden="true">
                             <svg className="quest-ui-dashboard-notification-surface" aria-hidden="true">
-                                <rect className="quest-ui-dashboard-notification-surface-rect" />
+                                <rect className="quest-ui-dashboard-notification-surface-rect" rx="17" ry="17" />
                             </svg>
                             <svg className="quest-ui-dashboard-notification-icon" viewBox="0 0 24 24">
                                 <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />

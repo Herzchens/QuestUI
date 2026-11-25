@@ -3210,13 +3210,15 @@
     --quest-ui-notification-tone: var(--brand-360, #949cf7);
     background-color: rgba(216,229,255,.10) !important;
     background-image: var(--quest-ui-glass-specular) !important;
+    background-clip: padding-box;
     border: 0;
-    border-radius: 999px;
+    border-radius: 22px;
     box-shadow: var(--quest-ui-glass-control-rim);
     color: inherit;
     font: inherit;
     line-height: 0;
     outline: none;
+    overflow: hidden;
     text-align: left;
     transition:
         max-width 340ms cubic-bezier(.18,.82,.24,1),
@@ -3629,12 +3631,13 @@
     }
     .quest-ui-theme-liquid-glass .quest-ui-dashboard-notification-island::before {
         background: radial-gradient(ellipse at 36% 0%, rgba(231,246,255,.42), rgba(134,190,255,.14) 45%, transparent 74%);
-        border-radius: inherit;
+        border-radius: 20px;
         content: "";
         inset: 2px;
         opacity: 0;
         pointer-events: none;
         position: absolute;
+        will-change: opacity, transform;
     }
     .quest-ui-theme-liquid-glass .quest-ui-dashboard-notification-island.is-visible::before,
     .quest-ui-theme-liquid-glass .quest-ui-dashboard-notification-island.is-idle:hover::before {
