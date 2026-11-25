@@ -40,7 +40,7 @@ The capture above is a real Discord runtime screenshot supplied by the maintaine
 
 - Discord Quest artwork, task-type badges, reward display, native progress ring, and expiry display
 
-- Dashboard theme selector beside the Orb balance with a persistent choice and complete managed stylesheet lifecycle (Default only for now)
+- Dashboard theme selector beside the Orb balance with a persistent choice and complete managed stylesheet lifecycle (Default and LiquidGlass)
 - Native Quick Open for enrolled, in-progress desktop video and Discord Activity Quests (`WATCH_VIDEO`, `PLAY_ACTIVITY`, `ACHIEVEMENT_IN_ACTIVITY` only), independent of Orion; opens Discord's video modal or invokes its Activity launch hook without external links or implicit enrollment
 - Explicit **Accept Quest**, **Claim Reward**, and bounded sequential **Claim all** actions, with a 1-3 second pause between consecutive native claims
 

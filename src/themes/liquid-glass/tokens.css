@@ -1,0 +1,170 @@
+/* LiquidGlass palette and optical surfaces.
+ * Themes own their complete styles, including layout and interaction presentation.
+ * Tokens are an internal convenience, not a limit on theme design.
+ */
+.quest-ui-theme-liquid-glass {
+    --quest-ui-theme-accent: #b6a3ff;
+    --quest-ui-dashboard-border: color-mix(in srgb, var(--quest-ui-theme-accent) 38%, rgba(255,255,255,.18));
+    --quest-ui-dashboard-base: rgba(18,22,43,.84);
+    --quest-ui-dashboard-card: rgba(35,40,68,.63);
+
+    --quest-ui-theme-panel: rgba(26,31,52,.94);
+    --quest-ui-theme-surface: rgba(204,216,255,.075);
+    --quest-ui-theme-surface-avatar: rgba(191,207,255,.12);
+    --quest-ui-theme-control: rgba(210,220,255,.095);
+    --quest-ui-theme-control-hover: rgba(210,220,255,.17);
+    --quest-ui-theme-artwork: rgba(99,109,161,.24);
+
+    --quest-ui-theme-danger-surface: rgba(117,49,67,.36);
+    --quest-ui-theme-danger-hover: rgba(145,61,80,.40);
+    --quest-ui-theme-success-surface: rgba(42,107,87,.32);
+    --quest-ui-theme-success-artwork: rgba(42,103,89,.32);
+    --quest-ui-theme-warning-artwork: rgba(120,90,45,.32);
+    --quest-ui-theme-error-artwork: rgba(120,49,69,.32);
+    --quest-ui-theme-info-artwork: rgba(79,66,141,.36);
+
+    --quest-ui-theme-text-strong: #fff;
+    --quest-ui-theme-text-primary: #f5f6ff;
+    --quest-ui-theme-text-normal: #e2e5f3;
+    --quest-ui-theme-text-muted: #b0b7ce;
+    --quest-ui-theme-text-secondary: #c9cfe2;
+    --quest-ui-theme-text-subtle: #bac3dc;
+    --quest-ui-theme-icon: #e7eaff;
+    --quest-ui-theme-ignored: #c77dff;
+    --quest-ui-notification-info: #c5a4ff;
+
+    --quest-ui-theme-border-faint: rgba(219,225,255,.10);
+    --quest-ui-theme-border-soft: rgba(219,225,255,.14);
+    --quest-ui-theme-border-muted: rgba(219,225,255,.15);
+    --quest-ui-theme-border-control: rgba(219,225,255,.22);
+    --quest-ui-theme-border-strong: rgba(219,225,255,.30);
+    --quest-ui-theme-row-hover: rgba(210,220,255,.065);
+
+    --quest-ui-theme-panel-shadow: rgba(0, 0, 0, .52);
+    --quest-ui-theme-float-shadow: rgba(0, 0, 0, .45);
+    --quest-ui-theme-popout-shadow: rgba(0, 0, 0, .42);
+    --quest-ui-dashboard-filter-shadow-rest: rgba(0, 0, 0, .24);
+    --quest-ui-dashboard-filter-shadow-hover: rgba(0, 0, 0, .28);
+
+    /* Update Center */
+    --quest-ui-update-panel: rgba(25,30,54,.95);
+    --quest-ui-update-product-surface: rgba(204,216,255,.075);
+    --quest-ui-update-accent: #b6a3ff;
+    --quest-ui-update-accent-surface-base: #7c5cff;
+    --quest-ui-update-accent-border-base: #9e80ff;
+    --quest-ui-update-accent-hover-border: #ae94ff;
+    --quest-ui-update-routine: #7d8cff;
+    --quest-ui-update-target-base: #7289ff;
+    --quest-ui-update-title: #f4f5f7;
+    --quest-ui-update-check-text: #e6e0ff;
+    --quest-ui-update-banner-text: #eef0f2;
+    --quest-ui-update-banner-muted: #8e939c;
+    --quest-ui-update-product-title: #f0f1f3;
+    --quest-ui-update-meta: #c9ccd2;
+    --quest-ui-update-muted: #aeb7cd;
+    --quest-ui-update-date: #aab3c9;
+    --quest-ui-update-icon: #d8dae0;
+    --quest-ui-update-link: #aeb7ff;
+    --quest-ui-update-link-hover: #d0d5ff;
+    --quest-ui-update-support-link-hover: #d1d6ff;
+    --quest-ui-update-settings-hint: #aeb7cd;
+    --quest-ui-update-state-muted: #abb4ca;
+    --quest-ui-update-banner-state-muted: #b0bad0;
+    --quest-ui-update-checking: #a8acb5;
+    --quest-ui-update-current: #59d484;
+    --quest-ui-update-available: #9ca7ff;
+    --quest-ui-update-error: #f07578;
+    --quest-ui-update-warning: #e7b84e;
+    --quest-ui-update-banner-current: #49d67d;
+    --quest-ui-update-banner-available: #8c98ff;
+    --quest-ui-update-banner-error: #f06467;
+    --quest-ui-update-alpha: #ff7b7e;
+    --quest-ui-update-old-version: #f47b7e;
+    --quest-ui-update-target: #aab4ff;
+    --quest-ui-update-arrow: #818690;
+
+    /* Event Log */
+    --quest-ui-event-panel-start: rgba(36,34,65,.96);
+    --quest-ui-event-panel-end: rgba(16,24,45,.96);
+    --quest-ui-event-detail-end: rgba(14,22,42,.97);
+    --quest-ui-event-control-surface: rgba(214,224,255,.13);
+    --quest-ui-event-control-hover: rgba(214,224,255,.22);
+    --quest-ui-event-control-pressed: rgba(214,224,255,.18);
+    --quest-ui-event-action-island: rgba(30,37,64,.83);
+    --quest-ui-event-island-surface: rgba(30,37,64,.92);
+    --quest-ui-event-island-border: rgba(217,225,255,.21);
+    --quest-ui-event-confirm-surface: rgba(44,50,78,.96);
+    --quest-ui-event-confirm-hover: rgba(65,72,103,.96);
+    --quest-ui-event-portal-surface: rgba(34,40,68,.96);
+    --quest-ui-event-island-text: #f4f4f5;
+    --quest-ui-event-detail-action-text: #d9dce2;
+    --quest-ui-event-detail-heading: #f5f6f8;
+    --quest-ui-event-detail-text: #f0f1f4;
+    --quest-ui-event-detail-label: #a6aab3;
+    --quest-ui-event-detail-diagnostic-label: #9da1aa;
+    --quest-ui-event-detail-diagnostic-text: #e6e8ec;
+    --quest-ui-event-detail-diagnostic-surface: rgba(9,15,33,.72);
+    --quest-ui-event-detail-diagnostic-code: #b8bdc7;
+    --quest-ui-event-portal-title: #8f939c;
+    --quest-ui-event-title: #f4f5f7;
+    --quest-ui-event-control-text: #d7d9dc;
+    --quest-ui-event-panel-shadow: rgba(0, 0, 0, .48);
+    --quest-ui-event-detail-shadow: rgba(0, 0, 0, .5);
+    --quest-ui-event-search-surface-base: rgba(199,213,255,.10);
+    --quest-ui-event-flat-surface-base: rgba(125,117,192,.12);
+    --quest-ui-event-flat-hover-base: rgba(159,149,225,.15);
+    --quest-ui-event-storage-surface-base: rgba(172,184,229,.09);
+    --quest-ui-event-account-change: #f59e42;
+    --quest-ui-event-choice-border: #666b75;
+    --quest-ui-event-filter-heading: #9ea2aa;
+    --quest-ui-event-filter-text: #e3e5e8;
+    --quest-ui-event-filter-error: #da373c;
+    --quest-ui-event-filter-warning: #b8860b;
+    --quest-ui-event-filter-success: #248046;
+    --quest-ui-event-filter-info: #378bd8;
+    --quest-ui-event-detail-category-text: #d7dae0;
+    --quest-ui-event-detail-runtime-text: #a8cbf5;
+    --quest-ui-event-detail-quest-text: #b7bdf9;
+    --quest-ui-event-detail-network-text: #f0c96f;
+    --quest-ui-event-detail-diagnostic-text-accent: #c6a4fa;
+    --quest-ui-event-detail-diagnostic-base: #aa70ff;
+    --quest-ui-event-detail-meta-surface-start: rgba(129,122,196,.16);
+    --quest-ui-event-detail-meta-surface-end: rgba(30,35,61,.56);
+    --quest-ui-event-detail-meta-icon-base: #9470ff;
+    --quest-ui-event-detail-meta-icon-text: #ad8cff;
+    --quest-ui-event-text-normal: #e2e5f3;
+    --quest-ui-event-text-strong: #f5f6ff;
+    --quest-ui-event-text-muted: #b0b7ce;
+    --quest-ui-event-text-muted-soft: #c4cbe1;
+    --quest-ui-event-interactive-normal: #cbd1e5;
+
+    /* Optical effects are theme-local; no blur on scrolling card surfaces. */
+    --quest-ui-glass-sheen: linear-gradient(155deg, rgba(220,225,255,.13), rgba(155,166,225,.04) 42%, rgba(14,18,42,.10) 72%, rgba(175,182,255,.07));
+    --quest-ui-glass-card-sheen: linear-gradient(155deg, rgba(227,232,255,.12), rgba(164,173,231,.025) 43%, rgba(9,12,33,.15) 78%, rgba(174,184,255,.07));
+    --quest-ui-glass-rim: inset 0 1px 0 rgba(255,255,255,.24), inset 1px 0 0 rgba(255,255,255,.075), inset 0 -1px 0 rgba(184,187,255,.08), 0 5px 16px rgba(3,5,20,.22);
+    --quest-ui-glass-panel-shadow: 0 24px 72px rgba(3,5,20,.48), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(176,182,255,.14);
+    --quest-ui-glass-panel-background: radial-gradient(ellipse at 8% 0%, rgba(117,104,212,.24), transparent 59%), radial-gradient(ellipse at 100% 90%, rgba(54,130,158,.16), transparent 65%), linear-gradient(145deg, rgba(28,27,55,.92), rgba(12,18,35,.94));
+
+    /* Keep native controls inside this dark surface readable in light Discord. */
+    --text-default: #e2e5f3;
+    --text-normal: #e2e5f3;
+    --text-strong: #f5f6ff;
+    --header-primary: #f5f6ff;
+    --header-secondary: #c9cfe2;
+    --text-muted: #b0b7ce;
+    --interactive-normal: #cbd1e5;
+    --interactive-hover: #f0f2ff;
+    --interactive-active: #ffffff;
+    --interactive-muted: #858fa9;
+    --background-base-lowest: #11182c;
+    --background-base-lower: #1b2340;
+    --background-base-low: #202943;
+    --background-secondary: #202943;
+    --background-secondary-alt: #27314b;
+    --background-primary: #1c2540;
+    --background-mod-subtle: rgba(206,218,255,.07);
+    --background-mod-strong: rgba(206,218,255,.13);
+    --background-mod-stronger: rgba(206,218,255,.19);
+    --border-subtle: rgba(220,227,255,.15);
+    --border-normal: rgba(220,227,255,.25);
+}
