@@ -164,6 +164,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/eventLog.test.ts
 
+      - name: Test Event Log theme hook order
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/themeHookOrder.test.ts
+
       - name: Test Orion structured Event Log logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/events.test.ts
