@@ -119,6 +119,88 @@
         display: none;
     }
 
+    /* Whole-card material layer, following the Obsidian surface architecture.
+     * Authored 1120 × 180 full-bleed strips follow the card's aspect ratio.
+     * Preserve the complete composition, frame, and native foreground. */
+    .quest-ui-theme-sakura .quest-ui-card > .quest-ui-sakura-card-art {
+        position: absolute;
+        inset: 3px;
+        /* Safe inset silhouette of the Event Viewer shoulders. */
+        clip-path: polygon(13px 0, calc(100% - 13px) 0, calc(100% - 8px) 2px, calc(100% - 5px) 6px, calc(100% - 5px) 9px, 100% 12px, 100% calc(100% - 12px), calc(100% - 5px) calc(100% - 9px), calc(100% - 5px) calc(100% - 6px), calc(100% - 8px) calc(100% - 2px), calc(100% - 13px) 100%, 13px 100%, 8px calc(100% - 2px), 5px calc(100% - 6px), 5px calc(100% - 9px), 0 calc(100% - 12px), 0 12px, 5px 9px, 5px 6px, 8px 2px);
+        z-index: 0;
+        pointer-events: none;
+        background-image: var(--quest-ui-sakura-art-image);
+        background-position: center;
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        opacity: .90;
+        mask-image: linear-gradient(90deg, rgba(0,0,0,.35), rgba(0,0,0,.45) 25%, rgba(0,0,0,.92) 45%, #000 65%, rgba(0,0,0,.46) 85%, rgba(0,0,0,.28));
+    }
+
+    /* silk-river */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="0"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-0);
+    }
+    /* asanoha */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="1"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-1);
+    }
+    /* reflection */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="2"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-2);
+    }
+    /* drifting-petals */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="3"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-3);
+    }
+    /* sakura-branch */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="4"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-4);
+    }
+    /* sunset */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="5"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-5);
+    }
+    /* hanami */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="6"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-6);
+    }
+    /* woven-silk */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="7"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-7);
+    }
+    /* golden-silk */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="8"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-8);
+    }
+    /* pavilion */
+    .quest-ui-theme-sakura .quest-ui-card[data-sakura-ornament="9"] > .quest-ui-sakura-card-art {
+        --quest-ui-sakura-art-image: var(--quest-ui-sakura-ornament-9);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card > :not(.quest-ui-card-backdrop, .quest-ui-sakura-card-art) {
+        z-index: 2;
+    }
+
+    /* The header ribbon remains subordinate to the title. The list and
+     * product panels deliberately have no independent decorative decals. */
+    .quest-ui-theme-sakura .quest-ui-dashboard-topbar::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: 12px;
+        inset-block-end: 4px;
+        block-size: 49%;
+        aspect-ratio: 360 / 112;
+        max-inline-size: 40%;
+        background: var(--quest-ui-sakura-header-ornament) center / contain no-repeat;
+        mask-image: linear-gradient(90deg, transparent, #000 12%, #000 84%, transparent);
+        mix-blend-mode: screen;
+        filter: saturate(.78) brightness(.84);
+        opacity: .64;
+        pointer-events: none;
+        z-index: -1;
+    }
+
     .quest-ui-theme-sakura .quest-ui-artwork {
         border-radius: 11px;
         border-color: rgba(244, 183, 171, .66);
