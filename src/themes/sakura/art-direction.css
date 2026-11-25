@@ -591,11 +591,19 @@
         background-image: var(--quest-ui-sakura-chip-jade);
     }
 
-    .quest-ui-theme-sakura.quest-ui-notification-center-panel {
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel,
+    .quest-ui-theme-sakura.quest-ui-event-log-panel.quest-ui-event-log-panel {
         background: transparent !important;
         border-color: transparent !important;
         border-radius: 0 !important;
         border-image: var(--quest-ui-sakura-frame-opaque) 30 34 fill / 23px 25px stretch !important;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-event-detail.quest-ui-event-detail {
+        background: transparent !important;
+        border-color: transparent !important;
+        border-radius: 0 !important;
+        border-image: var(--quest-ui-sakura-frame-card) 30 34 fill / 13px 15px stretch !important;
     }
 
     .quest-ui-theme-sakura .quest-ui-notification-center-action {
@@ -697,6 +705,64 @@
     .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-row:hover {
         background: transparent;
         filter: brightness(1.08);
+    }
+
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-new-events,
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-match-count,
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-filter-count,
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-account-legacy {
+        background: var(--quest-ui-sakura-chip-plum) center / 100% 100% no-repeat;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding-inline: 9px;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-new-events:hover,
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-filter-launcher:hover .quest-ui-event-filter-count,
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-filter-launcher.is-open .quest-ui-event-filter-count {
+        background: var(--quest-ui-sakura-petal-hover) center / 100% 100% no-repeat;
+        border-color: transparent;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-search {
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 0;
+        border-image: var(--quest-ui-sakura-petal-plum) 9 30 fill / 16% 15px stretch;
+        box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-search:hover,
+    .quest-ui-theme-sakura.quest-ui-event-log-panel .quest-ui-event-search:focus {
+        border-color: transparent;
+        border-image-source: var(--quest-ui-sakura-petal-hover);
+        box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-event-detail .quest-ui-event-detail-source,
+    .quest-ui-theme-sakura.quest-ui-event-detail .quest-ui-event-detail-category {
+        background: var(--quest-ui-sakura-chip-plum) center / 100% 100% no-repeat;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding-inline: 9px;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-event-detail .quest-ui-event-detail-hero-icon {
+        background: var(--quest-ui-sakura-medallion) center / 100% 100% no-repeat !important;
+        border: 0 !important;
+        border-radius: 0;
+        box-shadow: none !important;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-event-detail .quest-ui-event-detail-diagnostic > pre,
+    .quest-ui-theme-sakura.quest-ui-event-detail pre {
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 0;
+        border-image: var(--quest-ui-sakura-row-neutral) 30 34 fill / 13px 15px stretch;
+        box-shadow: none;
     }
 
     @media (max-width: 520px) {
