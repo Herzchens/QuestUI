@@ -1,0 +1,141 @@
+/* Obsidian palette and reusable values.
+ * Themes own their complete styles, including layout and interaction presentation.
+ * Tokens are an internal convenience, not a limit on theme design.
+ */
+.quest-ui-theme-obsidian {
+    --quest-ui-theme-accent: #a27aff;
+    --quest-ui-dashboard-border: color-mix(in srgb, var(--quest-ui-theme-accent) 24%, rgba(255, 255, 255, .08));
+    --quest-ui-dashboard-base: #07080d;
+    --quest-ui-dashboard-card: #10121b;
+
+    --quest-ui-theme-panel: #090b11;
+    --quest-ui-theme-surface: #10131d;
+    --quest-ui-theme-surface-avatar: #1b2030;
+    --quest-ui-theme-control: #111522;
+    --quest-ui-theme-control-hover: #202437;
+    --quest-ui-theme-artwork: #141824;
+
+    --quest-ui-theme-danger-surface: #211719;
+    --quest-ui-theme-danger-hover: #1b191c;
+    --quest-ui-theme-success-surface: #181b19;
+    --quest-ui-theme-success-artwork: #1b201d;
+    --quest-ui-theme-warning-artwork: #201d17;
+    --quest-ui-theme-error-artwork: #21191b;
+    --quest-ui-theme-info-artwork: #1d1c23;
+
+    --quest-ui-theme-text-strong: #fff;
+    --quest-ui-theme-text-primary: #e4e9f6;
+    --quest-ui-theme-text-normal: #e4e9f6;
+    --quest-ui-theme-text-muted: #a5aec3;
+    --quest-ui-theme-text-secondary: #b5bac1;
+    --quest-ui-theme-text-subtle: #aeb3ba;
+    --quest-ui-theme-icon: #d7d9dd;
+    --quest-ui-theme-ignored: #c77dff;
+    --quest-ui-notification-info: #c5a4ff;
+
+    --quest-ui-theme-border-faint: rgba(255, 255, 255, .065);
+    --quest-ui-theme-border-soft: rgba(255, 255, 255, .075);
+    --quest-ui-theme-border-muted: rgba(255, 255, 255, .08);
+    --quest-ui-theme-border-control: rgba(255, 255, 255, .105);
+    --quest-ui-theme-border-strong: rgba(255, 255, 255, .14);
+    --quest-ui-theme-row-hover: rgba(255, 255, 255, .022);
+
+    --quest-ui-theme-panel-shadow: rgba(0, 0, 0, .52);
+    --quest-ui-theme-float-shadow: rgba(0, 0, 0, .45);
+    --quest-ui-theme-popout-shadow: rgba(0, 0, 0, .42);
+    --quest-ui-dashboard-filter-shadow-rest: rgba(0, 0, 0, .24);
+    --quest-ui-dashboard-filter-shadow-hover: rgba(0, 0, 0, .28);
+
+    /* Update Center */
+    --quest-ui-update-panel: #0b0d16;
+    --quest-ui-update-product-surface: #121623;
+    --quest-ui-update-accent: #a489ff;
+    --quest-ui-update-accent-surface-base: #8967ed;
+    --quest-ui-update-accent-border-base: #9e80ff;
+    --quest-ui-update-accent-hover-border: #ae94ff;
+    --quest-ui-update-routine: #7d8cff;
+    --quest-ui-update-target-base: #7289ff;
+    --quest-ui-update-title: #f4f5f7;
+    --quest-ui-update-check-text: #e6e0ff;
+    --quest-ui-update-banner-text: #eef0f2;
+    --quest-ui-update-banner-muted: #8e939c;
+    --quest-ui-update-product-title: #f0f1f3;
+    --quest-ui-update-meta: #c9ccd2;
+    --quest-ui-update-muted: #777c85;
+    --quest-ui-update-date: #6f747d;
+    --quest-ui-update-icon: #d8dae0;
+    --quest-ui-update-link: #aeb7ff;
+    --quest-ui-update-link-hover: #d0d5ff;
+    --quest-ui-update-support-link-hover: #d1d6ff;
+    --quest-ui-update-settings-hint: #9aa5bd;
+    --quest-ui-update-state-muted: #737883;
+    --quest-ui-update-banner-state-muted: #7c8089;
+    --quest-ui-update-checking: #a8acb5;
+    --quest-ui-update-current: #59d484;
+    --quest-ui-update-available: #9ca7ff;
+    --quest-ui-update-error: #f07578;
+    --quest-ui-update-warning: #e7b84e;
+    --quest-ui-update-banner-current: #49d67d;
+    --quest-ui-update-banner-available: #8c98ff;
+    --quest-ui-update-banner-error: #f06467;
+    --quest-ui-update-alpha: #ff7b7e;
+    --quest-ui-update-old-version: #f47b7e;
+    --quest-ui-update-target: #aab4ff;
+    --quest-ui-update-arrow: #818690;
+
+    /* Event Log */
+    --quest-ui-event-panel-start: #090b12;
+    --quest-ui-event-panel-end: #07090f;
+    --quest-ui-event-detail-end: #060810;
+    --quest-ui-event-control-surface: #171c29;
+    --quest-ui-event-control-hover: #242a3b;
+    --quest-ui-event-control-pressed: #1d2332;
+    --quest-ui-event-action-island: #10131e;
+    --quest-ui-event-island-surface: #1d1a1c;
+    --quest-ui-event-island-border: #31394c;
+    --quest-ui-event-confirm-surface: #151a27;
+    --quest-ui-event-confirm-hover: #212637;
+    --quest-ui-event-portal-surface: #131724;
+    --quest-ui-event-island-text: #f4f4f5;
+    --quest-ui-event-detail-action-text: #d9dce2;
+    --quest-ui-event-detail-heading: #f5f6f8;
+    --quest-ui-event-detail-text: #f0f1f4;
+    --quest-ui-event-detail-label: #a6aab3;
+    --quest-ui-event-detail-diagnostic-label: #9da1aa;
+    --quest-ui-event-detail-diagnostic-text: #e6e8ec;
+    --quest-ui-event-detail-diagnostic-surface: #0a0910;
+    --quest-ui-event-detail-diagnostic-code: #b8bdc7;
+    --quest-ui-event-portal-title: #a3acc0;
+    --quest-ui-event-title: #f4f5f7;
+    --quest-ui-event-control-text: #d7d9dc;
+    --quest-ui-event-panel-shadow: rgba(0, 0, 0, .48);
+    --quest-ui-event-detail-shadow: rgba(0, 0, 0, .5);
+    --quest-ui-event-search-surface-base: #151a27;
+    --quest-ui-event-flat-surface-base: #111322;
+    --quest-ui-event-flat-hover-base: #1a1c2d;
+    --quest-ui-event-storage-surface-base: #1c2130;
+    --quest-ui-event-account-change: #f59e42;
+    --quest-ui-event-choice-border: #68728b;
+    --quest-ui-event-filter-heading: #9ea2aa;
+    --quest-ui-event-filter-text: #e3e5e8;
+    --quest-ui-event-filter-error: #da373c;
+    --quest-ui-event-filter-warning: #b8860b;
+    --quest-ui-event-filter-success: #248046;
+    --quest-ui-event-filter-info: #378bd8;
+    --quest-ui-event-detail-category-text: #d7dae0;
+    --quest-ui-event-detail-runtime-text: #a8cbf5;
+    --quest-ui-event-detail-quest-text: #b7bdf9;
+    --quest-ui-event-detail-network-text: #f0c96f;
+    --quest-ui-event-detail-diagnostic-text-accent: #c6a4fa;
+    --quest-ui-event-detail-diagnostic-base: #aa70ff;
+    --quest-ui-event-detail-meta-surface-start: #171b2c;
+    --quest-ui-event-detail-meta-surface-end: #0c0f18;
+    --quest-ui-event-detail-meta-icon-base: #9470ff;
+    --quest-ui-event-detail-meta-icon-text: #ad8cff;
+    --quest-ui-event-text-normal: #e4e9f6;
+    --quest-ui-event-text-strong: #e4e9f6;
+    --quest-ui-event-text-muted: #a5aec3;
+    --quest-ui-event-text-muted-soft: #a5aec3;
+    --quest-ui-event-interactive-normal: #a5aec3;
+
+}

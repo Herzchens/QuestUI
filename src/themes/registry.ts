@@ -20,6 +20,17 @@ import glassEventLog from "./liquid-glass/event-log.css?managed";
 import glassOrion from "./liquid-glass/orion.css?managed";
 import glassDashboard from "./liquid-glass/dashboard.css?managed";
 
+import obsidianTokens from "./obsidian/tokens.css?managed";
+import obsidianDashboardComponents from "./obsidian/dashboard-components.css?managed";
+import obsidianScrollbar from "./obsidian/scrollbar.css?managed";
+import obsidianQuestActions from "./obsidian/quest-actions.css?managed";
+import obsidianQuestReload from "./obsidian/quest-reload.css?managed";
+import obsidianNotifications from "./obsidian/notifications.css?managed";
+import obsidianUpdateCenter from "./obsidian/update-center.css?managed";
+import obsidianEventLog from "./obsidian/event-log.css?managed";
+import obsidianOrion from "./obsidian/orion.css?managed";
+import obsidianDashboard from "./obsidian/dashboard.css?managed";
+
 import type { DashboardTheme } from "./controller";
 
 export const DEFAULT_DASHBOARD_THEME_ID = "default";
@@ -56,6 +67,22 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             glassEventLog,
             glassOrion,
             glassDashboard,
+        ]
+    },
+    {
+        id: "obsidian",
+        label: "Obsidian",
+        styles: [
+            obsidianTokens,
+            obsidianDashboardComponents,
+            obsidianScrollbar,
+            obsidianQuestActions,
+            obsidianQuestReload,
+            obsidianNotifications,
+            obsidianUpdateCenter,
+            obsidianEventLog,
+            obsidianOrion,
+            obsidianDashboard,
         ]
     }
 ];

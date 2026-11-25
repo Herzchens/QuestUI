@@ -1,6 +1,8 @@
 import { findByCodeLazy } from "@webpack";
 import { ThemeStore, useStateFromStores } from "@webpack/common";
 
+import type { CSSProperties } from "react";
+
 import type { OrionControlSnapshot } from "../orion/companion";
 import { orionQuestProgressSource, orionQuestTagState, storedQuestTaskProgress, type OrionQuestTagState } from "../orion/controls";
 import { effectiveOrbRewardAmount, formatQuestRewardLabel } from "../orbs/rewards";
@@ -10,6 +12,9 @@ import { QuestOrbIcon } from "../orbs/QuestOrbIcon";
 import { QuestCardActions } from "../quests/actions/QuestCardActions";
 import { expiryUrgency, formatExpiry, formatQuestProgress } from "../quests/data";
 import type { NormalizedQuest, QuestTaskType } from "../quests/data";
+import { fractureVariant } from "../themes/obsidian/fracture";
+import { useObsidianArtworkColor } from "../themes/obsidian/useArtworkColor";
+import { useDashboardThemeId } from "../themes/runtime";
 interface DiscordQuestCompletion {
     completedRatio: number;
     percentComplete: number;
@@ -33,14 +38,22 @@ const useDiscordQuestCompletion = findByCodeLazy(
     "completedRatio"
 ) as (quest: any, forcePercent?: boolean) => DiscordQuestCompletion;
 
+function ProgressShape({ angular, ...props }: { angular: boolean; className: string; strokeDasharray?: string; strokeDashoffset?: number; transform?: string; }) {
+    return angular
+        ? <path d="M28 5 45 12 51 28 44 45 28 51 11 44 5 28 12 11 Z" pathLength="100" {...props} transform={undefined} />
+        : <circle cx="28" cy="28" r="21" pathLength="100" {...props} />;
+}
+
 function ProgressRing({
     quest,
     completion,
-    ratioOverride = null
+    ratioOverride = null,
+    angular = false
 }: {
     quest: NormalizedQuest;
     completion: DiscordQuestCompletion;
     ratioOverride?: number | null;
+    angular?: boolean;
 }) {
     const hasRatioOverride = Number.isFinite(ratioOverride);
     const ratio = hasRatioOverride
@@ -62,22 +75,16 @@ function ProgressRing({
             aria-label={isClaimed ? "Claimed" : isExpired ? "Expired" : `${display} complete`}
         >
             <svg viewBox="0 0 56 56" aria-hidden="true">
-                <circle className="quest-ui-progress-track" cx="28" cy="28" r="21" pathLength="100" />
+                <ProgressShape angular={angular} className="quest-ui-progress-track" />
                 {(isClaimed || isExpired) ? (
-                    <circle
+                    <ProgressShape
+                        angular={angular}
                         className="quest-ui-progress-state-ring"
-                        cx="28"
-                        cy="28"
-                        r="21"
-                        pathLength="100"
                     />
                 ) : (
-                    <circle
+                    <ProgressShape
+                        angular={angular}
                         className="quest-ui-progress-value"
-                        cx="28"
-                        cy="28"
-                        r="21"
-                        pathLength="100"
                         strokeDasharray="100"
                         strokeDashoffset={100 - progress}
                         transform="rotate(-90 28 28)"
@@ -307,6 +314,8 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     const completion = useDiscordQuestCompletion(quest.rawQuest);
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
     const artworkUrl = resolveQuestArtwork(quest, theme);
+    const obsidian = useDashboardThemeId() === "obsidian";
+    const { cardRef, color: artworkColor } = useObsidianArtworkColor(obsidian, artworkUrl);
     const now = Date.now();
     const expiry = dashboardExpiry(quest, now);
     const urgency = expiryUrgency(quest.expiresAt, now);
@@ -336,8 +345,13 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
         : null;
 
     return (
-        <article className={`quest-ui-card quest-ui-card-${quest.status}${isAchievement ? " quest-ui-card-achievement" : ""}${ignored ? " quest-ui-card-ignored" : ""}`}>
-            {artworkUrl && (
+        <article
+            ref={cardRef}
+            className={`quest-ui-card quest-ui-card-${quest.status}${isAchievement ? " quest-ui-card-achievement" : ""}${ignored ? " quest-ui-card-ignored" : ""}`}
+            data-obsidian-fracture={obsidian ? fractureVariant(quest.id) : undefined}
+            style={obsidian && artworkColor ? { "--obsidian-artwork-rgb": artworkColor.join(" ") } as CSSProperties : undefined}
+        >
+            {!obsidian && artworkUrl && (
                 <span className="quest-ui-card-backdrop" aria-hidden="true">
                     <img
                         src={artworkUrl}
@@ -396,7 +410,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                         complete={quest.status === "claimable" || quest.status === "claimed"}
                     />
                 ) : (
-                    <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} />
+                    <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} angular={obsidian} />
                 )}
                 {expiry && (
                     <span className={`quest-ui-card-expiry quest-ui-expiry-${urgency}`} title={expiry}>

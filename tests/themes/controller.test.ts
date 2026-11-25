@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createDashboardThemeController } from "../../src/themes/controller";
+import { dominantArtworkColor, fractureVariant } from "../../src/themes/obsidian/fracture";
 
 const themes = [
     { id: "default", label: "Default", styles: ["default/a", "default/b"] },
@@ -47,4 +48,12 @@ unsubscribe();
 assert.throws(() => createDashboardThemeController([
     ...themes, { id: "duplicate", label: "Duplicate", styles: ["default/a"] }
 ], "default", { validate() {}, enable() {}, disable() {} }), /multiple owners/);
-console.log("QuestUI Dashboard theme lifecycle tests - PASS");
+const ids = Array.from({ length: 100 }, (_, index) => String(123456789012345000n + BigInt(index)));
+const variants = ids.map(fractureVariant);
+assert.equal(new Set(variants).size, 4);
+assert.deepEqual(ids.map(fractureVariant), variants);
+assert.equal(dominantArtworkColor([]), null);
+assert.equal(dominantArtworkColor([255, 0, 0, 0, 0, 0, 0, 255]), null);
+assert.deepEqual(dominantArtworkColor([230, 150, 40, 255, 230, 150, 40, 255, 40, 70, 200, 255]), [230, 150, 40]);
+assert.deepEqual(dominantArtworkColor([100, 100, 100, 255]), [100, 100, 100]);
+console.log("QuestUI Dashboard theme lifecycle and Obsidian fracture tests - PASS");
