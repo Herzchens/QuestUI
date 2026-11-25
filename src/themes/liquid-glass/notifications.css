@@ -390,3 +390,10 @@
         max-height: min(390px, calc(100vh - 230px));
     }
 }
+
+@media (prefers-reduced-transparency: reduce) {
+    .quest-ui-notification-center-panel {
+        background: #202941;
+        backdrop-filter: none;
+    }
+}

@@ -1,17 +1,9 @@
-/* Default theme Dashboard styling: layout, geometry, interaction and visual design.
+/* LiquidGlass Dashboard styling: layout, geometry, interaction and visual design.
  * Both generic QuestUI hooks and named-theme selectors belong to this theme.
  * Keep changes in functional sections; do not reintroduce chronological override layers.
  */
 
 /* Shared title, summary, and progress presentation. */
-@keyframes quest-ui-liquid-glass-dashboard-title-sweep {
-    from {
-        background-position: 0 0;
-    }
-    to {
-        background-position: -320px 0;
-    }
-}
 .quest-ui-dashboard-display-title {
     align-items: center;
     display: inline-flex;
@@ -2542,12 +2534,15 @@
     background-image: radial-gradient(ellipse at 7% 0%, rgba(111,93,210,.27), transparent 58%), radial-gradient(ellipse at 94% 100%, rgba(50,127,159,.19), transparent 65%), linear-gradient(145deg, rgba(42,42,75,.20), rgba(9,17,36,.12)) !important;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard,
-.quest-ui-theme-liquid-glass .quest-ui-dashboard-topbar,
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-actionbar,
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-header,
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-content {
     background-color: transparent !important;
     background-image: none !important;
+}
+.quest-ui-theme-liquid-glass .quest-ui-dashboard-topbar {
+    background-color: rgba(125,139,197,.065) !important;
+    background-image: var(--quest-ui-glass-sheen) !important;
 }
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-actionbar-primary,
 .quest-ui-theme-liquid-glass .quest-ui-dashboard-actionbar-destinations,
@@ -3637,5 +3632,18 @@
 @media (prefers-reduced-motion: reduce) {
     .quest-ui-dashboard-palette-button {
         transition: none;
+    }
+}
+
+/* Readable opaque fallback for system reduced-transparency preferences. */
+@media (prefers-reduced-transparency: reduce) {
+    .quest-ui-theme-liquid-glass.quest-ui-dashboard-shell {
+        background-color: #182039 !important;
+        backdrop-filter: none;
+    }
+    .quest-ui-theme-liquid-glass.quest-ui-filter-list,
+    .quest-ui-theme-liquid-glass.quest-ui-dashboard-choice-list {
+        background: #242d47 !important;
+        backdrop-filter: none;
     }
 }

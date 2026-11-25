@@ -1821,3 +1821,13 @@
         display: none;
     }
 }
+
+@media (prefers-reduced-transparency: reduce) {
+    .quest-ui-event-log-panel.quest-ui-event-log-panel,
+    .quest-ui-event-detail.quest-ui-event-detail,
+    .quest-ui-event-sort-menu,
+    .quest-ui-event-filter-menu {
+        background: #202941;
+        backdrop-filter: none;
+    }
+}

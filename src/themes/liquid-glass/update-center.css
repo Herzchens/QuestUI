@@ -1136,3 +1136,10 @@
         transform: rotate(360deg);
     }
 }
+
+@media (prefers-reduced-transparency: reduce) {
+    .quest-ui-update-panel.quest-ui-update-panel-v16 {
+        background: #202941 !important;
+        backdrop-filter: none;
+    }
+}
