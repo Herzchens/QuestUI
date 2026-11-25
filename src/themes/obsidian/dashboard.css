@@ -2406,41 +2406,17 @@
 .quest-ui-theme-obsidian .quest-ui-progress-state-icon.is-claimed {
     color: #ddaaff;
 }
-.quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired) {
+.quest-ui-theme-obsidian .quest-ui-progress-ring {
     isolation: isolate;
-    --quest-ui-obsidian-emblem-tone: #b16cf4;
 }
-.quest-ui-theme-obsidian .quest-ui-progress-ring.quest-ui-progress-expired {
-    --quest-ui-obsidian-emblem-tone: #777580;
+.quest-ui-theme-obsidian .quest-ui-progress-ring > svg:first-child {
+    visibility: visible;
+    overflow: visible;
 }
-.quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired) > svg:first-child {
-    visibility: hidden;
-}
-.quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired)::before,
-.quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired)::after {
-    content: "";
-    position: absolute;
-    inset: 9px 0;
-    pointer-events: none;
-}
-.quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired)::before {
-    z-index: -2;
-    clip-path: polygon(12px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 12px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
-    background: linear-gradient(145deg, #e8d9ff, var(--quest-ui-obsidian-emblem-tone) 27%, #40334f 61%, var(--quest-ui-obsidian-emblem-tone) 92%, #e8d9ff);
-}
-.quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired)::after {
-    z-index: -1;
-    clip-path: polygon(13px 2px, calc(100% - 9px) 2px, calc(100% - 2px) 9px, calc(100% - 2px) calc(100% - 9px), calc(100% - 13px) calc(100% - 2px), 9px calc(100% - 2px), 2px calc(100% - 9px), 2px 9px);
-    background: linear-gradient(155deg, #292034, #0c0b13 43%, #161023 86%, #3c2257);
-}
-@media (forced-colors: active) {
-    .quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired) > svg:first-child {
-        visibility: visible;
-    }
-    .quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired)::before,
-    .quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired)::after {
-        display: none;
-    }
+.quest-ui-theme-obsidian .quest-ui-progress-ring::before,
+.quest-ui-theme-obsidian .quest-ui-progress-ring::after {
+    content: none !important;
+    display: none !important;
 }
 
 /* Expired: neutral completed ring, semantic red X. */

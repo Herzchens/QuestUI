@@ -82,7 +82,8 @@ function UpdateAttentionBadge({ level }: { level: Exclude<UpdateAttentionLevel, 
     return (
         <span className={`quest-ui-update-attention-badge is-${level}`} aria-hidden="true">
             <svg viewBox="0 0 12 12">
-                <path d="M6 2.3v4.4M6 9v.1" />
+                <path d="M6 2.1v4.2" />
+                <circle cx="6" cy="9.25" r=".9" />
             </svg>
         </span>
     );

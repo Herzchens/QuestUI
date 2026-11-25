@@ -14,9 +14,14 @@ const order = registry.match(/id:\s*"obsidian"[\s\S]*?styles:\s*\[([\s\S]*?)\]/)
 assert.ok(order?.length && order.every(name=>imports.has(name)), "Obsidian registry order");
 assert.match(registry, /id:\s*"liquid-glass"[\s\S]*?label:\s*"Liquid Glass"/, "Liquid Glass theme label");
 const css = order.map(name=>read("../../src/themes/obsidian/"+imports.get(name))).join("\n");
+const questCardSource = read("../../src/dashboard/QuestCard.tsx");
+assert.doesNotMatch(questCardSource, /M18 9 H53 L39 47 H4 Z/, "legacy four-sided Obsidian progress path returned");
+assert.match(questCardSource, /M28 10\.5 H46\.5 L54\.5 18\.5 V37\.5 L43\.5 45\.5 H9\.5 L1\.5 37\.5 V18\.5 L12\.5 10\.5 H28 Z/, "faceted Obsidian progress path missing");
 assert.doesNotMatch(css, /quest-ui-update-panel-heading::after\s*\{[^}]*content:\s*""/, "Obsidian Update Center heading separator returned");
 assert.doesNotMatch(css, /Single-choice groups use Discord-like radio circles/, "stale Dashboard radio presentation returned");
 assert.doesNotMatch(css, /Event Log radio controls: solid selected circle/, "stale Event Log radio presentation returned");
+assert.doesNotMatch(css, /\.quest-ui-detailed-count\s*\{[^}]*border-radius:\s*2px/, "Obsidian Detailed Status square badge returned");
+assert.match(css, /\.quest-ui-update-attention-badge\s*\{[\s\S]*?border-radius:\s*50%/, "Obsidian update attention badge must stay circular");
 
 /* Geometry floor: framed Obsidian UI may not regress below five sides.
  * The eight dashboard summary chips are the sole approved four-sided family.
@@ -57,13 +62,17 @@ const overlayFixture = '<div style="position:absolute;left:-10000px;top:0;width:
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-update-panel quest-ui-update-panel-v16 quest-ui-update-surface"><header class="quest-ui-update-panel-heading"><div class="quest-ui-update-panel-title"><span class="quest-ui-update-panel-title-icon">'+icon+'</span><strong>Update Center</strong></div><div class="quest-ui-update-panel-heading-actions">'+button("quest-ui-update-check-button","Check now")+'<span class="quest-ui-update-panel-last-check">Last check · now</span></div></header><div class="quest-ui-update-banner is-current"><span class="quest-ui-update-banner-mark">'+icon+'</span><div><strong>You are up to date</strong><span>QuestUI and OrionQuest are current.</span></div></div><div class="quest-ui-update-product-list"><div class="quest-ui-update-product-entry is-current"><div class="quest-ui-update-product-row"><div class="quest-ui-update-product-identity"><strong>QuestUI</strong><span class="quest-ui-update-row-version">v1.6.0-beta2</span></div><div class="quest-ui-update-product-row-meta"><strong>Current</strong><span>Release date</span></div>'+button("quest-ui-update-github-button",icon)+'</div></div></div><div class="quest-ui-update-support-footer">Support</div></div>'
 +'</div>';
 const art = '<div class="quest-ui-artwork"><div class="quest-ui-artwork-fallback">'+icon+'</div><span class="quest-ui-type-badge">'+icon+'</span></div>';
-const claimed = '<article class="quest-ui-card quest-ui-card-claimed" data-obsidian-fracture="1">'+art+'<div class="quest-ui-card-main"><div class="quest-ui-card-title-cluster"><strong class="quest-ui-card-title">New Operator: Argent Flow</strong></div><div class="quest-ui-card-status-line"><span class="quest-ui-card-status-dot"></span><span class="quest-ui-card-status">Claimed</span></div><div class="quest-ui-card-meta-row"><span class="quest-ui-card-reward">Reward: <strong>840 Orbs</strong></span></div></div><div class="quest-ui-card-side"><div class="quest-ui-progress-ring quest-ui-progress-claimed"><svg viewBox="0 0 56 56"><path d="M18 9H53L39 47H4Z" class="quest-ui-progress-track"/><path d="M18 9H53L39 47H4Z" class="quest-ui-progress-state-ring"/></svg><svg viewBox="0 0 24 24" class="quest-ui-progress-state-icon is-claimed"><path d="M6.5 12.4 10.1 16 17.7 8.4"/></svg></div><span class="quest-ui-card-expiry">Expires in 13d 19h</span></div></article>';
+const progressPath = "M28 10.5 H46.5 L54.5 18.5 V37.5 L43.5 45.5 H9.5 L1.5 37.5 V18.5 L12.5 10.5 H28 Z";
+const claimed = '<article class="quest-ui-card quest-ui-card-claimed" data-obsidian-fracture="1">'+art+'<div class="quest-ui-card-main"><div class="quest-ui-card-title-cluster"><strong class="quest-ui-card-title">New Operator: Argent Flow</strong></div><div class="quest-ui-card-status-line"><span class="quest-ui-card-status-dot"></span><span class="quest-ui-card-status">Claimed</span></div><div class="quest-ui-card-meta-row"><span class="quest-ui-card-reward">Reward: <strong>840 Orbs</strong></span></div></div><div class="quest-ui-card-side"><div class="quest-ui-progress-ring quest-ui-progress-claimed"><svg viewBox="0 0 56 56"><path d="'+progressPath+'" pathLength="100" class="quest-ui-progress-track"/><path d="'+progressPath+'" pathLength="100" class="quest-ui-progress-state-ring"/></svg><svg viewBox="0 0 24 24" class="quest-ui-progress-state-icon is-claimed"><path d="M6.5 12.4 10.1 16 17.7 8.4"/></svg></div><span class="quest-ui-card-expiry">Expires in 13d 19h</span></div></article>';
+const normalProgress = '<article class="quest-ui-card quest-ui-card-in-progress"><div class="quest-ui-card-side"><div class="quest-ui-progress-ring quest-ui-progress-in-progress"><svg viewBox="0 0 56 56"><path d="'+progressPath+'" pathLength="100" class="quest-ui-progress-track"/><path d="'+progressPath+'" pathLength="100" class="quest-ui-progress-value" stroke-dasharray="100" stroke-dashoffset="100"/></svg><span>0%</span></div></div></article>';
+const partialProgress = '<article class="quest-ui-card quest-ui-card-in-progress"><div class="quest-ui-card-side"><div class="quest-ui-progress-ring quest-ui-progress-in-progress"><svg viewBox="0 0 56 56"><path d="'+progressPath+'" pathLength="100" class="quest-ui-progress-track"/><path d="'+progressPath+'" pathLength="100" class="quest-ui-progress-value" stroke-dasharray="100" stroke-dashoffset="97"/></svg><span>3%</span></div></div></article>';
+const shortcutBadges = '<div class="quest-ui-icon-wrap"><svg></svg><span class="quest-ui-update-attention-badge is-routine"><svg viewBox="0 0 12 12"><path d="M6 2.1v4.2"></path><circle cx="6" cy="9.25" r=".9"></circle></svg></span><span class="quest-ui-detailed-count quest-ui-detail-available">9</span></div>';
 const active = '<article class="quest-ui-card quest-ui-card-in-progress quest-ui-card-achievement" data-obsidian-fracture="0">'+art+'<div class="quest-ui-card-main"><div class="quest-ui-card-title-cluster"><strong class="quest-ui-card-title">Dune: Part Three</strong><span class="quest-ui-card-orion-state is-stopped">Stopped</span></div><div class="quest-ui-card-status-line"><span class="quest-ui-card-status-dot"></span><span class="quest-ui-card-status">In progress</span></div><div class="quest-ui-card-meta-row"><span class="quest-ui-card-reward">Reward: <strong>840 Orbs</strong></span><span class="quest-ui-card-actions">'+button("quest-ui-card-orion-control is-start",icon)+button("quest-ui-card-action quest-ui-card-action-ignore",icon)+'</span></div></div><div class="quest-ui-card-side is-achievement"><div class="quest-ui-achievement-progress"><div class="quest-ui-achievement-progress-copy"><strong>0/5</strong><span>tasks done</span></div><div class="quest-ui-achievement-progress-segments" style="grid-template-columns:repeat(5,minmax(0,1fr))"><span></span><span></span><span></span><span></span><span></span></div></div><span class="quest-ui-card-expiry">Expires in 13d 19h</span></div></article>';
 const host = 'html,body{margin:0;background:#171820;color:#f2f3f5;font:14px Arial,sans-serif}body{--font-primary:Arial,sans-serif;--font-display:Arial,sans-serif;--font-code:monospace;--header-primary:#f2f3f5;--header-secondary:#b9bbbe;--text-default:#f2f3f5;--text-muted:#a5a8b0;--text-strong:#fff;--interactive-normal:#d6d7dc;--interactive-muted:#878991;--brand-360:#b2a7ff;--brand-500:#8272f4;--status-positive:#43d78b;--status-danger:#f24f5a;--status-warning:#f0b232;--background-base-lowest:#080a10;--background-base-low:#10121a;--background-mod-strong:#242630;--border-subtle:#363845}button{font:inherit}';
 function fixture(alternate) {
     const left=product("Orion Quest","orion","v4.11.5","stable",alternate?runtimeRunning:runtimeIdle,alternate?update("error","Update check failed","!"):update("current","You are up to date","✓"));
     const right=product("QuestUI","questui","v1.6.0-beta2","beta","",alternate?update("available","v1.6.0-beta.22 available","↑"):update("current","You are up to date","✓"));
-    return '<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="theme.css"><style>'+host+'</style><div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-dashboard-shell has-orion-control">'+topbar+toolbar+'<section class="quest-ui-dashboard"><header class="quest-ui-dashboard-header"><div class="quest-ui-default-status-strip">'+left+'<span class="quest-ui-status-bridge is-connected"><span class="quest-ui-status-bridge-line"></span><span class="quest-ui-status-bridge-node"></span><span class="quest-ui-status-bridge-line"></span></span>'+right+'</div><div class="quest-ui-dashboard-summary">'+summary+'</div>'+sort+'</header><div class="quest-ui-dashboard-content">'+active+claimed+'</div></section></div>'+overlayFixture+'<script>('+inspect.toString()+')()</script>';
+    return '<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="theme.css"><style>'+host+'</style><div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-dashboard-shell has-orion-control">'+topbar+toolbar+'<section class="quest-ui-dashboard"><header class="quest-ui-dashboard-header"><div class="quest-ui-default-status-strip">'+left+'<span class="quest-ui-status-bridge is-connected"><span class="quest-ui-status-bridge-line"></span><span class="quest-ui-status-bridge-node"></span><span class="quest-ui-status-bridge-line"></span></span>'+right+'</div><div class="quest-ui-dashboard-summary">'+summary+'</div>'+sort+'</header><div class="quest-ui-dashboard-content">'+active+claimed+normalProgress+partialProgress+shortcutBadges+'</div></section></div>'+overlayFixture+'<script>('+inspect.toString()+')()</script>';
 }
 function inspect(){
     const errors=[];
@@ -358,11 +367,40 @@ function inspect(){
         check(polygonPointCount(getComputedStyle(taskBadge).clipPath)===8,"Notification task badge is not octagonal");
     }
 
+    const progressFrames=[...document.querySelectorAll(".quest-ui-progress-ring")];
+    const progressPaths=progressFrames.flatMap(node=>[...node.querySelectorAll(":scope > svg:first-child > path")].map(path=>path.getAttribute("d")));
+    check(progressPaths.length>=4&&progressPaths.every(path=>path===progressPaths[0]),"Quest progress perimeter is not canonical across states");
+    check(progressPaths[0]==="M28 10.5 H46.5 L54.5 18.5 V37.5 L43.5 45.5 H9.5 L1.5 37.5 V18.5 L12.5 10.5 H28 Z","Quest progress perimeter does not match the faceted Obsidian path");
+    for(const node of progressFrames)
+        check(getComputedStyle(node.querySelector(":scope > svg:first-child")).visibility==="visible","Obsidian progress SVG track is hidden");
+    const zeroProgress=document.querySelector(".quest-ui-progress-in-progress .quest-ui-progress-value[stroke-dashoffset='100']");
+    const partialProgressNode=document.querySelector(".quest-ui-progress-in-progress .quest-ui-progress-value[stroke-dashoffset='97']");
+    check(Boolean(zeroProgress),"0% Obsidian progress fixture missing");
+    check(Boolean(partialProgressNode),"3% Obsidian progress fixture missing");
+    if(zeroProgress) check(zeroProgress.getAttribute("stroke-dasharray")==="100"&&zeroProgress.getAttribute("stroke-dashoffset")==="100","0% progress is not an empty track");
+    if(partialProgressNode) check(partialProgressNode.getAttribute("stroke-dasharray")==="100"&&partialProgressNode.getAttribute("stroke-dashoffset")==="97","3% progress does not expose a partial perimeter");
+
+    const detailedCount=document.querySelector(".quest-ui-detailed-count");
+    if(detailedCount){
+        const style=getComputedStyle(detailedCount),rect=detailedCount.getBoundingClientRect();
+        check(parseFloat(style.borderTopLeftRadius)>=rect.height/2-1,"Detailed Status count is not round like Default");
+    }
+    const attention=document.querySelector(".quest-ui-update-attention-badge");
+    if(attention){
+        const style=getComputedStyle(attention),rect=attention.getBoundingClientRect();
+        check(parseFloat(style.borderTopLeftRadius)>=rect.height/2-1,"Quest update attention badge is not circular");
+        check(style.backgroundColor==="rgb(242, 79, 90)"||style.backgroundColor==="rgb(242, 63, 66)","Quest update attention badge is not red");
+        const mark=attention.querySelector("circle");
+        check(Boolean(mark),"Quest update attention exclamation dot is missing");
+    }
+
     const detailCategory=document.querySelector(".quest-ui-event-detail-category");
     if(innerWidth>520) check(getComputedStyle(detailCategory).display!=="none","Event Detail category hidden on desktop");
     else check(getComputedStyle(detailCategory).display==="none","Event Detail category visible on narrow layout");
-    check(getComputedStyle(document.querySelector(".quest-ui-progress-claimed"),"::before").clipPath!=="none","missing claimed emblem");
-    check(getComputedStyle(document.querySelector(".quest-ui-progress-claimed > svg:first-child")).visibility==="hidden","duplicate claimed outline");
+    const claimedProgress=document.querySelector(".quest-ui-progress-claimed");
+    check(getComputedStyle(claimedProgress,"::before").content==="none","claimed progress regained a duplicate pseudo emblem");
+    check(getComputedStyle(claimedProgress.querySelector(":scope > svg:first-child")).visibility==="visible","claimed progress perimeter is hidden");
+    check(Boolean(claimedProgress.querySelector(".quest-ui-progress-state-ring")),"claimed full-state perimeter is missing");
     for(const image of document.querySelectorAll(".quest-ui-artwork-fallback"))check(inside(image.getBoundingClientRect(),image.parentElement.getBoundingClientRect()),"artwork escapes frame");
     if(innerWidth>=820){const chips=[...document.querySelectorAll(".quest-ui-summary-chip")];check(new Set(chips.map(chip=>Math.round(chip.getBoundingClientRect().top))).size===1,"desktop summary wraps")}
     parent.postMessage({width:innerWidth,errors},"*");
