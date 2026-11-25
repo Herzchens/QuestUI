@@ -2241,6 +2241,14 @@
     padding: 0 0 0 4px;
     white-space: nowrap;
 }
+.quest-ui-theme-sakura .quest-ui-dashboard-list-title {
+    color: #fff;
+    font-family: var(--font-display, var(--font-primary));
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1;
+}
 .quest-ui-theme .quest-ui-dashboard-actionbar-left {
     align-items: center;
     display: inline-flex;
@@ -2278,6 +2286,57 @@
     position: relative;
     width: max-content;
 }
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island {
+    --quest-ui-notification-tone: var(--quest-ui-theme-accent);
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    color: inherit;
+    font: inherit;
+    isolation: isolate;
+    line-height: 0;
+    outline: none;
+    overflow: visible;
+    text-align: left;
+    transition: max-width 340ms cubic-bezier(.18,.82,.24,1);
+}
+/* One continuous stretchable medallion, with a fixed 17px end on each side.
+ * Neither the bell nor the expanded text paints a second outline. */
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    border-image: var(--quest-ui-sakura-medallion) 49% fill / 16px stretch;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* The outer island is a decorative parent cover with fixed safe padding.
+ * Its used width is the current button width plus 14px at every frame;
+ * no second transition, intrinsic sizing feedback or extra hover target. */
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island::after {
+    content: "";
+    position: absolute;
+    inset: -6px -7px;
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    border-image: var(--quest-ui-sakura-island-frame) 30 34 fill / 12px 15px stretch;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-success {
+    --quest-ui-notification-tone: var(--status-positive, #23a55a);
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-warning {
+    --quest-ui-notification-tone: var(--status-warning, #f0b232);
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-error {
+    --quest-ui-notification-tone: var(--status-danger, #f23f42);
+}
 .quest-ui-theme .quest-ui-dashboard-notification-island.is-visible {
     max-width: 100%;
 }
@@ -2285,6 +2344,11 @@
 .quest-ui-theme .quest-ui-dashboard-notification-island.is-idle:focus-visible,
 .quest-ui-theme .quest-ui-dashboard-notification-island.is-idle.is-open {
     max-width: 100%;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-idle:hover,
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-idle:focus-visible,
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-idle.is-open {
+    transition: max-width 560ms cubic-bezier(.16,.84,.22,1);
 }
 .quest-ui-theme .quest-ui-dashboard-notification-island.is-exiting {
     max-width: 34px;
@@ -2300,6 +2364,14 @@
     position: absolute;
     top: 0;
     width: 100%;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-bell {
+    color: #fff;
+    line-height: 0;
+}
+/* Sakura paints both frames on the button; the shared SVG is unused here. */
+.quest-ui-theme .quest-ui-dashboard-notification-surface {
+    display: none;
 }
 .quest-ui-theme .quest-ui-dashboard-notification-icon {
     display: block;
@@ -2319,6 +2391,19 @@
     width: 17px;
     z-index: 4;
 }
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-icon {
+    transition: color 150ms ease;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-mounted .quest-ui-dashboard-notification-icon,
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-visible .quest-ui-dashboard-notification-icon,
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-exiting .quest-ui-dashboard-notification-icon {
+    color: color-mix(in srgb, #fff 72%, var(--quest-ui-notification-tone) 28%);
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-idle:hover .quest-ui-dashboard-notification-icon,
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-idle:focus-visible .quest-ui-dashboard-notification-icon,
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island.is-idle.is-open .quest-ui-dashboard-notification-icon {
+    color: color-mix(in srgb, #fff 78%, var(--quest-ui-theme-accent) 22%);
+}
 .quest-ui-theme .quest-ui-dashboard-notification-measure {
     align-items: center;
     box-sizing: border-box;
@@ -2330,6 +2415,12 @@
     visibility: hidden;
     white-space: nowrap;
     width: max-content;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-measure {
+    color: transparent;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 34px;
 }
 .quest-ui-theme .quest-ui-dashboard-notification-copy {
     align-items: center;
@@ -2370,10 +2461,29 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-text {
+    color: var(--text-default, #dbdee1);
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.15;
+}
 .quest-ui-theme .quest-ui-dashboard-notification-unread-chip {
     flex: 0 0 auto;
     padding: 4px 6px;
     white-space: nowrap;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-unread-chip {
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 18%, #211719);
+    border: 1px solid color-mix(in srgb, var(--status-danger, #f23f42) 42%, rgba(255,255,255,.10));
+    border-radius: 999px;
+    color: color-mix(in srgb, var(--status-danger, #f23f42) 48%, #fff 52%);
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-measure .quest-ui-dashboard-notification-unread-chip {
+    border-color: transparent;
+    color: transparent;
 }
 .quest-ui-theme .quest-ui-dashboard-notification-unread-dot {
     box-sizing: border-box;
@@ -2384,6 +2494,14 @@
     top: 0;
     width: 12px;
     z-index: 50;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-unread-dot {
+    background: var(--status-danger, #f23f42);
+    border: 2px solid #19191f;
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,.10),
+        0 2px 7px color-mix(in srgb, var(--status-danger, #f23f42) 42%, transparent);
 }
 .quest-ui-theme .quest-ui-dashboard-notification-island.is-idle:hover .quest-ui-dashboard-notification-unread-dot,
 .quest-ui-theme .quest-ui-dashboard-notification-island.is-idle:focus-visible .quest-ui-dashboard-notification-unread-dot,
@@ -2399,6 +2517,12 @@
         transition-delay: 0ms !important;
     }
 }
+
+.quest-ui-theme-sakura .quest-ui-dashboard-notification-island:focus-visible {
+    outline: 2px solid #ffe0c9;
+    outline-offset: 2px;
+}
+
 @media (max-width: 720px) {
     .quest-ui-theme .quest-ui-dashboard-actionbar-left {
         flex-wrap: wrap;
