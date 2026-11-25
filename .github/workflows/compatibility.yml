@@ -59,6 +59,10 @@ jobs:
         working-directory: questui
         run: node tests/themes/obsidianVisual.test.mjs
 
+      - name: Verify Sakura visual contract
+        working-directory: questui
+        run: node tests/themes/sakuraVisual.test.mjs
+
       - name: Checkout Vencord
         uses: actions/checkout@v7
         with:

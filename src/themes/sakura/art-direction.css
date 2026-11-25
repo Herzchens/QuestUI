@@ -1,4 +1,22 @@
+/* Sakura wallpaper foundation.
+ * One image on the stationary shell; UI remains native, responsive and functional.
+ * The header and list are separate flex regions, never overlapping.
+ */
 @supports (background: color-mix(in srgb, #000 50%, #fff)) {
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell {
+        background: linear-gradient(90deg, rgba(27, 12, 23, .18), rgba(27, 12, 23, .12)), var(--quest-ui-sakura-wallpaper) center right / cover no-repeat, #25121e;
+        backdrop-filter: none;
+        border: 1px solid #9d687a;
+        border-radius: 18px;
+        box-shadow: 0 16px 48px rgba(12, 4, 11, .5);
+        color: #f9e8eb;
+        display: flex;
+        flex-direction: column;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        max-height: min(820px, calc(100vh - 32px));
+        overflow: hidden;
+    }
 
     .quest-ui-theme-sakura .quest-ui-dashboard-topbar,
     .quest-ui-theme-sakura .quest-ui-dashboard-actionbar {
@@ -126,4 +144,29 @@
         text-shadow: none;
     }
 
+    @media (max-width: 520px) {
+        .quest-ui-theme-sakura .quest-ui-dashboard-header {
+            padding-inline: 8px;
+        }
+        .quest-ui-theme-sakura .quest-ui-dashboard-content {
+            padding-inline: 8px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .quest-ui-theme-sakura .quest-ui-card,
+        .quest-ui-theme-sakura .quest-ui-toolbar-button,
+        .quest-ui-theme-sakura .quest-ui-dashboard-filter-control,
+        .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip {
+            transition: none;
+        }
+    }
+
+}
+
+@media (forced-colors: active) {
+    .quest-ui-theme-sakura :is(.quest-ui-summary-chip, .quest-ui-card-action, .quest-ui-toolbar-button, .quest-ui-dashboard-filter-control):focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
 }
