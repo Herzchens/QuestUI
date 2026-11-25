@@ -2447,7 +2447,7 @@
  * preserving the card's existing overflow for badges and action controls.
  */
 .quest-ui-theme .quest-ui-card-backdrop {
-    inset: 1px;
+    inset: 0;
     overflow: hidden;
     pointer-events: none;
     position: absolute;
@@ -2568,9 +2568,9 @@
 /* Stronger ambient art: brighter and more saturated, while still reading as a backdrop. */
 .quest-ui-theme .quest-ui-card-backdrop > img {
     height: 190%;
-    left: -4%;
+    left: -48px;
     top: 50%;
-    width: 94%;
+    width: calc(94% + 48px);
 }
 .quest-ui-theme-liquid-glass .quest-ui-card-backdrop > img {
     filter: blur(24px) saturate(1.75) brightness(1.08);
@@ -3630,6 +3630,105 @@
 @media (prefers-reduced-motion: reduce) {
     .quest-ui-dashboard-palette-button {
         transition: none;
+    }
+}
+
+/* Liquid optics: moving caustics are decorative, not a second layout layer.
+ * One small header surface moves at rest; card and island effects run only
+ * in response to interaction. Never animate backdrop blur or card geometry. */
+@keyframes quest-ui-liquid-glass-caustic-drift {
+    0%, 100% {
+        background-position: 0% 50%, 100% 50%;
+    }
+    50% {
+        background-position: 100% 50%, 0% 50%;
+    }
+}
+@keyframes quest-ui-liquid-glass-caustic-sweep {
+    0% {
+        opacity: 0;
+        transform: translateX(-32%) scaleX(.85);
+    }
+    28% {
+        opacity: .76;
+    }
+    72% {
+        opacity: .46;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(32%) scaleX(1.12);
+    }
+}
+@keyframes quest-ui-liquid-glass-lens-press {
+    0% { scale: 1; }
+    62% { scale: .94 .90; }
+    100% { scale: .97 .95; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .quest-ui-theme-liquid-glass .quest-ui-dashboard-topbar {
+        isolation: isolate;
+    }
+    .quest-ui-theme-liquid-glass .quest-ui-dashboard-topbar::before {
+        animation: quest-ui-liquid-glass-caustic-drift 11s ease-in-out infinite;
+        background:
+            radial-gradient(ellipse 24% 80% at 33% 0%, rgba(224,241,255,.32), rgba(137,191,255,.13) 35%, transparent 78%),
+            radial-gradient(ellipse 32% 100% at 69% 100%, rgba(194,138,255,.22), rgba(76,172,255,.12) 40%, transparent 83%);
+        background-size: 185% 100%, 185% 100%;
+        border-radius: 25px 25px 0 0;
+        content: "";
+        inset: 0;
+        pointer-events: none;
+        position: absolute;
+        z-index: -1;
+    }
+    .quest-ui-theme-liquid-glass .quest-ui-card-backdrop::before {
+        background: linear-gradient(110deg, transparent 24%, rgba(132,197,255,.045) 38%, rgba(219,241,255,.22) 49%, rgba(174,143,255,.10) 54%, transparent 70%);
+        content: "";
+        inset: 0;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        z-index: 1;
+    }
+    .quest-ui-theme-liquid-glass .quest-ui-card:hover .quest-ui-card-backdrop::before {
+        animation: quest-ui-liquid-glass-caustic-sweep 1150ms cubic-bezier(.2,.7,.25,1) both;
+    }
+    .quest-ui-theme-liquid-glass .quest-ui-dashboard-notification-island::before {
+        background: radial-gradient(ellipse at 36% 0%, rgba(231,246,255,.42), rgba(134,190,255,.14) 45%, transparent 74%);
+        border-radius: inherit;
+        content: "";
+        inset: 2px;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+    }
+    .quest-ui-theme-liquid-glass .quest-ui-dashboard-notification-island.is-visible::before,
+    .quest-ui-theme-liquid-glass .quest-ui-dashboard-notification-island.is-idle:hover::before {
+        animation: quest-ui-liquid-glass-caustic-sweep 780ms ease-out both;
+    }
+    .quest-ui-theme-liquid-glass :where(
+        .quest-ui-dashboard-palette-button,
+        .quest-ui-toolbar-button,
+        .quest-ui-orion-icon-button,
+        .quest-ui-status-settings-button,
+        .quest-ui-summary-chip,
+        .quest-ui-dashboard-filter-control,
+        .quest-ui-dashboard-orb-balance,
+        .quest-ui-card-orion-control,
+        .quest-ui-card-action
+    ):active:not(:disabled):not([aria-disabled="true"]) {
+        animation: quest-ui-liquid-glass-lens-press 180ms cubic-bezier(.2,.75,.3,1) both;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .quest-ui-theme-liquid-glass .quest-ui-dashboard-topbar::before,
+    .quest-ui-theme-liquid-glass .quest-ui-card-backdrop::before,
+    .quest-ui-theme-liquid-glass .quest-ui-dashboard-notification-island::before {
+        animation: none;
+        display: none;
     }
 }
 
