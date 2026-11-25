@@ -16,6 +16,7 @@ import {
     type RewardKind
 } from "../quests/rewardFilters";
 import { DASHBOARD_SORT_OPTIONS, normalizeDashboardSortMode, type DashboardSortMode } from "./sort";
+import { DashboardChoiceMenu } from "./DashboardChoiceMenu";
 import {
     DASHBOARD_SETTING_KEYS,
     dashboardFilterCount,
@@ -371,32 +372,6 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
     );
 }
 
-function DashboardSorts({ mode, onChange }: { mode: DashboardSortMode; onChange: (mode: DashboardSortMode) => void; }) {
-    return (
-        <div className={useDashboardThemeClassName("quest-ui-sort-list")} role="menu" aria-label="Sort quests">
-            <span className="quest-ui-sort-list-title">Sort by</span>
-            {DASHBOARD_SORT_OPTIONS.map(option => {
-                const selected = option.value === mode;
-                return (
-                    <button
-                        key={option.value}
-                        type="button"
-                        className={selected ? "is-selected" : ""}
-                        role="menuitemradio"
-                        aria-checked={selected}
-                        onClick={() => onChange(option.value)}
-                    >
-                        <span>{option.label}</span>
-                        <span className="quest-ui-sort-list-radio" aria-hidden="true">
-                            {selected && <span />}
-                        </span>
-                    </button>
-                );
-            })}
-        </div>
-    );
-}
-
 export function QuestDashboardFilterSortControls() {
     const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
     const quests = useQuestSnapshot();
@@ -426,7 +401,7 @@ export function QuestDashboardFilterSortControls() {
                 shouldShow={sortOpen}
                 onRequestClose={() => setSortOpen(false)}
                 targetElementRef={sortButtonRef}
-                renderPopout={() => <DashboardSorts mode={sortMode} onChange={selectSort} />}
+                renderPopout={() => <DashboardChoiceMenu title="Sort by" ariaLabel="Sort quests" options={DASHBOARD_SORT_OPTIONS} selectedValue={sortMode} onSelect={selectSort} />}
             >
                 {(_, { isShown }) => (
                     <button

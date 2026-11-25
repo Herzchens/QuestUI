@@ -2608,11 +2608,11 @@
 
 /* Dropdown reset: intentionally plain, Discord-like checklist/menu surfaces. */
 .quest-ui-theme.quest-ui-filter-list,
-.quest-ui-theme.quest-ui-sort-list {
+.quest-ui-theme.quest-ui-dashboard-choice-list {
     box-sizing: border-box;
 }
 .quest-ui-theme-default.quest-ui-filter-list,
-.quest-ui-theme-default.quest-ui-sort-list {
+.quest-ui-theme-default.quest-ui-dashboard-choice-list {
     background: #202126;
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 9px;
@@ -2703,17 +2703,17 @@
     border-radius: 50%;
 }
 
-/* Sort is the same plain menu language, not a separate visual concept. */
-.quest-ui-theme .quest-ui-sort-list-title {
+/* Shared single-choice menu for Sort and Dashboard themes. */
+.quest-ui-theme .quest-ui-dashboard-choice-list-title {
     display: block;
     padding: 5px 8px 6px;
 }
-.quest-ui-theme-default .quest-ui-sort-list-title {
+.quest-ui-theme-default .quest-ui-dashboard-choice-list-title {
     color: #8f939c;
     font-size: 10px;
     font-weight: 700;
 }
-.quest-ui-theme .quest-ui-sort-list > button {
+.quest-ui-theme .quest-ui-dashboard-choice-list > button {
     align-items: center;
     cursor: pointer;
     display: flex;
@@ -2722,7 +2722,7 @@
     padding: 5px 8px;
     width: 100%;
 }
-.quest-ui-theme-default .quest-ui-sort-list > button {
+.quest-ui-theme-default .quest-ui-dashboard-choice-list > button {
     background: transparent;
     border: 0;
     border-radius: 5px;
@@ -2731,14 +2731,14 @@
     font-size: 11.5px;
     text-align: left;
 }
-.quest-ui-theme-default .quest-ui-sort-list > button:hover {
+.quest-ui-theme-default .quest-ui-dashboard-choice-list > button:hover {
     background: rgba(255,255,255,.055);
 }
-.quest-ui-theme-default .quest-ui-sort-list > button.is-selected {
+.quest-ui-theme-default .quest-ui-dashboard-choice-list > button.is-selected {
     background: rgba(88,101,242,.12);
     color: #fff;
 }
-.quest-ui-theme .quest-ui-sort-list-radio {
+.quest-ui-theme .quest-ui-dashboard-choice-list-radio {
     align-items: center;
     display: inline-flex;
     flex: 0 0 16px;
@@ -2746,18 +2746,18 @@
     justify-content: center;
     width: 16px;
 }
-.quest-ui-theme-default .quest-ui-sort-list-radio {
+.quest-ui-theme-default .quest-ui-dashboard-choice-list-radio {
     border: 1px solid #666b75;
     border-radius: 50%;
 }
-.quest-ui-theme-default .quest-ui-sort-list > button.is-selected .quest-ui-sort-list-radio {
+.quest-ui-theme-default .quest-ui-dashboard-choice-list > button.is-selected .quest-ui-dashboard-choice-list-radio {
     border-color: #858cff;
 }
-.quest-ui-theme .quest-ui-sort-list-radio > span {
+.quest-ui-theme .quest-ui-dashboard-choice-list-radio > span {
     height: 8px;
     width: 8px;
 }
-.quest-ui-theme-default .quest-ui-sort-list-radio > span {
+.quest-ui-theme-default .quest-ui-dashboard-choice-list-radio > span {
     background: #858cff;
     border-radius: 50%;
 }
@@ -2896,7 +2896,7 @@
 }
 
 /* Sort lives in a Discord portal. Scope styles to the root element itself. */
-.quest-ui-theme.quest-ui-sort-list {
+.quest-ui-theme.quest-ui-dashboard-choice-list {
     box-sizing: border-box;
     display: flex !important;
     flex-direction: column !important;
@@ -2905,23 +2905,23 @@
     padding: 7px !important;
     width: 250px !important;
 }
-.quest-ui-theme-default.quest-ui-sort-list {
+.quest-ui-theme-default.quest-ui-dashboard-choice-list {
     background: #202126 !important;
     border: 1px solid rgba(255,255,255,.08) !important;
     border-radius: 9px !important;
     box-shadow: 0 14px 36px rgba(0,0,0,.45) !important;
 }
-.quest-ui-theme.quest-ui-sort-list > .quest-ui-sort-list-title {
+.quest-ui-theme.quest-ui-dashboard-choice-list > .quest-ui-dashboard-choice-list-title {
     display: block !important;
     padding: 5px 8px 7px !important;
 }
-.quest-ui-theme-default.quest-ui-sort-list > .quest-ui-sort-list-title {
+.quest-ui-theme-default.quest-ui-dashboard-choice-list > .quest-ui-dashboard-choice-list-title {
     color: #8f939c !important;
     font-size: 10px !important;
     font-weight: 700 !important;
     line-height: 14px;
 }
-.quest-ui-theme.quest-ui-sort-list > button {
+.quest-ui-theme.quest-ui-dashboard-choice-list > button {
     align-items: center !important;
     box-sizing: border-box;
     cursor: pointer;
@@ -2933,7 +2933,7 @@
     padding: 6px 8px !important;
     width: 100% !important;
 }
-.quest-ui-theme-default.quest-ui-sort-list > button {
+.quest-ui-theme-default.quest-ui-dashboard-choice-list > button {
     background: transparent !important;
     border: 0 !important;
     border-radius: 5px !important;
@@ -2942,21 +2942,21 @@
     font-size: 11.5px !important;
     text-align: left !important;
 }
-.quest-ui-theme.quest-ui-sort-list > button > span:first-child {
+.quest-ui-theme.quest-ui-dashboard-choice-list > button > span:first-child {
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.quest-ui-theme-default.quest-ui-sort-list > button:hover {
+.quest-ui-theme-default.quest-ui-dashboard-choice-list > button:hover {
     background: rgba(255,255,255,.055) !important;
 }
-.quest-ui-theme-default.quest-ui-sort-list > button.is-selected {
+.quest-ui-theme-default.quest-ui-dashboard-choice-list > button.is-selected {
     background: rgba(88,101,242,.12) !important;
     color: #fff !important;
 }
-.quest-ui-theme.quest-ui-sort-list > button > .quest-ui-sort-list-radio {
+.quest-ui-theme.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio {
     align-items: center !important;
     box-sizing: border-box;
     display: inline-flex !important;
@@ -2967,20 +2967,20 @@
     position: static !important;
     width: 18px !important;
 }
-.quest-ui-theme-default.quest-ui-sort-list > button > .quest-ui-sort-list-radio {
+.quest-ui-theme-default.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio {
     border: 1px solid #666b75 !important;
     border-radius: 50% !important;
 }
-.quest-ui-theme-default.quest-ui-sort-list > button.is-selected > .quest-ui-sort-list-radio {
+.quest-ui-theme-default.quest-ui-dashboard-choice-list > button.is-selected > .quest-ui-dashboard-choice-list-radio {
     background: #5865f2 !important;
     border-color: #5865f2 !important;
 }
-.quest-ui-theme.quest-ui-sort-list > button > .quest-ui-sort-list-radio > span {
+.quest-ui-theme.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio > span {
     display: block !important;
     height: 7px !important;
     width: 7px !important;
 }
-.quest-ui-theme-default.quest-ui-sort-list > button > .quest-ui-sort-list-radio > span {
+.quest-ui-theme-default.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio > span {
     background: #fff !important;
     border-radius: 50%;
 }
@@ -3607,4 +3607,55 @@
 }
 .quest-ui-theme .quest-ui-dashboard-content {
     padding-top: 8px;
+}
+
+/* Header theme selector sits immediately before the Orb balance. */
+.quest-ui-dashboard-header-tools {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    margin-left: auto;
+    min-width: 0;
+}
+.quest-ui-dashboard-palette-button {
+    align-items: center;
+    appearance: none;
+    background: var(--quest-ui-theme-control);
+    border: 1px solid var(--quest-ui-theme-border-control);
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: var(--quest-ui-theme-text-strong);
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 34px;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 120ms ease, border-color 120ms ease;
+    width: 34px;
+}
+.quest-ui-dashboard-palette-button:hover,
+.quest-ui-dashboard-palette-button.is-open {
+    background: var(--quest-ui-theme-control-hover);
+    border-color: var(--quest-ui-theme-accent);
+}
+.quest-ui-dashboard-palette-button:focus-visible {
+    outline: 2px solid var(--quest-ui-theme-accent);
+    outline-offset: 2px;
+}
+.quest-ui-dashboard-palette-icon {
+    fill: currentColor;
+    height: 20px;
+    width: 20px;
+}
+@media (max-width: 560px) {
+    .quest-ui-dashboard-header-tools {
+        align-self: flex-end;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-dashboard-palette-button {
+        transition: none;
+    }
 }
