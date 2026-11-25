@@ -1,7 +1,7 @@
 /* Dark volcanic glass; illumination is confined to the authored fissure mask. */
 .quest-ui-theme-obsidian .quest-ui-card[data-obsidian-fracture] {
     --obsidian-artwork-rgb: 143 130 205;
-    clip-path: polygon(14px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 9px 100%, 0 calc(100% - 9px), 0 14px);
+    clip-path: polygon(22px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 22px), calc(100% - 22px) 100%, 12px 100%, 0 calc(100% - 12px), 0 22px);
     isolation: isolate;
 }
 .quest-ui-theme-obsidian .quest-ui-card[data-obsidian-fracture]::before,
@@ -9,9 +9,9 @@
     content: "";
     pointer-events: none;
     position: absolute;
-    inset: 1.5px;
-    /* Offset the chamfers along their diagonal normals, not by the full inset. */
-    clip-path: polygon(13.1px 0, calc(100% - 8.1px) 0, 100% 8.1px, 100% calc(100% - 13.1px), calc(100% - 13.1px) 100%, 8.1px 100%, 0 calc(100% - 8.1px), 0 13.1px);
+    inset: 3px 3px 3px 6px;
+    /* Identical inset geometry for surface and emission, with a deeper left bevel. */
+    clip-path: polygon(17.25px 0, calc(100% - 10.25px) 0, 100% 10.25px, 100% calc(100% - 20.25px), calc(100% - 20.25px) 100%, 7.25px 100%, 0 calc(100% - 7.25px), 0 17.25px);
     z-index: 0;
 }
 .quest-ui-theme-obsidian .quest-ui-card[data-obsidian-fracture]::before {
