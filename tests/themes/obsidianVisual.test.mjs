@@ -18,7 +18,8 @@ const icon = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"
 const button = (classes,html,attrs="") => '<button type="button" class="'+classes+'" '+attrs+'>'+html+'</button>';
 const update = (tone,copy,mark) => '<span class="quest-ui-product-update-chip is-'+tone+'"><span class="quest-ui-product-update-mark">'+mark+'</span><span>'+copy+'</span></span>';
 const product = (name,kind,version,channel,runtime,notice) => '<div class="quest-ui-default-status-product is-'+kind+'"><div class="quest-ui-default-status-identity"><div class="quest-ui-default-status-identity-row"><strong class="quest-ui-default-status-name">'+name+'</strong><span class="quest-ui-version-chip quest-ui-version-chip-'+kind+' is-'+channel+'">'+version+'</span></div></div><div class="quest-ui-default-status-state">'+runtime+notice+'</div>'+button("quest-ui-status-settings-button",icon)+'</div>';
-const runtime = '<span class="quest-ui-orion-status is-compact is-connected is-engine-idle"><span class="quest-ui-orion-runtime-chip"><span class="quest-ui-orion-status-dot"></span><span class="quest-ui-orion-status-copy">Idle</span></span></span>';
+const runtimeIdle = '<span class="quest-ui-orion-status is-compact is-connected is-engine-idle"><span class="quest-ui-orion-runtime-chip"><span class="quest-ui-orion-status-dot"></span><span class="quest-ui-orion-status-copy">Idle</span></span></span>';
+const runtimeRunning = '<span class="quest-ui-orion-status is-compact is-connected is-engine-running"><span class="quest-ui-orion-runtime-chip"><span class="quest-ui-orion-status-dot"></span><span class="quest-ui-orion-status-copy">Running</span></span></span>';
 const summary = [["all","All",62],["available","Available",0],["claimable","Ready",0],["in-progress","In Progress",1],["claimed","Claimed",16],["expired","Expired",45],["ignored","Ignored",0],["hidden","Hidden",0]].map(([key,label,count])=>button("quest-ui-summary-chip quest-ui-summary-"+key+(key==="all"?" is-selected":""),'<span class="quest-ui-summary-chip-dot"></span><span class="quest-ui-summary-chip-label">'+label+'</span><span class="quest-ui-summary-chip-count">'+count+'</span>')).join("");
 const notice = button("quest-ui-dashboard-notification-island is-idle",'<span class="quest-ui-dashboard-notification-bell"><svg class="quest-ui-dashboard-notification-surface"><rect class="quest-ui-dashboard-notification-surface-rect"/></svg>'+icon+'</span><span class="quest-ui-dashboard-notification-measure">Notification Center</span><span class="quest-ui-dashboard-notification-copy"><span class="quest-ui-dashboard-notification-text">Notification Center</span></span><span class="quest-ui-dashboard-notification-unread-dot"></span>');
 const toolbar = '<div class="quest-ui-dashboard-actionbar"><div class="quest-ui-dashboard-actionbar-left"><div class="quest-ui-dashboard-actionbar-primary"><div class="quest-ui-orion-controls">'+button("quest-ui-orion-icon-button is-start",icon+'<span class="quest-ui-orion-control-label">Start</span>')+button("quest-ui-orion-icon-button is-stop",icon+'<span class="quest-ui-orion-control-label">Stop</span>',"disabled")+'</div>'+button("quest-ui-toolbar-button quest-ui-claim-all-button",'<span class="quest-ui-claim-all-label">Claim All</span><span class="quest-ui-claim-all-count">0</span>',"disabled")+'<span class="quest-ui-dashboard-action-divider"></span>'+["quest-ui-reload-icon-button","quest-ui-update-center-button","quest-ui-event-log-button"].map(c=>button(c,icon)).join("")+'</div></div><div class="quest-ui-dashboard-notification-region">'+notice+'</div><div class="quest-ui-dashboard-actionbar-destinations">'+button("quest-ui-toolbar-button quest-ui-market-button",icon)+button("quest-ui-toolbar-button quest-ui-home-button",icon)+'</div></div>';
@@ -29,7 +30,7 @@ const claimed = '<article class="quest-ui-card quest-ui-card-claimed" data-obsid
 const active = '<article class="quest-ui-card quest-ui-card-in-progress quest-ui-card-achievement" data-obsidian-fracture="0">'+art+'<div class="quest-ui-card-main"><div class="quest-ui-card-title-cluster"><strong class="quest-ui-card-title">Dune: Part Three</strong><span class="quest-ui-card-orion-state is-stopped">Stopped</span></div><div class="quest-ui-card-status-line"><span class="quest-ui-card-status-dot"></span><span class="quest-ui-card-status">In progress</span></div><div class="quest-ui-card-meta-row"><span class="quest-ui-card-reward">Reward: <strong>840 Orbs</strong></span><span class="quest-ui-card-actions">'+button("quest-ui-card-orion-control is-start",icon)+button("quest-ui-card-action quest-ui-card-action-ignore",icon)+'</span></div></div><div class="quest-ui-card-side is-achievement"><div class="quest-ui-achievement-progress"><div class="quest-ui-achievement-progress-copy"><strong>0/5</strong><span>tasks done</span></div><div class="quest-ui-achievement-progress-segments" style="grid-template-columns:repeat(5,minmax(0,1fr))"><span></span><span></span><span></span><span></span><span></span></div></div><span class="quest-ui-card-expiry">Expires in 13d 19h</span></div></article>';
 const host = 'html,body{margin:0;background:#171820;color:#f2f3f5;font:14px Arial,sans-serif}body{--font-primary:Arial,sans-serif;--font-display:Arial,sans-serif;--font-code:monospace;--header-primary:#f2f3f5;--header-secondary:#b9bbbe;--text-default:#f2f3f5;--text-muted:#a5a8b0;--text-strong:#fff;--interactive-normal:#d6d7dc;--interactive-muted:#878991;--brand-360:#b2a7ff;--brand-500:#8272f4;--status-positive:#43d78b;--status-danger:#f24f5a;--status-warning:#f0b232;--background-base-lowest:#080a10;--background-base-low:#10121a;--background-mod-strong:#242630;--border-subtle:#363845}button{font:inherit}';
 function fixture(alternate) {
-    const left=product("Orion Quest","orion","v4.11.5","stable",runtime,alternate?update("error","Update check failed","!"):update("current","You are up to date","✓"));
+    const left=product("Orion Quest","orion","v4.11.5","stable",alternate?runtimeRunning:runtimeIdle,alternate?update("error","Update check failed","!"):update("current","You are up to date","✓"));
     const right=product("QuestUI","questui","v1.6.0-beta2","beta","",alternate?update("available","v1.6.0-beta.22 available","↑"):update("current","You are up to date","✓"));
     return '<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="theme.css"><style>'+host+'</style><div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-dashboard-shell has-orion-control">'+topbar+toolbar+'<section class="quest-ui-dashboard"><header class="quest-ui-dashboard-header"><div class="quest-ui-default-status-strip">'+left+'<span class="quest-ui-status-bridge is-connected"><span class="quest-ui-status-bridge-line"></span><span class="quest-ui-status-bridge-node"></span><span class="quest-ui-status-bridge-line"></span></span>'+right+'</div><div class="quest-ui-dashboard-summary">'+summary+'</div>'+sort+'</header><div class="quest-ui-dashboard-content">'+active+claimed+'</div></section></div><script>('+inspect.toString()+')()</script>';
 }
@@ -59,11 +60,91 @@ function inspect(){
         check(getComputedStyle(panel).clipPath==="none","status panel content clip");
         for(const child of panel.children)check(inside(child.getBoundingClientRect(),panel.getBoundingClientRect()),"status panel overflow: "+child.className);
     }
-    for(const count of document.querySelectorAll(".quest-ui-summary-chip-count,.quest-ui-filter-count-badge,.quest-ui-claim-all-count"))check(parseFloat(getComputedStyle(count).borderTopLeftRadius)<=2,"rounded count: "+count.className);
+    if(innerWidth>=820){
+        const orion=document.querySelector(".quest-ui-default-status-product.is-orion");
+        const runtime=orion.querySelector(".quest-ui-orion-runtime-chip");
+        const updateChip=orion.querySelector(".quest-ui-product-update-chip");
+        const settings=orion.querySelector(".quest-ui-status-settings-button");
+        const o=orion.getBoundingClientRect(),r=runtime.getBoundingClientRect(),u=updateChip.getBoundingClientRect(),g=settings.getBoundingClientRect();
+        check(Math.abs(r.top-u.top)<=3,"Orion runtime/update wrapped on desktop");
+        check(u.right<=g.left+2,"Orion update overlaps Settings");
+        check(g.right<=o.right+2,"Orion Settings escapes status slab");
+    }
+    for(const count of document.querySelectorAll(".quest-ui-summary-chip-count,.quest-ui-filter-count-badge,.quest-ui-claim-all-count")){
+        const style=getComputedStyle(count),box=count.getBoundingClientRect();
+        check(parseFloat(style.borderTopLeftRadius)>=box.height/2-1,"count is not circular: "+count.className);
+        check(Math.abs(box.width-box.height)<=1,"count is not square/circular: "+count.className+" "+box.width+"x"+box.height);
+    }
+    for(const count of document.querySelectorAll(".quest-ui-summary-chip-count")){
+        check(getComputedStyle(count,"::before").content==="none"&&getComputedStyle(count,"::after").content==="none","summary count still uses parentheses");
+    }
     check(getComputedStyle(document.querySelector(".quest-ui-dashboard-notification-surface")).visibility==="hidden","old notification rectangle visible");
     for(const rail of document.querySelectorAll(".quest-ui-dashboard-actionbar-primary,.quest-ui-orion-controls,.quest-ui-dashboard-actionbar-destinations")){
-        check(parseFloat(getComputedStyle(rail).columnGap)===3,"toolbar gap: "+rail.className);
+        check(parseFloat(getComputedStyle(rail).columnGap)===(rail.classList.contains("quest-ui-orion-controls")?0:3),"toolbar gap: "+rail.className);
     }
+    const controls=document.querySelector(".quest-ui-orion-controls");
+    const claim=document.querySelector(".quest-ui-claim-all-button");
+    check(parseFloat(getComputedStyle(claim).marginInlineStart)===-3,"primary claim gap");
+    const controlsBox=controls.getBoundingClientRect(),claimBox=claim.getBoundingClientRect();
+    if(Math.abs(controlsBox.top-claimBox.top)<4)check(claimBox.left>=controlsBox.right-0.5,"primary action hitboxes overlap");
+    // Measure the painted gap at the centerline, not just the flex gap.
+    // The generated polygons use pixel offsets on straight diagonal edges.
+    const [start,stop]=controls.querySelectorAll(".quest-ui-orion-icon-button");
+    function midEdges(node){
+        const rim=getComputedStyle(node,"::before");
+        const box=node.getBoundingClientRect(),style=getComputedStyle(node);
+        const w=box.width-parseFloat(style.borderLeftWidth)-parseFloat(style.borderRightWidth);
+        const h=box.height-parseFloat(style.borderTopWidth)-parseFloat(style.borderBottomWidth);
+        const raw=rim.clipPath.match(/^polygon\((.*)\)$/)?.[1];
+        const vertices=raw?.split(",").map(point=>{
+            const xy=point.trim().match(/^(calc\(100% - [\d.]+px\)|[\d.]+(?:px|%)?)\s+(calc\(100% - [\d.]+px\)|[\d.]+(?:px|%)?)$/);
+            if(!xy)return null;
+            const px=(v,n)=>v.startsWith("calc")?n-Number(v.match(/- ([\d.]+)px/)[1]):v.endsWith("%")?parseFloat(v)*n/100:parseFloat(v);
+            return [px(xy[1],w),px(xy[2],h)];
+        });
+        if(!vertices?.length||vertices.some(v=>!v))return null;
+        const y=h/2,xs=[];
+        for(let i=0;i<vertices.length;i++){
+            const [x1,y1]=vertices[i],[x2,y2]=vertices[(i+1)%vertices.length];
+            if(y1===y2)continue;
+            if(y>=Math.min(y1,y2)&&y<=Math.max(y1,y2))xs.push(x1+(x2-x1)*(y-y1)/(y2-y1));
+        }
+        const left=box.left+parseFloat(style.borderLeftWidth);
+        return xs.length?[left+Math.min(...xs),left+Math.max(...xs)]:null;
+    }
+    const a=midEdges(start),b=midEdges(stop),d=midEdges(claim);
+    check(a&&b&&b[0]-a[1]>=5&&b[0]-a[1]<=11,"primary painted Start/Stop gap: "+(a&&b?b[0]-a[1]:"unknown"));
+    if(Math.abs(controlsBox.top-claimBox.top)<4)check(b&&d&&d[0]-b[1]>=5&&d[0]-b[1]<=11,"primary painted Stop/Claim gap: "+(b&&d?d[0]-b[1]:"unknown"));
+    check(getComputedStyle(document.querySelector(".quest-ui-dashboard-display-title > strong"),"::after").content==="none","Dashboard title still has // decoration");
+    const vertexCount=node=>{
+        const clip=getComputedStyle(node,"::before").clipPath;
+        const raw=clip.match(/^polygon\((.*)\)$/)?.[1];
+        return raw?raw.split(",").length:0;
+    };
+    check(vertexCount(document.querySelector(".quest-ui-default-status-product.is-orion"))>=9,"Orion status slab lost carved multi-corner silhouette");
+    check(vertexCount(document.querySelector(".quest-ui-default-status-product.is-questui"))>=8,"QuestUI status slab lost carved multi-corner silhouette");
+    check(vertexCount(document.querySelector(".quest-ui-sort-button"))>=6&&vertexCount(document.querySelector(".quest-ui-filter-button"))>=6,"Sort/Filter lost six-point silhouette");
+    check(vertexCount(document.querySelector(".quest-ui-market-button"))>=7&&vertexCount(document.querySelector(".quest-ui-home-button"))>=7,"Destination socket lost multi-corner silhouette");
+    check(vertexCount(document.querySelector(".quest-ui-dashboard-palette-button"))>=6,"Palette lost faceted silhouette");
+    check(vertexCount(document.querySelector(".quest-ui-dashboard-orb-balance"))>=6,"Orb balance lost faceted silhouette");
+    check(getComputedStyle(document.querySelector(".quest-ui-dashboard-list-title"),"::before").content==="none","Quest List ornament still visible");
+    const utilities=[
+        document.querySelector(".quest-ui-reload-icon-button"),
+        document.querySelector(".quest-ui-update-center-button"),
+        document.querySelector(".quest-ui-event-log-button")
+    ];
+    const utilityCuts=utilities.map(node=>getComputedStyle(node,"::before").clipPath);
+    check(utilityCuts.every(cut=>cut===utilityCuts[0]),"utility trio silhouettes diverged");
+    const marketCut=getComputedStyle(document.querySelector(".quest-ui-market-button"),"::before").clipPath;
+    check(marketCut!==utilityCuts[0],"market/home incorrectly reuse utility silhouette");
+    const settingsCut=getComputedStyle(document.querySelector(".quest-ui-status-settings-button"),"::before").clipPath;
+    check(settingsCut!==utilityCuts[0],"settings incorrectly reuse utility silhouette");
+    const versionCut=getComputedStyle(document.querySelector(".quest-ui-version-chip"),"::before").clipPath;
+    const updateCut=getComputedStyle(document.querySelector(".quest-ui-product-update-chip"),"::before").clipPath;
+    check(versionCut!==updateCut,"version/update chips incorrectly share silhouette");
+    const orb=document.querySelector(".quest-ui-dashboard-orb-balance");
+    const rim=getComputedStyle(orb,"::before");
+    check(rim.backgroundImage.includes("rgb(213, 90, 255)"),"missing violet orb rim");
     const bell=document.querySelector(".quest-ui-dashboard-notification-bell");
     for(const [pseudo,inset] of [["::before",5],["::after",6]]){
         const layer=getComputedStyle(bell,pseudo);
