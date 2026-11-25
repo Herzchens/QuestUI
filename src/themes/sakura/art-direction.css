@@ -592,7 +592,8 @@
     }
 
     .quest-ui-theme-sakura.quest-ui-notification-center-panel,
-    .quest-ui-theme-sakura.quest-ui-event-log-panel.quest-ui-event-log-panel {
+    .quest-ui-theme-sakura.quest-ui-event-log-panel.quest-ui-event-log-panel,
+    .quest-ui-theme-sakura.quest-ui-update-panel.quest-ui-update-panel-v16 {
         background: transparent !important;
         border-color: transparent !important;
         border-radius: 0 !important;
@@ -763,6 +764,52 @@
         border-radius: 0;
         border-image: var(--quest-ui-sakura-row-neutral) 30 34 fill / 13px 15px stretch;
         box-shadow: none;
+    }
+
+    /* Update Center: all secondary cards/tags use Sakura frames too. */
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-settings-control,
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-decision {
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 0;
+        border-image: var(--quest-ui-sakura-row-warning) 30 34 fill / 14px 16px stretch;
+        box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-settings-control {
+        border-image-source: var(--quest-ui-sakura-row-neutral);
+    }
+
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-channel,
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-product-status.is-compact,
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-product-new,
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-result {
+        background: var(--quest-ui-sakura-chip-plum) center / 100% 100% no-repeat;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding-inline: 8px;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-channel:not(.is-prerelease),
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-product-status.is-current,
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-result.is-success {
+        background-image: var(--quest-ui-sakura-chip-jade);
+    }
+
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-channel.is-prerelease,
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-result.is-warning {
+        background-image: var(--quest-ui-sakura-chip-amber);
+    }
+
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-result.is-error {
+        background-image: var(--quest-ui-sakura-chip-red);
+    }
+
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-product-mark,
+    .quest-ui-theme-sakura.quest-ui-update-panel-v16 .quest-ui-update-banner-mark {
+        background: var(--quest-ui-sakura-flower-control) center / 100% 100% no-repeat !important;
+        border-radius: 0;
     }
 
     @media (max-width: 520px) {

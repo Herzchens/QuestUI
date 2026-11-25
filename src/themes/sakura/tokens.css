@@ -8,6 +8,7 @@
     --quest-ui-dashboard-base: rgba(34,10,27,.90);
     --quest-ui-dashboard-card: rgba(79,31,57,.42);
 
+    --quest-ui-theme-panel: rgba(45,16,35,.97);
     --quest-ui-theme-surface: rgba(255,204,220,.075);
     --quest-ui-theme-surface-avatar: rgba(245,181,205,.12);
     --quest-ui-theme-artwork: rgba(122,62,91,.26);
@@ -39,6 +40,37 @@
     --quest-ui-theme-panel-shadow: rgba(0, 0, 0, .52);
     --quest-ui-theme-float-shadow: rgba(0, 0, 0, .45);
     --quest-ui-theme-popout-shadow: rgba(0, 0, 0, .42);
+
+    /* Update Center */
+    --quest-ui-update-panel: #321b29;
+    --quest-ui-update-accent: #e6a0b8;
+    --quest-ui-update-title: #f4f5f7;
+    --quest-ui-update-check-text: #e6e0ff;
+    --quest-ui-update-banner-text: #eef0f2;
+    --quest-ui-update-banner-muted: #8e939c;
+    --quest-ui-update-product-title: #f0f1f3;
+    --quest-ui-update-meta: #c9ccd2;
+    --quest-ui-update-muted: #aeb7cd;
+    --quest-ui-update-date: #aab3c9;
+    --quest-ui-update-icon: #d8dae0;
+    --quest-ui-update-link: #e0a6bc;
+    --quest-ui-update-link-hover: #f2cad6;
+    --quest-ui-update-support-link-hover: #f4ceda;
+    --quest-ui-update-settings-hint: #aeb7cd;
+    --quest-ui-update-state-muted: #abb4ca;
+    --quest-ui-update-banner-state-muted: #b0bad0;
+    --quest-ui-update-checking: #a8acb5;
+    --quest-ui-update-current: #59d484;
+    --quest-ui-update-available: #d996b3;
+    --quest-ui-update-error: #f07578;
+    --quest-ui-update-warning: #e7b84e;
+    --quest-ui-update-banner-current: #49d67d;
+    --quest-ui-update-banner-available: #cf87a8;
+    --quest-ui-update-banner-error: #f06467;
+    --quest-ui-update-alpha: #ff7b7e;
+    --quest-ui-update-old-version: #f47b7e;
+    --quest-ui-update-target: #e5b2c4;
+    --quest-ui-update-arrow: #818690;
 
     /* Event Log */
     --quest-ui-event-panel-start: #432434;
@@ -112,6 +144,7 @@
     --quest-ui-sakura-frame-card-hover: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22100%22%20viewBox%3D%220%200%20160%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%235b3548%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%233e2232%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M33%202H127C142%202%20149%2010%20147%2021Q154%2019%20158%2029V71Q154%2081%20147%2079C149%2090%20142%2098%20127%2098H33C18%2098%2011%2090%2013%2079Q6%2081%202%2071V29Q6%2019%2013%2021C11%2010%2018%202%2033%202Z%22%20fill%3D%22url(%23f)%22%20fill-opacity%3D%221%22%20stroke%3D%22%23edbac0%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
     --quest-ui-sakura-row-neutral: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22100%22%20viewBox%3D%220%200%20160%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23523044%22%2F%3E%3Cstop%20offset%3D%22.46%22%20stop-color%3D%22%23523044%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23321c2a%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22r%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%22.8%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23cc939c%22%2F%3E%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23cc939c%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23cc939c%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M33%202H127C142%202%20149%2010%20147%2021Q154%2019%20158%2029V71Q154%2081%20147%2079C149%2090%20142%2098%20127%2098H33C18%2098%2011%2090%2013%2079Q6%2081%202%2071V29Q6%2019%2013%2021C11%2010%2018%202%2033%202Z%22%20fill%3D%22url(%23f)%22%20fill-opacity%3D%220.96%22%20stroke%3D%22url(%23r)%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
     --quest-ui-sakura-row-info: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22100%22%20viewBox%3D%220%200%20160%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%233b344d%22%2F%3E%3Cstop%20offset%3D%22.46%22%20stop-color%3D%22%233b344d%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23292335%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22r%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%22.8%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23a6a8c5%22%2F%3E%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23a6a8c5%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a6a8c5%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M33%202H127C142%202%20149%2010%20147%2021Q154%2019%20158%2029V71Q154%2081%20147%2079C149%2090%20142%2098%20127%2098H33C18%2098%2011%2090%2013%2079Q6%2081%202%2071V29Q6%2019%2013%2021C11%2010%2018%202%2033%202Z%22%20fill%3D%22url(%23f)%22%20fill-opacity%3D%220.96%22%20stroke%3D%22url(%23r)%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    --quest-ui-sakura-row-success: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22100%22%20viewBox%3D%220%200%20160%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%2343503d%22%2F%3E%3Cstop%20offset%3D%22.46%22%20stop-color%3D%22%2343503d%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23303326%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22r%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%22.8%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23a8c28d%22%2F%3E%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23a8c28d%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a8c28d%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M33%202H127C142%202%20149%2010%20147%2021Q154%2019%20158%2029V71Q154%2081%20147%2079C149%2090%20142%2098%20127%2098H33C18%2098%2011%2090%2013%2079Q6%2081%202%2071V29Q6%2019%2013%2021C11%2010%2018%202%2033%202Z%22%20fill%3D%22url(%23f)%22%20fill-opacity%3D%220.96%22%20stroke%3D%22url(%23r)%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
     --quest-ui-sakura-row-warning: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22100%22%20viewBox%3D%220%200%20160%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23594232%22%2F%3E%3Cstop%20offset%3D%22.46%22%20stop-color%3D%22%23594232%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23392a28%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22r%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%22.8%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23d9b581%22%2F%3E%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23d9b581%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23d9b581%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M33%202H127C142%202%20149%2010%20147%2021Q154%2019%20158%2029V71Q154%2081%20147%2079C149%2090%20142%2098%20127%2098H33C18%2098%2011%2090%2013%2079Q6%2081%202%2071V29Q6%2019%2013%2021C11%2010%2018%202%2033%202Z%22%20fill%3D%22url(%23f)%22%20fill-opacity%3D%220.96%22%20stroke%3D%22url(%23r)%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
     --quest-ui-sakura-row-error: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22100%22%20viewBox%3D%220%200%20160%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23613645%22%2F%3E%3Cstop%20offset%3D%22.46%22%20stop-color%3D%22%23613645%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%233c222f%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22r%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%22.8%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23e19aa6%22%2F%3E%3Cstop%20offset%3D%22.45%22%20stop-color%3D%22%23e19aa6%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23e19aa6%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M33%202H127C142%202%20149%2010%20147%2021Q154%2019%20158%2029V71Q154%2081%20147%2079C149%2090%20142%2098%20127%2098H33C18%2098%2011%2090%2013%2079Q6%2081%202%2071V29Q6%2019%2013%2021C11%2010%2018%202%2033%202Z%22%20fill%3D%22url(%23f)%22%20fill-opacity%3D%220.96%22%20stroke%3D%22url(%23r)%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
     --quest-ui-sakura-frame-opaque: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22100%22%20viewBox%3D%220%200%20160%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23593445%22%2F%3E%3Cstop%20offset%3D%220.34%22%20stop-color%3D%22%23452636%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23321b29%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22r%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%22.8%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff0ce%22%2F%3E%3Cstop%20offset%3D%220.24%22%20stop-color%3D%22%23f4c2ac%22%2F%3E%3Cstop%20offset%3D%220.48%22%20stop-color%3D%22%23b87987%22%2F%3E%3Cstop%20offset%3D%220.76%22%20stop-color%3D%22%23f6b9b3%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23fff0cb%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M25%202H135C149%202%20158%2011%20158%2025V75C158%2089%20149%2098%20135%2098H25C11%2098%202%2089%202%2075V25C2%2011%2011%202%2025%202Z%22%20fill%3D%22url(%23f)%22%20fill-opacity%3D%221%22%20stroke%3D%22url(%23r)%22%20stroke-width%3D%221.05%22%2F%3E%3Cpath%20d%3D%22M26%204H134%22%20stroke%3D%22%23fff0dc%22%20stroke-opacity%3D%22.18%22%20stroke-width%3D%22.8%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E");
