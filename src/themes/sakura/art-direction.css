@@ -591,6 +591,25 @@
         background-image: var(--quest-ui-sakura-chip-jade);
     }
 
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel {
+        background: transparent !important;
+        border-color: transparent !important;
+        border-radius: 0 !important;
+        border-image: var(--quest-ui-sakura-frame-opaque) 30 34 fill / 23px 25px stretch !important;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-notification-center-action {
+        background: transparent !important;
+        border-color: transparent !important;
+        border-radius: 0 !important;
+        box-shadow: none;
+        border-image: var(--quest-ui-sakura-petal-plum) 9 30 fill / 16% 15px stretch !important;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-notification-center-action:hover:not(:disabled) {
+        border-image-source: var(--quest-ui-sakura-petal-hover) !important;
+    }
+
     .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-orion-status-copy {
         background: transparent;
         border: 0;
@@ -616,6 +635,68 @@
     .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.is-selected .quest-ui-summary-chip-count {
         color: #fff0e6;
         background: radial-gradient(ellipse at 40% 10%, #a87b7b, #77535c) !important;
+    }
+
+    /* Notification Center. */
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-account {
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 0;
+        border-image: var(--quest-ui-sakura-frame-card) 30 34 fill / 18px 20px stretch;
+        box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-unread {
+        background: var(--quest-ui-sakura-chip-muted) center / 100% 100% no-repeat;
+        border: 0;
+        border-radius: 0;
+        padding-inline: 11px;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-unread.has-unread {
+        background-image: var(--quest-ui-sakura-chip-red);
+        border-color: transparent;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-current-chip {
+        background: var(--quest-ui-sakura-chip-jade) center / 100% 100% no-repeat;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding-inline: 10px;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-action {
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        border-radius: 0 !important;
+        border-image: var(--quest-ui-sakura-petal-plum) 9 30 fill / 16% 15px stretch !important;
+        box-shadow: none !important;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-action:hover:not(:disabled),
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-action:active:not(:disabled) {
+        background: transparent !important;
+        border-color: transparent !important;
+        border-image-source: var(--quest-ui-sakura-petal-hover) !important;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-action.is-danger:hover:not(:disabled),
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-action.is-danger:active:not(:disabled) {
+        background: transparent !important;
+        border-image-source: var(--quest-ui-sakura-petal-red) !important;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-task-badge {
+        background: var(--quest-ui-sakura-flower-control) center / 100% 100% no-repeat;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-notification-center-panel .quest-ui-notification-center-row:hover {
+        background: transparent;
+        filter: brightness(1.08);
     }
 
     @media (max-width: 520px) {

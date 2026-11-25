@@ -38,6 +38,7 @@ import sakuraDashboardComponents from "./sakura/dashboard-components.css?managed
 import sakuraScrollbar from "./sakura/scrollbar.css?managed";
 import sakuraQuestActions from "./sakura/quest-actions.css?managed";
 import sakuraQuestReload from "./sakura/quest-reload.css?managed";
+import sakuraNotifications from "./sakura/notifications.css?managed";
 import sakuraOrion from "./sakura/orion.css?managed";
 import sakuraDashboard from "./sakura/dashboard.css?managed";
 import sakuraSceneAssets from "./sakura/scene-assets.css?managed";
@@ -109,6 +110,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             sakuraScrollbar,
             sakuraQuestActions,
             sakuraQuestReload,
+            sakuraNotifications,
             sakuraOrion,
             sakuraDashboard,
             sakuraSceneAssets,
