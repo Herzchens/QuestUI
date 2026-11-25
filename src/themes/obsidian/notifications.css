@@ -394,8 +394,18 @@
     background-image: linear-gradient(145deg, rgba(174,182,227,.10), transparent 35%, rgba(112,78,191,.09));
 }
 .quest-ui-notification-center-action {
-    background-image: linear-gradient(140deg, rgba(209,220,255,.12), transparent 40%, rgba(135,108,219,.08));
-    clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+    background-image: linear-gradient(155deg, rgba(229,235,255,.18), rgba(154,160,202,.05) 26%, transparent 53%, rgba(134,93,233,.12));
+    clip-path: polygon(9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
+    position: relative;
+    isolation: isolate;
+}
+.quest-ui-notification-center-action::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    background: var(--quest-ui-obsidian-rim-light);
+    clip-path: var(--quest-ui-obsidian-rim);
 }
 .quest-ui-notification-center-action:focus-visible {
     clip-path: none;

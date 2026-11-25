@@ -40,7 +40,7 @@ const useDiscordQuestCompletion = findByCodeLazy(
 
 function ProgressShape({ angular, ...props }: { angular: boolean; className: string; strokeDasharray?: string; strokeDashoffset?: number; transform?: string; }) {
     return angular
-        ? <path d="M28 5 45 12 51 28 44 45 28 51 11 44 5 28 12 11 Z" pathLength="100" {...props} transform={undefined} />
+        ? <path d="M18 9 H53 L39 47 H4 Z" pathLength="100" {...props} transform={undefined} />
         : <circle cx="28" cy="28" r="21" pathLength="100" {...props} />;
 }
 

@@ -488,10 +488,12 @@
 .quest-ui-progress-track,
 .quest-ui-progress-value {
     fill: none;
-    stroke-width: 4.5;
+    stroke-width: 2.6;
+    stroke-linejoin: miter;
 }
 .quest-ui-progress-track {
-    stroke: var(--background-mod-strong, rgba(255, 255, 255, 0.13));
+    fill: #090a13;
+    stroke: rgba(180,190,219,.23);
 }
 .quest-ui-progress-value {
     stroke: var(--quest-ui-ring);

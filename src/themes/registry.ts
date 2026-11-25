@@ -30,6 +30,8 @@ import obsidianUpdateCenter from "./obsidian/update-center.css?managed";
 import obsidianEventLog from "./obsidian/event-log.css?managed";
 import obsidianOrion from "./obsidian/orion.css?managed";
 import obsidianDashboard from "./obsidian/dashboard.css?managed";
+import obsidianFractures from "./obsidian/fractures.css?managed";
+import obsidianFractureAssets from "./obsidian/fracture-assets.css?managed";
 
 import type { DashboardTheme } from "./controller";
 
@@ -83,6 +85,8 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             obsidianEventLog,
             obsidianOrion,
             obsidianDashboard,
+            obsidianFractureAssets,
+            obsidianFractures,
         ]
     }
 ];

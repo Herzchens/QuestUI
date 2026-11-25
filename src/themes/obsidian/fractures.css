@@ -1,0 +1,27 @@
+/* Static faceted volcanic-glass material; only RGB and variant change at runtime. */
+.quest-ui-theme-obsidian .quest-ui-card[data-obsidian-fracture] {
+    --obsidian-artwork-rgb: 143 130 205;
+    clip-path: polygon(14px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 9px 100%, 0 calc(100% - 9px), 0 14px);
+    isolation: isolate;
+}
+.quest-ui-theme-obsidian .quest-ui-card[data-obsidian-fracture]::before,
+.quest-ui-theme-obsidian .quest-ui-card[data-obsidian-fracture]::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 2px;
+    clip-path: inherit;
+    z-index: 0;
+}
+.quest-ui-theme-obsidian .quest-ui-card[data-obsidian-fracture]::before {
+    background: linear-gradient(90deg, rgba(5,6,10,.90), rgba(5,6,10,.56) 23%, transparent 45%, transparent 73%, rgba(5,6,10,.74) 94%), radial-gradient(ellipse 30% 66% at var(--quest-ui-obsidian-core-position), rgb(var(--obsidian-artwork-rgb) / .24), transparent 95%), var(--quest-ui-obsidian-fracture-facets);
+    box-shadow: inset 0 1px 0 rgba(234,235,255,.20), inset 0 -1px 0 rgba(151,105,255,.28), inset 1px 0 6px rgba(0,0,0,.65);
+    background-size: 100% 100%;
+    background-blend-mode: normal, screen, normal;
+}
+.quest-ui-theme-obsidian .quest-ui-card[data-obsidian-fracture]::after {
+    background: radial-gradient(ellipse 22% 72% at var(--quest-ui-obsidian-core-position), #fff 0%, color-mix(in srgb, rgb(var(--obsidian-artwork-rgb)) 66%, #fff) 9%, rgb(var(--obsidian-artwork-rgb)) 29%, rgb(var(--obsidian-artwork-rgb) / .81) 62%, rgba(190,200,229,.38) 91%, transparent 100%);
+    mask-image: var(--quest-ui-obsidian-fracture-lines);
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+}
