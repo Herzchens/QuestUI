@@ -54,7 +54,7 @@
     padding: 5px 8px;
     border: 1px solid var(--background-modifier-accent);
     border-radius: 7px;
-    background: var(--background-secondary);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     color: var(--text-muted);
     font-size: 11px;
     cursor: pointer;
@@ -388,7 +388,7 @@
 }
 .quest-ui-event-log-panel .quest-ui-event-log-actions button,
 .quest-ui-event-log-panel .quest-ui-event-log-panel .quest-ui-event-log-actions button:hover {
-    background: var(--background-mod-strong, color-mix(in srgb, var(--quest-ui-theme-text-strong) 9%, transparent));
+    background: var(--quest-ui-glass-specular), var(--background-mod-strong, color-mix(in srgb, var(--quest-ui-theme-text-strong) 9%, transparent));
     color: var(--text-default, var(--header-primary));
 }
 .quest-ui-event-log-panel .quest-ui-event-list {
@@ -453,9 +453,6 @@
 
 /* Runtime-polished controls, custom dropdown, and Dashboard-identical scrollbar behavior. */
 .quest-ui-event-log-panel {
-    --quest-ui-event-control-bg: color-mix(in srgb, var(--background-base-lowest, #111214) 38%, var(--quest-ui-event-control-surface) 62%);
-    --quest-ui-event-control-hover-bg: color-mix(in srgb, var(--background-base-lowest, #111214) 28%, var(--quest-ui-event-control-hover) 72%);
-    --quest-ui-event-control-pressed-bg: color-mix(in srgb, var(--background-base-lowest, #111214) 32%, var(--quest-ui-event-control-pressed) 68%);
     --quest-ui-event-control-border: color-mix(in srgb, var(--quest-ui-theme-text-strong) 14.000000000000002%, transparent);
     --quest-ui-event-control-border-hover: color-mix(in srgb, var(--quest-ui-theme-text-strong) 26%, transparent);
 }
@@ -478,7 +475,7 @@
 .quest-ui-event-log-panel .quest-ui-event-log-actions button,
 .quest-ui-event-sort-trigger {
     border: 1px solid var(--quest-ui-event-control-border, color-mix(in srgb, var(--quest-ui-theme-text-strong) 14.000000000000002%, transparent));
-    background: var(--quest-ui-event-control-bg, var(--quest-ui-event-control-surface));
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     color: var(--quest-ui-event-control-text);
     box-shadow: inset 0 1px 0 color-mix(in srgb, var(--quest-ui-theme-text-strong) 4.5%, transparent);
     transition: background-color 110ms ease, border-color 110ms ease, color 110ms ease, box-shadow 110ms ease;
@@ -487,12 +484,12 @@
 .quest-ui-event-sort-trigger:hover,
 .quest-ui-event-sort-trigger.is-open {
     border-color: var(--quest-ui-event-control-border-hover, color-mix(in srgb, var(--quest-ui-theme-text-strong) 26%, transparent));
-    background: var(--quest-ui-event-control-hover-bg);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.19);
     color: var(--quest-ui-theme-text-strong);
 }
 .quest-ui-event-log-panel .quest-ui-event-log-actions button:active,
 .quest-ui-event-sort-trigger:active {
-    background: var(--quest-ui-event-control-pressed-bg);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.19);
     border-color: color-mix(in srgb, var(--quest-ui-theme-text-strong) 30%, transparent);
     color: var(--quest-ui-theme-text-strong);
 }
@@ -547,7 +544,7 @@
 }
 .quest-ui-event-flat-control {
     align-items: center;
-    background: color-mix(in srgb, var(--background-base-low, #1e1f22) 86%, var(--quest-ui-event-flat-surface-base) 14%);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--background-base-low, #1e1f22) 86%, var(--quest-ui-event-flat-surface-base) 14%);
     border: 1px solid color-mix(in srgb, var(--quest-ui-theme-text-strong) 11%, transparent);
     border-radius: 9px;
     box-shadow: none;
@@ -570,12 +567,12 @@
 }
 .quest-ui-event-flat-control:hover,
 .quest-ui-event-flat-control.is-open {
-    background: color-mix(in srgb, var(--background-mod-stronger, #34363c) 84%, var(--quest-ui-event-flat-hover-base) 16%);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--background-mod-stronger, #34363c) 84%, var(--quest-ui-event-flat-hover-base) 16%);
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 34%, color-mix(in srgb, var(--quest-ui-theme-text-strong) 12%, transparent));
     color: var(--quest-ui-theme-text-strong);
 }
 .quest-ui-event-flat-control:active {
-    background: color-mix(in srgb, var(--background-mod-stronger, #34363c) 90%, var(--quest-ui-event-flat-hover-base) 10%);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--background-mod-stronger, #34363c) 90%, var(--quest-ui-event-flat-hover-base) 10%);
 }
 .quest-ui-event-flat-control .quest-ui-event-control-icon {
     width: 16px;
@@ -641,7 +638,7 @@
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--quest-ui-theme-text-strong) 11%, transparent);
     border-radius: 999px;
-    background: var(--quest-ui-event-action-island);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     box-shadow: none;
 }
 
@@ -664,7 +661,7 @@
     padding: 0;
     border: 1px solid var(--quest-ui-event-island-border);
     border-radius: 50%;
-    background: var(--quest-ui-event-island-surface);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     color: var(--quest-ui-event-island-text);
     box-shadow: none;
     font-size: 0;
@@ -678,7 +675,7 @@
 }
 .quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-island-icon-button:hover {
     border-color: color-mix(in srgb, var(--status-warning, #f0b232) 44%, var(--quest-ui-event-island-border));
-    background: color-mix(in srgb, var(--quest-ui-event-island-surface) 92%, var(--status-warning, #f0b232) 8%);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-event-island-surface) 92%, var(--status-warning, #f0b232) 8%);
     color: var(--status-warning, #f0b232);
 }
 .quest-ui-event-island-icon-button:active {
@@ -704,7 +701,7 @@
     overflow: hidden;
     border: 1px solid var(--quest-ui-event-island-border);
     border-radius: 999px;
-    background: var(--quest-ui-event-island-surface);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     color: var(--quest-ui-event-island-text);
     transition:
         width 340ms cubic-bezier(.18,.82,.24,1),
@@ -715,7 +712,7 @@
     width: 196px;
     margin-right: -5px;
     border-color: color-mix(in srgb, var(--status-danger, #f23f42) 34%, var(--quest-ui-event-island-border));
-    background: color-mix(in srgb, var(--quest-ui-event-island-surface) 91%, var(--status-danger, #f23f42) 9%);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-event-island-surface) 91%, var(--status-danger, #f23f42) 9%);
 }
 
 /* Give the Event Log child trigger an independent action-button style. */
@@ -749,10 +746,10 @@
 }
 .quest-ui-event-clean-island:not(.is-expanded):has(.quest-ui-event-clean-trigger:hover) {
     border-color: color-mix(in srgb, var(--status-danger, #f23f42) 44%, var(--quest-ui-event-island-border));
-    background: color-mix(in srgb, var(--quest-ui-event-island-surface) 92%, var(--status-danger, #f23f42) 8%);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--quest-ui-event-island-surface) 92%, var(--status-danger, #f23f42) 8%);
 }
 .quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:hover {
-    background: color-mix(in srgb, var(--status-danger, #f23f42) 10%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--status-danger, #f23f42) 10%, transparent);
     color: var(--status-danger, #f23f42);
 }
 .quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:active {
@@ -848,7 +845,7 @@
     padding: 0;
     border: 1px solid color-mix(in srgb, var(--quest-ui-theme-text-strong) 13%, transparent);
     border-radius: 50%;
-    background: var(--quest-ui-event-confirm-surface);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     color: var(--quest-ui-event-island-text);
     box-shadow: none;
     font-size: 0;
@@ -857,7 +854,7 @@
 }
 .quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clear-confirm-button:hover {
     border-color: color-mix(in srgb, var(--quest-ui-theme-text-strong) 22%, transparent);
-    background: var(--quest-ui-event-confirm-hover);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.19);
 }
 .quest-ui-event-clear-confirm-button .quest-ui-event-action-icon {
     width: 13px;
@@ -867,7 +864,7 @@
     color: var(--status-danger, #f23f42);
 }
 .quest-ui-event-clear-confirm-button.is-confirm:hover {
-    background: color-mix(in srgb, var(--status-danger, #f23f42) 16%, var(--quest-ui-event-confirm-surface));
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--status-danger, #f23f42) 16%, var(--quest-ui-event-confirm-surface));
 }
 .quest-ui-event-clear-confirm-button.is-cancel {
     color: var(--quest-ui-event-text-muted);
@@ -1349,7 +1346,7 @@
     background: color-mix(in srgb, var(--quest-ui-theme-text-strong) 5.5%, transparent);
 }
 .quest-ui-event-sort-menu > button.is-selected {
-    background: color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--brand-500, #5865f2) 12%, transparent);
     color: var(--quest-ui-theme-text-strong);
 }
 .quest-ui-event-sort-radio {
@@ -1489,7 +1486,7 @@
 }
 .quest-ui-event-sort-menu > button.is-selected .quest-ui-event-sort-radio,
 .quest-ui-event-filter-list-row.is-radio.is-checked .quest-ui-event-filter-list-box {
-    background: var(--brand-500, #5865f2);
+    background: var(--quest-ui-glass-specular), var(--brand-500, #5865f2);
     border-color: var(--brand-500, #5865f2);
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-500, #5865f2) 8%, transparent);
 }

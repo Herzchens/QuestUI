@@ -110,7 +110,7 @@
 }
 
 .quest-ui-notification-center-current-chip {
-    background: color-mix(in srgb, var(--status-positive, #23a55a) 13%, var(--quest-ui-theme-success-surface));
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--status-positive, #23a55a) 13%, var(--quest-ui-theme-success-surface));
     border: 1px solid color-mix(in srgb, var(--status-positive, #23a55a) 32%, var(--quest-ui-theme-border-muted));
     border-radius: 999px;
     color: color-mix(in srgb, var(--status-positive, #23a55a) 48%, var(--quest-ui-theme-text-strong) 52%);
@@ -279,7 +279,7 @@
 
 .quest-ui-notification-center-task-badge {
     align-items: center;
-    background: var(--quest-ui-theme-surface);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     border: 1px solid var(--quest-ui-theme-border-strong);
     border-radius: 50%;
     bottom: -4px;

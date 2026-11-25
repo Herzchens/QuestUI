@@ -5,14 +5,14 @@
 .quest-ui-theme-liquid-glass {
     --quest-ui-theme-accent: #b6a3ff;
     --quest-ui-dashboard-border: color-mix(in srgb, var(--quest-ui-theme-accent) 38%, rgba(255,255,255,.18));
-    --quest-ui-dashboard-base: rgba(18,22,43,.84);
-    --quest-ui-dashboard-card: rgba(35,40,68,.63);
+    --quest-ui-dashboard-base: rgba(15,21,39,.70);
+    --quest-ui-dashboard-card: rgba(37,45,72,.40);
 
     --quest-ui-theme-panel: rgba(26,31,52,.94);
     --quest-ui-theme-surface: rgba(204,216,255,.075);
     --quest-ui-theme-surface-avatar: rgba(191,207,255,.12);
-    --quest-ui-theme-control: rgba(210,220,255,.095);
-    --quest-ui-theme-control-hover: rgba(210,220,255,.17);
+    --quest-ui-theme-control: rgba(218,230,255,.095);
+    --quest-ui-theme-control-hover: rgba(218,230,255,.19);
     --quest-ui-theme-artwork: rgba(99,109,161,.24);
 
     --quest-ui-theme-danger-surface: rgba(117,49,67,.36);
@@ -36,7 +36,7 @@
     --quest-ui-theme-border-faint: rgba(219,225,255,.10);
     --quest-ui-theme-border-soft: rgba(219,225,255,.14);
     --quest-ui-theme-border-muted: rgba(219,225,255,.15);
-    --quest-ui-theme-border-control: rgba(219,225,255,.22);
+    --quest-ui-theme-border-control: rgba(226,236,255,.29);
     --quest-ui-theme-border-strong: rgba(219,225,255,.30);
     --quest-ui-theme-row-hover: rgba(210,220,255,.065);
 
@@ -87,14 +87,9 @@
     --quest-ui-event-panel-start: rgba(36,34,65,.96);
     --quest-ui-event-panel-end: rgba(16,24,45,.96);
     --quest-ui-event-detail-end: rgba(14,22,42,.97);
-    --quest-ui-event-control-surface: rgba(214,224,255,.13);
-    --quest-ui-event-control-hover: rgba(214,224,255,.22);
-    --quest-ui-event-control-pressed: rgba(214,224,255,.18);
-    --quest-ui-event-action-island: rgba(30,37,64,.83);
     --quest-ui-event-island-surface: rgba(30,37,64,.92);
     --quest-ui-event-island-border: rgba(217,225,255,.21);
     --quest-ui-event-confirm-surface: rgba(44,50,78,.96);
-    --quest-ui-event-confirm-hover: rgba(65,72,103,.96);
     --quest-ui-event-portal-surface: rgba(34,40,68,.96);
     --quest-ui-event-island-text: #f4f4f5;
     --quest-ui-event-detail-action-text: #d9dce2;
@@ -139,11 +134,18 @@
     --quest-ui-event-interactive-normal: #cbd1e5;
 
     /* Optical effects are theme-local; no blur on scrolling card surfaces. */
-    --quest-ui-glass-sheen: linear-gradient(155deg, rgba(220,225,255,.13), rgba(155,166,225,.04) 42%, rgba(14,18,42,.10) 72%, rgba(175,182,255,.07));
-    --quest-ui-glass-card-sheen: linear-gradient(155deg, rgba(227,232,255,.12), rgba(164,173,231,.025) 43%, rgba(9,12,33,.15) 78%, rgba(174,184,255,.07));
-    --quest-ui-glass-rim: inset 0 1px 0 rgba(255,255,255,.24), inset 1px 0 0 rgba(255,255,255,.075), inset 0 -1px 0 rgba(184,187,255,.08), 0 5px 16px rgba(3,5,20,.22);
-    --quest-ui-glass-panel-shadow: 0 24px 72px rgba(3,5,20,.48), inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(176,182,255,.14);
+    --quest-ui-glass-sheen: radial-gradient(ellipse at 18% 0%, rgba(255,255,255,.24), transparent 55%), radial-gradient(ellipse at 88% 100%, rgba(187,209,255,.13), transparent 53%), linear-gradient(158deg, rgba(214,225,255,.09), rgba(190,207,255,.025) 42%, rgba(8,16,36,.07) 74%, rgba(200,218,255,.07));
+    --quest-ui-glass-card-sheen: radial-gradient(ellipse at 14% 0%, rgba(255,255,255,.17), transparent 53%), radial-gradient(ellipse at 90% 100%, rgba(192,213,255,.10), transparent 52%), linear-gradient(145deg, rgba(221,232,255,.08), transparent 48%, rgba(8,16,36,.06));
+    --quest-ui-glass-rim: inset 0 1px 1px rgba(255,255,255,.44), inset 1px 0 1px rgba(231,241,255,.17), inset 0 -1px 1px rgba(206,224,255,.20), inset 0 0 5px rgba(218,232,255,.10), 0 5px 16px rgba(3,5,20,.16);
+    --quest-ui-glass-panel-shadow: 0 24px 72px rgba(3,5,20,.42), inset 0 1px 1px rgba(255,255,255,.53), inset 1px 0 1px rgba(228,238,255,.20), inset 0 -1px 1px rgba(192,214,255,.25), inset 0 0 10px rgba(218,232,255,.08);
     --quest-ui-glass-panel-background: radial-gradient(ellipse at 8% 0%, rgba(117,104,212,.24), transparent 59%), radial-gradient(ellipse at 100% 90%, rgba(54,130,158,.16), transparent 65%), linear-gradient(145deg, rgba(28,27,55,.92), rgba(12,18,35,.94));
+
+    /* Clear lens controls: directional specular highlights over transparent tints.
+     * These gradients and inset rims approximate glass optics without per-control blur. */
+    --quest-ui-glass-specular: radial-gradient(ellipse at 20% 0%, rgba(255,255,255,.26), transparent 57%), radial-gradient(ellipse at 85% 100%, rgba(210,231,255,.16), transparent 52%), linear-gradient(158deg, rgba(240,247,255,.11), rgba(221,232,255,.025) 44%, rgba(12,20,42,.04) 74%, rgba(230,240,255,.07));
+    --quest-ui-glass-control: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
+    --quest-ui-glass-control-hover: var(--quest-ui-glass-specular), rgba(218,230,255,.19);
+    --quest-ui-glass-control-rim: inset 0 1px 1px rgba(255,255,255,.48), inset 1px 0 1px rgba(232,242,255,.16), inset 0 -1px 1px rgba(213,229,255,.22), inset 0 0 3px rgba(224,236,255,.09), 0 2px 6px rgba(5,10,25,.12);
 
     /* Keep native controls inside this dark surface readable in light Discord. */
     --text-default: #e2e5f3;

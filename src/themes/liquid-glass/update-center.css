@@ -2,9 +2,9 @@
     color: var(--interactive-normal, #b5bac1);
 }
 .quest-ui-update-center-button.is-open {
-    background: color-mix(in srgb, var(--brand-500, #5865f2) 10%, var(--background-mod-subtle, transparent));
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, #b6a3ff 20%, transparent);
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 38%, var(--border-subtle, transparent));
-    color: var(--brand-360, #949cf7);
+    color: #e2d8ff;
 }
 .quest-ui-update-center-button.has-update {
     border-color: color-mix(in srgb, var(--status-positive, #23a55a) 46%, var(--border-subtle, transparent));
@@ -120,7 +120,7 @@
 .quest-ui-update-check-button,
 .quest-ui-update-card-actions > button,
 .quest-ui-update-settings-control > button {
-    background: var(--background-mod-subtle, rgba(255, 255, 255, .06));
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, .1));
     border-radius: 7px;
     color: var(--interactive-normal, #b5bac1);
@@ -297,7 +297,7 @@
     margin-top: 2px;
 }
 .quest-ui-update-decision-actions > button {
-    background: var(--background-mod-subtle, rgba(255, 255, 255, .06));
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, .1));
     border-radius: 7px;
     color: var(--interactive-normal, #b5bac1);
@@ -326,7 +326,7 @@
     gap: 5px;
 }
 .quest-ui-update-card-actions > button:first-child {
-    background: color-mix(in srgb, var(--brand-500, #5865f2) 13%, var(--background-mod-subtle, transparent));
+    background: var(--quest-ui-glass-specular), color-mix(in srgb, var(--brand-500, #5865f2) 13%, var(--background-mod-subtle, transparent));
     border-color: color-mix(in srgb, var(--brand-360, #949cf7) 32%, transparent);
     color: var(--brand-360, #949cf7);
 }
@@ -344,7 +344,7 @@
 
 .quest-ui-update-settings-control {
     align-items: center;
-    background: var(--background-mod-subtle, rgba(255, 255, 255, .045));
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     border: 1px solid var(--border-subtle, rgba(255, 255, 255, .09));
     border-radius: 9px;
     box-sizing: border-box;
@@ -450,11 +450,11 @@
     text-overflow: ellipsis;
 }
 .quest-ui-update-panel-v16 .quest-ui-update-card-actions > button {
-    background: var(--quest-ui-theme-control-hover);
+    background: var(--quest-ui-glass-specular), rgba(218,230,255,.075);
     border-color: var(--quest-ui-theme-border-muted);
 }
 .quest-ui-update-panel-v16 .quest-ui-update-card-actions > button:first-child {
-    background: var(--brand-500, #5865f2);
+    background: var(--quest-ui-glass-specular), var(--brand-500, #5865f2);
     border-color: var(--brand-500, #5865f2);
     color: var(--quest-ui-theme-text-strong);
 }
