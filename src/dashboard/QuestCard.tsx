@@ -302,19 +302,21 @@ function IgnoredQuestTag() {
     );
 }
 
-export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive, closePopout, obsidianFractureVariant }: {
+export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive, closePopout, obsidianFractureVariant, sakuraOrnamentVariant }: {
     quest: NormalizedQuest;
     orionSnapshot: OrionControlSnapshot | null;
     ignored: boolean;
     receivesOrbBoost: boolean;
     claimBatchActive: boolean;
     obsidianFractureVariant: number | undefined;
+    sakuraOrnamentVariant?: number;
     closePopout?: () => void;
 }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
     const artworkUrl = resolveQuestArtwork(quest, theme);
-    const obsidian = useDashboardThemeId() === "obsidian";
+    const dashboardThemeId = useDashboardThemeId();
+    const obsidian = dashboardThemeId === "obsidian";
     const artworkColor = useObsidianArtworkColor(obsidian, artworkUrl);
     const now = Date.now();
     const expiry = dashboardExpiry(quest, now);
@@ -348,9 +350,10 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
         <article
             className={`quest-ui-card quest-ui-card-${quest.status}${isAchievement ? " quest-ui-card-achievement" : ""}${ignored ? " quest-ui-card-ignored" : ""}`}
             data-obsidian-fracture={obsidian ? obsidianFractureVariant : undefined}
+            data-sakura-ornament={dashboardThemeId === "sakura" ? sakuraOrnamentVariant : undefined}
             style={obsidian && artworkColor ? { "--obsidian-artwork-rgb": artworkColor.join(" ") } as CSSProperties : undefined}
         >
-            {!obsidian && artworkUrl && (
+            {!obsidian && dashboardThemeId !== "sakura" && artworkUrl && (
                 <span className="quest-ui-card-backdrop" aria-hidden="true">
                     <img
                         src={artworkUrl}
@@ -360,6 +363,9 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                         onError={event => { event.currentTarget.parentElement?.remove(); }}
                     />
                 </span>
+            )}
+            {dashboardThemeId === "sakura" && sakuraOrnamentVariant != null && (
+                <span className="quest-ui-sakura-card-art" aria-hidden="true" />
             )}
             <QuestArtwork imageUrl={artworkUrl} type={taskType} eager={obsidian} />
 

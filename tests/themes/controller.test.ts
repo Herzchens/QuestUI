@@ -1,3 +1,4 @@
+import { ornamentVariantSequence, SAKURA_ORNAMENT_COUNT } from "../../src/themes/sakura/ornament";
 import assert from "node:assert/strict";
 import { createDashboardThemeController } from "../../src/themes/controller";
 import { dominantArtworkColor, fractureVariant, fractureVariantSequence } from "../../src/themes/obsidian/fracture";
@@ -80,4 +81,14 @@ assert.equal(dominantArtworkColor([]), null);
 assert.equal(dominantArtworkColor([255, 0, 0, 0, 0, 0, 0, 255]), null);
 assert.deepEqual(dominantArtworkColor([230, 150, 40, 255, 230, 150, 40, 255, 40, 70, 200, 255]), [230, 150, 40]);
 assert.deepEqual(dominantArtworkColor([100, 100, 100, 255]), [100, 100, 100]);
-console.log("QuestUI Dashboard theme lifecycle and Obsidian fracture tests - PASS");
+const sakuraAssigned = ornamentVariantSequence(ids);
+assert.deepEqual(sakuraAssigned, ornamentVariantSequence(ids));
+assert.equal(SAKURA_ORNAMENT_COUNT, 10);
+for (const order of [ids, [...ids].reverse(), ids.filter((_, i) => i % 3 === 0), Array(30).fill("collision")]) {
+    const sequence = ornamentVariantSequence(order);
+    for (let i = 0; i < sequence.length; i++) {
+        assert.ok(sequence[i] >= 0 && sequence[i] < SAKURA_ORNAMENT_COUNT);
+        assert.ok(!sequence.slice(Math.max(0, i - (SAKURA_ORNAMENT_COUNT - 1)), i).includes(sequence[i]));
+    }
+}
+console.log("QuestUI Dashboard theme lifecycle and material assignment tests - PASS");

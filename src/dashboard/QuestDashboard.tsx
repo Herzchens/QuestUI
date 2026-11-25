@@ -14,6 +14,7 @@ import { dashboardScopeFromSettings, filterQuests, questStatusCounts, useQuestSn
 import type { NormalizedQuest } from "../quests/data";
 import { resolveQuestArtwork } from "../quests/presentation";
 import { fractureVariantSequence } from "../themes/obsidian/fracture";
+import { ornamentVariantSequence } from "../themes/sakura/ornament";
 import { preloadObsidianArtworkColors } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
 import { DashboardProductUpdateNotice } from "../updates/UpdateCenter";
@@ -126,7 +127,8 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const [showHiddenOnly, setShowHiddenOnly] = useState(false);
     const claimBatchActive = useClaimAllBatchActive();
     const quests = useQuestSnapshot();
-    const obsidian = useDashboardThemeId() === "obsidian";
+    const dashboardThemeId = useDashboardThemeId();
+    const obsidian = dashboardThemeId === "obsidian";
     const artworkTheme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
     useEffect(() => {
         if (obsidian) preloadObsidianArtworkColors(quests.map(quest => resolveQuestArtwork(quest, artworkTheme)));
@@ -161,6 +163,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
             : 0
     );
     const obsidianVariants = obsidian ? fractureVariantSequence(visible.map(quest => quest.id)) : undefined;
+    const sakuraVariants = dashboardThemeId === "sakura" ? ornamentVariantSequence(visible.map(quest => quest.id)) : undefined;
     const hiddenCount = hiddenNormal.length;
     const ignoredCount = partition.ignored.length;
 
@@ -290,6 +293,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                             key={quest.id}
                             quest={quest}
                             obsidianFractureVariant={obsidianVariants?.[index]}
+                            sakuraOrnamentVariant={sakuraVariants?.[index]}
                             orionSnapshot={orionSnapshot}
                             ignored={ignoredIds.has(quest.id)}
                             receivesOrbBoost={orbMultiplier.receivesBoost}
