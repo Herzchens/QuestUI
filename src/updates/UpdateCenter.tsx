@@ -370,16 +370,14 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
     return (
         <div className={useDashboardThemeClassName("quest-ui-update-panel", "quest-ui-update-panel-v16")} role="group" aria-label="Plugin updates">
             <header className="quest-ui-update-panel-heading">
-                <div className="quest-ui-update-panel-title-block">
-                    <div className="quest-ui-update-panel-title">
-                        <span className="quest-ui-update-panel-title-icon"><UpdateCenterIcon /></span>
-                        <strong>Update Center</strong>
-                    </div>
-                    <span className="quest-ui-update-panel-settings-hint">
-                        You can also update plugins from{" "}
-                        <button type="button" onClick={openQuestUIPluginSettings}>QuestUI settings</button>.
-                    </span>
+                <div className="quest-ui-update-panel-title">
+                    <span className="quest-ui-update-panel-title-icon"><UpdateCenterIcon /></span>
+                    <strong>Update Center</strong>
                 </div>
+                <span className="quest-ui-update-panel-settings-hint">
+                    You can also update plugins from{" "}
+                    <button type="button" onClick={openQuestUIPluginSettings}>QuestUI settings</button>.
+                </span>
                 <div className="quest-ui-update-panel-heading-actions">
                     <button
                         type="button"

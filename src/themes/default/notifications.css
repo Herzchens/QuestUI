@@ -193,7 +193,7 @@
     gap: 12px;
     grid-template-columns: 50px minmax(0, 1fr);
     min-height: 84px;
-    padding: 14px 6px 14px 0;
+    padding: 14px 10px;
     transition: background-color 120ms ease, opacity 120ms ease;
 }
 
