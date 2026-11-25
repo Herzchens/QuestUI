@@ -13,8 +13,10 @@ export type EventLogVirtualRow =
     | { kind: "event"; key: string; event: EventLogEvent; };
 
 const EVENT_LOG_DAY_ROW_HEIGHT = 36;
-const EVENT_LOG_EVENT_ROW_HEIGHT = 58;
-const EVENT_LOG_ACCOUNT_ROW_HEIGHT = 70;
+// Reserve space for metadata, two 1.35-line-height preview lines, row
+// padding/borders and virtual gutters. Keep the fixed-height windowing model.
+const EVENT_LOG_EVENT_ROW_HEIGHT = 74;
+const EVENT_LOG_ACCOUNT_ROW_HEIGHT = 80;
 
 export function BugLogIcon() {
     return (

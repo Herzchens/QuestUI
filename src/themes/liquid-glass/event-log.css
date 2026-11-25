@@ -143,8 +143,11 @@
     align-items: center;
     gap: 6px;
     min-width: 0;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 .quest-ui-event-copy strong {
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -305,9 +308,8 @@
     margin: 2px 0;
 }
 
-/* Virtual rows need a predictable height. Full text remains available in
- * View details; the list summary is intentionally capped to two lines. */
-.quest-ui-event-virtual-list .quest-ui-event-copy > span,
+/* The fixed virtual row reserves two full preview lines. Account labels are
+ * capped independently; full values remain available in the detail view. */
 .quest-ui-event-virtual-list .quest-ui-event-account-name {
     display: -webkit-box;
     overflow: hidden;
@@ -404,14 +406,22 @@
 }
 .quest-ui-event-log-panel .quest-ui-event-copy > span {
     display: -webkit-box;
+    min-width: 0;
+    max-height: 2.7em;
+    flex-shrink: 0;
     overflow: hidden;
+    overflow-wrap: anywhere;
+    white-space: normal;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     line-height: 1.35;
 }
 .quest-ui-event-log-panel .quest-ui-event-row-actions {
+    grid-column: 4;
+    grid-row: 1;
     justify-content: flex-end;
+    white-space: nowrap;
 }
 
 /* Event Log keeps a stable gutter; the canonical scrollbar visuals live in the theme's scrollbar.css. */
@@ -435,13 +445,6 @@
     }
     .quest-ui-event-log-panel .quest-ui-event-log-actions > div {
         width: 100%;
-    }
-    .quest-ui-event-log-panel .quest-ui-event-row {
-        grid-template-columns: 52px 18px minmax(0, 1fr);
-        align-items: start;
-    }
-    .quest-ui-event-log-panel .quest-ui-event-row-actions {
-        grid-column: 3;
     }
 }
 
@@ -1122,6 +1125,20 @@
 .quest-ui-event-log-panel .quest-ui-event-row {
     grid-template-columns: 74px 20px minmax(0, 1fr) auto;
     transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+/* Keep the action rail in column four even at narrow widths; creating an
+ * implicit second grid row would exceed the virtual item's fixed height. */
+@media (max-width: 620px) {
+    .quest-ui-event-log-panel .quest-ui-event-row {
+        grid-template-columns: 52px 18px minmax(0, 1fr) auto;
+        gap: 5px;
+    }
+    .quest-ui-event-log-panel .quest-ui-event-row-actions {
+        gap: 4px;
+    }
+    .quest-ui-event-log-panel .quest-ui-event-copy > div {
+        gap: 3px;
+    }
 }
 .quest-ui-event-time-cell {
     display: flex;
