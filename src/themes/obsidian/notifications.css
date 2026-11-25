@@ -393,22 +393,3 @@
 .quest-ui-notification-center-panel {
     background-image: linear-gradient(145deg, rgba(174,182,227,.10), transparent 35%, rgba(112,78,191,.09));
 }
-.quest-ui-notification-center-action {
-    background-image: linear-gradient(155deg, rgba(229,235,255,.18), rgba(154,160,202,.05) 26%, transparent 53%, rgba(134,93,233,.12));
-    clip-path: polygon(9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
-    position: relative;
-    isolation: isolate;
-}
-.quest-ui-notification-center-action::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    pointer-events: none;
-    background: var(--quest-ui-obsidian-rim-light);
-    clip-path: var(--quest-ui-obsidian-rim);
-}
-.quest-ui-notification-center-action:focus-visible {
-    clip-path: none;
-    outline: 2px solid var(--quest-ui-theme-accent);
-    outline-offset: 2px;
-}
