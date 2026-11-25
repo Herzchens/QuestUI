@@ -1,3 +1,5 @@
+import { OBSIDIAN_FRACTURE_VARIANT_COUNT } from "./fractureVariantCount";
+
 /** Pure Obsidian presentation helpers. */
 export type ArtworkRgb = readonly [number, number, number];
 
@@ -7,7 +9,24 @@ export function fractureVariant(questId: string): number {
         hash ^= questId.charCodeAt(index);
         hash = Math.imul(hash, 16777619);
     }
-    return (hash >>> 0) % 4;
+    return (hash >>> 0) % OBSIDIAN_FRACTURE_VARIANT_COUNT;
+}
+
+/** Assign materials in displayed order, excluding the four preceding cards. */
+export function fractureVariantSequence(questIds: readonly string[]): number[] {
+    const variants: number[] = [];
+    const recent: number[] = [];
+
+    for (const questId of questIds) {
+        let variant = fractureVariant(questId);
+        while (recent.includes(variant)) {
+            variant = (variant + 1) % OBSIDIAN_FRACTURE_VARIANT_COUNT;
+        }
+        variants.push(variant);
+        recent.push(variant);
+        if (recent.length > 4) recent.shift();
+    }
+    return variants;
 }
 
 /** Vote for the dominant visible color cluster, retaining neutral artwork as neutral. */

@@ -2499,10 +2499,10 @@
 /* Obsidian shell and control surfaces. */
 .quest-ui-theme-obsidian.quest-ui-dashboard-shell {
     background-color: #07080d !important;
-    background-image: linear-gradient(90deg, rgba(5,6,10,.96), rgba(5,6,10,.71) 37%, rgba(5,6,10,.13) 69%, rgba(5,6,10,.12)), radial-gradient(ellipse at 73% 54%, rgba(168,72,255,.12), transparent 34%), var(--quest-ui-obsidian-shell-facets), linear-gradient(139deg, #100e18, #05060a 43%, #12101b) !important;
-    background-size: 100% 180px, 100% 180px, 100% 180px, 100% 100%;
+    background-image: linear-gradient(90deg, rgba(5,6,10,.91), rgba(5,6,10,.60) 37%, rgba(5,6,10,.10) 69%, rgba(5,6,10,.10)), var(--quest-ui-obsidian-shell-facets), linear-gradient(139deg, #100e18, #05060a 43%, #12101b) !important;
+    background-size: 100% 180px, 100% 180px, 100% 100%;
     background-repeat: no-repeat;
-    background-blend-mode: normal, screen, normal, normal;
+    background-blend-mode: normal, normal, normal;
 }
 .quest-ui-theme-obsidian.quest-ui-dashboard-shell::before {
     content: "";
@@ -2511,8 +2511,11 @@
     inset: 0 0 auto;
     height: 180px;
     z-index: -1;
-    background: radial-gradient(ellipse 42% 120% at 73% 54%, #e9c5ff 0%, #b663ff 35%, #8d32ff 66%, rgba(141,50,255,.2) 100%);
-    mask: var(--quest-ui-obsidian-shell-fissures) 0 0 / 100% 100% no-repeat;
+    background: radial-gradient(ellipse 48% 130% at 76% 52%, #f9edff 0%, #e1baff 12%, #c183ff 42%, #bb6bff 100%);
+    mask: var(--quest-ui-obsidian-shell-fissures) 0 0 / 100% 100% no-repeat,
+        var(--quest-ui-obsidian-shell-fissures) 0 0 / 100% 100% no-repeat,
+        var(--quest-ui-obsidian-shell-fissures) 0 0 / 100% 100% no-repeat;
+    mask-composite: add;
 }
 .quest-ui-theme-obsidian .quest-ui-dashboard,
 .quest-ui-theme-obsidian .quest-ui-dashboard-topbar,
@@ -2529,9 +2532,9 @@
 .quest-ui-theme-obsidian .quest-ui-default-status-product,
 .quest-ui-theme-obsidian .quest-ui-default-status-product.is-orion,
 .quest-ui-theme-obsidian .quest-ui-default-status-product.is-questui {
-    background: linear-gradient(90deg, rgba(7,8,12,.88), rgba(7,8,12,.69) 48%, rgba(7,8,12,.19) 88%, rgba(7,8,12,.40)), radial-gradient(ellipse at 88% 80%, rgba(145,80,255,.25), transparent 38%), var(--quest-ui-obsidian-shell-facets) !important;
+    background: linear-gradient(90deg, rgba(7,8,12,.88), rgba(7,8,12,.69) 48%, rgba(7,8,12,.19) 88%, rgba(7,8,12,.40)), var(--quest-ui-obsidian-shell-facets) !important;
     background-size: 100% 100%;
-    background-blend-mode: normal, screen, normal;
+    background-repeat: no-repeat;
 }
 .quest-ui-theme-obsidian .quest-ui-dashboard-filter-control.quest-ui-sort-button,
 .quest-ui-theme-obsidian .quest-ui-dashboard-filter-control.quest-ui-filter-button {
@@ -2543,12 +2546,12 @@
 .quest-ui-theme-obsidian .quest-ui-card,
 .quest-ui-theme-obsidian .quest-ui-card:not(.quest-ui-card-achievement) {
     background-color: #35394d !important;
-    background-image: radial-gradient(ellipse 115px 19px at 30px 1px, #fff 0%, #fff 6%, #f5cbff 12%, #d77aff 22%, #9f32f6 42%, transparent 100%), radial-gradient(ellipse 118px 19px at calc(100% - 24px) calc(100% - 1px), #fff 0%, #fce1ff 9%, #d07aff 23%, #9430f4 44%, transparent 100%), linear-gradient(176deg, #f0edf8 0%, #858393 1.5%, transparent 4%, transparent 96%, #5e546e 98%, #c8b4e1 100%), linear-gradient(125deg, #9293a7 0%, #515260 14%, #282a37 35%, #454253 65%, #85749b 92%, #d3aaff 100%) !important;
+    background-image: var(--quest-ui-obsidian-card-rim) !important;
 }
 .quest-ui-theme-obsidian .quest-ui-card:hover,
 .quest-ui-theme-obsidian .quest-ui-card:not(.quest-ui-card-achievement):hover {
     background-color: #535c76 !important;
-    background-image: radial-gradient(ellipse 115px 19px at 30px 1px, #fff 0%, #fff 6%, #f5cbff 12%, #d77aff 22%, #9f32f6 42%, transparent 100%), radial-gradient(ellipse 118px 19px at calc(100% - 24px) calc(100% - 1px), #fff 0%, #fce1ff 9%, #d07aff 23%, #9430f4 44%, transparent 100%), linear-gradient(176deg, #f0edf8 0%, #858393 1.5%, transparent 4%, transparent 96%, #5e546e 98%, #c8b4e1 100%), linear-gradient(125deg, #9293a7 0%, #515260 14%, #282a37 35%, #454253 65%, #85749b 92%, #d3aaff 100%) !important;
+    background-image: var(--quest-ui-obsidian-card-rim) !important;
 }
 
 /* Dropdown reset: intentionally plain, Discord-like checklist/menu surfaces. */
@@ -3614,6 +3617,7 @@
     --quest-ui-obsidian-cut: polygon(9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
     --quest-ui-obsidian-rim: polygon(evenodd, 9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%, 9px 0, 10px 1.5px, 2.5px calc(100% - 1.5px), calc(100% - 10px) calc(100% - 1.5px), calc(100% - 2.5px) 1.5px, 10px 1.5px);
     --quest-ui-obsidian-rim-tone: #b9afd9;
+    --quest-ui-obsidian-card-rim: radial-gradient(ellipse 46px 9px at 16px 1px, #fff 0%, #f6e9ff 10%, #d58aff 24%, #9b38ef 48%, transparent 100%), radial-gradient(ellipse 12px 36px at 2px 15px, #f6e6ff 0%, #ba68ff 30%, transparent 100%), radial-gradient(ellipse 55px 10px at calc(100% - 16px) calc(100% - 1px), #fff 0%, #f8d7ff 10%, #ca66ff 25%, #9b38ef 50%, transparent 100%), radial-gradient(ellipse 12px 34px at calc(100% - 2px) calc(100% - 15px), #f3caff 0%, #a95aff 30%, transparent 100%), linear-gradient(180deg, #d8d8e8 0px, #737486 1px, #272835 3px, transparent 6px, transparent calc(100% - 5px), #414052 calc(100% - 3px), #a9a0c0 calc(100% - 1px), #dbd5f0 100%), linear-gradient(125deg, #88899a, #383a4b 16%, #181a24 45%, #535164 78%, #b59bd6);
     --quest-ui-obsidian-rim-light: radial-gradient(ellipse 28px 9px at 13px 1px, #fff 0%, var(--quest-ui-obsidian-rim-tone) 27%, transparent 100%), radial-gradient(ellipse 35px 10px at calc(100% - 11px) calc(100% - 1px), #fff 0%, var(--quest-ui-obsidian-rim-tone) 27%, transparent 100%), linear-gradient(170deg, var(--quest-ui-obsidian-rim-tone), #868598 10%, #33323d 29%, #191921 60%, #5d526a 89%, var(--quest-ui-obsidian-rim-tone));
 }
 .quest-ui-theme-obsidian :is(.quest-ui-toolbar-button, .quest-ui-dashboard-filter-control, .quest-ui-dashboard-palette-button, .quest-ui-orion-icon-button, .quest-ui-status-settings-button, .quest-ui-dashboard-boost-source-tag, .quest-ui-dashboard-orb-balance, .quest-ui-summary-chip, .quest-ui-card-action, .quest-ui-card-orion-control, .quest-ui-market-button, .quest-ui-home-button, .quest-ui-event-log-button, .quest-ui-reload-icon-button, .quest-ui-update-center-button) {
@@ -3694,8 +3698,26 @@
 .quest-ui-theme-obsidian .quest-ui-default-status-product {
     clip-path: polygon(11px 0, 100% 0, 100% calc(100% - 11px), calc(100% - 11px) 100%, 0 100%, 0 11px);
 }
+.quest-ui-theme-obsidian .quest-ui-default-status-product::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(175,70,255,.32) 0%, rgba(199,131,255,.55) 45%, #d9abff 65%, #f4e5ff 82%, #d09aff 100%);
+    mask: var(--quest-ui-obsidian-shell-fissures) 0 0 / 100% 100% no-repeat,
+        var(--quest-ui-obsidian-shell-fissures) 0 0 / 100% 100% no-repeat,
+        var(--quest-ui-obsidian-shell-fissures) 0 0 / 100% 100% no-repeat;
+    mask-composite: add;
+    clip-path: polygon(11px 0, 100% 0, 100% calc(100% - 11px), calc(100% - 11px) 100%, 0 100%, 0 11px);
+}
 .quest-ui-theme-obsidian .quest-ui-default-status-product:focus-within {
     clip-path: none;
+}
+@media (forced-colors: active) {
+    .quest-ui-theme-obsidian .quest-ui-default-status-product::after {
+        display: none;
+    }
 }
 .quest-ui-theme-obsidian :is(.quest-ui-filter-list-box, .quest-ui-dashboard-choice-list-radio),
 .quest-ui-theme-obsidian.quest-ui-dashboard-choice-list .quest-ui-dashboard-choice-list-radio {

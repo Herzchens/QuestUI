@@ -53,6 +53,7 @@ jobs:
         run: |
           node scripts/checkThemeContract.mjs --self-test
           node scripts/checkThemeContract.mjs
+          node src/themes/obsidian/generateFractureAssets.mjs --check
 
       - name: Checkout Vencord
         uses: actions/checkout@v7

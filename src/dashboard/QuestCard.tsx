@@ -12,7 +12,6 @@ import { QuestOrbIcon } from "../orbs/QuestOrbIcon";
 import { QuestCardActions } from "../quests/actions/QuestCardActions";
 import { expiryUrgency, formatExpiry, formatQuestProgress } from "../quests/data";
 import type { NormalizedQuest, QuestTaskType } from "../quests/data";
-import { fractureVariant } from "../themes/obsidian/fracture";
 import { useObsidianArtworkColor } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
 interface DiscordQuestCompletion {
@@ -303,12 +302,13 @@ function IgnoredQuestTag() {
     );
 }
 
-export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive, closePopout }: {
+export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive, closePopout, obsidianFractureVariant }: {
     quest: NormalizedQuest;
     orionSnapshot: OrionControlSnapshot | null;
     ignored: boolean;
     receivesOrbBoost: boolean;
     claimBatchActive: boolean;
+    obsidianFractureVariant: number | undefined;
     closePopout?: () => void;
 }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
@@ -347,7 +347,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     return (
         <article
             className={`quest-ui-card quest-ui-card-${quest.status}${isAchievement ? " quest-ui-card-achievement" : ""}${ignored ? " quest-ui-card-ignored" : ""}`}
-            data-obsidian-fracture={obsidian ? fractureVariant(quest.id) : undefined}
+            data-obsidian-fracture={obsidian ? obsidianFractureVariant : undefined}
             style={obsidian && artworkColor ? { "--obsidian-artwork-rgb": artworkColor.join(" ") } as CSSProperties : undefined}
         >
             {!obsidian && artworkUrl && (

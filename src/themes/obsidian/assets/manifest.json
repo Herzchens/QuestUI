@@ -1,31 +1,67 @@
 [
   {
     "name": "spine",
-    "position": "63% 54%",
+    "position": "64% 63%",
     "surface": "spine-surface.jpg",
     "mask": "spine-mask.png"
   },
   {
     "name": "burst",
-    "position": "60% 54%",
+    "position": "64% 57%",
     "surface": "burst-surface.jpg",
     "mask": "burst-mask.png"
   },
   {
     "name": "edge",
-    "position": "70% 54%",
+    "position": "78% 43%",
     "surface": "edge-surface.jpg",
     "mask": "edge-mask.png"
   },
   {
     "name": "lattice",
-    "position": "63% 54%",
+    "position": "60% 54%",
     "surface": "lattice-surface.jpg",
     "mask": "lattice-mask.png"
   },
   {
+    "name": "rift",
+    "position": "65% 53%",
+    "surface": "rift-surface.jpg",
+    "mask": "rift-mask.png"
+  },
+  {
+    "name": "fault",
+    "position": "72% 48%",
+    "surface": "fault-surface.jpg",
+    "mask": "fault-mask.png"
+  },
+  {
+    "name": "fork",
+    "position": "69% 78%",
+    "surface": "fork-surface.jpg",
+    "mask": "fork-mask.png"
+  },
+  {
+    "name": "caldera",
+    "position": "76% 56%",
+    "surface": "caldera-surface.jpg",
+    "mask": "caldera-mask.png"
+  },
+  {
+    "name": "shatter",
+    "position": "70% 55%",
+    "surface": "shatter-surface.jpg",
+    "mask": "shatter-mask.png"
+  },
+  {
+    "name": "shear",
+    "position": "67% 51%",
+    "surface": "shear-surface.jpg",
+    "mask": "shear-mask.png"
+  },
+  {
     "name": "shell",
-    "position": "73% 54%",
+    "position": "76% 52%",
     "surface": "shell-surface.jpg",
     "mask": "shell-mask.png"
   }

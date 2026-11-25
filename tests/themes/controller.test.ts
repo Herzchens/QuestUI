@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createDashboardThemeController } from "../../src/themes/controller";
-import { dominantArtworkColor, fractureVariant } from "../../src/themes/obsidian/fracture";
+import { dominantArtworkColor, fractureVariant, fractureVariantSequence } from "../../src/themes/obsidian/fracture";
+import { OBSIDIAN_FRACTURE_VARIANT_COUNT } from "../../src/themes/obsidian/fractureVariantCount";
 
 const themes = [
     { id: "default", label: "Default", styles: ["default/a", "default/b"] },
@@ -50,8 +51,31 @@ assert.throws(() => createDashboardThemeController([
 ], "default", { validate() {}, enable() {}, disable() {} }), /multiple owners/);
 const ids = Array.from({ length: 100 }, (_, index) => String(123456789012345000n + BigInt(index)));
 const variants = ids.map(fractureVariant);
-assert.equal(new Set(variants).size, 4);
+assert.equal(OBSIDIAN_FRACTURE_VARIANT_COUNT, 10);
+assert.deepEqual([...new Set(variants)].sort((a, b) => a - b), Array.from({ length: OBSIDIAN_FRACTURE_VARIANT_COUNT }, (_, index) => index));
 assert.deepEqual(ids.map(fractureVariant), variants);
+
+// Every sliding window of five displayed cards must have distinct materials.
+function assertFractureSequence(orderedIds: readonly string[]) {
+    const assigned = fractureVariantSequence(orderedIds);
+    assert.equal(assigned.length, orderedIds.length);
+    assert.deepEqual(fractureVariantSequence(orderedIds), assigned);
+    for (let index = 0; index < assigned.length; index++) {
+        assert.ok(Number.isInteger(assigned[index]));
+        assert.ok(assigned[index] >= 0 && assigned[index] < OBSIDIAN_FRACTURE_VARIANT_COUNT);
+        assert.ok(!assigned.slice(Math.max(0, index - 4), index).includes(assigned[index]));
+    }
+}
+assertFractureSequence([]);
+assertFractureSequence(ids.slice(0, 1));
+assertFractureSequence(ids.slice(0, 4));
+assertFractureSequence(ids);
+assertFractureSequence([...ids].reverse());
+assertFractureSequence(ids.filter((_, index) => index % 3 === 0));
+const collidingIds = ids.filter(id => fractureVariant(id) === 9);
+assert.ok(collidingIds.length >= 6);
+assertFractureSequence(collidingIds);
+assert.deepEqual(fractureVariantSequence(collidingIds.slice(0, 6)), [9, 0, 1, 2, 3, 9]);
 assert.equal(dominantArtworkColor([]), null);
 assert.equal(dominantArtworkColor([255, 0, 0, 0, 0, 0, 0, 255]), null);
 assert.deepEqual(dominantArtworkColor([230, 150, 40, 255, 230, 150, 40, 255, 40, 70, 200, 255]), [230, 150, 40]);

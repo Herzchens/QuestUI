@@ -13,6 +13,7 @@ import { useIgnoredQuests } from "../quests/ignored/runtime";
 import { dashboardScopeFromSettings, filterQuests, questStatusCounts, useQuestSnapshot } from "../quests/data";
 import type { NormalizedQuest } from "../quests/data";
 import { resolveQuestArtwork } from "../quests/presentation";
+import { fractureVariantSequence } from "../themes/obsidian/fracture";
 import { preloadObsidianArtworkColors } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
 import { DashboardProductUpdateNotice } from "../updates/UpdateCenter";
@@ -159,6 +160,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
             )
             : 0
     );
+    const obsidianVariants = obsidian ? fractureVariantSequence(visible.map(quest => quest.id)) : undefined;
     const hiddenCount = hiddenNormal.length;
     const ignoredCount = partition.ignored.length;
 
@@ -283,10 +285,11 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
 
             <div className="quest-ui-dashboard-content">
                 {visible.length > 0 ? (
-                    visible.map(quest => (
+                    visible.map((quest, index) => (
                         <QuestCard
                             key={quest.id}
                             quest={quest}
+                            obsidianFractureVariant={obsidianVariants?.[index]}
                             orionSnapshot={orionSnapshot}
                             ignored={ignoredIds.has(quest.id)}
                             receivesOrbBoost={orbMultiplier.receivesBoost}
