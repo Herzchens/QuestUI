@@ -1049,7 +1049,7 @@
     background: linear-gradient(180deg, #8a8599 0 1px, #22232d 1px, #101119 36%, #08090e 70%, #575261 calc(100% - 1px), #a39db3 100%);
     border: 0;
     border-radius: 0;
-    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 5px 100%, 0 50%);
 }
 .quest-ui-theme-obsidian .quest-ui-achievement-progress-segments > span.is-filled {
     background: linear-gradient(180deg, #eedaff 0 1px, #ab6cf6 1px, #6630a6 48%, #a958ed 90%, #e0b2ff 100%);
@@ -1142,7 +1142,7 @@
 }
 /* Tighten the three primary actions without changing utility spacing or hitboxes. */
 .quest-ui-theme-obsidian .quest-ui-orion-controls {
-    gap: 0;
+    gap: 5px;
 }
 .quest-ui-theme-obsidian .quest-ui-orion-controls + .quest-ui-claim-all-button {
     margin-inline-start: -3px;
@@ -2425,12 +2425,12 @@
 }
 .quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired)::before {
     z-index: -2;
-    clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+    clip-path: polygon(12px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 12px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
     background: linear-gradient(145deg, #e8d9ff, var(--quest-ui-obsidian-emblem-tone) 27%, #40334f 61%, var(--quest-ui-obsidian-emblem-tone) 92%, #e8d9ff);
 }
 .quest-ui-theme-obsidian .quest-ui-progress-ring:is(.quest-ui-progress-claimed, .quest-ui-progress-expired)::after {
     z-index: -1;
-    clip-path: polygon(16px 2px, calc(100% - 4px) 2px, calc(100% - 16px) calc(100% - 2px), 4px calc(100% - 2px));
+    clip-path: polygon(13px 2px, calc(100% - 9px) 2px, calc(100% - 2px) 9px, calc(100% - 2px) calc(100% - 9px), calc(100% - 13px) calc(100% - 2px), 9px calc(100% - 2px), 2px calc(100% - 9px), 2px 9px);
     background: linear-gradient(155deg, #292034, #0c0b13 43%, #161023 86%, #3c2257);
 }
 @media (forced-colors: active) {
@@ -3741,10 +3741,10 @@
         var(--quest-ui-obsidian-face-base) 45%, var(--quest-ui-obsidian-face-base) 72%,
         color-mix(in srgb, var(--quest-ui-obsidian-face-tone) 26%, var(--quest-ui-obsidian-face-base)) 100%);
 }
-/* Action blades, currency plates and dropdown slabs have separate outlines. */
+/* Action blades, currency plates and dropdown slabs have separate faceted outlines. */
 .quest-ui-theme-obsidian .quest-ui-orion-icon-button {
-    --quest-ui-obsidian-cut: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
-    --quest-ui-obsidian-face-cut: polygon(7px 2px, calc(100% - 2.5px) 2px, calc(100% - 7px) calc(100% - 2px), 2.5px calc(100% - 2px));
+    --quest-ui-obsidian-cut: polygon(7px 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 7px) 100%, 5px 100%, 0 50%);
+    --quest-ui-obsidian-face-cut: polygon(8px 2px, calc(100% - 6px) 2px, calc(100% - 2px) 50%, calc(100% - 8px) calc(100% - 2px), 6px calc(100% - 2px), 2px 50%);
     padding-inline: 18px;
     white-space: nowrap;
 }
@@ -3754,8 +3754,8 @@
     padding-inline: 16px;
 }
 .quest-ui-theme-obsidian :is(.quest-ui-dashboard-boost-source-tag, .quest-ui-dashboard-orb-balance) {
-    --quest-ui-obsidian-cut: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
-    --quest-ui-obsidian-face-cut: polygon(16px 2px, calc(100% - 4px) 2px, calc(100% - 16px) calc(100% - 2px), 4px calc(100% - 2px));
+    --quest-ui-obsidian-cut: polygon(12px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 12px) 100%, 8px 100%, 0 50%);
+    --quest-ui-obsidian-face-cut: polygon(13px 2px, calc(100% - 9px) 2px, calc(100% - 2px) 50%, calc(100% - 13px) calc(100% - 2px), 9px calc(100% - 2px), 2px 50%);
     padding-inline: 17px;
     white-space: nowrap;
 }
@@ -4035,12 +4035,12 @@
 }
 .quest-ui-theme-obsidian :is(.quest-ui-card-orion-state, .quest-ui-card-ignored-state)::before {
     z-index: -2;
-    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    clip-path: polygon(6px 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 6px) 100%, 5px 100%, 0 50%);
     background: color-mix(in srgb, currentColor 66%, #45434e);
 }
 .quest-ui-theme-obsidian :is(.quest-ui-card-orion-state, .quest-ui-card-ignored-state)::after {
     z-index: -1;
-    clip-path: polygon(6.6px 1px, calc(100% - 1.5px) 1px, calc(100% - 6.6px) calc(100% - 1px), 1.5px calc(100% - 1px));
+    clip-path: polygon(5.8px 0, calc(100% - 4.8px) 0, 100% 50%, calc(100% - 5.8px) 100%, 4.8px 100%, 0 50%);
     background: color-mix(in srgb, currentColor 8%, #090a10);
 }
 .quest-ui-theme-obsidian .quest-ui-card:not(.quest-ui-card-achievement) {
@@ -4200,8 +4200,8 @@
         max-width: none;
     }
 }
-/* Status metadata follows the reference's two distinct silhouettes:
- * a clipped-corner version plate and a slanted update plate.
+/* Status metadata follows two distinct mineral silhouettes:
+ * a clipped-corner version plate and a six-sided update crystal.
  * Paint only the two pseudo-elements; keep the text in an uncut layout box. */
 .quest-ui-theme-obsidian .quest-ui-default-status-strip :is(.quest-ui-version-chip, .quest-ui-product-update-chip) {
     position: relative;
@@ -4224,8 +4224,8 @@
     overflow-wrap: anywhere;
 }
 .quest-ui-theme-obsidian .quest-ui-default-status-strip .quest-ui-default-status-state .quest-ui-product-update-chip {
-    --quest-ui-obsidian-status-tag-cut: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-    --quest-ui-obsidian-status-tag-face: polygon(8.8px 1px, calc(100% - 1.6px) 1px, calc(100% - 8.8px) calc(100% - 1px), 1.6px calc(100% - 1px));
+    --quest-ui-obsidian-status-tag-cut: polygon(7px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 7px) 100%, 6px 100%, 0 50%);
+    --quest-ui-obsidian-status-tag-face: polygon(7.8px 1px, calc(100% - 6.8px) 1px, calc(100% - 1px) 50%, calc(100% - 7.8px) calc(100% - 1px), 6.8px calc(100% - 1px), 1px 50%);
     flex: 0 0 auto !important;
     max-width: none !important;
     min-width: 0;
@@ -4290,7 +4290,7 @@
     border: 0;
     border-radius: 0;
     box-shadow: none;
-    clip-path: polygon(50% 0, 100% 48%, 50% 100%, 0 48%);
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
     background:
         conic-gradient(from 0deg at 50% 48%, #e7caff 0deg 45deg, #9e45f2 45deg 90deg, #6526b0 90deg 135deg, #c48aff 135deg 180deg, #8b40e1 180deg 225deg, #4a247e 225deg 270deg, #a56bfa 270deg 315deg, #f6e8ff 315deg 360deg);
 }
@@ -4488,7 +4488,7 @@
     clip-path: polygon(50% 0, 86% 14%, 100% 50%, 86% 86%, 50% 100%, 14% 86%, 0 50%, 14% 14%);
 }
 .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-radio-dot, .quest-ui-dashboard-choice-list-radio > span) {
-    border-radius: 0 !important; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: #f2dfff !important;
+    border-radius: 0 !important; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); background: #f2dfff !important;
 }
 @media (forced-colors: active) {
     .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface { border: 1px solid CanvasText !important; background: Canvas !important; }

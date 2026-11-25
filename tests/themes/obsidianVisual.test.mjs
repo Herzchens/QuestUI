@@ -14,6 +14,22 @@ const order = registry.match(/id:\s*"obsidian"[\s\S]*?styles:\s*\[([\s\S]*?)\]/)
 assert.ok(order?.length && order.every(name=>imports.has(name)), "Obsidian registry order");
 const css = order.map(name=>read("../../src/themes/obsidian/"+imports.get(name))).join("\n");
 
+/* Geometry floor: framed Obsidian UI may not regress below five sides.
+ * The eight dashboard summary chips are the sole approved four-sided family.
+ * The Sort caret is an icon primitive, not a framed UI surface. */
+const lowPointPolygons=[];
+for(const match of css.matchAll(/([-\w]+)\s*:\s*polygon\(([^;}]*)\)/g)){
+    const points=match[2].split(",").map(point=>point.trim()).filter(Boolean);
+    if(points.length>=5) continue;
+    const blockStart=css.lastIndexOf("}",match.index)+1;
+    const brace=css.lastIndexOf("{",match.index);
+    const selector=css.slice(blockStart,brace).trim().replace(/\s+/g," ");
+    const allowedSummary=selector.includes(".quest-ui-dashboard-summary > .quest-ui-summary-chip");
+    const allowedIcon=selector.includes(".quest-ui-sort-button > span::after");
+    if(!allowedSummary&&!allowedIcon) lowPointPolygons.push({property:match[1],points:points.length,selector,polygon:match[2].trim()});
+}
+assert.deepEqual(lowPointPolygons,[],"Obsidian geometry below five sides: "+JSON.stringify(lowPointPolygons));
+
 const icon = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4L20 12 7 20Z" fill="currentColor"/></svg>';
 const button = (classes,html,attrs="") => '<button type="button" class="'+classes+'" '+attrs+'>'+html+'</button>';
 const update = (tone,copy,mark) => '<span class="quest-ui-product-update-chip is-'+tone+'"><span class="quest-ui-product-update-mark">'+mark+'</span><span>'+copy+'</span></span>';
@@ -30,7 +46,7 @@ const overlayFixture = '<div style="position:absolute;left:-10000px;top:0;width:
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-filter-list quest-ui-dashboard-menu-surface"><div class="quest-ui-filter-list-scroll"><section class="quest-ui-filter-list-section"><h3>Status</h3><div class="quest-ui-filter-list-options"><button class="quest-ui-filter-list-row is-checked"><span class="quest-ui-filter-list-box">'+icon+'</span><span>Available</span></button></div></section></div></div>'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-sort-menu quest-ui-event-menu-surface"><span class="quest-ui-event-sort-list-title">Sort by</span><button role="menuitemradio" class="is-selected"><span>Newest first</span><span class="quest-ui-event-sort-radio"><span></span></span></button></div>'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-filter-menu quest-ui-event-menu-surface"><section class="quest-ui-event-filter-list-section"><h3>Level</h3><div class="quest-ui-event-filter-list-options"><button class="quest-ui-event-filter-list-row is-check is-checked tone-error"><span class="quest-ui-event-filter-list-box">'+icon+'</span><span>Error</span></button></div></section></div>'
-+'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-log-panel quest-ui-event-surface"><div class="quest-ui-event-log-header"><div><strong>Event Log</strong></div><div class="quest-ui-event-log-header-meta"><span class="quest-ui-event-storage is-safe"><span class="quest-ui-event-storage-used">2 MB</span><span>/</span><span>10 MB</span></span></div></div><div class="quest-ui-event-search-shell">'+icon+'<input class="quest-ui-event-search" value="" placeholder="Search"><span class="quest-ui-event-match-count">16 events</span></div><div class="quest-ui-event-log-actions"><div class="quest-ui-event-controls-main">'+button("quest-ui-event-flat-control quest-ui-event-sort-trigger",icon+"<span>Sort</span>")+button("quest-ui-event-flat-control quest-ui-event-filter-launcher",icon+'<span>Filter</span><span class="quest-ui-event-filter-count">1</span>')+'</div><div class="quest-ui-event-action-island">'+button("quest-ui-event-island-icon-button",icon)+button("quest-ui-event-clean-trigger",icon)+'</div></div><div class="quest-ui-event-list"><div class="quest-ui-event-day"><span>Today</span><span class="quest-ui-event-day-line"></span></div><article class="quest-ui-event-row is-info is-category-runtime"><div class="quest-ui-event-time-cell"><span>12:30</span></div><span class="quest-ui-event-severity is-info">'+icon+'</span><div class="quest-ui-event-copy"><div><span class="quest-ui-event-source is-questui">QuestUI</span><span class="quest-ui-event-category is-runtime">RUNTIME</span><strong>Quest event</strong></div><span>Sample event row</span></div><div class="quest-ui-event-row-actions">'+button("quest-ui-event-view-detail","View details")+'</div></article></div><div class="quest-ui-event-page-footer">Scroll to continue…</div></div>'
++'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-log-panel quest-ui-event-surface"><div class="quest-ui-event-log-header"><div><strong>Event Log</strong></div><div class="quest-ui-event-log-header-meta"><span class="quest-ui-event-storage is-safe"><span class="quest-ui-event-storage-used">2 MB</span><span>/</span><span>10 MB</span></span></div></div><div class="quest-ui-event-search-shell">'+icon.replace('<svg ','<svg class="quest-ui-event-search-icon" ')+'<input class="quest-ui-event-search" value="" placeholder="Search"><span class="quest-ui-event-match-count">16 events</span></div><div class="quest-ui-event-log-actions"><div class="quest-ui-event-controls-main">'+button("quest-ui-event-flat-control quest-ui-event-sort-trigger",icon+"<span>Sort</span>")+button("quest-ui-event-flat-control quest-ui-event-filter-launcher",icon+'<span>Filter</span><span class="quest-ui-event-filter-count">1</span>')+'</div><div class="quest-ui-event-action-island">'+button("quest-ui-event-island-icon-button",icon.replace('<svg ','<svg class="quest-ui-event-folder-icon quest-ui-event-action-icon" '))+'<div class="quest-ui-event-clean-island">'+button("quest-ui-event-clean-trigger",icon.replace('<svg ','<svg class="quest-ui-event-broom-icon quest-ui-event-action-icon" '))+'</div></div></div><div class="quest-ui-event-list"><div class="quest-ui-event-day"><span>Today</span><span class="quest-ui-event-day-line"></span></div><article class="quest-ui-event-row is-info is-category-runtime"><div class="quest-ui-event-time-cell"><span>12:30</span></div><span class="quest-ui-event-severity is-info">'+icon+'</span><div class="quest-ui-event-copy"><div><span class="quest-ui-event-source is-questui">QuestUI</span><span class="quest-ui-event-category is-runtime">RUNTIME</span><strong>Quest event</strong></div><span>Sample event row</span></div><div class="quest-ui-event-row-actions">'+button("quest-ui-event-view-detail","View details")+'</div></article></div><div class="quest-ui-event-page-footer">Scroll to continue…</div></div>'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-detail quest-ui-event-surface is-warning"><div class="quest-ui-event-detail-header">'+button("quest-ui-event-detail-back",icon+"<span>Back</span>")+'<div class="quest-ui-event-detail-header-actions">'+button("quest-ui-event-copy-report",icon+"<span>Copy report</span>")+'</div></div><div class="quest-ui-event-detail-hero"><span class="quest-ui-event-detail-hero-icon is-warning">'+icon+'</span><h3>Event detail</h3><span class="quest-ui-event-detail-category is-runtime">Runtime</span></div><div class="quest-ui-event-detail-meta-card"><div class="quest-ui-event-detail-meta-row"><span class="quest-ui-event-detail-meta-icon-wrap">'+icon+'</span><span class="quest-ui-event-detail-meta-label">Code</span><div class="quest-ui-event-detail-meta-value"><strong>TEST</strong></div></div></div><div class="quest-ui-event-detail-callout is-reason"><div class="quest-ui-event-detail-callout-heading"><strong>Reason</strong></div><p>Sample reason</p></div><div class="quest-ui-event-detail-diagnostic"><pre>diagnostic</pre></div></div>'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-notification-center-panel"><div class="quest-ui-notification-center-account"><span class="quest-ui-notification-center-avatar"></span><span class="quest-ui-notification-center-account-copy"><strong>bò biếc bay</strong><span>@pnuyn_</span></span><span class="quest-ui-notification-center-current-chip">Current account</span></div></div>'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-update-panel quest-ui-update-panel-v16 quest-ui-update-surface"><header class="quest-ui-update-panel-heading"><div class="quest-ui-update-panel-title"><span class="quest-ui-update-panel-title-icon">'+icon+'</span><strong>Update Center</strong></div><div class="quest-ui-update-panel-heading-actions">'+button("quest-ui-update-check-button","Check now")+'<span class="quest-ui-update-panel-last-check">Last check · now</span></div></header><div class="quest-ui-update-banner is-current"><span class="quest-ui-update-banner-mark">'+icon+'</span><div><strong>You are up to date</strong><span>QuestUI and OrionQuest are current.</span></div></div><div class="quest-ui-update-product-list"><div class="quest-ui-update-product-entry is-current"><div class="quest-ui-update-product-row"><div class="quest-ui-update-product-identity"><strong>QuestUI</strong><span class="quest-ui-update-row-version">v1.6.0-beta2</span></div><div class="quest-ui-update-product-row-meta"><strong>Current</strong><span>Release date</span></div>'+button("quest-ui-update-github-button",icon)+'</div></div></div><div class="quest-ui-update-support-footer">Support</div></div>'
@@ -48,6 +64,7 @@ function inspect(){
     const errors=[];
     const check=(ok,message)=>{if(!ok)errors.push(message)};
     const inside=(a,b,e=2)=>a.left>=b.left-e&&a.right<=b.right+e&&a.top>=b.top-e&&a.bottom<=b.bottom+e;
+    const polygonPointCount=value=>value==="none"?0:(value.match(/,/g)||[]).length+1;
     const selectors=".quest-ui-orion-icon-button,.quest-ui-claim-all-button,.quest-ui-dashboard-boost-source-tag,.quest-ui-dashboard-orb-balance,.quest-ui-summary-chip,.quest-ui-dashboard-filter-control,.quest-ui-version-chip,.quest-ui-product-update-chip,.quest-ui-status-settings-button,.quest-ui-card-orion-control,.quest-ui-card-action,.quest-ui-card-orion-state,.quest-ui-dashboard-palette-button,.quest-ui-reload-icon-button,.quest-ui-update-center-button,.quest-ui-event-log-button,.quest-ui-market-button,.quest-ui-home-button,.quest-ui-dashboard-notification-island,.quest-ui-type-badge";
     for(const node of document.querySelectorAll(selectors)){
         const style=getComputedStyle(node),box=node.getBoundingClientRect();
@@ -56,6 +73,8 @@ function inspect(){
         for(const pseudo of ["::before","::after"]){
             const paint=getComputedStyle(node,pseudo);
             check(paint.clipPath!=="none"&&paint.content!=="none",node.className+": missing "+pseudo);
+            if(!node.classList.contains("quest-ui-summary-chip"))
+                check(polygonPointCount(paint.clipPath)>=5,node.className+": "+pseudo+" regressed below five sides");
         }
         if(node.classList.contains("quest-ui-dashboard-notification-island"))continue;
         const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);
@@ -90,7 +109,7 @@ function inspect(){
     }
     check(getComputedStyle(document.querySelector(".quest-ui-dashboard-notification-surface")).visibility==="hidden","old notification rectangle visible");
     for(const rail of document.querySelectorAll(".quest-ui-dashboard-actionbar-primary,.quest-ui-orion-controls,.quest-ui-dashboard-actionbar-destinations")){
-        check(parseFloat(getComputedStyle(rail).columnGap)===(rail.classList.contains("quest-ui-orion-controls")?0:3),"toolbar gap: "+rail.className);
+        check(parseFloat(getComputedStyle(rail).columnGap)===(rail.classList.contains("quest-ui-orion-controls")?5:3),"toolbar gap: "+rail.className);
     }
     const controls=document.querySelector(".quest-ui-orion-controls");
     const claim=document.querySelector(".quest-ui-claim-all-button");
@@ -183,6 +202,10 @@ function inspect(){
     check(getComputedStyle(updateSurface,"::before").clipPath!=="none"&&getComputedStyle(updateSurface,"::after").clipPath!=="none","Update Center missing Obsidian frame");
     const updateRow=document.querySelector(".quest-ui-update-surface .quest-ui-update-product-row");
     check(getComputedStyle(updateRow,"::before").clipPath!=="none"&&getComputedStyle(updateRow,"::after").clipPath!=="none","Update Center row missing Obsidian frame");
+    const updateEntry=document.querySelector(".quest-ui-update-surface .quest-ui-update-product-entry");
+    check(getComputedStyle(updateEntry).borderTopWidth==="0px"&&getComputedStyle(updateEntry).overflow==="visible","Update Center legacy product shell still clips the Obsidian row");
+    const versionChip=document.querySelector(".quest-ui-update-surface .quest-ui-update-row-version");
+    check((getComputedStyle(versionChip).clipPath.match(/,/g)||[]).length===5,"Update Center version chip is not a six-sided crystal");
     const updateBanner=document.querySelector(".quest-ui-update-surface .quest-ui-update-banner");
     check(getComputedStyle(updateBanner,"::before").clipPath!=="none"&&getComputedStyle(updateBanner,"::after").clipPath!=="none","Update Center banner missing closed Obsidian frame");
     const updateCheck=document.querySelector(".quest-ui-update-surface .quest-ui-update-check-button");
@@ -195,8 +218,40 @@ function inspect(){
         check(before.content!=="none"&&before.clipPath!=="none",root.className+": missing outer frame");
         check(after.content!=="none"&&after.clipPath!=="none",root.className+": missing inner frame");
     }
-    for(const node of document.querySelectorAll(".quest-ui-event-sort-trigger,.quest-ui-event-filter-launcher")) check(getComputedStyle(node,"::before").clipPath!=="none"&&getComputedStyle(node,"::after").clipPath!=="none",node.className+": missing faceted control");
+    for(const node of document.querySelectorAll(".quest-ui-event-sort-trigger,.quest-ui-event-filter-launcher")) check(getComputedStyle(node).clipPath==="none"&&getComputedStyle(node,"::before").clipPath!=="none"&&getComputedStyle(node,"::after").clipPath!=="none",node.className+": missing closed faceted control");
+    const searchShell=document.querySelector(".quest-ui-event-search-shell");
+    const searchRect=searchShell.getBoundingClientRect();
+    check(getComputedStyle(searchShell).clipPath==="none","Event Log search still clips its real border");
+    check(getComputedStyle(searchShell,"::before").clipPath!=="none"&&getComputedStyle(searchShell,"::after").clipPath!=="none","Event Log search missing closed frame");
+    check(searchRect.height>=38&&searchRect.height<=42,"Event Log search height is distorted: "+searchRect.height);
+    const actionIsland=document.querySelector(".quest-ui-event-action-island");
+    check(getComputedStyle(actionIsland).clipPath==="none"&&getComputedStyle(actionIsland,"::before").clipPath!=="none"&&getComputedStyle(actionIsland,"::after").clipPath!=="none","Event Log Dynamic Island geometry is not closed");
+    const folderButton=document.querySelector(".quest-ui-event-island-icon-button");
+    check(getComputedStyle(folderButton).clipPath==="none"&&getComputedStyle(folderButton,"::before").clipPath!=="none","Folder action is still clipped/deformed");
+    const cleanIsland=document.querySelector(".quest-ui-event-clean-island");
+    check(getComputedStyle(cleanIsland).clipPath==="none"&&getComputedStyle(cleanIsland,"::before").clipPath!=="none","Clear Log island is still clipped/deformed");
+    const cleanTrigger=document.querySelector(".quest-ui-event-clean-trigger");
+    check(getComputedStyle(cleanTrigger).clipPath==="none"&&getComputedStyle(cleanTrigger).borderTopWidth==="0px","Clear Log trigger still has legacy clipped geometry");
     for(const node of document.querySelectorAll(".quest-ui-event-row,.quest-ui-event-detail-meta-card,.quest-ui-event-detail-callout,.quest-ui-event-detail-diagnostic > pre,.quest-ui-event-view-detail")) check(getComputedStyle(node).clipPath!=="none",node.className+": missing faceted surface");
+    const geometryNodes=[
+        ".quest-ui-orion-icon-button",
+        ".quest-ui-default-status-state .quest-ui-product-update-chip",
+        ".quest-ui-card-orion-state",
+        ".quest-ui-event-source",
+        ".quest-ui-event-category",
+        ".quest-ui-event-view-detail",
+        ".quest-ui-event-detail-category"
+    ];
+    for(const selector of geometryNodes){
+        const node=document.querySelector(selector);
+        if(!node) continue;
+        const own=polygonPointCount(getComputedStyle(node).clipPath);
+        const before=polygonPointCount(getComputedStyle(node,"::before").clipPath);
+        const after=polygonPointCount(getComputedStyle(node,"::after").clipPath);
+        check(Math.max(own,before,after)>=5,selector+": rendered geometry has fewer than five sides");
+    }
+    for(const segment of document.querySelectorAll(".quest-ui-achievement-progress-segments > span"))
+        check(polygonPointCount(getComputedStyle(segment).clipPath)>=5,"Achievement segment regressed below five sides");
     const detailCategory=document.querySelector(".quest-ui-event-detail-category");
     if(innerWidth>520) check(getComputedStyle(detailCategory).display!=="none","Event Detail category hidden on desktop");
     else check(getComputedStyle(detailCategory).display==="none","Event Detail category visible on narrow layout");
