@@ -1750,6 +1750,109 @@
     border-bottom: 0;
 }
 
+/* One compact control capsule keeps the toolbar visually grouped without adding another band. */
+.quest-ui-theme .quest-ui-dashboard-actionbar-primary {
+    gap: 6px;
+    padding: 5px 7px;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-actionbar-primary {
+    border: 1px solid transparent;
+    border-radius: 0;
+    box-shadow: none;
+
+    background: transparent;
+
+    border-color: transparent;
+
+    border-image: var(--quest-ui-sakura-island-frame) 30 34 fill / 12px 15px stretch;
+}
+
+/* Text actions read as pills. */
+.quest-ui-theme-sakura .quest-ui-orion-icon-button,
+.quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button,
+.quest-ui-theme-sakura .quest-ui-event-log-button {
+    border-radius: 999px;
+}
+
+/* Utility actions read as circular icon pills. */
+.quest-ui-theme .quest-ui-reload-icon-button,
+.quest-ui-theme .quest-ui-update-center-button {
+    flex: 0 0 34px;
+    height: 34px;
+    min-height: 34px;
+    width: 34px;
+}
+.quest-ui-theme-sakura .quest-ui-reload-icon-button,
+.quest-ui-theme-sakura .quest-ui-update-center-button {
+    border-radius: 999px;
+}
+
+.quest-ui-theme .quest-ui-dashboard-action-divider {
+    height: 18px;
+    margin: 0 1px;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-action-divider {
+    opacity: .65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-theme-sakura .quest-ui-dashboard-display-title > strong {
+        -webkit-text-fill-color: currentColor;
+        animation: none;
+        background-image: none;
+        color: var(--text-strong, var(--header-primary));
+    }
+}
+
+/* Default actionbar: use spare width as an inline notice lane. */
+.quest-ui-theme .quest-ui-dashboard-actionbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.quest-ui-theme .quest-ui-dashboard-actionbar-primary {
+    flex: 0 0 auto;
+}
+.quest-ui-theme .quest-ui-dashboard-actionbar-destinations {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 5px;
+    margin-inline-start: auto;
+    padding: 5px 6px;
+}
+.quest-ui-theme-sakura .quest-ui-dashboard-actionbar-destinations {
+    border: 1px solid transparent;
+    border-radius: 0;
+    box-shadow: none;
+
+    background: transparent;
+
+    border-color: transparent;
+
+    border-image: var(--quest-ui-sakura-island-frame) 30 34 fill / 12px 15px stretch;
+}
+.quest-ui-theme .quest-ui-market-button,
+.quest-ui-theme .quest-ui-home-button {
+    flex: 0 0 34px;
+    height: 34px;
+    min-height: 34px;
+    width: 34px;
+}
+.quest-ui-theme-sakura .quest-ui-market-button,
+.quest-ui-theme-sakura .quest-ui-home-button {
+    border-radius: 999px;
+}
+.quest-ui-theme .quest-ui-market-glyph {
+    fill: none;
+    height: 17px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+    width: 17px;
+}
+
 /* Action feedback presentation. */
 .quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-event-log-button {
     flex: 0 0 34px;

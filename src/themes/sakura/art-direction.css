@@ -144,6 +144,113 @@
         text-shadow: none;
     }
 
+    /* Ornamented controls retain their original rectangular hit targets. */
+    .quest-ui-theme-sakura .quest-ui-dashboard-palette-button,
+    .quest-ui-theme-sakura .quest-ui-reload-icon-button,
+    .quest-ui-theme-sakura .quest-ui-update-center-button,
+    .quest-ui-theme-sakura .quest-ui-status-settings-button,
+    .quest-ui-theme-sakura .quest-ui-home-button,
+    .quest-ui-theme-sakura .quest-ui-market-button,
+    .quest-ui-theme-sakura .quest-ui-dashboard-actionbar .quest-ui-event-log-button {
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        min-height: 34px;
+        padding: 0;
+        box-sizing: border-box;
+        background: var(--quest-ui-sakura-medallion) center / 100% 100% no-repeat;
+        border-color: transparent;
+        border-radius: 0;
+        box-shadow: none;
+        color: #ffe8dc;
+    }
+
+    .quest-ui-theme-sakura :is(.quest-ui-dashboard-palette-button, .quest-ui-reload-icon-button, .quest-ui-update-center-button, .quest-ui-status-settings-button, .quest-ui-home-button, .quest-ui-market-button, .quest-ui-event-log-button):hover:not(:disabled) {
+        background: var(--quest-ui-sakura-medallion) center / 100% 100% no-repeat;
+        border-color: transparent;
+        box-shadow: none;
+        color: #fff8ee;
+        filter: brightness(1.16);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button,
+    .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button {
+        font-family: var(--font-primary);
+    }
+    .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button:not(:disabled) {
+
+        color: #f6edc8;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-start,
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-resume {
+
+        color: #daefc3;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-pause {
+
+        color: #ffdfae;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-stop {
+
+        color: #ffb6bc;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button,
+    .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button,
+    .quest-ui-theme-sakura .quest-ui-dashboard-orb-balance {
+        background: transparent;
+        border-color: transparent;
+        border-radius: 0;
+        box-shadow: none;
+        border-image: var(--quest-ui-sakura-petal-plum) 9 30 fill / 16% 15px stretch;
+        transition: filter 120ms ease, opacity 120ms ease, transform 120ms ease;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-orb-balance {
+        border-image: var(--quest-ui-sakura-orb-frame) 25 24 fill / 46% 13px stretch;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-stop {
+        background: transparent;
+        border-color: transparent;
+        border-image-source: var(--quest-ui-sakura-petal-red);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-start,
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-resume,
+    .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button:not(:disabled) {
+        background: transparent;
+        border-color: transparent;
+        border-image-source: var(--quest-ui-sakura-petal-jade);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-pause {
+        background: transparent;
+        border-color: transparent;
+        border-image-source: var(--quest-ui-sakura-petal-amber);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-orion-icon-button:disabled,
+    .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button:disabled {
+        background: transparent;
+        border-color: transparent;
+        border-image-source: var(--quest-ui-sakura-petal-muted);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-toolbar-button:focus-visible {
+        outline: none;
+    
+    filter: drop-shadow(0 0 3px #ffe0c9);
+}
+
+    .quest-ui-theme-sakura :is(.quest-ui-orion-icon-button, .quest-ui-claim-all-button):hover:not(:disabled) {
+        filter: brightness(1.12);
+    }
+
     @media (max-width: 520px) {
         .quest-ui-theme-sakura .quest-ui-dashboard-header {
             padding-inline: 8px;
