@@ -2826,20 +2826,9 @@
     border-color: #f06ac8;
 }
 
-/* Single-choice groups use Discord-like radio circles, matching the supplied reference. */
+/* Single-choice row spacing; appearance is owned by the canonical Obsidian crystal below. */
 .quest-ui-theme .quest-ui-filter-list-options.is-radio-options .quest-ui-filter-list-row {
     padding-right: 10px;
-}
-.quest-ui-theme-obsidian .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-box {
-    background: #8272f4;
-    border-color: #8272f4;
-}
-.quest-ui-theme .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-radio-dot {
-    height: 7px;
-    width: 7px;
-}
-.quest-ui-theme-obsidian .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-radio-dot {
-    background: #fff;
 }
 
 @media (max-width: 720px) {
@@ -2970,22 +2959,10 @@
     position: static !important;
     width: 18px !important;
 }
-.quest-ui-theme-obsidian.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio {
-    border: 1px solid #68728b !important;
-    border-radius: 1px !important;
-}
-.quest-ui-theme-obsidian.quest-ui-dashboard-choice-list > button.is-selected > .quest-ui-dashboard-choice-list-radio {
-    background: #8272f4 !important;
-    border-color: #8272f4 !important;
-}
 .quest-ui-theme.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio > span {
     display: block !important;
     height: 7px !important;
     width: 7px !important;
-}
-.quest-ui-theme-obsidian.quest-ui-dashboard-choice-list > button > .quest-ui-dashboard-choice-list-radio > span {
-    background: #fff !important;
-    border-radius: 1px;
 }
 
 /* Custom stepped expired-history control.
@@ -3056,27 +3033,47 @@
     width: 18px;
 }
 .quest-ui-theme-obsidian .quest-ui-history-step-node {
-    background: #131724;
-    border: 2px solid #68728b;
-    border-radius: 1px;
-    transition:
-        background-color 100ms ease,
-        border-color 100ms ease,
-        box-shadow 100ms ease;
+    --quest-ui-history-node-rim: #706979;
+    --quest-ui-history-node-face: #090a0f;
+    position: relative;
+    isolation: isolate;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    clip-path: none;
+    transition: filter 100ms ease;
+}
+.quest-ui-theme-obsidian .quest-ui-history-step-node::before,
+.quest-ui-theme-obsidian .quest-ui-history-step-node::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian .quest-ui-history-step-node::before {
+    inset: 0;
+    z-index: 0;
+    clip-path: polygon(50% 0, 84% 12%, 100% 50%, 84% 88%, 50% 100%, 16% 88%, 0 50%, 16% 12%);
+    background: linear-gradient(145deg, #c6becf, var(--quest-ui-history-node-rim) 32%, #393640 68%, #8e789b);
+}
+.quest-ui-theme-obsidian .quest-ui-history-step-node::after {
+    inset: 2px;
+    z-index: 1;
+    clip-path: polygon(50% 0, 84% 12%, 100% 50%, 84% 88%, 50% 100%, 16% 88%, 0 50%, 16% 12%);
+    background: var(--quest-ui-history-node-face);
 }
 .quest-ui-theme .quest-ui-history-step-node > span {
     height: 7px;
     width: 7px;
 }
 .quest-ui-theme-obsidian .quest-ui-history-step-node > span {
+    position: relative;
+    z-index: 2;
     background: transparent;
-    border-radius: 1px;
+    border-radius: 0;
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
 }
 .quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button:hover .quest-ui-history-step-node {
-    border-color: #8c91a0;
-}
-.quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button.is-selected .quest-ui-history-step-node > span {
-    background: #fff;
+    --quest-ui-history-node-rim: #958b9f;
 }
 .quest-ui-theme .quest-ui-history-step-label {
     white-space: nowrap;
@@ -3112,21 +3109,20 @@
     color: #b8bcc5;
 }
 .quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button.is-reached .quest-ui-history-step-node {
-    background: #8272f4;
-    border-color: #8272f4;
-}
-.quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button.is-reached .quest-ui-history-step-node > span {
-    background: #fff;
+    --quest-ui-history-node-rim: #a861dd;
+    --quest-ui-history-node-face: #2a1239;
 }
 .quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button.is-selected {
     color: #f2f3f5;
 }
 .quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button.is-selected .quest-ui-history-step-node {
-    background: #8272f4;
-    border-color: #8272f4;
-    box-shadow:
-        0 0 0 1px rgba(88,101,242,.28),
-        0 0 9px rgba(88,101,242,.30);
+    --quest-ui-history-node-rim: #dda0ff;
+    --quest-ui-history-node-face: linear-gradient(145deg, #a64fe7 0%, #672a98 48%, #35124d 100%);
+    filter: drop-shadow(0 0 4px rgba(180,85,244,.34));
+}
+.quest-ui-theme-obsidian .quest-ui-history-steps-nodes > button.is-selected .quest-ui-history-step-node > span {
+    background: #f4e6ff;
+    box-shadow: 0 0 4px rgba(244,230,255,.55);
 }
 
 /* Keep labels centered under the true node center even though the button itself is only 18px. */
@@ -3779,35 +3775,64 @@
     background: currentColor;
     clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
-/* Header palette: narrow asymmetric shard. */
+/* Dashboard icon utilities reuse the opened Update Center title-icon geometry.
+ * Keep semantic colors/state on each control; only the silhouette is canonical. */
+.quest-ui-theme-obsidian :is(
+    .quest-ui-dashboard-palette-button,
+    .quest-ui-reload-icon-button,
+    .quest-ui-update-center-button,
+    .quest-ui-dashboard-actionbar .quest-ui-event-log-button,
+    .quest-ui-market-button,
+    .quest-ui-home-button
+) {
+    --quest-ui-obsidian-cut: polygon(8px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 6px 100%, 0 calc(100% - 6px), 0 8px);
+    --quest-ui-obsidian-face-cut: polygon(7px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 5px 100%, 0 calc(100% - 5px), 0 7px);
+    --quest-ui-obsidian-rim-tone: #c7bdd8;
+    --quest-ui-obsidian-face-tone: #766c82;
+    --quest-ui-obsidian-face-base: #0a0b11;
+    --quest-ui-obsidian-edge-light: #eadcf5;
+}
+.quest-ui-theme-obsidian :is(
+    .quest-ui-dashboard-palette-button,
+    .quest-ui-reload-icon-button,
+    .quest-ui-update-center-button,
+    .quest-ui-dashboard-actionbar .quest-ui-event-log-button,
+    .quest-ui-market-button,
+    .quest-ui-home-button
+)::after {
+    inset: 1px;
+}
 .quest-ui-theme-obsidian .quest-ui-dashboard-palette-button {
-    --quest-ui-obsidian-cut: polygon(8px 0, calc(100% - 5px) 0, 100% 6px, calc(100% - 7px) 100%, 0 100%, 3px 8px);
-    --quest-ui-obsidian-face-cut: polygon(9px 1.5px, calc(100% - 6px) 1.5px, calc(100% - 1.5px) 6.8px, calc(100% - 8px) calc(100% - 1.5px), 2px calc(100% - 1.5px), 4.5px 8.8px);
-    --quest-ui-obsidian-rim-tone: #cfc7df;
-    --quest-ui-obsidian-face-tone: #747080;
-    --quest-ui-obsidian-face-base: #0b0c13;
-    --quest-ui-obsidian-edge-light: #f3effc;
-    flex: 0 0 38px;
-    min-width: 38px;
-    width: 38px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    padding: 0 !important;
 }
-/* Refresh / updater / event log: slim parallelogram family from the reference. */
-.quest-ui-theme-obsidian :is(.quest-ui-reload-icon-button, .quest-ui-update-center-button),
-.quest-ui-theme-obsidian .quest-ui-dashboard-actionbar .quest-ui-event-log-button {
-    --quest-ui-obsidian-cut: polygon(8px 0, calc(100% - 5px) 0, 100% 6px, calc(100% - 7px) 100%, 0 100%, 3px 7px);
-    --quest-ui-obsidian-face-cut: polygon(9px 1.5px, calc(100% - 6px) 1.5px, calc(100% - 1.5px) 6.8px, calc(100% - 8px) calc(100% - 1.5px), 2px calc(100% - 1.5px), 4.5px 7.8px);
-    --quest-ui-obsidian-rim-tone: #c7c0d7;
-    --quest-ui-obsidian-face-tone: #6d6978;
-    flex: 0 0 38px;
-    min-width: 38px;
-    width: 38px;
-}
-/* Destination buttons: clipped mineral sockets, distinct from the utility trio. */
-.quest-ui-theme-obsidian :is(.quest-ui-market-button, .quest-ui-home-button) {
-    --quest-ui-obsidian-cut: polygon(8px 0, calc(100% - 6px) 0, 100% 7px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 4px 7px);
-    --quest-ui-obsidian-face-cut: polygon(9px 1.5px, calc(100% - 7px) 1.5px, calc(100% - 1.5px) 7.8px, calc(100% - 1.5px) calc(100% - 9px), calc(100% - 9px) calc(100% - 1.5px), 2px calc(100% - 1.5px), 5px 8px);
-    --quest-ui-obsidian-rim-tone: #bdb6cf;
-    --quest-ui-obsidian-face-tone: #666271;
+.quest-ui-theme-obsidian :is(
+    .quest-ui-reload-icon-button,
+    .quest-ui-update-center-button,
+    .quest-ui-dashboard-actionbar .quest-ui-event-log-button
+) {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 34px !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    padding: 0 !important;
 }
 /* Compact utility cuts have short chamfers, not needle-thin parallelograms. */
 .quest-ui-theme-obsidian :is(.quest-ui-status-settings-button, .quest-ui-card-orion-control, .quest-ui-card-action) {
@@ -4498,12 +4523,84 @@
     .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"])::after { display: none; }
 }
 
-/* Obsidian menu radios: clean circular idle state; selected crystal stays intact. */
-.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface .quest-ui-filter-list-row.is-radio:not(.is-checked) .quest-ui-filter-list-box,
-.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface button[role="menuitemradio"]:not(.is-selected) .quest-ui-dashboard-choice-list-radio {
-    border: 1px solid #756d82 !important;
-    border-radius: 50% !important;
+/* Canonical Obsidian single-choice crystal.
+ * Idle is a clean hollow octagonal socket; selected adds the six-sided light dot. */
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(
+    .quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box,
+    .quest-ui-dashboard-choice-list-radio
+) {
+    --quest-ui-choice-rim: #777080;
+    --quest-ui-choice-face: linear-gradient(155deg, #13141b, #08090e 62%, #15101b);
+    position: relative !important;
+    isolation: isolate;
+    box-sizing: border-box;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 18px !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
     clip-path: none !important;
-    background: radial-gradient(circle, #0d0e14 0 42%, #15131b 44% 100%) !important;
-    box-shadow: inset 0 0 0 2px #08090e, 0 0 0 1px rgba(220,196,238,.035);
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(
+    .quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box,
+    .quest-ui-dashboard-choice-list-radio
+)::before,
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(
+    .quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box,
+    .quest-ui-dashboard-choice-list-radio
+)::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(
+    .quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box,
+    .quest-ui-dashboard-choice-list-radio
+)::before {
+    inset: 0;
+    z-index: -2;
+    clip-path: polygon(50% 0, 84% 12%, 100% 50%, 84% 88%, 50% 100%, 16% 88%, 0 50%, 16% 12%);
+    background: linear-gradient(145deg, #c6becf, var(--quest-ui-choice-rim) 32%, #393640 68%, #8e789b);
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(
+    .quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box,
+    .quest-ui-dashboard-choice-list-radio
+)::after {
+    inset: 2px;
+    z-index: -1;
+    clip-path: polygon(50% 0, 84% 12%, 100% 50%, 84% 88%, 50% 100%, 16% 88%, 0 50%, 16% 12%);
+    background: var(--quest-ui-choice-face);
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(
+    .quest-ui-filter-list-row.is-radio.is-checked .quest-ui-filter-list-box,
+    button[role="menuitemradio"].is-selected .quest-ui-dashboard-choice-list-radio
+) {
+    --quest-ui-choice-rim: #d38cff;
+    --quest-ui-choice-face: linear-gradient(145deg, #a64fe7 0%, #672a98 48%, #35124d 100%);
+    border: 0 !important;
+    clip-path: none !important;
+    background: transparent !important;
+    box-shadow: 0 0 7px rgba(180,85,244,.24);
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(
+    .quest-ui-filter-list-radio-dot,
+    .quest-ui-dashboard-choice-list-radio > span
+) {
+    position: relative;
+    z-index: 1;
+    width: 7px !important;
+    height: 7px !important;
+    border-radius: 0 !important;
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%) !important;
+    background: #f4e6ff !important;
+    box-shadow: 0 0 4px rgba(244,230,255,.45);
 }

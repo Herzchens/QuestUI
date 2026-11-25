@@ -12,7 +12,11 @@ const registry = read("../../src/themes/registry.ts");
 const imports = new Map([...registry.matchAll(/import\s+(\w+)\s+from\s+"\.\/obsidian\/([^"]+)\?managed";/g)].map(m => [m[1],m[2]]));
 const order = registry.match(/id:\s*"obsidian"[\s\S]*?styles:\s*\[([\s\S]*?)\]/)?.[1].split(",").map(s=>s.trim()).filter(Boolean);
 assert.ok(order?.length && order.every(name=>imports.has(name)), "Obsidian registry order");
+assert.match(registry, /id:\s*"liquid-glass"[\s\S]*?label:\s*"Liquid Glass"/, "Liquid Glass theme label");
 const css = order.map(name=>read("../../src/themes/obsidian/"+imports.get(name))).join("\n");
+assert.doesNotMatch(css, /quest-ui-update-panel-heading::after\s*\{[^}]*content:\s*""/, "Obsidian Update Center heading separator returned");
+assert.doesNotMatch(css, /Single-choice groups use Discord-like radio circles/, "stale Dashboard radio presentation returned");
+assert.doesNotMatch(css, /Event Log radio controls: solid selected circle/, "stale Event Log radio presentation returned");
 
 /* Geometry floor: framed Obsidian UI may not regress below five sides.
  * The eight dashboard summary chips are the sole approved four-sided family.
@@ -43,11 +47,12 @@ const topbar = '<div class="quest-ui-dashboard-topbar"><div class="quest-ui-dash
 const sort = '<div class="quest-ui-dashboard-filter-tools"><h2 class="quest-ui-dashboard-list-title">Quest List</h2>'+button("quest-ui-dashboard-filter-control quest-ui-sort-button",icon+"<span>Sort: Expiring Soon</span>")+button("quest-ui-dashboard-filter-control quest-ui-filter-button is-active",icon+'<span>Filter</span><span class="quest-ui-filter-count-badge">1</span>')+'</div>';
 const overlayFixture = '<div style="position:absolute;left:-10000px;top:0;width:720px">'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-dashboard-choice-list quest-ui-dashboard-menu-surface"><span class="quest-ui-dashboard-choice-list-title">Sort by</span><button role="menuitemradio" class="is-selected"><span>Expiring Soon</span><span class="quest-ui-dashboard-choice-list-radio"><span></span></span></button></div>'
-+'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-filter-list quest-ui-dashboard-menu-surface"><div class="quest-ui-filter-list-scroll"><section class="quest-ui-filter-list-section"><h3>Status</h3><div class="quest-ui-filter-list-options"><button class="quest-ui-filter-list-row is-checked"><span class="quest-ui-filter-list-box">'+icon+'</span><span>Available</span></button></div></section></div></div>'
++'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-filter-list quest-ui-dashboard-menu-surface"><div class="quest-ui-filter-list-scroll"><section class="quest-ui-filter-list-section"><h3>Status</h3><div class="quest-ui-filter-list-options"><button class="quest-ui-filter-list-row is-checked"><span class="quest-ui-filter-list-box">'+icon+'</span><span>Available</span></button></div></section><section class="quest-ui-filter-list-section"><h3>Reward</h3><div class="quest-ui-filter-list-options is-radio-options"><button class="quest-ui-filter-list-row is-radio is-checked" role="radio" aria-checked="true"><span class="quest-ui-filter-list-box"><span class="quest-ui-filter-list-radio-dot"></span></span><span>All rewards</span></button><button class="quest-ui-filter-list-row is-radio" role="radio" aria-checked="false"><span class="quest-ui-filter-list-box"></span><span>Orbs</span></button></div></section></div></div>'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-sort-menu quest-ui-event-menu-surface"><span class="quest-ui-event-sort-list-title">Sort by</span><button role="menuitemradio" class="is-selected"><span>Newest first</span><span class="quest-ui-event-sort-radio"><span></span></span></button></div>'
-+'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-filter-menu quest-ui-event-menu-surface"><section class="quest-ui-event-filter-list-section"><h3>Level</h3><div class="quest-ui-event-filter-list-options"><button class="quest-ui-event-filter-list-row is-check is-checked tone-error"><span class="quest-ui-event-filter-list-box">'+icon+'</span><span>Error</span></button></div></section></div>'
-+'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-log-panel quest-ui-event-surface"><div class="quest-ui-event-log-header"><div><strong>Event Log</strong></div><div class="quest-ui-event-log-header-meta"><span class="quest-ui-event-storage is-safe"><span class="quest-ui-event-storage-used">2 MB</span><span>/</span><span>10 MB</span></span></div></div><div class="quest-ui-event-search-shell">'+icon.replace('<svg ','<svg class="quest-ui-event-search-icon" ')+'<input class="quest-ui-event-search" value="" placeholder="Search"><span class="quest-ui-event-match-count">16 events</span></div><div class="quest-ui-event-log-actions"><div class="quest-ui-event-controls-main">'+button("quest-ui-event-flat-control quest-ui-event-sort-trigger",icon+"<span>Sort</span>")+button("quest-ui-event-flat-control quest-ui-event-filter-launcher",icon+'<span>Filter</span><span class="quest-ui-event-filter-count">1</span>')+'</div><div class="quest-ui-event-action-island">'+button("quest-ui-event-island-icon-button",icon.replace('<svg ','<svg class="quest-ui-event-folder-icon quest-ui-event-action-icon" '))+'<div class="quest-ui-event-clean-island">'+button("quest-ui-event-clean-trigger",icon.replace('<svg ','<svg class="quest-ui-event-broom-icon quest-ui-event-action-icon" '))+'</div></div></div><div class="quest-ui-event-list"><div class="quest-ui-event-day"><span>Today</span><span class="quest-ui-event-day-line"></span></div><article class="quest-ui-event-row is-info is-category-runtime"><div class="quest-ui-event-time-cell"><span>12:30</span></div><span class="quest-ui-event-severity is-info">'+icon+'</span><div class="quest-ui-event-copy"><div><span class="quest-ui-event-source is-questui">QuestUI</span><span class="quest-ui-event-category is-runtime">RUNTIME</span><strong>Quest event</strong></div><span>Sample event row</span></div><div class="quest-ui-event-row-actions">'+button("quest-ui-event-view-detail","View details")+'</div></article></div><div class="quest-ui-event-page-footer">Scroll to continue…</div></div>'
++'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-filter-menu quest-ui-event-menu-surface"><section class="quest-ui-event-filter-list-section"><h3>Source</h3><div class="quest-ui-event-filter-list-options is-radio-options"><button class="quest-ui-event-filter-list-row is-radio is-checked tone-questui" role="radio" aria-checked="true"><span class="quest-ui-event-filter-list-box"><span class="quest-ui-event-filter-list-radio-dot"></span></span><span>QuestUI</span></button></div></section><section class="quest-ui-event-filter-list-section"><h3>Level</h3><div class="quest-ui-event-filter-list-options"><button class="quest-ui-event-filter-list-row is-check is-checked tone-error"><span class="quest-ui-event-filter-list-box">'+icon+'</span><span>Error</span></button></div></section></div>'
++'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-log-panel quest-ui-event-surface"><div class="quest-ui-event-log-header"><div><strong>Event Log</strong></div><div class="quest-ui-event-log-header-meta"><span class="quest-ui-event-storage is-safe"><span class="quest-ui-event-storage-used">2 MB</span><span>/</span><span>10 MB</span></span></div></div><div class="quest-ui-event-search-shell">'+icon.replace('<svg ','<svg class="quest-ui-event-search-icon" ')+'<input class="quest-ui-event-search" value="" placeholder="Search"><span class="quest-ui-event-match-count">16 events</span></div><div class="quest-ui-event-log-actions"><div class="quest-ui-event-controls-main">'+button("quest-ui-event-flat-control quest-ui-event-sort-trigger",icon+"<span>Sort</span>")+button("quest-ui-event-flat-control quest-ui-event-filter-launcher",icon+'<span>Filter</span><span class="quest-ui-event-filter-count">1</span>')+'</div><div class="quest-ui-event-action-island">'+button("quest-ui-event-island-icon-button",icon.replace('<svg ','<svg class="quest-ui-event-folder-icon quest-ui-event-action-icon" '))+'<div class="quest-ui-event-clean-island is-expanded">'+button("quest-ui-event-clean-trigger",icon.replace('<svg ','<svg class="quest-ui-event-broom-icon quest-ui-event-action-icon" '))+'<div class="quest-ui-event-clear-confirm"><span class="quest-ui-event-clear-confirm-text">Clear log? 2s</span><div class="quest-ui-event-clear-confirm-actions">'+button("quest-ui-event-clear-confirm-button is-confirm",icon)+button("quest-ui-event-clear-confirm-button is-cancel",icon)+'</div></div></div></div></div><div class="quest-ui-event-list"><div class="quest-ui-event-day"><span>Today</span><span class="quest-ui-event-day-line"></span></div><article class="quest-ui-event-row is-info is-category-runtime"><div class="quest-ui-event-time-cell"><span>12:30</span></div><span class="quest-ui-event-severity is-info">'+icon+'</span><div class="quest-ui-event-copy"><div><span class="quest-ui-event-source is-questui">QuestUI</span><span class="quest-ui-event-category is-runtime">RUNTIME</span><strong>Quest event</strong></div><span>Sample event row</span></div><div class="quest-ui-event-row-actions">'+button("quest-ui-event-row-bug",icon)+button("quest-ui-event-view-detail","View details")+'</div></article></div><div class="quest-ui-event-page-footer">Scroll to continue…</div></div>'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-event-detail quest-ui-event-surface is-warning"><div class="quest-ui-event-detail-header">'+button("quest-ui-event-detail-back",icon+"<span>Back</span>")+'<div class="quest-ui-event-detail-header-actions">'+button("quest-ui-event-copy-report",icon+"<span>Copy report</span>")+'</div></div><div class="quest-ui-event-detail-hero"><span class="quest-ui-event-detail-hero-icon is-warning">'+icon+'</span><h3>Event detail</h3><span class="quest-ui-event-detail-category is-runtime">Runtime</span></div><div class="quest-ui-event-detail-meta-card"><div class="quest-ui-event-detail-meta-row"><span class="quest-ui-event-detail-meta-icon-wrap">'+icon+'</span><span class="quest-ui-event-detail-meta-label">Code</span><div class="quest-ui-event-detail-meta-value"><strong>TEST</strong></div></div></div><div class="quest-ui-event-detail-callout is-reason"><div class="quest-ui-event-detail-callout-heading"><strong>Reason</strong></div><p>Sample reason</p></div><div class="quest-ui-event-detail-diagnostic"><pre>diagnostic</pre></div></div>'
++'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-history-steps"><div class="quest-ui-history-steps-track"><span class="quest-ui-history-steps-line"></span><span class="quest-ui-history-steps-fill"></span><div class="quest-ui-history-steps-nodes" role="radiogroup"><button class="is-reached is-selected" role="radio" aria-checked="true"><span class="quest-ui-history-step-node"><span></span></span><span class="quest-ui-history-step-label">7d</span></button><button role="radio" aria-checked="false"><span class="quest-ui-history-step-node"><span></span></span><span class="quest-ui-history-step-label">15d</span></button></div></div></div>'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-notification-center-panel"><div class="quest-ui-notification-center-account"><span class="quest-ui-notification-center-avatar"></span><span class="quest-ui-notification-center-account-copy"><strong>bò biếc bay</strong><span>@pnuyn_</span></span><span class="quest-ui-notification-center-current-chip">Current account</span></div></div>'
 +'<div class="quest-ui-theme quest-ui-theme-obsidian quest-ui-update-panel quest-ui-update-panel-v16 quest-ui-update-surface"><header class="quest-ui-update-panel-heading"><div class="quest-ui-update-panel-title"><span class="quest-ui-update-panel-title-icon">'+icon+'</span><strong>Update Center</strong></div><div class="quest-ui-update-panel-heading-actions">'+button("quest-ui-update-check-button","Check now")+'<span class="quest-ui-update-panel-last-check">Last check · now</span></div></header><div class="quest-ui-update-banner is-current"><span class="quest-ui-update-banner-mark">'+icon+'</span><div><strong>You are up to date</strong><span>QuestUI and OrionQuest are current.</span></div></div><div class="quest-ui-update-product-list"><div class="quest-ui-update-product-entry is-current"><div class="quest-ui-update-product-row"><div class="quest-ui-update-product-identity"><strong>QuestUI</strong><span class="quest-ui-update-row-version">v1.6.0-beta2</span></div><div class="quest-ui-update-product-row-meta"><strong>Current</strong><span>Release date</span></div>'+button("quest-ui-update-github-button",icon)+'</div></div></div><div class="quest-ui-update-support-footer">Support</div></div>'
 +'</div>';
@@ -160,12 +165,13 @@ function inspect(){
     const utilities=[
         document.querySelector(".quest-ui-reload-icon-button"),
         document.querySelector(".quest-ui-update-center-button"),
-        document.querySelector(".quest-ui-event-log-button")
+        document.querySelector(".quest-ui-event-log-button"),
+        document.querySelector(".quest-ui-dashboard-palette-button"),
+        document.querySelector(".quest-ui-market-button"),
+        document.querySelector(".quest-ui-home-button")
     ];
     const utilityCuts=utilities.map(node=>getComputedStyle(node,"::before").clipPath);
-    check(utilityCuts.every(cut=>cut===utilityCuts[0]),"utility trio silhouettes diverged");
-    const marketCut=getComputedStyle(document.querySelector(".quest-ui-market-button"),"::before").clipPath;
-    check(marketCut!==utilityCuts[0],"market/home incorrectly reuse utility silhouette");
+    check(utilityCuts.every(cut=>cut===utilityCuts[0]),"canonical utility silhouettes diverged");
     const settingsCut=getComputedStyle(document.querySelector(".quest-ui-status-settings-button"),"::before").clipPath;
     check(settingsCut!==utilityCuts[0],"settings incorrectly reuse utility silhouette");
     const versionCut=getComputedStyle(document.querySelector(".quest-ui-version-chip"),"::before").clipPath;
@@ -184,9 +190,11 @@ function inspect(){
     const eventMenu=document.querySelector(".quest-ui-event-menu-surface");
     check(Number.parseInt(getComputedStyle(eventMenu).zIndex,10)>=1000,"Event Log menu stacking is too low");
     for(const idleRadio of document.querySelectorAll(".quest-ui-dashboard-menu-surface .is-radio:not(.is-checked) .quest-ui-filter-list-box,.quest-ui-event-menu-surface .is-radio:not(.is-checked) .quest-ui-event-filter-list-box")){
-        const style=getComputedStyle(idleRadio),box=idleRadio.getBoundingClientRect();
-        check(style.clipPath==="none","idle radio is still clipped");
-        check(parseFloat(style.borderTopLeftRadius)>=box.height/2-1,"idle radio is not circular");
+        const style=getComputedStyle(idleRadio);
+        check(style.clipPath==="none","idle single-choice content is clipped");
+        check(parseFloat(style.borderTopLeftRadius)===0,"idle single-choice regained rounded geometry");
+        check(polygonPointCount(getComputedStyle(idleRadio,"::before").clipPath)===8,"idle single-choice outer is not octagonal");
+        check(polygonPointCount(getComputedStyle(idleRadio,"::after").clipPath)===8,"idle single-choice face is not octagonal");
     }
     for(const framed of document.querySelectorAll(".quest-ui-event-storage,.quest-ui-event-match-count")){
         const framedStyle=getComputedStyle(framed);
@@ -252,6 +260,75 @@ function inspect(){
     }
     for(const segment of document.querySelectorAll(".quest-ui-achievement-progress-segments > span"))
         check(polygonPointCount(getComputedStyle(segment).clipPath)>=5,"Achievement segment regressed below five sides");
+
+    const updateTitleOuter="polygon(8px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 6px 100%, 0 calc(100% - 6px), 0 8px)";
+    const updateTitleInner="polygon(7px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 5px 100%, 0 calc(100% - 5px), 0 7px)";
+    for(const selector of [
+        ".quest-ui-dashboard-palette-button",
+        ".quest-ui-reload-icon-button",
+        ".quest-ui-update-center-button",
+        ".quest-ui-event-log-button",
+        ".quest-ui-market-button",
+        ".quest-ui-home-button"
+    ]){
+        const node=document.querySelector(selector);
+        if(!node) continue;
+        const style=getComputedStyle(node);
+        check(style.getPropertyValue("--quest-ui-obsidian-cut").trim()===updateTitleOuter,selector+": outer geometry differs from Update Center title icon");
+        check(style.getPropertyValue("--quest-ui-obsidian-face-cut").trim()===updateTitleInner,selector+": inner geometry differs from Update Center title icon");
+        check(getComputedStyle(node,"::after").inset==="1px",selector+": inner face does not use the Update Center inset");
+    }
+    const equalUtilityNodes=[
+        ".quest-ui-reload-icon-button",
+        ".quest-ui-update-center-button",
+        ".quest-ui-event-log-button"
+    ].map(selector=>document.querySelector(selector)).filter(Boolean);
+    const equalUtilityRects=equalUtilityNodes.map(node=>node.getBoundingClientRect());
+    check(equalUtilityRects.every(rect=>Math.abs(rect.width-34)<.5&&Math.abs(rect.height-34)<.5),"Refresh / Update Center / Event Viewer are not exactly 34x34");
+
+    for(const node of document.querySelectorAll(".quest-ui-event-clear-confirm-button")){
+        check(getComputedStyle(node).clipPath==="none",node.className+": Clear Log confirm content is clipped");
+        check(polygonPointCount(getComputedStyle(node,"::before").clipPath)===8,node.className+": Clear Log confirm outer is not octagonal");
+        check(polygonPointCount(getComputedStyle(node,"::after").clipPath)===8,node.className+": Clear Log confirm face is not octagonal");
+    }
+    for(const node of document.querySelectorAll(".quest-ui-event-row-bug")){
+        check(getComputedStyle(node).clipPath==="none","Event Row bug icon content is clipped");
+        check(polygonPointCount(getComputedStyle(node,"::before").clipPath)===8,"Event Row bug icon outer is not octagonal");
+        check(polygonPointCount(getComputedStyle(node,"::after").clipPath)===8,"Event Row bug icon face is not octagonal");
+    }
+    const idleHistory=document.querySelector(".quest-ui-history-steps-nodes > button:not(.is-selected) .quest-ui-history-step-node");
+    if(idleHistory){
+        check(getComputedStyle(idleHistory).clipPath==="none","Expired History idle node is clipped");
+        check(polygonPointCount(getComputedStyle(idleHistory,"::before").clipPath)===8,"Expired History idle outer is not octagonal");
+        check(polygonPointCount(getComputedStyle(idleHistory,"::after").clipPath)===8,"Expired History idle face is not octagonal");
+    }
+
+    const singleChoiceOuters=[
+        ".quest-ui-dashboard-choice-list-radio",
+        ".quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box",
+        ".quest-ui-event-sort-radio",
+        ".quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box",
+        ".quest-ui-history-step-node"
+    ].map(selector=>document.querySelector(selector)).filter(Boolean);
+    for(const node of singleChoiceOuters){
+        check(getComputedStyle(node).clipPath==="none",node.className+": single-choice content is clipped");
+        check(polygonPointCount(getComputedStyle(node,"::before").clipPath)===8,node.className+": single-choice outer is not the canonical octagon");
+        check(polygonPointCount(getComputedStyle(node,"::after").clipPath)===8,node.className+": single-choice face is not the canonical octagon");
+    }
+    const singleChoiceInners=[
+        ".quest-ui-dashboard-choice-list-radio > span",
+        ".quest-ui-filter-list-radio-dot",
+        ".quest-ui-event-sort-radio > span",
+        ".quest-ui-event-filter-list-radio-dot",
+        ".quest-ui-history-step-node > span"
+    ].map(selector=>document.querySelector(selector)).filter(Boolean);
+    for(const node of singleChoiceInners)
+        check(polygonPointCount(getComputedStyle(node).clipPath)===6,node.className+": single-choice center is not the canonical six-sided dot");
+    for(const node of document.querySelectorAll(".quest-ui-dashboard-menu-surface .is-selected .quest-ui-dashboard-choice-list-radio,.quest-ui-dashboard-menu-surface .is-radio.is-checked .quest-ui-filter-list-box,.quest-ui-event-menu-surface .is-selected .quest-ui-event-sort-radio,.quest-ui-event-menu-surface .is-radio.is-checked .quest-ui-event-filter-list-box,.quest-ui-history-steps-nodes > button.is-selected .quest-ui-history-step-node")){
+        const face=getComputedStyle(node,"::after").backgroundImage;
+        check(face!=="none"&&face.includes("linear-gradient"),node.className+": selected single-choice face is not filled");
+    }
+
     const detailCategory=document.querySelector(".quest-ui-event-detail-category");
     if(innerWidth>520) check(getComputedStyle(detailCategory).display!=="none","Event Detail category hidden on desktop");
     else check(getComputedStyle(detailCategory).display==="none","Event Detail category visible on narrow layout");

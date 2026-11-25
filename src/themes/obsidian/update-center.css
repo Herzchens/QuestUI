@@ -1189,14 +1189,9 @@
     background: linear-gradient(90deg, rgba(116,59,151,.075), transparent 58%) !important;
 }
 .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-heading::after {
-    content: "";
-    position: absolute;
-    left: 13px;
-    right: 13px;
-    bottom: 0;
-    height: 1px;
-    pointer-events: none;
-    background: linear-gradient(90deg, rgba(224,200,240,.28), rgba(145,75,190,.14) 64%, transparent);
+    content: none !important;
+    display: none !important;
+    background: none !important;
 }
 .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-title-icon,
 .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button,
@@ -1261,6 +1256,8 @@
     --quest-ui-update-state-rim: #726b7b;
     position: relative;
     isolation: isolate;
+    overflow: hidden;
+    z-index: 1;
     border: 0 !important;
     border-radius: 0 !important;
     clip-path: none !important;

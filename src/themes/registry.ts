@@ -57,7 +57,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
     },
     {
         id: "liquid-glass",
-        label: "LiquidGlass",
+        label: "Liquid Glass",
         styles: [
             glassTokens,
             glassDashboardComponents,

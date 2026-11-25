@@ -238,6 +238,10 @@
     stroke-linejoin: round;
 }
 .quest-ui-event-row-bug {
+    --quest-ui-event-row-bug-rim: #6f6878;
+    --quest-ui-event-row-bug-face: #0c0d13;
+    position: relative;
+    isolation: isolate;
     display: grid;
     place-items: center;
     width: 26px;
@@ -245,20 +249,35 @@
     height: 26px;
     min-height: 26px;
     padding: 0;
-    border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
-    border-radius: 1px;
-    background: color-mix(in srgb, var(--text-muted) 5%, transparent);
+    border: 0;
+    border-radius: 0;
+    clip-path: none;
+    background: transparent;
     color: var(--text-muted);
     cursor: pointer;
-    transition:
-        background-color 110ms ease,
-        border-color 110ms ease,
-        color 110ms ease,
-        transform 110ms ease;
+    transition: color 110ms ease, transform 110ms ease;
+}
+.quest-ui-event-row-bug::before,
+.quest-ui-event-row-bug::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+.quest-ui-event-row-bug::before {
+    inset: 0;
+    z-index: -2;
+    clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 5px), calc(100% - 5px) 100%, 5px 100%, 0 calc(100% - 5px), 0 5px);
+    background: linear-gradient(145deg, #bcb4c6, var(--quest-ui-event-row-bug-rim) 34%, #35323b 66%, #7a5d87);
+}
+.quest-ui-event-row-bug::after {
+    inset: 1px;
+    z-index: -1;
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+    background: var(--quest-ui-event-row-bug-face);
 }
 .quest-ui-event-row-bug:hover {
-    border-color: color-mix(in srgb, var(--brand-360, #b2a7ff) 52%, transparent);
-    background: color-mix(in srgb, var(--brand-500, #8272f4) 12%, transparent);
+    --quest-ui-event-row-bug-rim: #bd75e5;
+    --quest-ui-event-row-bug-face: #17101f;
     color: var(--brand-360, #b2a7ff);
 }
 .quest-ui-event-row-bug:active {
@@ -1474,30 +1493,7 @@
     }
 }
 
-/* Event Log radio controls: solid selected circle + white center dot. */
-.quest-ui-event-sort-radio,
-.quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box {
-    background: transparent;
-    border: 1px solid var(--quest-ui-event-choice-border);
-    border-radius: 1px;
-    box-sizing: border-box;
-    flex: 0 0 18px;
-    height: 18px;
-    width: 18px;
-}
-.quest-ui-event-sort-menu > button.is-selected .quest-ui-event-sort-radio,
-.quest-ui-event-filter-list-row.is-radio.is-checked .quest-ui-event-filter-list-box {
-    background: var(--brand-500, #8272f4);
-    border-color: var(--brand-500, #8272f4);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-500, #8272f4) 8%, transparent);
-}
-.quest-ui-event-sort-radio > span,
-.quest-ui-event-filter-list-radio-dot {
-    background: var(--quest-ui-theme-text-strong);
-    border-radius: 1px;
-    height: 6px;
-    width: 6px;
-}
+/* Event Log single-choice appearance is owned by the canonical Obsidian crystal below. */
 
 /* Event Detail redesign: visual hierarchy follows the refined Event Log mock. */
 .quest-ui-event-detail.quest-ui-event-detail {
@@ -2131,6 +2127,52 @@
 .quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clean-trigger:hover {
     color: var(--status-danger, #f23f42) !important;
 }
+
+/* Clear Log confirmation controls are octagonal crystals, never square buttons. */
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clear-confirm-button {
+    --quest-ui-event-confirm-rim: #716a7c;
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+    border: 0 !important;
+    border-radius: 0 !important;
+    clip-path: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clear-confirm-button::before,
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clear-confirm-button::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clear-confirm-button::before {
+    inset: 0;
+    z-index: -2;
+    clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 5px), calc(100% - 5px) 100%, 5px 100%, 0 calc(100% - 5px), 0 5px);
+    background: linear-gradient(145deg, #bdb5c7, var(--quest-ui-event-confirm-rim) 34%, #34313a 65%, #80608d);
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clear-confirm-button::after {
+    inset: 1px;
+    z-index: -1;
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+    background: #0c0d13;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clear-confirm-button > * {
+    position: relative;
+    z-index: 1;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clear-confirm-button.is-confirm {
+    --quest-ui-event-confirm-rim: color-mix(in srgb, var(--status-danger, #f23f42) 58%, #716a7c);
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clear-confirm-button.is-confirm:hover {
+    --quest-ui-event-confirm-rim: var(--status-danger, #f23f42);
+    background: transparent !important;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface button.quest-ui-event-clear-confirm-button.is-cancel:hover {
+    --quest-ui-event-confirm-rim: #b69bc7;
+    background: transparent !important;
+}
 .quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface :is(.quest-ui-event-folder-icon, .quest-ui-event-broom-icon) {
     width: 18px !important;
     height: 18px !important;
@@ -2258,14 +2300,86 @@
     }
 }
 
-/* Event Log fidelity corrections. */
-.quest-ui-theme-obsidian.quest-ui-event-menu-surface button[role="menuitemradio"]:not(.is-selected) .quest-ui-event-sort-radio,
-.quest-ui-theme-obsidian.quest-ui-event-menu-surface .quest-ui-event-filter-list-row.is-radio:not(.is-checked) .quest-ui-event-filter-list-box {
-    border: 1px solid #756d82 !important;
-    border-radius: 50% !important;
+/* Event Log fidelity corrections.
+ * Sort and Source radios share the Dashboard's hollow octagonal choice socket. */
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(
+    .quest-ui-event-sort-radio,
+    .quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box
+) {
+    --quest-ui-choice-rim: #777080;
+    --quest-ui-choice-face: linear-gradient(155deg, #13141b, #08090e 62%, #15101b);
+    position: relative !important;
+    isolation: isolate;
+    box-sizing: border-box;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 18px !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
     clip-path: none !important;
-    background: radial-gradient(circle, #0d0e14 0 42%, #15131b 44% 100%) !important;
-    box-shadow: inset 0 0 0 2px #08090e, 0 0 0 1px rgba(220,196,238,.035);
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(
+    .quest-ui-event-sort-radio,
+    .quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box
+)::before,
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(
+    .quest-ui-event-sort-radio,
+    .quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box
+)::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(
+    .quest-ui-event-sort-radio,
+    .quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box
+)::before {
+    inset: 0;
+    z-index: -2;
+    clip-path: polygon(50% 0, 84% 12%, 100% 50%, 84% 88%, 50% 100%, 16% 88%, 0 50%, 16% 12%);
+    background: linear-gradient(145deg, #c6becf, var(--quest-ui-choice-rim) 32%, #393640 68%, #8e789b);
+}
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(
+    .quest-ui-event-sort-radio,
+    .quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box
+)::after {
+    inset: 2px;
+    z-index: -1;
+    clip-path: polygon(50% 0, 84% 12%, 100% 50%, 84% 88%, 50% 100%, 16% 88%, 0 50%, 16% 12%);
+    background: var(--quest-ui-choice-face);
+}
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(
+    button[role="menuitemradio"].is-selected .quest-ui-event-sort-radio,
+    .quest-ui-event-filter-list-row.is-radio.is-checked .quest-ui-event-filter-list-box
+) {
+    --quest-ui-choice-rim: #d38cff;
+    --quest-ui-choice-face: linear-gradient(145deg, #a64fe7 0%, #672a98 48%, #35124d 100%);
+    border: 0 !important;
+    clip-path: none !important;
+    background: transparent !important;
+    box-shadow: 0 0 7px rgba(180,85,244,.24);
+}
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface :is(
+    .quest-ui-event-sort-radio > span,
+    .quest-ui-event-filter-list-radio-dot
+) {
+    position: relative;
+    z-index: 1;
+    width: 7px !important;
+    height: 7px !important;
+    border-radius: 0 !important;
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%) !important;
+    background: #f4e6ff !important;
+    box-shadow: 0 0 4px rgba(244,230,255,.45);
 }
 .quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-storage::before,
 .quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-storage::after,
