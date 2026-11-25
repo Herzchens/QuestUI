@@ -1,6 +1,6 @@
 import { useSettings } from "@api/Settings";
 import { findByCodeLazy } from "@webpack";
-import { useEffect, useState } from "@webpack/common";
+import { ThemeStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { effectiveOrbRewardAmount } from "../orbs/rewards";
@@ -12,6 +12,9 @@ import { useClaimAllBatchActive } from "../quests/actions/ClaimAllControl";
 import { useIgnoredQuests } from "../quests/ignored/runtime";
 import { dashboardScopeFromSettings, filterQuests, questStatusCounts, useQuestSnapshot } from "../quests/data";
 import type { NormalizedQuest } from "../quests/data";
+import { resolveQuestArtwork } from "../quests/presentation";
+import { preloadObsidianArtworkColors } from "../themes/obsidian/useArtworkColor";
+import { useDashboardThemeId } from "../themes/runtime";
 import { DashboardProductUpdateNotice } from "../updates/UpdateCenter";
 import { versionChannelClass } from "../updates/channel";
 import { QuestCard } from "./QuestCard";
@@ -122,6 +125,11 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const [showHiddenOnly, setShowHiddenOnly] = useState(false);
     const claimBatchActive = useClaimAllBatchActive();
     const quests = useQuestSnapshot();
+    const obsidian = useDashboardThemeId() === "obsidian";
+    const artworkTheme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
+    useEffect(() => {
+        if (obsidian) preloadObsidianArtworkColors(quests.map(quest => resolveQuestArtwork(quest, artworkTheme)));
+    }, [obsidian, quests, artworkTheme]);
     const orbMultiplier = useQuestOrbMultiplierState();
     const { ids: ignoredIds } = useIgnoredQuests();
     const partition = partitionIgnored(quests, ignoredIds);

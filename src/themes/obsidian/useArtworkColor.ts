@@ -1,18 +1,18 @@
-import { useEffect, useRef, useState } from "@webpack/common";
+import { useEffect, useState } from "@webpack/common";
 
 import { dominantArtworkColor, type ArtworkRgb } from "./fracture";
 
-const CACHE_LIMIT = 128;
 const SAMPLE_SIZE = 24;
-const cache = new Map<string, Promise<ArtworkRgb | null>>();
+interface ArtworkColorEntry {
+    pending: Promise<ArtworkRgb | null>;
+    color?: ArtworkRgb | null;
+}
+
+const cache = new Map<string, ArtworkColorEntry>();
 
 function readArtworkColor(url: string): Promise<ArtworkRgb | null> {
     const cached = cache.get(url);
-    if (cached) {
-        cache.delete(url);
-        cache.set(url, cached);
-        return cached;
-    }
+    if (cached) return cached.pending;
 
     const pending = new Promise<ArtworkRgb | null>(resolve => {
         const image = new Image();
@@ -42,42 +42,38 @@ function readArtworkColor(url: string): Promise<ArtworkRgb | null> {
             finish(null);
         }
     });
-    cache.set(url, pending);
-    if (cache.size > CACHE_LIMIT) {
-        const oldest = cache.keys().next().value;
-        if (oldest !== undefined) cache.delete(oldest);
-    }
+    const entry: ArtworkColorEntry = { pending };
+    cache.set(url, entry);
+    void pending.then(color => { entry.color = color; });
     return pending;
 }
 
-/** Only sample visible/nearby artwork while Obsidian is active. */
-export function useObsidianArtworkColor(active: boolean, url: string | null) {
-    const cardRef = useRef<HTMLElement | null>(null);
+/** Prewarm the entire Quest catalogue, including cards excluded by filters. */
+export function preloadObsidianArtworkColors(urls: Iterable<string | null>): void {
+    const catalogue = new Set(Array.from(urls).filter((url): url is string => Boolean(url)));
+    // Retain the current catalogue and discard obsolete asset URLs.
+    for (const url of cache.keys()) {
+        if (!catalogue.has(url)) cache.delete(url);
+    }
+    for (const url of catalogue) void readArtworkColor(url);
+}
+
+/** Sample immediately on mount or artwork changes; scrolling is not a trigger. */
+export function useObsidianArtworkColor(active: boolean, url: string | null): ArtworkRgb | null {
     const [sample, setSample] = useState<{ url: string; color: ArtworkRgb | null; } | null>(null);
 
     useEffect(() => {
-        if (!active || !url || !cardRef.current) return;
+        if (!active || !url) return;
         let alive = true;
-        const load = () => {
-            void readArtworkColor(url).then(color => {
-                if (alive) setSample({ url, color });
-            });
-        };
-        let observer: IntersectionObserver | undefined;
-        if (typeof IntersectionObserver === "undefined") load();
-        else {
-            observer = new IntersectionObserver(entries => {
-                if (!entries.some(entry => entry.isIntersecting)) return;
-                observer?.disconnect();
-                load();
-            }, { rootMargin: "120px" });
-            observer.observe(cardRef.current);
-        }
-        return () => {
-            alive = false;
-            observer?.disconnect();
-        };
+        void readArtworkColor(url).then(color => {
+            if (alive) setSample({ url, color });
+        });
+        return () => { alive = false; };
     }, [active, url]);
 
-    return { cardRef, color: active && sample?.url === url ? sample?.color ?? null : null };
+    if (!active || !url) return null;
+    // Preloaded colors are available on the very first render after filtering or remounting.
+    const cached = cache.get(url);
+    if (cached?.color !== undefined) return cached.color;
+    return sample?.url === url ? sample.color : null;
 }

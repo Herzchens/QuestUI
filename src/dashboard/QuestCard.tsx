@@ -173,7 +173,7 @@ function TaskTypeGlyph({ type }: { type: QuestTaskType; }) {
     );
 }
 
-function QuestArtwork({ imageUrl, type }: { imageUrl: string | null; type: QuestTaskType; }) {
+function QuestArtwork({ imageUrl, type, eager = false }: { imageUrl: string | null; type: QuestTaskType; eager?: boolean; }) {
     return (
         <div className="quest-ui-artwork" aria-hidden="true">
             <div className="quest-ui-artwork-fallback"><TaskTypeGlyph type={type} /></div>
@@ -182,7 +182,7 @@ function QuestArtwork({ imageUrl, type }: { imageUrl: string | null; type: Quest
                     className="quest-ui-artwork-image"
                     src={imageUrl}
                     alt=""
-                    loading="lazy"
+                    loading={eager ? "eager" : "lazy"}
                     draggable={false}
                     onError={event => { event.currentTarget.style.display = "none"; }}
                 />
@@ -315,7 +315,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
     const artworkUrl = resolveQuestArtwork(quest, theme);
     const obsidian = useDashboardThemeId() === "obsidian";
-    const { cardRef, color: artworkColor } = useObsidianArtworkColor(obsidian, artworkUrl);
+    const artworkColor = useObsidianArtworkColor(obsidian, artworkUrl);
     const now = Date.now();
     const expiry = dashboardExpiry(quest, now);
     const urgency = expiryUrgency(quest.expiresAt, now);
@@ -346,7 +346,6 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
 
     return (
         <article
-            ref={cardRef}
             className={`quest-ui-card quest-ui-card-${quest.status}${isAchievement ? " quest-ui-card-achievement" : ""}${ignored ? " quest-ui-card-ignored" : ""}`}
             data-obsidian-fracture={obsidian ? fractureVariant(quest.id) : undefined}
             style={obsidian && artworkColor ? { "--obsidian-artwork-rgb": artworkColor.join(" ") } as CSSProperties : undefined}
@@ -362,7 +361,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                     />
                 </span>
             )}
-            <QuestArtwork imageUrl={artworkUrl} type={taskType} />
+            <QuestArtwork imageUrl={artworkUrl} type={taskType} eager={obsidian} />
 
             <div className="quest-ui-card-main">
                 <div className="quest-ui-card-title-cluster">

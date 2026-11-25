@@ -1,0 +1,32 @@
+[
+  {
+    "name": "spine",
+    "position": "63% 54%",
+    "surface": "spine-surface.jpg",
+    "mask": "spine-mask.png"
+  },
+  {
+    "name": "burst",
+    "position": "60% 54%",
+    "surface": "burst-surface.jpg",
+    "mask": "burst-mask.png"
+  },
+  {
+    "name": "edge",
+    "position": "70% 54%",
+    "surface": "edge-surface.jpg",
+    "mask": "edge-mask.png"
+  },
+  {
+    "name": "lattice",
+    "position": "63% 54%",
+    "surface": "lattice-surface.jpg",
+    "mask": "lattice-mask.png"
+  },
+  {
+    "name": "shell",
+    "position": "73% 54%",
+    "surface": "shell-surface.jpg",
+    "mask": "shell-mask.png"
+  }
+]
