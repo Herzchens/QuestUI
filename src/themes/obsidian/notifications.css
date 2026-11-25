@@ -58,23 +58,44 @@
 }
 
 .quest-ui-notification-center-unread {
-    background: linear-gradient(145deg, #17131d, #0b0c12 62%, #17101d);
+    --quest-ui-notification-chip-rim: #655e70;
+    --quest-ui-notification-chip-face: linear-gradient(145deg, #17131d, #0b0c12 62%, #17101d);
+    position: relative;
+    isolation: isolate;
+    background: transparent;
     border: 0;
     border-radius: 0;
-    clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%);
+    clip-path: none;
     color: var(--quest-ui-theme-text-muted);
     flex: 0 0 auto;
     font-size: 10.5px;
     font-weight: 750;
     line-height: 1;
     padding: 7px 11px;
-    box-shadow: inset 0 0 0 1px #655e70;
+    box-shadow: none;
 }
-
+.quest-ui-notification-center-unread::before,
+.quest-ui-notification-center-unread::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+.quest-ui-notification-center-unread::before {
+    inset: 0;
+    z-index: -2;
+    clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%);
+    background: linear-gradient(145deg, #c5bdcf, var(--quest-ui-notification-chip-rim) 38%, #393640 72%, #82608f);
+}
+.quest-ui-notification-center-unread::after {
+    inset: 1px;
+    z-index: -1;
+    clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 5px 100%, 0 50%);
+    background: var(--quest-ui-notification-chip-face);
+}
 .quest-ui-notification-center-unread.has-unread {
-    background: linear-gradient(145deg, #4a1d26, #201016 64%, #3b1720);
+    --quest-ui-notification-chip-rim: #b34a5a;
+    --quest-ui-notification-chip-face: linear-gradient(145deg, #4a1d26, #201016 64%, #3b1720);
     color: #f4a9b0;
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--status-danger, #f23f42) 58%, #6f6678);
 }
 
 .quest-ui-notification-center-account {
@@ -163,16 +184,37 @@
 }
 
 .quest-ui-notification-center-current-chip {
-    background: linear-gradient(145deg, #183623, #0d1b13 64%, #173020);
+    --quest-ui-current-chip-rim: color-mix(in srgb, var(--status-positive, #23a55a) 56%, #655d70);
+    position: relative;
+    isolation: isolate;
+    background: transparent;
     border: 0;
     border-radius: 0;
-    clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%);
+    clip-path: none;
     color: #8ed5a7;
     flex: 0 0 auto;
     font-size: 9.5px;
     font-weight: 750;
     padding: 6px 10px;
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--status-positive, #23a55a) 48%, #655d70);
+    box-shadow: none;
+}
+.quest-ui-notification-center-current-chip::before,
+.quest-ui-notification-center-current-chip::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+.quest-ui-notification-center-current-chip::before {
+    inset: 0;
+    z-index: -2;
+    clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%);
+    background: linear-gradient(145deg, #a9cbb5, var(--quest-ui-current-chip-rim) 40%, #32483a 74%, #5e8f6f);
+}
+.quest-ui-notification-center-current-chip::after {
+    inset: 1px;
+    z-index: -1;
+    clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 5px 100%, 0 50%);
+    background: linear-gradient(145deg, #183623, #0d1b13 64%, #173020);
 }
 
 .quest-ui-notification-center-actions {

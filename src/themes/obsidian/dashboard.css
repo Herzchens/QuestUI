@@ -3305,13 +3305,37 @@
 }
 .quest-ui-theme-obsidian .quest-ui-dashboard-notification-island {
     --quest-ui-notification-tone: var(--brand-360, #b2a7ff);
+    position: relative;
+    isolation: isolate;
     border: 0;
+    border-radius: 0;
+    clip-path: none;
+    background: transparent;
     color: inherit;
     font: inherit;
     line-height: 0;
     outline: none;
+    overflow: visible;
     text-align: left;
     transition: max-width 340ms cubic-bezier(.18,.82,.24,1);
+}
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island::before,
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island::before {
+    inset: 4px;
+    z-index: 0;
+    clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px), 0 7px);
+    background: linear-gradient(145deg, #c7bfd1, #6c6576 28%, #37333e 62%, #8f6b9d);
+}
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island::after {
+    inset: 5px;
+    z-index: 1;
+    clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+    background: linear-gradient(155deg, #161720, #0a0b11 64%, #17101f);
 }
 .quest-ui-theme-obsidian .quest-ui-dashboard-notification-island.is-success {
     --quest-ui-notification-tone: var(--status-positive, #23a55a);
@@ -3374,18 +3398,22 @@
     y: 5px;
 }
 .quest-ui-theme-obsidian .quest-ui-dashboard-notification-surface-rect {
-    fill: color-mix(in srgb, #131724 88%, #251e3d 12%);
-    rx: 2px;
-    ry: 2px;
-    stroke: rgba(210,219,244,.42);
-    stroke-width: 1;
-    transition: fill 150ms ease, stroke 150ms ease;
+    fill: transparent !important;
+    stroke: transparent !important;
+    stroke-width: 0 !important;
+    rx: 0;
+    ry: 0;
 }
-.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island.is-mounted .quest-ui-dashboard-notification-surface-rect,
-.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island.is-visible .quest-ui-dashboard-notification-surface-rect,
-.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island.is-exiting .quest-ui-dashboard-notification-surface-rect {
-    fill: color-mix(in srgb, #131724 92%, var(--quest-ui-notification-tone) 8%);
-    stroke: color-mix(in srgb, rgba(255,255,255,.13) 70%, var(--quest-ui-notification-tone) 30%);
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island.is-mounted::before,
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island.is-visible::before,
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-island.is-exiting::before {
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, #c7bfd1 72%, var(--quest-ui-notification-tone) 28%),
+        color-mix(in srgb, #6c6576 76%, var(--quest-ui-notification-tone) 24%) 28%,
+        #37333e 62%,
+        color-mix(in srgb, #8f6b9d 74%, var(--quest-ui-notification-tone) 26%)
+    );
 }
 .quest-ui-theme .quest-ui-dashboard-notification-icon {
     display: block;
@@ -3487,13 +3515,34 @@
     white-space: nowrap;
 }
 .quest-ui-theme-obsidian .quest-ui-dashboard-notification-unread-chip {
-    background: color-mix(in srgb, var(--status-danger, #f23f42) 18%, #211719);
-    border: 1px solid color-mix(in srgb, var(--status-danger, #f23f42) 42%, rgba(255,255,255,.10));
-    border-radius: 2px;
+    position: relative;
+    isolation: isolate;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    clip-path: none;
     color: color-mix(in srgb, var(--status-danger, #f23f42) 48%, #fff 52%);
     font-size: 9px;
     font-weight: 800;
     line-height: 1;
+}
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-unread-chip::before,
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-unread-chip::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-unread-chip::before {
+    inset: 0;
+    z-index: -2;
+    clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 5px 100%, 0 50%);
+    background: linear-gradient(145deg, #d06a76, #7a303d 40%, #40202a 70%, #a44756);
+}
+.quest-ui-theme-obsidian .quest-ui-dashboard-notification-unread-chip::after {
+    inset: 1px;
+    z-index: -1;
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 50%, calc(100% - 4px) 100%, 4px 100%, 0 50%);
+    background: linear-gradient(145deg, #4a1d26, #201016 64%, #3b1720);
 }
 .quest-ui-theme-obsidian .quest-ui-dashboard-notification-measure .quest-ui-dashboard-notification-unread-chip {
     border-color: transparent;
@@ -3677,6 +3726,10 @@
     border-color: transparent !important;
     box-shadow: none !important;
     overflow: visible;
+}
+.quest-ui-theme-obsidian .quest-ui-notification-center-action {
+    --quest-ui-obsidian-cut: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px), 0 7px);
+    --quest-ui-obsidian-face-cut: polygon(7.5px 1.5px, calc(100% - 7.5px) 1.5px, calc(100% - 1.5px) 7.5px, calc(100% - 1.5px) calc(100% - 7.5px), calc(100% - 7.5px) calc(100% - 1.5px), 7.5px calc(100% - 1.5px), 1.5px calc(100% - 7.5px), 1.5px 7.5px);
 }
 .quest-ui-theme-obsidian :is(
     .quest-ui-toolbar-button, .quest-ui-dashboard-filter-control,

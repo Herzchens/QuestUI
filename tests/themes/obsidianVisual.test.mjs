@@ -340,6 +340,18 @@ function inspect(){
         check(polygonPointCount(getComputedStyle(notificationPanel,"::after").clipPath)===8,"Notification Center panel face is not octagonal");
         const account=document.querySelector(".quest-ui-notification-center-account");
         check(polygonPointCount(getComputedStyle(account,"::before").clipPath)===8,"Notification Center account outer is not octagonal");
+        const unreadChip=document.querySelector(".quest-ui-notification-center-unread");
+        check(getComputedStyle(unreadChip).clipPath==="none","Notification unread chip clips its real surface");
+        check(polygonPointCount(getComputedStyle(unreadChip,"::before").clipPath)===6,"Notification unread chip outer is not hexagonal");
+        check(polygonPointCount(getComputedStyle(unreadChip,"::after").clipPath)===6,"Notification unread chip face is not hexagonal");
+        const currentChip=document.querySelector(".quest-ui-notification-center-current-chip");
+        check(getComputedStyle(currentChip).clipPath==="none","Current account chip clips its real surface");
+        check(polygonPointCount(getComputedStyle(currentChip,"::before").clipPath)===6,"Current account chip outer is not hexagonal");
+        check(polygonPointCount(getComputedStyle(currentChip,"::after").clipPath)===6,"Current account chip face is not hexagonal");
+        for(const action of document.querySelectorAll(".quest-ui-notification-center-action")){
+            check(polygonPointCount(getComputedStyle(action,"::before").clipPath)===8,"Notification Center action outer is not octagonal");
+            check(polygonPointCount(getComputedStyle(action,"::after").clipPath)===8,"Notification Center action face is not octagonal");
+        }
         const artwork=document.querySelector(".quest-ui-notification-center-row-artwork");
         check(polygonPointCount(getComputedStyle(artwork).clipPath)===8,"Notification artwork is not octagonal");
         const taskBadge=document.querySelector(".quest-ui-notification-center-task-badge");
