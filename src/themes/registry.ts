@@ -33,6 +33,14 @@ import obsidianDashboard from "./obsidian/dashboard.css?managed";
 import obsidianFractures from "./obsidian/fractures.css?managed";
 import obsidianFractureAssets from "./obsidian/fracture-assets.css?managed";
 
+import sakuraTokens from "./sakura/tokens.css?managed";
+import sakuraDashboardComponents from "./sakura/dashboard-components.css?managed";
+import sakuraScrollbar from "./sakura/scrollbar.css?managed";
+import sakuraQuestActions from "./sakura/quest-actions.css?managed";
+import sakuraQuestReload from "./sakura/quest-reload.css?managed";
+import sakuraOrion from "./sakura/orion.css?managed";
+import sakuraDashboard from "./sakura/dashboard.css?managed";
+
 import type { DashboardTheme } from "./controller";
 
 export const DEFAULT_DASHBOARD_THEME_ID = "default";
@@ -87,6 +95,19 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             obsidianDashboard,
             obsidianFractureAssets,
             obsidianFractures,
+        ]
+    },
+    {
+        id: "sakura",
+        label: "Sakura",
+        styles: [
+            sakuraTokens,
+            sakuraDashboardComponents,
+            sakuraScrollbar,
+            sakuraQuestActions,
+            sakuraQuestReload,
+            sakuraOrion,
+            sakuraDashboard,
         ]
     }
 ];
