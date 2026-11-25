@@ -3163,3 +3163,19 @@
     }
 }
 
+/* Readable opaque fallback for system reduced-transparency preferences. */
+@media (prefers-reduced-transparency: reduce) {
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell {
+        background-color: #25121e !important;
+        backdrop-filter: none;
+    }
+}
+
+/* Sakura menu interaction: indicators, never row fills. */
+.quest-ui-theme-sakura.quest-ui-dashboard-choice-list > button:hover > .quest-ui-dashboard-choice-list-radio,
+.quest-ui-theme-sakura .quest-ui-filter-list-row:hover:not(:disabled) .quest-ui-filter-list-box {
+    filter: brightness(1.18);
+}
+.quest-ui-theme-sakura .quest-ui-filter-list-row.is-checked:not(:disabled) {
+    color: #ffd1b9;
+}

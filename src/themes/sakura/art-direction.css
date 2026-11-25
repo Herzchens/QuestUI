@@ -3,7 +3,6 @@
  * The header and list are separate flex regions, never overlapping.
  */
 @supports (background: color-mix(in srgb, #000 50%, #fff)) {
-
     .quest-ui-theme-sakura.quest-ui-dashboard-shell {
         background: linear-gradient(90deg, rgba(27, 12, 23, .18), rgba(27, 12, 23, .12)), var(--quest-ui-sakura-wallpaper) center right / cover no-repeat, #25121e;
         backdrop-filter: none;
@@ -226,6 +225,7 @@
         text-shadow: none;
     }
 
+
     /* Ornamented controls retain their original rectangular hit targets. */
     .quest-ui-theme-sakura .quest-ui-dashboard-palette-button,
     .quest-ui-theme-sakura .quest-ui-reload-icon-button,
@@ -288,6 +288,7 @@
 
         color: #ffebe6;
     }
+
 
     .quest-ui-theme-sakura .quest-ui-default-status-name {
         font-family: var(--font-display);
@@ -353,8 +354,10 @@
         background: linear-gradient(155deg, #fff4d0, #efcf89 48%, #c3a069);
     }
 
-    /* Petal silhouettes. */
 
+    /* Petal silhouettes. The border image includes the fill and edge; its corners
+     * are fixed-size vector slices rather than a scaled whole-card illustration.
+     * The rectangular layout box, keyboard outline and child badges stay intact. */
     .quest-ui-theme-sakura .quest-ui-card,
     .quest-ui-theme-sakura .quest-ui-card:not(.quest-ui-card-achievement),
     .quest-ui-theme-sakura .quest-ui-card.quest-ui-card-achievement {
@@ -408,7 +411,6 @@
     .quest-ui-theme-sakura .quest-ui-dashboard-orb-balance {
         border-image: var(--quest-ui-sakura-orb-frame) 25 24 fill / 46% 13px stretch;
     }
-
     .quest-ui-theme-sakura .quest-ui-dashboard-boost-source-tag {
         border: 0;
         border-radius: 0;
@@ -512,6 +514,7 @@
     filter: drop-shadow(0 0 3px #ffe0c9);
 }
 
+    /* Hover the painted petal itself, never a rectangular background. */
     .quest-ui-theme-sakura :is(.quest-ui-orion-icon-button, .quest-ui-claim-all-button, .quest-ui-card-action, .quest-ui-summary-chip, .quest-ui-dashboard-filter-control):hover:not(:disabled) {
         filter: brightness(1.12);
     }
@@ -591,6 +594,7 @@
         background-image: var(--quest-ui-sakura-chip-jade);
     }
 
+    /* Portal panels use an opaque petal-corner frame, not the translucent card material. */
     .quest-ui-theme-sakura.quest-ui-notification-center-panel,
     .quest-ui-theme-sakura.quest-ui-event-log-panel.quest-ui-event-log-panel,
     .quest-ui-theme-sakura.quest-ui-update-panel.quest-ui-update-panel-v16 {
@@ -619,11 +623,52 @@
         border-image-source: var(--quest-ui-sakura-petal-hover) !important;
     }
 
+
+    /* Final Sakura language audit.
+     * These selectors are intentionally rooted at the themed surface so generic
+     * component fallbacks cannot leak rounded/glass geometry back in on hover,
+     * expanded, selected or auxiliary states. */
+
+    /* Dashboard stragglers. */
     .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-orion-status-copy {
         background: transparent;
         border: 0;
         border-radius: 0;
         box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-detailed-count {
+        background: var(--quest-ui-sakura-chip-muted) center / 100% 100% no-repeat;
+        border-radius: 0;
+        padding-inline: 8px;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-type-badge,
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-update-attention-badge {
+        background: var(--quest-ui-sakura-flower-control) center / 100% 100% no-repeat;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-dashboard-primary-action {
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 0;
+        border-image: var(--quest-ui-sakura-petal-plum) 9 30 fill / 16% 15px stretch;
+        box-shadow: none;
+    }
+
+    /* Standalone unread badges remain decorative; small numeric counters
+     * are inset into the material, like the reference's summary counts. */
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-dashboard-notification-unread-chip,
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-update-count {
+        background: var(--quest-ui-sakura-chip-plum) center / 100% 100% no-repeat !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        min-width: 18px;
+        padding-inline: 5px;
     }
 
     .quest-ui-theme-sakura.quest-ui-dashboard-shell :is(.quest-ui-summary-chip-count, .quest-ui-filter-count-badge, .quest-ui-claim-all-count) {
@@ -644,6 +689,45 @@
     .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.is-selected .quest-ui-summary-chip-count {
         color: #fff0e6;
         background: radial-gradient(ellipse at 40% 10%, #a87b7b, #77535c) !important;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-dashboard-notification-unread-chip,
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-update-count {
+        background-image: var(--quest-ui-sakura-chip-red) !important;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-history-step-node {
+        background: var(--quest-ui-sakura-flower-control) center / 100% 100% no-repeat !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-history-step-node > span {
+        border-radius: 0 !important;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-summary-chip-dot {
+        border-radius: 0;
+        height: 5px;
+        width: 5px;
+        transform: rotate(45deg);
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-history-steps-line,
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-history-steps-fill {
+        border-radius: 0;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-empty-quest-icon {
+        background: var(--quest-ui-sakura-medallion) center / 100% 100% no-repeat;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-status-tooltip-grid > span::before {
+        border-radius: 0;
+        transform: rotate(45deg);
     }
 
     /* Notification Center. */
@@ -812,6 +896,12 @@
         border-radius: 0;
     }
 
+    @media (max-width: 620px) {
+        .quest-ui-theme-sakura .quest-ui-card > .quest-ui-sakura-card-art {
+            display: none;
+        }
+    }
+
     @media (max-width: 520px) {
         .quest-ui-theme-sakura .quest-ui-dashboard-header {
             padding-inline: 8px;
@@ -830,9 +920,30 @@
         }
     }
 
+    @media (prefers-reduced-transparency: reduce) {
+        .quest-ui-theme-sakura .quest-ui-dashboard-topbar::before,
+        .quest-ui-theme-sakura .quest-ui-card > .quest-ui-sakura-card-art {
+            display: none;
+        }
+        .quest-ui-theme-sakura .quest-ui-dashboard-topbar,
+        .quest-ui-theme-sakura .quest-ui-dashboard-actionbar,
+        .quest-ui-theme-sakura .quest-ui-dashboard-header {
+            background: #321b29;
+        }
+        .quest-ui-theme-sakura .quest-ui-card,
+        .quest-ui-theme-sakura .quest-ui-card:not(.quest-ui-card-achievement),
+        .quest-ui-theme-sakura .quest-ui-card.quest-ui-card-achievement {
+            border-image-source: var(--quest-ui-sakura-frame-card);
+        }
+    }
 }
 
 @media (forced-colors: active) {
+    .quest-ui-theme-sakura .quest-ui-card > .quest-ui-sakura-card-art,
+    .quest-ui-theme-sakura .quest-ui-dashboard-topbar::before {
+        display: none;
+    }
+
     .quest-ui-theme-sakura :is(.quest-ui-summary-chip, .quest-ui-card-action, .quest-ui-toolbar-button, .quest-ui-dashboard-filter-control):focus-visible {
         outline: 2px solid Highlight;
         outline-offset: 2px;
