@@ -32,8 +32,7 @@
     }
 
     .quest-ui-theme-sakura .quest-ui-dashboard-display-title,
-    .quest-ui-theme-sakura .quest-ui-dashboard-list-title,
-    .quest-ui-theme-sakura .quest-ui-card-title {
+    .quest-ui-theme-sakura .quest-ui-dashboard-list-title {
         color: #fff1ed;
         font-family: "Segoe UI", system-ui, sans-serif;
         letter-spacing: 0;
@@ -213,8 +212,7 @@
 
     .quest-ui-theme-sakura .quest-ui-card-title {
         font-family: var(--font-display);
-        font-size: 14px;
-        font-weight: 700;
+        letter-spacing: 0;
     }
 
     .quest-ui-theme-sakura .quest-ui-card-action-claim {

@@ -103,23 +103,22 @@
     display: inline;
     font-variant-numeric: tabular-nums;
     transition: color 160ms linear, text-shadow 160ms linear;
+    font-weight: 700;
 }
 .quest-ui-card-progress-current.quest-ui-progress-tone-starting {
-    color: var(--text-muted, #949ba4);
+    color: var(--quest-ui-theme-text-secondary);
 }
 .quest-ui-card-progress-current.quest-ui-progress-tone-building {
-    color: color-mix(in srgb, var(--quest-ui-theme-accent) 58%, var(--text-muted, #949ba4));
+    color: color-mix(in srgb, var(--quest-ui-theme-accent) 50%, var(--quest-ui-theme-text-strong));
 }
 .quest-ui-card-progress-current.quest-ui-progress-tone-mid {
-    color: var(--quest-ui-theme-accent);
+    color: color-mix(in srgb, var(--quest-ui-theme-accent) 75%, var(--quest-ui-theme-text-strong));
 }
 .quest-ui-card-progress-current.quest-ui-progress-tone-advanced {
-    color: color-mix(in srgb, var(--status-positive, #23a55a) 68%, var(--quest-ui-theme-accent));
+    color: color-mix(in srgb, var(--status-positive, #23a55a) 48%, var(--quest-ui-theme-text-strong));
 }
 .quest-ui-card-progress-current.quest-ui-progress-tone-near-complete {
-    color: var(--status-positive, #23a55a);
-    font-weight: 650;
-    text-shadow: 0 0 8px color-mix(in srgb, var(--status-positive, #23a55a) 24%, transparent);
+    color: color-mix(in srgb, var(--status-positive, #23a55a) 62%, var(--quest-ui-theme-text-strong));
 }
 
 @media (max-width: 430px) {
@@ -754,7 +753,7 @@
     white-space: nowrap;
 }
 .quest-ui-theme-sakura .quest-ui-default-status-name {
-    color: var(--header-primary,#f2f3f5);
+    color: var(--quest-ui-theme-text-strong);
     font-weight: 800;
 }
 .quest-ui-theme .quest-ui-orion-status {
@@ -1354,7 +1353,6 @@
 }
 .quest-ui-theme-sakura .quest-ui-card-expiry {
     font-size: 9.5px;
-    font-weight: 650;
     line-height: 12px;
     text-align: center;
 }
@@ -1409,13 +1407,15 @@
     gap: 5px;
 }
 .quest-ui-theme-sakura .quest-ui-achievement-progress-copy {
-    color: var(--text-muted, #949ba4);
+    color: var(--quest-ui-theme-text-primary);
     font-size: 10.5px;
+    text-shadow: var(--quest-ui-sakura-copy-shadow);
 }
 .quest-ui-theme-sakura .quest-ui-achievement-progress-copy strong {
-    color: var(--header-primary, #f2f3f5);
+    color: var(--quest-ui-theme-text-strong);
     font-size: 11.5px;
     font-variant-numeric: tabular-nums;
+    font-weight: 800;
 }
 .quest-ui-theme .quest-ui-achievement-progress-segments {
     display: grid;

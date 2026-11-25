@@ -26,6 +26,8 @@
     --quest-ui-theme-text-muted: #cdb1bc;
     --quest-ui-theme-text-secondary: #e1c6ce;
     --quest-ui-theme-text-subtle: #c7a8b5;
+    /* Tight text-only separation over the panoramic materials. */
+    --quest-ui-sakura-copy-shadow: 0 1px 2px rgba(16,5,12,.85), 0 0 3px rgba(16,5,12,.55);
     --quest-ui-theme-icon: #f9ddd8;
     --quest-ui-theme-ignored: #d7a0d2;
     --quest-ui-notification-info: #c5a4ff;

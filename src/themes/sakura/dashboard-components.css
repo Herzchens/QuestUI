@@ -352,21 +352,22 @@
 .quest-ui-card-title {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    color: var(--text-strong, var(--header-primary));
+    color: #fffaf6;
     display: -webkit-box;
     flex: 0 1 auto;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 18px;
     max-height: 36px;
     max-width: 100%;
     min-width: 0;
     overflow: hidden;
     overflow-wrap: anywhere;
+    text-shadow: var(--quest-ui-sakura-copy-shadow);
 }
 .quest-ui-card-status-line {
     align-items: center;
-    color: var(--text-muted);
+    color: var(--quest-ui-theme-text-secondary);
     display: flex;
     flex-wrap: wrap;
     font-size: 11.5px;
@@ -383,18 +384,20 @@
     width: 7px;
 }
 .quest-ui-card-status {
-    color: var(--quest-ui-accent);
+    color: color-mix(in srgb, var(--quest-ui-accent, #cdb1bc) 76%, var(--quest-ui-theme-text-strong));
     flex: 0 0 auto;
     font-weight: 700;
+    text-shadow: var(--quest-ui-sakura-copy-shadow);
 }
 .quest-ui-card-separator {
-    color: var(--text-muted);
+    color: var(--quest-ui-theme-text-secondary);
     flex: 0 0 auto;
 }
 .quest-ui-card-progress-text {
-    color: var(--text-muted);
+    color: var(--quest-ui-theme-text-primary);
     min-width: 0;
     overflow-wrap: anywhere;
+    text-shadow: var(--quest-ui-sakura-copy-shadow);
 }
 .quest-ui-card-meta-row {
     align-items: center;
@@ -407,33 +410,34 @@
 }
 .quest-ui-card-reward {
     align-items: center;
-    color: var(--text-default, var(--header-secondary));
+    color: var(--quest-ui-theme-text-primary);
     display: inline-flex;
     gap: 4px;
     min-width: 0;
     overflow: hidden;
 }
 .quest-ui-card-reward > span {
-    color: var(--text-muted);
+    color: var(--quest-ui-theme-text-secondary);
     flex: 0 0 auto;
+    text-shadow: var(--quest-ui-sakura-copy-shadow);
 }
 .quest-ui-card-reward > strong {
-    color: var(--text-default, var(--header-secondary));
-    font-weight: 600;
+    color: var(--quest-ui-theme-text-strong);
+    font-weight: 700;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-shadow: var(--quest-ui-sakura-copy-shadow);
 }
 .quest-ui-reward-orbs > strong {
-    color: #e9d3aa;
+    color: #ffe5bc;
 }
 .quest-ui-orb-large > strong {
-    color: #f1d28e;
+    color: #ffe0a0;
 }
 .quest-ui-orb-boosted > strong {
-    color: color-mix(in srgb, var(--status-warning) 72%, var(--quest-ui-theme-text-strong));
-    text-shadow: 0 0 10px color-mix(in srgb, var(--status-warning) 24%, transparent);
+    color: color-mix(in srgb, var(--status-warning, #f0b232) 52%, var(--quest-ui-theme-text-strong));
 }
 .quest-ui-orb-glyph {
     flex: 0 0 15px;
@@ -451,21 +455,22 @@
 }
 .quest-ui-card-expiry {
     font-size: 9.5px;
-    font-weight: 650;
+    font-weight: 700;
     line-height: 12px;
     max-width: 82px;
     text-align: center;
     white-space: normal;
+    text-shadow: var(--quest-ui-sakura-copy-shadow);
 }
 .quest-ui-expiry-normal {
-    color: #b4d69a;
+    color: #d4efbb;
 }
 .quest-ui-expiry-warning {
-    color: #f1d28e;
+    color: #ffe3a8;
 }
 .quest-ui-expiry-danger,
 .quest-ui-expiry-expired {
-    color: var(--status-danger);
+    color: #ffadb6;
 }
 .quest-ui-progress-ring {
     --quest-ui-ring: var(--quest-ui-accent);
@@ -498,11 +503,13 @@
     filter: drop-shadow(0 0 2px color-mix(in srgb, var(--quest-ui-ring) 24%, transparent));
 }
 .quest-ui-progress-ring > span {
-    color: var(--text-strong, var(--header-primary));
+    color: var(--quest-ui-theme-text-strong);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     position: relative;
     z-index: 1;
+    font-variant-numeric: tabular-nums;
+    text-shadow: var(--quest-ui-sakura-copy-shadow);
 }
 .quest-ui-progress-state-icon {
     fill: var(--quest-ui-ring);
