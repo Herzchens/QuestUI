@@ -14,11 +14,8 @@ import { QuestOrbBalance } from "../orbs/QuestOrbBalance";
 import { DashboardNoticeLane } from "./DashboardNoticeLane";
 import { QuestReloadControl } from "../quests/reload/QuestReloadControl";
 import settings from "../plugin/settings";
-import { dashboardThemeClassName } from "../themes/runtime";
+import { useDashboardThemeClassName } from "../themes/runtime";
 import { UpdateCenterIndicator } from "../updates/UpdateCenter";
-
-import "../themes/default/orion.css";
-import "../themes/default/dashboard.css";
 
 const NativeQuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
 
@@ -142,7 +139,7 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
     const showOrionControls = orionIntegration === true && isOrionCommandReady();
 
     return (
-        <div className={dashboardThemeClassName("quest-ui-dashboard-shell", showOrionControls && "has-orion-control")}>
+        <div className={useDashboardThemeClassName("quest-ui-dashboard-shell", showOrionControls && "has-orion-control")}>
             <div className="quest-ui-dashboard-topbar">
                 <QuestDashboardDisplayTitle />
                 <QuestOrbBalance closePopout={closePopout} />

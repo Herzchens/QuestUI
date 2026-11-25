@@ -9,6 +9,7 @@ import { QuestButton, QuestsCount } from "./src/dashboard/QuestButton";
 import { resetDashboardNotices, startDashboardNotices } from "./src/dashboard/notifications";
 import { resetClaimAllRuntime } from "./src/quests/actions/claimAllState";
 import { QUESTUI_VERSION } from "./src/plugin/version";
+import { startDashboardThemes, stopDashboardThemes } from "./src/themes/runtime";
 import settings from "./src/plugin/settings";
 import { updateCheckHoursFromStep } from "./src/updates/logic";
 import { startUpdateChecks, stopUpdateChecks } from "./src/updates/runtime";
@@ -26,6 +27,7 @@ export default definePlugin({
     settings,
 
     start() {
+        startDashboardThemes(settings.store.dashboardTheme);
         startDashboardNotices();
         startEventLogCapture();
         startIgnoredQuestLifecycle();
@@ -50,6 +52,7 @@ export default definePlugin({
         stopIgnoredQuestLifecycle();
         stopEventLogCapture();
         resetDashboardNotices();
+        stopDashboardThemes();
     },
 
     patches: [

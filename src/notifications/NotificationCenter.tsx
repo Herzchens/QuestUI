@@ -7,7 +7,7 @@ import { resolveQuestArtwork, type QuestTheme } from "../quests/presentation";
 import { findQuestByIdentity, safeQuestArtworkUrl, taskTypeForKey } from "../quests/presentationLogic";
 import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { formatQuestRewardLabel } from "../orbs/rewards";
-import { dashboardThemeClassName } from "../themes/runtime";
+import { useDashboardThemeClassName } from "../themes/runtime";
 import { UpdateCenterIcon } from "../updates/status";
 import {
     notificationCenterItems,
@@ -24,8 +24,6 @@ import {
     preloadNotificationCenterState,
     subscribeNotificationCenterState
 } from "./centerRuntime";
-
-import "../themes/default/notifications.css";
 
 const CENTER_QUERY_LIMIT = 300;
 const EVENT_SETTLE_DELAY_MS = 160;
@@ -321,7 +319,7 @@ export function NotificationCenterPanel({ feed }: { feed: NotificationCenterFeed
     };
 
     return (
-        <div className={dashboardThemeClassName("quest-ui-notification-center-panel")} role="dialog" aria-label="Notification Center">
+        <div className={useDashboardThemeClassName("quest-ui-notification-center-panel")} role="dialog" aria-label="Notification Center">
             <div className="quest-ui-notification-center-header">
                 <div>
                     <strong>Notification Center</strong>

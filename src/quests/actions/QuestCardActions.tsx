@@ -24,8 +24,6 @@ import type { NormalizedQuest } from "../data";
 import { captureQuestEventRef } from "../presentation";
 import settings from "../../plugin/settings";
 
-import "../../themes/default/quest-actions.css";
-
 type QuestAction = "enroll" | "claim";
 type SubmittedState = { action: QuestAction; userId: string; releaseAt: number; };
 
@@ -62,7 +60,6 @@ function IgnoreGlyph({ ignored }: { ignored: boolean; }) {
         </svg>
     );
 }
-
 
 export function QuestCardActions({ quest, ignored = false, claimBatchActive = false }: {
     quest: NormalizedQuest;

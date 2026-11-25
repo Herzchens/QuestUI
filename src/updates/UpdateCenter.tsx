@@ -7,10 +7,8 @@ import { checkForUpdates, getInstalledRelease, getUpdateSnapshot, subscribeUpdat
 import { managedNative as Native, runManagedReleaseUpdate, runOrionUpdateDecision, saveSkippedUpdate, saveUpdateReminder, toastFailure, type AvailableUpdateState, type ManagedReleaseUpdateResult, type UpdatePendingAction } from "./managed";
 import { UpdateCenterIcon, UpdateProductStatus, availableUpdate, combinedAvailabilityCopy, formatCompactTimestamp, healthForProduct, productLabel, safeOpenRelease, updateProductTone, visibleReleaseVersion, visibleUpdate } from "./status";
 import { pushDashboardNotice } from "../dashboard/notifications";
-import { dashboardThemeClassName } from "../themes/runtime";
+import { useDashboardThemeClassName } from "../themes/runtime";
 import { versionChannelClass } from "./channel";
-
-import "../themes/default/update-center.css";
 
 function useUpdateSnapshot(): UpdateSnapshot {
     const [, setRevision] = useState(0);
@@ -370,7 +368,7 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
                 : "OrionQuest and QuestUI are up to date.";
 
     return (
-        <div className={dashboardThemeClassName("quest-ui-update-panel", "quest-ui-update-panel-v16")} role="group" aria-label="Plugin updates">
+        <div className={useDashboardThemeClassName("quest-ui-update-panel", "quest-ui-update-panel-v16")} role="group" aria-label="Plugin updates">
             <header className="quest-ui-update-panel-heading">
                 <div className="quest-ui-update-panel-title-block">
                     <div className="quest-ui-update-panel-title">
@@ -675,5 +673,4 @@ export function UpdateSettingsControl() {
         </div>
     );
 }
-
 

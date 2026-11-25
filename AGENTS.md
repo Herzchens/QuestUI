@@ -66,7 +66,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/orion/capabilities.ts`, `src/orion/events.ts` - optional Orion structured-event capability discovery, validation, semantic normalization, and console-shadow reconciliation.
 - `src/orion/schedulerState.ts` - optional Orion scheduler snapshot normalization used by the companion integration; unordered live batches are normalized without inferring queue order.
 - `src/themes/default/dashboard-components.css`, `src/themes/default/scrollbar.css` - Default theme component, shortcut and scrollbar styling.
-- `src/themes/runtime.ts`, `src/themes/default/` - theme-root application and the complete Default stylesheet set. Each theme owns all its CSS, including layout, geometry, typography, motion, responsive rules and visual styling; `.quest-ui-theme` is a stable markup hook, not a mandatory shared stylesheet. Default is currently the only loaded theme; future theme selection must activate exactly one complete stylesheet set, including shortcut and portal surfaces.
+- `src/themes/registry.ts`, `src/themes/controller.ts`, `src/themes/runtime.ts`, `src/themes/default/` - complete managed Dashboard theme sets, single-active-theme lifecycle, and reactive theme roots. Each theme owns all its CSS, including layout, geometry, typography, motion, responsive rules and visual styling; `.quest-ui-theme` is a stable markup hook, not a mandatory shared stylesheet. Only the registry imports `?managed` theme CSS. The plugin starts/stops the active set; open portal roots subscribe to the actual active theme. Default is currently the only registered theme.
 - `src/quests/actions/QuestCardActions.tsx` - explicit Accept/Claim, Ignore/Unignore with exact-ID Orion pause when active, `Processing…`, confirmed-enrollment Orion auto-start, and per-Quest control slot.
 - `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAll.ts`, `src/quests/actions/claimAllState.ts` - bounded sequential Claim all UI, pure batch semantics, and the synchronous cross-render batch lock.
 - `src/quests/actions/native.ts` - manual Enroll/Claim orchestration delegating to Discord native actions.
@@ -121,6 +121,7 @@ pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/notifications/logic.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/notifications/center.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/quickOpen.test.ts
+pnpm exec tsx src/userplugins/QuestUI/tests/themes/controller.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/eventLog.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/updates/channel.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/updates/logic.test.ts

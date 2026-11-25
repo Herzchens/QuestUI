@@ -26,8 +26,6 @@ import { useQuestSnapshot } from "../data";
 import { captureQuestEventRef } from "../presentation";
 import { QuestsStore } from "../../plugin/stores";
 
-import "../../themes/default/quest-actions.css";
-
 function currentUserId(): string | null {
     try {
         const id = UserStore?.getCurrentUser?.()?.id;

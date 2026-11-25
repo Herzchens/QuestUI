@@ -1,4 +1,4 @@
-import { dashboardThemeClassName } from "../themes/runtime";
+import { useDashboardThemeClassName } from "../themes/runtime";
 import type { EventLogAccountScope, EventLogCategory, EventLogSeverity, EventLogSort, EventLogSource } from "./types";
 
 export const EVENT_LOG_SORT_OPTIONS: ReadonlyArray<{ value: EventLogSort; label: string; }> = [
@@ -110,7 +110,7 @@ export function CloseIcon() {
 
 export function EventLogSortMenu({ mode, onChange }: { mode: EventLogSort; onChange: (mode: EventLogSort) => void; }) {
     return (
-        <div className={dashboardThemeClassName("quest-ui-event-sort-menu")} role="menu" aria-label="Sort Event Log">
+        <div className={useDashboardThemeClassName("quest-ui-event-sort-menu")} role="menu" aria-label="Sort Event Log">
             <span className="quest-ui-event-sort-list-title">Sort by</span>
             {EVENT_LOG_SORT_OPTIONS.map(option => {
                 const selected = option.value === mode;
@@ -201,7 +201,7 @@ export function EventLogCombinedFilterMenu({
     onCategoryToggle: (value: EventLogCategory) => void;
 }) {
     return (
-        <div className={dashboardThemeClassName("quest-ui-event-filter-menu")} role="group" aria-label="Filter Event Log">
+        <div className={useDashboardThemeClassName("quest-ui-event-filter-menu")} role="group" aria-label="Filter Event Log">
             <section className="quest-ui-event-filter-list-section">
                 <h3>Source</h3>
                 <div className="quest-ui-event-filter-list-options is-radio-options" role="radiogroup" aria-label="Event source">

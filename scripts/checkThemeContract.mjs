@@ -524,7 +524,28 @@ function validateRepository() {
         if (relative(file) === "src/themes/runtime.ts") continue;
         const source = stripJsComments(fs.readFileSync(file, "utf8"));
         if (/\bquest-ui-theme(?:-[A-Za-z0-9_-]+)?\b/.test(source)) {
-            failures.push(`${relative(file)}: theme root classes must be applied through dashboardThemeClassName()`);
+            failures.push(`${relative(file)}: theme root classes must be applied through useDashboardThemeClassName()`);
+        }
+    }
+
+    // All theme CSS must be registered exactly once as Vencord managed styles.
+    const registryPath = path.join(srcRoot, "themes", "registry.ts");
+    const registrySource = fs.readFileSync(registryPath, "utf8");
+    const registered = [...registrySource.matchAll(/from\s+["'](\.\/[^"']+\.css)\?managed["']/g)]
+        .map(match => path.resolve(path.dirname(registryPath), match[1]));
+    for (const file of cssFiles) {
+        if (registered.filter(candidate => candidate === file).length !== 1) {
+            failures.push(relative(file) + ": theme stylesheet must have exactly one managed registry import");
+        }
+    }
+    for (const file of registered) {
+        if (!cssFiles.includes(file)) failures.push(relative(file) + ": registry imports an unknown stylesheet");
+    }
+    for (const file of sourceFiles) {
+        if (file === registryPath) continue;
+        const source = stripJsComments(fs.readFileSync(file, "utf8"));
+        if (/\bimport\s+(?:[^;\n]+?\s+from\s+)?["'][^"']*\.css(?:\?managed)?["']/.test(source)) {
+            failures.push(relative(file) + ": component-owned CSS import; register the complete theme instead");
         }
     }
 

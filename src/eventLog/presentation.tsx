@@ -3,7 +3,7 @@ import { showToast } from "@webpack/common";
 import { isLegacyUnscopedEvent } from "./account";
 import { inferEventCategory } from "./logic";
 import { buildDiagnosticReport } from "./report";
-import { dashboardThemeClassName } from "../themes/runtime";
+import { useDashboardThemeClassName } from "../themes/runtime";
 import type { EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSource } from "./types";
 
 export type EventLogStorageTone = "safe" | "watch" | "high" | "critical" | "unknown";
@@ -309,7 +309,7 @@ export function EventDetail({ event, availableEvents, accountLabel, onBack }: { 
     const category = inferEventCategory(event);
     const displaySeverity = visualSeverity(event);
     return (
-        <div className={dashboardThemeClassName("quest-ui-event-detail", `is-${displaySeverity}`)}>
+        <div className={useDashboardThemeClassName("quest-ui-event-detail", `is-${displaySeverity}`)}>
             <div className="quest-ui-event-detail-header">
                 <button type="button" className="quest-ui-event-detail-back" onClick={onBack}>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>

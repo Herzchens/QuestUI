@@ -6,8 +6,6 @@ import { markQuestReloadSuccessful } from "./auto";
 import { reloadQuestList } from "./native";
 import { shouldFinishReloadSpin } from "./logic";
 
-import "../../themes/default/quest-reload.css";
-
 function ReloadIcon({ onIteration }: { onIteration: () => void; }) {
     return (
         <svg viewBox="0 0 24 24" aria-hidden="true" onAnimationIteration={onIteration}>

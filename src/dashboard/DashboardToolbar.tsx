@@ -3,7 +3,7 @@ import { openPluginModal } from "@components/settings";
 import { NavigationRouter, Popout, useRef, useState } from "@webpack/common";
 
 import settings from "../plugin/settings";
-import { dashboardThemeClassName } from "../themes/runtime";
+import { useDashboardThemeClassName } from "../themes/runtime";
 import { useIgnoredQuests } from "../quests/ignored/runtime";
 import { useQuestSnapshot } from "../quests/data";
 import {
@@ -297,7 +297,7 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
     const expiredAgeSliderIndex = expiredHistoryOptionIndex(expiredAgeDays);
 
     return (
-        <div className={dashboardThemeClassName("quest-ui-filter-list")} role="group" aria-label="Quest filters">
+        <div className={useDashboardThemeClassName("quest-ui-filter-list")} role="group" aria-label="Quest filters">
             <div className="quest-ui-filter-list-scroll">
                 <section className="quest-ui-filter-list-section">
                     <h3>Status</h3>
@@ -367,14 +367,13 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
                 </section>
             </div>
 
-
         </div>
     );
 }
 
 function DashboardSorts({ mode, onChange }: { mode: DashboardSortMode; onChange: (mode: DashboardSortMode) => void; }) {
     return (
-        <div className={dashboardThemeClassName("quest-ui-sort-list")} role="menu" aria-label="Sort quests">
+        <div className={useDashboardThemeClassName("quest-ui-sort-list")} role="menu" aria-label="Sort quests">
             <span className="quest-ui-sort-list-title">Sort by</span>
             {DASHBOARD_SORT_OPTIONS.map(option => {
                 const selected = option.value === mode;
@@ -397,7 +396,6 @@ function DashboardSorts({ mode, onChange }: { mode: DashboardSortMode; onChange:
         </div>
     );
 }
-
 
 export function QuestDashboardFilterSortControls() {
     const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
