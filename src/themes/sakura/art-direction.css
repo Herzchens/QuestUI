@@ -199,6 +199,31 @@
         color: #ffb6bc;
     }
 
+    .quest-ui-theme-sakura .quest-ui-default-status-name {
+        font-family: var(--font-display);
+        font-size: 15px;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-version-chip {
+        font-family: var(--font-primary);
+
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Petal silhouettes. */
+
+    .quest-ui-theme-sakura .quest-ui-default-status-product,
+    .quest-ui-theme-sakura .quest-ui-default-status-product.is-orion,
+    .quest-ui-theme-sakura .quest-ui-default-status-product.is-questui {
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 0;
+        box-shadow: none;
+        border-image: var(--quest-ui-sakura-frame-card) 30 34 fill / 13px 15px stretch;
+        position: relative;
+        isolation: isolate;
+    }
+
     .quest-ui-theme-sakura .quest-ui-orion-icon-button,
     .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button,
     .quest-ui-theme-sakura .quest-ui-dashboard-orb-balance {
@@ -212,6 +237,19 @@
 
     .quest-ui-theme-sakura .quest-ui-dashboard-orb-balance {
         border-image: var(--quest-ui-sakura-orb-frame) 25 24 fill / 46% 13px stretch;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-boost-source-tag {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: var(--quest-ui-sakura-ribbon-rose) center / 100% 100% no-repeat;
+        padding-inline: 10px 15px;
+        height: 34px;
+        font-style: italic;
+    }
+    .quest-ui-theme-sakura .quest-ui-dashboard-boost-source-tag.is-xbox {
+        background-image: var(--quest-ui-sakura-ribbon-jade);
     }
 
     .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-stop {
@@ -249,6 +287,46 @@
 
     .quest-ui-theme-sakura :is(.quest-ui-orion-icon-button, .quest-ui-claim-all-button):hover:not(:disabled) {
         filter: brightness(1.12);
+    }
+
+    /* Compact chips: no nine-slice seams or undersized end caps. */
+    .quest-ui-theme-sakura :is(.quest-ui-version-chip, .quest-ui-orion-runtime-chip, .quest-ui-product-update-chip) {
+        background: var(--quest-ui-sakura-chip-plum) center / 100% 100% no-repeat;
+        border: 0;
+        border-radius: 0;
+        border-image: none;
+        box-shadow: none;
+        box-sizing: border-box;
+        min-height: 22px;
+        padding: 3px 10px;
+        line-height: 1;
+    }
+
+    .quest-ui-theme-sakura :is(.quest-ui-version-chip.is-stable, .quest-ui-version-chip.is-unknown, .quest-ui-orion-runtime-chip.is-idle) {
+        background-image: var(--quest-ui-sakura-chip-muted);
+    }
+
+    .quest-ui-theme-sakura :is(.quest-ui-version-chip.is-beta, .quest-ui-product-update-chip.is-warning) {
+        background-image: var(--quest-ui-sakura-chip-amber);
+    }
+
+    .quest-ui-theme-sakura :is(.quest-ui-version-chip.is-alpha, .quest-ui-product-update-chip.is-error) {
+        background-image: var(--quest-ui-sakura-chip-red);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-version-chip.is-prerelease {
+        background-image: var(--quest-ui-sakura-chip-lilac);
+    }
+
+    .quest-ui-theme-sakura :is(.quest-ui-product-update-chip.is-current, .quest-ui-orion-runtime-chip.is-running) {
+        background-image: var(--quest-ui-sakura-chip-jade);
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell .quest-ui-orion-status-copy {
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
     }
 
     @media (max-width: 520px) {

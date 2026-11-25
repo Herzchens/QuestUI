@@ -2222,6 +2222,162 @@
     line-height: 11px;
 }
 
+/* Beta-safe plugin status cards. */
+.quest-ui-theme .quest-ui-default-status-strip {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.29fr) minmax(0, 1fr) !important;
+    gap: 10px !important;
+}
+.quest-ui-theme .quest-ui-default-status-product {
+    align-items: center !important;
+    display: grid !important;
+    gap: 4px !important;
+    grid-template-columns: max-content minmax(0, 1fr) 28px !important;
+    min-height: 48px;
+    padding: 6px 9px !important;
+}
+.quest-ui-theme .quest-ui-default-status-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.quest-ui-theme .quest-ui-default-status-identity-row {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+    min-width: 0;
+}
+.quest-ui-theme .quest-ui-default-status-name {
+    flex: 0 1 auto !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.quest-ui-theme .quest-ui-version-chip {
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    white-space: nowrap;
+}
+.quest-ui-theme .quest-ui-default-status-state {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    min-width: 0;
+}
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-status,
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-runtime-chip {
+    min-width: 0;
+}
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-status-copy {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.quest-ui-theme .quest-ui-status-settings-button {
+    justify-self: end;
+}
+
+@media (max-width: 720px) {
+    .quest-ui-theme .quest-ui-default-status-strip {
+        grid-template-columns: 1fr !important;
+}
+}
+
+/* Sakura has no bridge: the two products use the entire status row. */
+.quest-ui-theme-sakura .quest-ui-status-bridge {
+    display: none !important;
+}
+
+/* Beta status strip clipping fix.
+ * Runtime text and update chips must remain fully visible even when the product half is tight.
+ */
+.quest-ui-theme .quest-ui-default-status-product,
+.quest-ui-theme .quest-ui-default-status-product.is-orion,
+.quest-ui-theme .quest-ui-default-status-product.is-questui {
+    overflow: visible !important;
+}
+.quest-ui-theme .quest-ui-default-status-state {
+    overflow: visible !important;
+}
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-status,
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-runtime-chip,
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-orion-status-copy {
+    overflow: visible !important;
+}
+.quest-ui-theme .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
+    min-height: auto !important;
+    padding: 1px 0 !important;
+    text-overflow: clip !important;
+}
+.quest-ui-theme-sakura .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
+    line-height: 1.2 !important;
+}
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-product-update-chip {
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+}
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-product-update-chip > span,
+.quest-ui-theme .quest-ui-default-status-state .quest-ui-product-update-chip > span:last-child {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+/* Adapt to the actual dashboard width, not the Discord window width. */
+.quest-ui-theme-sakura .quest-ui-dashboard-header {
+    container-type: inline-size;
+    container-name: sakura-header;
+}
+
+/* Keep all content of a product on one baseline. Stack whole cards only
+ * when the dashboard is too narrow to fit both, never wrap individual chips. */
+.quest-ui-theme-sakura .quest-ui-default-status-product > .quest-ui-status-settings-button {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+}
+.quest-ui-theme-sakura .quest-ui-default-status-product .quest-ui-default-status-name {
+    font-size: clamp(11px, 1.55cqw, 14px);
+    white-space: nowrap;
+}
+.quest-ui-theme-sakura .quest-ui-default-status-product :is(.quest-ui-version-chip, .quest-ui-orion-runtime-chip, .quest-ui-product-update-chip) {
+    font-size: clamp(8px, 1.13cqw, 10.5px);
+    min-height: 21px;
+    padding: 2px 8px;
+    gap: 3px;
+    white-space: nowrap;
+}
+/* Keep the status glyph inside the narrow end of the petal artwork. */
+.quest-ui-theme-sakura .quest-ui-default-status-product .quest-ui-product-update-chip {
+    padding-inline: 11px;
+    gap: 4px;
+}
+.quest-ui-theme-sakura .quest-ui-default-status-product .quest-ui-orion-status.is-compact .quest-ui-orion-status-copy {
+    font-size: inherit;
+}
+.quest-ui-theme-sakura .quest-ui-default-status-product .quest-ui-default-status-state {
+    gap: 4px;
+}
+@container sakura-header (max-width: 760px) {
+    .quest-ui-theme .quest-ui-default-status-strip {
+        grid-template-columns: 1fr !important;
+    }
+}
+@container sakura-header (max-width: 450px) {
+    .quest-ui-theme .quest-ui-default-status-product {
+        gap: 3px !important;
+        padding-inline: 7px !important;
+    }
+    .quest-ui-theme .quest-ui-default-status-identity-row {
+        gap: 3px;
+    }
+}
+
 /* Quest List heading and notification-island shell. */
 .quest-ui-theme .quest-ui-dashboard-filter-tools {
     align-items: center;
