@@ -7,7 +7,7 @@ export function DashboardChoiceMenu<T extends string>({ title, ariaLabel, option
     selectedValue: T;
     onSelect: (value: T) => void;
 }) {
-    const className = useDashboardThemeClassName("quest-ui-dashboard-choice-list");
+    const className = useDashboardThemeClassName("quest-ui-dashboard-choice-list", "quest-ui-dashboard-menu-surface");
     return (
         <div className={className} role="menu" aria-label={ariaLabel}>
             <span className="quest-ui-dashboard-choice-list-title">{title}</span>

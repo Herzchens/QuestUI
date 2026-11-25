@@ -4423,3 +4423,80 @@
         left: 0;
     }
 }
+
+
+/* Obsidian overlay fidelity: dashboard menus. */
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface {
+    position: relative;
+    isolation: isolate;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 18px 44px rgba(0,0,0,.58), 0 0 18px rgba(157,70,230,.10) !important;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface::before,
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface::before {
+    z-index: -2;
+    clip-path: polygon(12px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 9px 100%, 0 calc(100% - 9px), 0 12px);
+    background: radial-gradient(ellipse 42px 9px at 18px 1px, #f3e5ff, #b75bf1 20%, transparent 72%), radial-gradient(ellipse 46px 10px at calc(100% - 16px) 100%, #efcfff, #9c45df 22%, transparent 74%), linear-gradient(145deg, #bca6d4, #60556c 17%, #292733 48%, #5f486b 78%, #b76de7);
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface::after {
+    z-index: -1;
+    inset: 2px;
+    clip-path: polygon(11px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 13px), calc(100% - 13px) 100%, 8px 100%, 0 calc(100% - 8px), 0 11px);
+    background: linear-gradient(145deg, rgba(189,154,220,.11), transparent 24%, transparent 70%, rgba(166,76,224,.10)), #090a10;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface > * { position: relative; z-index: 1; }
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface .quest-ui-filter-list-section + .quest-ui-filter-list-section { border-top: 0; position: relative; }
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface .quest-ui-filter-list-section + .quest-ui-filter-list-section::before {
+    content: ""; position: absolute; left: 2px; right: 2px; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(207,174,235,.28) 14%, rgba(125,72,161,.18) 72%, transparent);
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-section h3, .quest-ui-dashboard-choice-list-title) {
+    color: #c7b7d7 !important; letter-spacing: .055em; text-transform: uppercase;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"]) {
+    --quest-ui-obsidian-menu-tone: #8d8298; position: relative; isolation: isolate;
+    background: transparent !important; border: 0 !important; border-radius: 0 !important;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"])::before,
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"])::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"])::before {
+    z-index: -2; clip-path: polygon(6px 0, 100% 0, calc(100% - 5px) 100%, 0 100%, 2px 5px);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--quest-ui-obsidian-menu-tone) 46%, #736c7d), #34323c 52%, color-mix(in srgb, var(--quest-ui-obsidian-menu-tone) 28%, #25232d)); opacity: .42;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"])::after {
+    z-index: -1; inset: 1px; clip-path: polygon(5px 0, 100% 0, calc(100% - 4px) 100%, 0 100%, 2px 4px); background: #0b0c12;
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row:hover:not(:disabled), button[role="menuitemradio"]:hover)::before { opacity: .82; }
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row.is-checked, button[role="menuitemradio"].is-selected) { --quest-ui-obsidian-menu-tone: #b35df1; color: #fff !important; }
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-box, .quest-ui-dashboard-choice-list-radio) {
+    box-sizing: border-box; border: 1px solid #756d82 !important; border-radius: 0 !important;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    background: #0a0b10 !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row.is-checked .quest-ui-filter-list-box, button.is-selected .quest-ui-dashboard-choice-list-radio) {
+    border-color: #c778ff !important; background: linear-gradient(145deg, #8c3ed2, #431764) !important;
+    box-shadow: 0 0 6px rgba(178,84,243,.32), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface .quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box {
+    clip-path: polygon(50% 0, 86% 14%, 100% 50%, 86% 86%, 50% 100%, 14% 86%, 0 50%, 14% 14%);
+}
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-radio-dot, .quest-ui-dashboard-choice-list-radio > span) {
+    border-radius: 0 !important; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: #f2dfff !important;
+}
+@media (forced-colors: active) {
+    .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface { border: 1px solid CanvasText !important; background: Canvas !important; }
+    .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface::before,
+    .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface::after,
+    .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"])::before,
+    .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"])::after { display: none; }
+}

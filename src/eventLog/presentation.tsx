@@ -309,7 +309,7 @@ export function EventDetail({ event, availableEvents, accountLabel, onBack }: { 
     const category = inferEventCategory(event);
     const displaySeverity = visualSeverity(event);
     return (
-        <div className={useDashboardThemeClassName("quest-ui-event-detail", `is-${displaySeverity}`)}>
+        <div className={useDashboardThemeClassName("quest-ui-event-detail", "quest-ui-event-surface", `is-${displaySeverity}`)}>
             <div className="quest-ui-event-detail-header">
                 <button type="button" className="quest-ui-event-detail-back" onClick={onBack}>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>

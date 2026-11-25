@@ -67,7 +67,7 @@ function toggleOrderedSelection<T extends string>(current: readonly T[], value: 
 
 function EventLogPanel() {
     // Keep the theme subscription unconditional when switching list/detail views.
-    const themeClassName = useDashboardThemeClassName("quest-ui-event-log-panel");
+    const themeClassName = useDashboardThemeClassName("quest-ui-event-log-panel", "quest-ui-event-surface");
     const currentUserId = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.id ?? null);
     const currentUsername = useStateFromStores([UserStore], () => UserStore?.getCurrentUser?.()?.username ?? null);
     const [events, setEvents] = useState<EventLogEvent[]>([]);

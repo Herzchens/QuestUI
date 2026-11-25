@@ -298,7 +298,7 @@ function DashboardFilters({ ignoredCount }: { ignoredCount: number; }) {
     const expiredAgeSliderIndex = expiredHistoryOptionIndex(expiredAgeDays);
 
     return (
-        <div className={useDashboardThemeClassName("quest-ui-filter-list")} role="group" aria-label="Quest filters">
+        <div className={useDashboardThemeClassName("quest-ui-filter-list", "quest-ui-dashboard-menu-surface")} role="group" aria-label="Quest filters">
             <div className="quest-ui-filter-list-scroll">
                 <section className="quest-ui-filter-list-section">
                     <h3>Status</h3>
