@@ -175,9 +175,12 @@
     }
 
     .quest-ui-theme-sakura .quest-ui-orion-icon-button,
-    .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button {
+    .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button,
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control.quest-ui-sort-button,
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control.quest-ui-filter-button {
         font-family: var(--font-primary);
     }
+
     .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button:not(:disabled) {
 
         color: #f6edc8;
@@ -197,6 +200,11 @@
     .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-stop {
 
         color: #ffb6bc;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control {
+
+        color: #ffebe6;
     }
 
     .quest-ui-theme-sakura .quest-ui-default-status-name {
@@ -224,6 +232,10 @@
         isolation: isolate;
     }
 
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip,
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-all,
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control.quest-ui-sort-button,
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control.quest-ui-filter-button,
     .quest-ui-theme-sakura .quest-ui-orion-icon-button,
     .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button,
     .quest-ui-theme-sakura .quest-ui-dashboard-orb-balance {
@@ -252,12 +264,25 @@
         background-image: var(--quest-ui-sakura-ribbon-jade);
     }
 
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip:hover,
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control.quest-ui-sort-button:hover,
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control.quest-ui-filter-button:hover,
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control.quest-ui-sort-button.is-open,
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control.quest-ui-filter-button.is-open {
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+        border-image-source: var(--quest-ui-sakura-petal-hover);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-available,
     .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-stop {
         background: transparent;
         border-color: transparent;
         border-image-source: var(--quest-ui-sakura-petal-red);
     }
 
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimable,
     .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-start,
     .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-resume,
     .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button:not(:disabled) {
@@ -266,12 +291,27 @@
         border-image-source: var(--quest-ui-sakura-petal-jade);
     }
 
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-in-progress,
     .quest-ui-theme-sakura .quest-ui-orion-icon-button.is-pause {
         background: transparent;
         border-color: transparent;
         border-image-source: var(--quest-ui-sakura-petal-amber);
     }
 
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimed {
+        background: transparent;
+        border-color: transparent;
+        border-image-source: var(--quest-ui-sakura-petal-lilac);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-ignored {
+        border-image-source: var(--quest-ui-sakura-petal-ignored);
+    }
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-hidden {
+        border-image-source: var(--quest-ui-sakura-petal-hidden);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-expired,
     .quest-ui-theme-sakura .quest-ui-orion-icon-button:disabled,
     .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button:disabled {
         background: transparent;
@@ -279,13 +319,25 @@
         border-image-source: var(--quest-ui-sakura-petal-muted);
     }
 
-    .quest-ui-theme-sakura .quest-ui-toolbar-button:focus-visible {
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.is-selected,
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-all.is-selected {
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+        border-image-source: var(--quest-ui-sakura-petal-ivory);
+        color: #38202a;
+        filter: none;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip:focus-visible,
+    .quest-ui-theme-sakura .quest-ui-toolbar-button:focus-visible,
+    .quest-ui-theme-sakura .quest-ui-dashboard-filter-control:focus-visible {
         outline: none;
     
     filter: drop-shadow(0 0 3px #ffe0c9);
 }
 
-    .quest-ui-theme-sakura :is(.quest-ui-orion-icon-button, .quest-ui-claim-all-button):hover:not(:disabled) {
+    .quest-ui-theme-sakura :is(.quest-ui-orion-icon-button, .quest-ui-claim-all-button, .quest-ui-summary-chip, .quest-ui-dashboard-filter-control):hover:not(:disabled) {
         filter: brightness(1.12);
     }
 
@@ -327,6 +379,26 @@
         border: 0;
         border-radius: 0;
         box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura.quest-ui-dashboard-shell :is(.quest-ui-summary-chip-count, .quest-ui-filter-count-badge, .quest-ui-claim-all-count) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        background: radial-gradient(ellipse at 45% 15%, rgba(255,239,226,.19), rgba(32,15,27,.46)) !important;
+        border: 1px solid rgba(255,225,207,.22) !important;
+        border-radius: 999px !important;
+        box-shadow: none !important;
+        color: #fff0e6;
+        height: 18px;
+        min-width: 17px;
+        padding: 0 3px;
+        line-height: 1;
+    }
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.is-selected .quest-ui-summary-chip-count {
+        color: #fff0e6;
+        background: radial-gradient(ellipse at 40% 10%, #a87b7b, #77535c) !important;
     }
 
     @media (max-width: 520px) {
