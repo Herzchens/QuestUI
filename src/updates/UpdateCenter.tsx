@@ -368,7 +368,7 @@ function UpdateCenterPanel({ snapshot }: { snapshot: UpdateSnapshot; }) {
                 : "OrionQuest and QuestUI are up to date.";
 
     return (
-        <div className={useDashboardThemeClassName("quest-ui-update-panel", "quest-ui-update-panel-v16")} role="group" aria-label="Plugin updates">
+        <div className={useDashboardThemeClassName("quest-ui-update-panel", "quest-ui-update-panel-v16", "quest-ui-update-surface")} role="group" aria-label="Plugin updates">
             <header className="quest-ui-update-panel-heading">
                 <div className="quest-ui-update-panel-title">
                     <span className="quest-ui-update-panel-title-icon"><UpdateCenterIcon /></span>

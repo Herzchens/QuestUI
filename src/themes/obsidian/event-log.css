@@ -1859,11 +1859,17 @@
     border-color: #b262e6; box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 0 0 1px rgba(161,75,217,.18), 0 0 10px rgba(161,75,217,.12);
 }
 .quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-search { background: transparent !important; border: 0 !important; box-shadow: none !important; }
-.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface :is(.quest-ui-event-match-count, .quest-ui-event-new-events, .quest-ui-event-storage) {
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface :is(.quest-ui-event-match-count, .quest-ui-event-new-events) {
     border-radius: 0 !important; clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
 }
 .quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-storage {
-    background: linear-gradient(155deg, color-mix(in srgb, var(--quest-ui-event-storage-color) 12%, #10121a), #08090e); border-color: color-mix(in srgb, var(--quest-ui-event-storage-color) 46%, #4a4651);
+    position: relative;
+    isolation: isolate;
+    flex: 0 0 auto;
+    clip-path: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
 }
 .quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface :is(.quest-ui-event-sort-trigger, .quest-ui-event-filter-launcher) {
     --quest-ui-event-control-rim: #c8bfd4; position: relative; isolation: isolate;
@@ -1907,7 +1913,7 @@
     border: 1px solid #3d3946; border-radius: 0; clip-path: polygon(9px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 6px 100%, 0 calc(100% - 6px), 0 9px); background: rgba(8,9,14,.62);
 }
 .quest-ui-theme-obsidian.quest-ui-event-menu-surface {
-    position: relative; isolation: isolate; background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: 0 16px 42px rgba(0,0,0,.58) !important;
+    position: relative; isolation: isolate; z-index: 1000 !important; background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: 0 16px 42px rgba(0,0,0,.58) !important;
 }
 .quest-ui-theme-obsidian.quest-ui-event-menu-surface::before,
 .quest-ui-theme-obsidian.quest-ui-event-menu-surface::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
@@ -1940,10 +1946,42 @@
     border-radius: 0 !important; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: #f0dcff;
 }
 .quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-back, .quest-ui-event-copy-report) {
-    border-radius: 0 !important; clip-path: polygon(7px 0, calc(100% - 5px) 0, 100% 5px, calc(100% - 7px) 100%, 0 100%, 3px 6px);
-    background: linear-gradient(155deg, #151620, #090a10 64%, #16101d); border-color: #655d70;
+    --quest-ui-event-detail-action-rim: #81778d;
+    --quest-ui-event-detail-action-face: #0a0b11;
+    position: relative;
+    isolation: isolate;
+    border: 0 !important;
+    border-radius: 0 !important;
+    clip-path: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
-.quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-back, .quest-ui-event-copy-report):hover { border-color: #ad6bd4; background: linear-gradient(155deg, #1d1724, #0c0b12 64%, #23102c); }
+.quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-back, .quest-ui-event-copy-report)::before,
+.quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-back, .quest-ui-event-copy-report)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-back, .quest-ui-event-copy-report)::before {
+    z-index: -2;
+    clip-path: polygon(7px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 5px 100%, 0 calc(100% - 5px), 0 7px);
+    background: linear-gradient(145deg, #c9bfda, var(--quest-ui-event-detail-action-rim) 22%, #393640 54%, color-mix(in srgb, var(--quest-ui-event-detail-action-rim) 72%, #332b3a) 84%, #b58bd1);
+}
+.quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-back, .quest-ui-event-copy-report)::after {
+    z-index: -1;
+    inset: 1px;
+    clip-path: polygon(6px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 4px 100%, 0 calc(100% - 4px), 0 6px);
+    background: linear-gradient(155deg, #151620, var(--quest-ui-event-detail-action-face) 64%, #17101e);
+}
+.quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-back, .quest-ui-event-copy-report) > * {
+    position: relative;
+    z-index: 1;
+}
+.quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-back, .quest-ui-event-copy-report):hover {
+    --quest-ui-event-detail-action-rim: #bd71e8;
+    --quest-ui-event-detail-action-face: #130d19;
+}
 .quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface :is(.quest-ui-event-detail-hero-icon, .quest-ui-event-detail-meta-icon-wrap) {
     border-radius: 0 !important; clip-path: polygon(7px 0, calc(100% - 5px) 0, 100% 6px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 5px 100%, 0 calc(100% - 5px), 0 7px);
 }
@@ -1974,4 +2012,73 @@
     .quest-ui-theme-obsidian.quest-ui-event-detail.quest-ui-event-surface .quest-ui-event-detail-category {
         display: none;
     }
+}
+
+/* Event Log fidelity corrections. */
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface button[role="menuitemradio"]:not(.is-selected) .quest-ui-event-sort-radio,
+.quest-ui-theme-obsidian.quest-ui-event-menu-surface .quest-ui-event-filter-list-row.is-radio:not(.is-checked) .quest-ui-event-filter-list-box {
+    border: 1px solid #756d82 !important;
+    border-radius: 50% !important;
+    clip-path: none !important;
+    background: radial-gradient(circle, #0d0e14 0 42%, #15131b 44% 100%) !important;
+    box-shadow: inset 0 0 0 2px #08090e, 0 0 0 1px rgba(220,196,238,.035);
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-match-count {
+    position: relative;
+    isolation: isolate;
+    clip-path: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 3px 8px !important;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-storage::before,
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-storage::after,
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-match-count::before,
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-match-count::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-storage::before {
+    z-index: -2;
+    clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 5px), calc(100% - 5px) 100%, 5px 100%, 0 calc(100% - 5px), 0 5px);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--quest-ui-event-storage-color) 68%, #e9dff2), color-mix(in srgb, var(--quest-ui-event-storage-color) 32%, #49434f) 48%, #302d36);
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-storage::after {
+    z-index: -1;
+    inset: 1px;
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+    background: linear-gradient(155deg, color-mix(in srgb, var(--quest-ui-event-storage-color) 10%, #12131b), #08090e 62%, #121019);
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-match-count::before {
+    z-index: -2;
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--quest-ui-match-color) 55%, #d7cedf), #4f4958 55%, color-mix(in srgb, var(--quest-ui-match-color) 32%, #302d36));
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-match-count::after {
+    z-index: -1;
+    inset: 1px;
+    clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);
+    background: #0a0b11;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-log-actions button.quest-ui-event-island-icon-button,
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-log-actions button.quest-ui-event-clean-trigger {
+    clip-path: none !important;
+    border: 1px solid var(--quest-ui-theme-border-control, rgba(255,255,255,.14)) !important;
+    border-radius: 2px !important;
+    background: var(--quest-ui-theme-control, #11131b) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-log-actions button.quest-ui-event-island-icon-button:hover {
+    border-color: color-mix(in srgb, var(--status-warning, #f0b232) 54%, var(--quest-ui-theme-border-control, rgba(255,255,255,.14))) !important;
+    background: color-mix(in srgb, var(--status-warning, #f0b232) 10%, var(--quest-ui-theme-control, #11131b)) !important;
+    color: var(--status-warning, #f0b232) !important;
+}
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:hover,
+.quest-ui-theme-obsidian.quest-ui-event-log-panel.quest-ui-event-surface .quest-ui-event-clean-island:not(.is-expanded):has(.quest-ui-event-clean-trigger:hover) {
+    border-color: color-mix(in srgb, var(--status-danger, #f23f42) 52%, var(--quest-ui-theme-border-control, rgba(255,255,255,.14))) !important;
+    background: color-mix(in srgb, var(--status-danger, #f23f42) 10%, var(--quest-ui-theme-control, #11131b)) !important;
+    color: var(--status-danger, #f23f42) !important;
 }

@@ -1144,3 +1144,266 @@
 .quest-ui-update-panel-v16 {
     background-image: linear-gradient(140deg, rgba(197,205,242,.10), transparent 36%, rgba(122,91,211,.10));
 }
+
+/* Obsidian Update Center: one closed carved language for shell, state, rows, and controls. */
+.quest-ui-theme-obsidian.quest-ui-update-surface {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 22px 60px rgba(0,0,0,.62), 0 0 22px rgba(153,69,213,.11) !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface::before,
+.quest-ui-theme-obsidian.quest-ui-update-surface::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface::before {
+    z-index: 0;
+    clip-path: polygon(14px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 11px 100%, 0 calc(100% - 11px), 0 14px);
+    background:
+        radial-gradient(ellipse 54px 10px at 22px 1px, #f5e7ff, #b456ea 22%, transparent 74%),
+        radial-gradient(ellipse 56px 11px at calc(100% - 19px) 100%, #ead0fb, #8e3cc9 24%, transparent 76%),
+        linear-gradient(145deg, #c7b8d6, #625a6d 16%, #2b2933 48%, #60466b 78%, #b762de);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface::after {
+    z-index: 0;
+    inset: 2px;
+    clip-path: polygon(13px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 15px), calc(100% - 15px) 100%, 10px 100%, 0 calc(100% - 10px), 0 13px);
+    background:
+        radial-gradient(circle at 78% 10%, rgba(161,75,215,.09), transparent 30%),
+        linear-gradient(155deg, #12141c, #08090e 60%, #160f1c);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface > * {
+    position: relative;
+    z-index: 1;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-heading {
+    position: relative;
+    border: 0 !important;
+    background: linear-gradient(90deg, rgba(116,59,151,.075), transparent 58%) !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-heading::after {
+    content: "";
+    position: absolute;
+    left: 13px;
+    right: 13px;
+    bottom: 0;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(224,200,240,.28), rgba(145,75,190,.14) 64%, transparent);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-title-icon,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-github-button {
+    position: relative;
+    isolation: isolate;
+    border: 0 !important;
+    border-radius: 0 !important;
+    clip-path: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-title-icon::before,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-title-icon::after,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button::before,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button::after,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-github-button::before,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-github-button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-title-icon::before {
+    z-index: -2;
+    clip-path: polygon(8px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 6px 100%, 0 calc(100% - 6px), 0 8px);
+    background: linear-gradient(145deg, #e1c7f3, #8658a2 24%, #3d3345 54%, #9d4fc5 86%, #d99af6);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-title-icon::after {
+    z-index: -1;
+    inset: 1px;
+    clip-path: polygon(7px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 5px 100%, 0 calc(100% - 5px), 0 7px);
+    background: linear-gradient(145deg, rgba(174,93,226,.17), #0a0b11 58%, rgba(111,47,152,.14));
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-title-icon {
+    color: #dca8ff !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button {
+    --quest-ui-update-control-rim: #815c91;
+    color: #ddb3f5 !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button::before {
+    z-index: -2;
+    clip-path: polygon(7px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 5px 100%, 0 calc(100% - 5px), 0 7px);
+    background: linear-gradient(145deg, #cfc3da, var(--quest-ui-update-control-rim) 24%, #3a3641 56%, #8b5aa1 86%, #c690e2);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button::after {
+    z-index: -1;
+    inset: 1px;
+    clip-path: polygon(6px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 4px 100%, 0 calc(100% - 4px), 0 6px);
+    background: linear-gradient(155deg, #171821, #090a10 64%, #19101f);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button:hover:not(:disabled) {
+    --quest-ui-update-control-rim: #bc70e3;
+    color: #f3ddff !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface :is(.quest-ui-update-panel-title-icon, .quest-ui-update-check-button, .quest-ui-update-github-button) > * {
+    position: relative;
+    z-index: 1;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner {
+    --quest-ui-update-state-rim: #726b7b;
+    position: relative;
+    isolation: isolate;
+    border: 0 !important;
+    border-radius: 0 !important;
+    clip-path: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner::before,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner::before {
+    z-index: -2;
+    clip-path: polygon(9px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 7px 100%, 0 calc(100% - 7px), 0 9px);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--quest-ui-update-state-rim) 70%, #ddd4e4), #403b47 50%, color-mix(in srgb, var(--quest-ui-update-state-rim) 62%, #2e2933));
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner::after {
+    z-index: -1;
+    inset: 1px;
+    clip-path: polygon(8px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 6px 100%, 0 calc(100% - 6px), 0 8px);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--quest-ui-update-state-rim) 10%, #0a0b11), #08090e 42%, #0b0b12);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner > * {
+    position: relative;
+    z-index: 1;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner.is-current {
+    --quest-ui-update-state-rim: var(--status-positive, #23a55a);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner.has-update {
+    --quest-ui-update-state-rim: #b462e2;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner.has-error {
+    --quest-ui-update-state-rim: var(--status-danger, #f23f42);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-entry,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-row {
+    position: relative;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-entry + .quest-ui-update-product-entry,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-expanded {
+    border-top: 0 !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-row {
+    isolation: isolate;
+    border: 0 !important;
+    border-radius: 0 !important;
+    clip-path: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-row::before,
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-row::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-row::before {
+    z-index: -2;
+    clip-path: polygon(9px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 7px 100%, 0 calc(100% - 7px), 0 9px);
+    background: linear-gradient(145deg, #8d8398, #45404c 46%, #694b74 80%, #a85ed0);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-row::after {
+    z-index: -1;
+    inset: 1px;
+    clip-path: polygon(8px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 6px 100%, 0 calc(100% - 6px), 0 8px);
+    background: linear-gradient(150deg, #12131b, #08090e 58%, #160f1b);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-row > * {
+    position: relative;
+    z-index: 1;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface :is(.quest-ui-update-row-version, .quest-ui-update-row-target) {
+    border: 0 !important;
+    border-radius: 0 !important;
+    clip-path: polygon(5px 0, calc(100% - 3px) 0, 100% 3px, calc(100% - 5px) 100%, 0 100%, 2px 4px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-row-version {
+    background: linear-gradient(145deg, rgba(204,139,238,.18), rgba(101,48,132,.28)) !important;
+    color: #e0bcf5 !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-row-target {
+    background: linear-gradient(145deg, rgba(113,174,238,.15), rgba(42,84,127,.25)) !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-github-button {
+    --quest-ui-update-github-rim: #6f6878;
+    color: #bfb8c8 !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-github-button::before {
+    z-index: -2;
+    clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px), 0 7px);
+    background: linear-gradient(145deg, #b9b1c1, var(--quest-ui-update-github-rim) 32%, #36333c 62%, #80608e);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-github-button::after {
+    z-index: -1;
+    inset: 1px;
+    clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+    background: #0d0e14;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-github-button:hover {
+    --quest-ui-update-github-rim: #a45bc8;
+    color: #e7c8f8 !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-support-footer {
+    position: relative;
+    border-top: 0 !important;
+    background: linear-gradient(90deg, transparent, rgba(112,58,143,.055), transparent) !important;
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-support-footer::before {
+    content: "";
+    position: absolute;
+    left: 13px;
+    right: 13px;
+    top: 0;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(205,172,226,.20) 18%, rgba(126,71,159,.16) 70%, transparent);
+}
+.quest-ui-theme-obsidian.quest-ui-update-surface > .quest-ui-update-manual-warning {
+    border-top: 0 !important;
+    background: linear-gradient(90deg, rgba(240,178,50,.075), transparent 68%) !important;
+}
+@media (forced-colors: active) {
+    .quest-ui-theme-obsidian.quest-ui-update-surface {
+        background: Canvas !important;
+        border: 1px solid CanvasText !important;
+    }
+    .quest-ui-theme-obsidian.quest-ui-update-surface::before,
+    .quest-ui-theme-obsidian.quest-ui-update-surface::after,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-title-icon::before,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-panel-title-icon::after,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button::before,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-check-button::after,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner::before,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-banner::after,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-row::before,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-product-row::after,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-github-button::before,
+    .quest-ui-theme-obsidian.quest-ui-update-surface .quest-ui-update-github-button::after {
+        display: none;
+    }
+}

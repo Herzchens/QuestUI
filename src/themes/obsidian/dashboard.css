@@ -3847,8 +3847,8 @@
     --quest-ui-obsidian-face-tone: #aa61f5;
 }
 .quest-ui-theme-obsidian .quest-ui-dashboard-boost-source-tag.is-nitro {
-    --quest-ui-obsidian-cut: polygon(14px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
-    --quest-ui-obsidian-face-cut: polygon(15px 1.5px, calc(100% - 2px) 1.5px, calc(100% - 13px) calc(100% - 1.5px), 2px calc(100% - 1.5px));
+    --quest-ui-obsidian-cut: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
+    --quest-ui-obsidian-face-cut: polygon(10.8px 1.5px, calc(100% - 10.8px) 1.5px, calc(100% - 1.5px) 50%, calc(100% - 10.8px) calc(100% - 1.5px), 10.8px calc(100% - 1.5px), 1.5px 50%);
     --quest-ui-obsidian-rim-tone: #b768f0;
     --quest-ui-obsidian-face-tone: #8b39cf;
     --quest-ui-obsidian-face-base: #3e1468;
@@ -4083,8 +4083,8 @@
 /* Obsidian product status: a carved outer slab, recessed textured face,
  * and aligned fissure emission. All paint sits behind the real controls. */
 .quest-ui-theme-obsidian .quest-ui-default-status-strip {
-    grid-template-columns: minmax(0, 1.12fr) 18px minmax(0, .88fr) !important;
-    gap: 6px !important;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr) !important;
+    gap: 8px !important;
     align-items: stretch;
     overflow: visible;
 }
@@ -4281,10 +4281,7 @@
 }
 /* The bridge represents the same integration state, now as a faceted crystal. */
 .quest-ui-theme-obsidian .quest-ui-default-status-strip .quest-ui-status-bridge {
-    align-self: center;
-    min-width: 0;
-    width: 24px;
-    grid-template-columns: minmax(0, 1fr) 14px minmax(0, 1fr);
+    display: none !important;
 }
 .quest-ui-theme-obsidian .quest-ui-default-status-strip .quest-ui-status-bridge-node {
     width: 14px;
@@ -4499,4 +4496,14 @@
     .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface::after,
     .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"])::before,
     .quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface :is(.quest-ui-filter-list-row, button[role="menuitemradio"])::after { display: none; }
+}
+
+/* Obsidian menu radios: clean circular idle state; selected crystal stays intact. */
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface .quest-ui-filter-list-row.is-radio:not(.is-checked) .quest-ui-filter-list-box,
+.quest-ui-theme-obsidian.quest-ui-dashboard-menu-surface button[role="menuitemradio"]:not(.is-selected) .quest-ui-dashboard-choice-list-radio {
+    border: 1px solid #756d82 !important;
+    border-radius: 50% !important;
+    clip-path: none !important;
+    background: radial-gradient(circle, #0d0e14 0 42%, #15131b 44% 100%) !important;
+    box-shadow: inset 0 0 0 2px #08090e, 0 0 0 1px rgba(220,196,238,.035);
 }

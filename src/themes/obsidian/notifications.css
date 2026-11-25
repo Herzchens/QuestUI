@@ -93,9 +93,13 @@
 
 .quest-ui-notification-center-account-copy strong {
     color: var(--quest-ui-theme-text-primary);
+    font-family: var(--font-primary, sans-serif);
     font-size: 13px;
     font-weight: 800;
+    line-height: 1.45;
+    min-height: 19px;
     overflow: hidden;
+    padding-block: 1px;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
