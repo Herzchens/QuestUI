@@ -40,6 +40,7 @@ import sakuraQuestActions from "./sakura/quest-actions.css?managed";
 import sakuraQuestReload from "./sakura/quest-reload.css?managed";
 import sakuraOrion from "./sakura/orion.css?managed";
 import sakuraDashboard from "./sakura/dashboard.css?managed";
+import sakuraArtDirection from "./sakura/art-direction.css?managed";
 
 import type { DashboardTheme } from "./controller";
 
@@ -108,6 +109,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             sakuraQuestReload,
             sakuraOrion,
             sakuraDashboard,
+            sakuraArtDirection,
         ]
     }
 ];

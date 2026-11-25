@@ -5,6 +5,7 @@
 .quest-ui-theme-sakura {
     --quest-ui-theme-accent: #e6a0b8;
     --quest-ui-dashboard-border: color-mix(in srgb, var(--quest-ui-theme-accent) 38%, rgba(255,255,255,.18));
+    --quest-ui-dashboard-base: rgba(34,10,27,.90);
     --quest-ui-dashboard-card: rgba(79,31,57,.42);
 
     --quest-ui-theme-text-strong: #fff2ed;

@@ -1,0 +1,129 @@
+@supports (background: color-mix(in srgb, #000 50%, #fff)) {
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-topbar,
+    .quest-ui-theme-sakura .quest-ui-dashboard-actionbar {
+        background: linear-gradient(180deg, rgba(67,32,47,.34), rgba(34,15,28,.54));
+        flex: 0 0 auto;
+        box-shadow: none;
+        border-color: rgba(244, 182, 174, .45);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-topbar {
+        background: linear-gradient(90deg, rgba(48,24,37,.58), transparent 78%);
+        border-bottom: 1px solid #d6a094;
+        isolation: isolate;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-display-title,
+    .quest-ui-theme-sakura .quest-ui-dashboard-list-title,
+    .quest-ui-theme-sakura .quest-ui-card-title {
+        color: #fff1ed;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        letter-spacing: 0;
+        text-shadow: 0 1px 3px rgba(16, 5, 12, .7);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-display-title > strong {
+        font-family: var(--font-display);
+        color: #fff0eb;
+        -webkit-text-fill-color: currentColor;
+        background: none;
+        font-size: clamp(19px, 3vw, 26px);
+        font-weight: 750;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-list-title {
+        font-family: var(--font-display);
+        font-size: 25px;
+        padding-left: 12px;
+        border-left: 3px solid #e8a0ad;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard {
+        background: transparent;
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        max-height: none;
+        min-height: 0;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-header {
+        background: linear-gradient(180deg, rgba(36,16,29,.63), rgba(42,19,33,.38));
+        border-bottom: 1px solid rgba(244, 182, 174, .48);
+        flex: 0 0 auto;
+        min-height: auto;
+        padding: 10px 12px 8px;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        row-gap: 6px;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-content {
+        background: transparent;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 10px 12px 12px;
+    }
+
+
+    .quest-ui-theme-sakura .quest-ui-dashboard-orb-balance {
+        color: #fff0e8;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card,
+    .quest-ui-theme-sakura .quest-ui-card:not(.quest-ui-card-achievement),
+    .quest-ui-theme-sakura .quest-ui-card.quest-ui-card-achievement {
+        border: 1px solid transparent;
+
+
+        flex-shrink: 0;
+        transform: none;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card:hover,
+    .quest-ui-theme-sakura .quest-ui-card:not(.quest-ui-card-achievement):hover,
+    .quest-ui-theme-sakura .quest-ui-card.quest-ui-card-achievement:hover {
+
+        transform: none;
+    }
+
+    /* No thumbnail-derived background in Sakura. The localized scene and
+     * ornament are independent layers behind the original Quest artwork. */
+    .quest-ui-theme-sakura .quest-ui-card-backdrop {
+        display: none;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-artwork {
+        border-radius: 11px;
+        border-color: rgba(244, 183, 171, .66);
+        box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-artwork-image {
+        filter: none;
+        opacity: 1;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-title {
+        font-family: var(--font-display);
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-action-claim {
+        background: linear-gradient(155deg, #fff0c9, #e4c381 48%, #b69257);
+        border-color: #f4d7a3;
+        border-radius: 18px 6px 18px 6px;
+        color: #301922;
+        text-shadow: none;
+    }
+
+}

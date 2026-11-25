@@ -1986,6 +1986,36 @@
     object-fit: contain;
 }
 
+/* Sakura uses its own dark palette and optical layers. */
+.quest-ui-theme-sakura.quest-ui-dashboard-shell {
+    background: var(--quest-ui-dashboard-base);
+}
+.quest-ui-theme-sakura .quest-ui-dashboard,
+.quest-ui-theme-sakura .quest-ui-dashboard-topbar,
+.quest-ui-theme-sakura .quest-ui-dashboard-actionbar,
+.quest-ui-theme-sakura .quest-ui-dashboard-header {
+    background: transparent;
+}
+.quest-ui-theme-sakura .quest-ui-card,
+.quest-ui-theme-sakura .quest-ui-card:not(.quest-ui-card-achievement) {
+    background: var(--quest-ui-dashboard-card);
+}
+.quest-ui-theme-sakura .quest-ui-card:hover,
+.quest-ui-theme-sakura .quest-ui-card:not(.quest-ui-card-achievement):hover {
+    background: #1d1d23;
+}
+
+/* Make the ambient Quest artwork readable enough to identify the card without competing
+ * with the actual thumbnail or text. The fade still returns to the neutral card surface.
+ */
+/* Stronger ambient art: brighter and more saturated, while still reading as a backdrop. */
+.quest-ui-theme .quest-ui-card-backdrop > img {
+    height: 190%;
+    left: -48px;
+    top: 50%;
+    width: calc(94% + 48px);
+}
+
 /* Custom stepped expired-history control.
  * No native range input and no overlaid fake nodes: track, fill and nodes are one control.
  */
