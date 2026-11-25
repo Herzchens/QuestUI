@@ -300,7 +300,79 @@
         font-variant-numeric: tabular-nums;
     }
 
+    /* Timed progress uses one blossom silhouette in every state.
+     * The actual normalized ratio still drives the SVG stroke dash. */
+    .quest-ui-theme-sakura .quest-ui-progress-ring {
+        background: var(--quest-ui-sakura-seal-track) center / contain no-repeat;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-progress-claimable {
+        background: var(--quest-ui-sakura-seal-ready) center / contain no-repeat;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-progress-claimed {
+        background: var(--quest-ui-sakura-seal) center / contain no-repeat;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-progress-expired {
+        background: var(--quest-ui-sakura-seal-expired) center / contain no-repeat;
+    }
+
+    .quest-ui-theme-sakura :is(.quest-ui-progress-claimable, .quest-ui-progress-claimed, .quest-ui-progress-expired) > svg:first-child {
+        visibility: hidden;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-progress-ring .quest-ui-progress-track {
+        stroke: transparent;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-progress-ring .quest-ui-progress-value {
+        stroke-width: 2.8;
+        stroke-linecap: round;
+        filter: none;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-progress-expired .quest-ui-progress-state-icon.is-expired {
+        color: #e2a2ab;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-progress-state-icon.is-claimed {
+        color: #fff3ed;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-action:not(.quest-ui-card-action-claim):not(.quest-ui-card-action-ignore) {
+        color: #301725;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-action:not(.quest-ui-card-action-ignore):hover:not(:disabled) {
+        filter: brightness(1.09);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-action-claim:hover:not(:disabled),
+    .quest-ui-theme-sakura .quest-ui-card-action-claim:active:not(:disabled) {
+        background: linear-gradient(155deg, #fff4d0, #efcf89 48%, #c3a069);
+    }
+
     /* Petal silhouettes. */
+
+    .quest-ui-theme-sakura .quest-ui-card,
+    .quest-ui-theme-sakura .quest-ui-card:not(.quest-ui-card-achievement),
+    .quest-ui-theme-sakura .quest-ui-card.quest-ui-card-achievement {
+        background: transparent;
+        border-color: transparent;
+        border-radius: 0;
+        box-shadow: none;
+        border-image: var(--quest-ui-sakura-frame-card) 30 34 fill / 13px 15px stretch;
+        isolation: isolate;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card:hover,
+    .quest-ui-theme-sakura .quest-ui-card:not(.quest-ui-card-achievement):hover,
+    .quest-ui-theme-sakura .quest-ui-card.quest-ui-card-achievement:hover {
+        background: transparent;
+        border-color: transparent;
+        border-image-source: var(--quest-ui-sakura-frame-card-hover);
+    }
 
     .quest-ui-theme-sakura .quest-ui-default-status-product,
     .quest-ui-theme-sakura .quest-ui-default-status-product.is-orion,
@@ -320,7 +392,11 @@
     .quest-ui-theme-sakura .quest-ui-dashboard-filter-control.quest-ui-filter-button,
     .quest-ui-theme-sakura .quest-ui-orion-icon-button,
     .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button,
-    .quest-ui-theme-sakura .quest-ui-dashboard-orb-balance {
+    .quest-ui-theme-sakura .quest-ui-dashboard-orb-balance,
+    .quest-ui-theme-sakura .quest-ui-card-orion-state,
+    .quest-ui-theme-sakura .quest-ui-card-ignored-state,
+    .quest-ui-theme-sakura .quest-ui-card-action:not(.quest-ui-card-action-ignore),
+    .quest-ui-theme-sakura .quest-ui-card-action:not(.quest-ui-card-action-claim):not(.quest-ui-card-action-ignore) {
         background: transparent;
         border-color: transparent;
         border-radius: 0;
@@ -380,7 +456,8 @@
         border-image-source: var(--quest-ui-sakura-petal-amber);
     }
 
-    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimed {
+    .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimed,
+    .quest-ui-theme-sakura .quest-ui-card-ignored-state {
         background: transparent;
         border-color: transparent;
         border-image-source: var(--quest-ui-sakura-petal-lilac);
@@ -394,6 +471,7 @@
     }
 
     .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-expired,
+    .quest-ui-theme-sakura .quest-ui-card-orion-state.is-stopped,
     .quest-ui-theme-sakura .quest-ui-orion-icon-button:disabled,
     .quest-ui-theme-sakura .quest-ui-toolbar-button.quest-ui-claim-all-button:disabled {
         background: transparent;
@@ -411,7 +489,22 @@
         filter: none;
     }
 
+    .quest-ui-theme-sakura .quest-ui-card-action:not(.quest-ui-card-action-claim):not(.quest-ui-card-action-ignore) {
+        background: transparent;
+        border-color: transparent;
+        border-image-source: var(--quest-ui-sakura-petal-rose);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-action.quest-ui-card-action-claim,
+    .quest-ui-theme-sakura .quest-ui-card-action.quest-ui-card-action-claim:hover:not(:disabled),
+    .quest-ui-theme-sakura .quest-ui-card-action.quest-ui-card-action-claim:active:not(:disabled) {
+        background: transparent;
+        border-color: transparent;
+        border-image-source: var(--quest-ui-sakura-petal-gold);
+    }
+
     .quest-ui-theme-sakura .quest-ui-dashboard-summary > .quest-ui-summary-chip:focus-visible,
+    .quest-ui-theme-sakura .quest-ui-card-action:focus-visible,
     .quest-ui-theme-sakura .quest-ui-toolbar-button:focus-visible,
     .quest-ui-theme-sakura .quest-ui-dashboard-filter-control:focus-visible {
         outline: none;
@@ -419,8 +512,50 @@
     filter: drop-shadow(0 0 3px #ffe0c9);
 }
 
-    .quest-ui-theme-sakura :is(.quest-ui-orion-icon-button, .quest-ui-claim-all-button, .quest-ui-summary-chip, .quest-ui-dashboard-filter-control):hover:not(:disabled) {
+    .quest-ui-theme-sakura :is(.quest-ui-orion-icon-button, .quest-ui-claim-all-button, .quest-ui-card-action, .quest-ui-summary-chip, .quest-ui-dashboard-filter-control):hover:not(:disabled) {
         filter: brightness(1.12);
+    }
+
+    /* Small, nearly square utility controls use the full blossom silhouette. */
+    .quest-ui-theme-sakura .quest-ui-card-action-ignore,
+    .quest-ui-theme-sakura .quest-ui-card-orion-control {
+        background: var(--quest-ui-sakura-flower-control) center / 100% 100% no-repeat;
+        border-color: transparent;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-action-ignore:hover:not(:disabled),
+    .quest-ui-theme-sakura .quest-ui-card-orion-control:hover:not(:disabled) {
+        background: var(--quest-ui-sakura-flower-control) center / 100% 100% no-repeat;
+        border-color: transparent;
+        box-shadow: none;
+        filter: brightness(1.14);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-achievement-progress-segments > span,
+    .quest-ui-theme-sakura .quest-ui-achievement-progress-segments > span.is-filled {
+        background: var(--quest-ui-sakura-segment-empty) center / 100% 100% no-repeat;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        height: 14px;
+    }
+
+    .quest-ui-theme-sakura .quest-ui-achievement-progress-segments > span.is-filled {
+        background-image: var(--quest-ui-sakura-segment-filled);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-claimable .quest-ui-achievement-progress-segments > span.is-filled {
+        background-image: var(--quest-ui-sakura-segment-ready);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-claimed .quest-ui-achievement-progress-segments > span.is-filled {
+        background-image: var(--quest-ui-sakura-segment-claimed);
+    }
+
+    .quest-ui-theme-sakura .quest-ui-card-expired .quest-ui-achievement-progress-segments > span.is-filled {
+        background-image: var(--quest-ui-sakura-segment-expired);
     }
 
     /* Compact chips: no nine-slice seams or undersized end caps. */

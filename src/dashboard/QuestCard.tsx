@@ -14,6 +14,7 @@ import { expiryUrgency, formatExpiry, formatQuestProgress } from "../quests/data
 import type { NormalizedQuest, QuestTaskType } from "../quests/data";
 import { useObsidianArtworkColor } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
+import { SAKURA_PROGRESS_OUTLINE } from "../themes/sakura/progressShape";
 interface DiscordQuestCompletion {
     completedRatio: number;
     percentComplete: number;
@@ -37,7 +38,8 @@ const useDiscordQuestCompletion = findByCodeLazy(
     "completedRatio"
 ) as (quest: any, forcePercent?: boolean) => DiscordQuestCompletion;
 
-function ProgressShape({ angular, ...props }: { angular: boolean; className: string; strokeDasharray?: string; strokeDashoffset?: number; transform?: string; }) {
+function ProgressShape({ angular, sakura, ...props }: { angular: boolean; sakura: boolean; className: string; strokeDasharray?: string; strokeDashoffset?: number; transform?: string; }) {
+    if (sakura) return <path d={SAKURA_PROGRESS_OUTLINE} pathLength="100" {...props} transform="translate(2.8 2.8) scale(.504)" />;
     return angular
         ? <path d="M28 10.5 H46.5 L54.5 18.5 V37.5 L43.5 45.5 H9.5 L1.5 37.5 V18.5 L12.5 10.5 H28 Z" pathLength="100" {...props} transform={undefined} />
         : <circle cx="28" cy="28" r="21" pathLength="100" {...props} />;
@@ -47,12 +49,14 @@ function ProgressRing({
     quest,
     completion,
     ratioOverride = null,
-    angular = false
+    angular = false,
+    sakura = false
 }: {
     quest: NormalizedQuest;
     completion: DiscordQuestCompletion;
     ratioOverride?: number | null;
     angular?: boolean;
+    sakura?: boolean;
 }) {
     const hasRatioOverride = Number.isFinite(ratioOverride);
     const ratio = hasRatioOverride
@@ -74,15 +78,17 @@ function ProgressRing({
             aria-label={isClaimed ? "Claimed" : isExpired ? "Expired" : `${display} complete`}
         >
             <svg viewBox="0 0 56 56" aria-hidden="true">
-                <ProgressShape angular={angular} className="quest-ui-progress-track" />
+                <ProgressShape angular={angular} sakura={sakura} className="quest-ui-progress-track" />
                 {(isClaimed || isExpired) ? (
                     <ProgressShape
                         angular={angular}
+                        sakura={sakura}
                         className="quest-ui-progress-state-ring"
                     />
                 ) : (
                     <ProgressShape
                         angular={angular}
+                        sakura={sakura}
                         className="quest-ui-progress-value"
                         strokeDasharray="100"
                         strokeDashoffset={100 - progress}
@@ -415,7 +421,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                         complete={quest.status === "claimable" || quest.status === "claimed"}
                     />
                 ) : (
-                    <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} angular={obsidian} />
+                    <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} angular={obsidian} sakura={dashboardThemeId === "sakura"} />
                 )}
                 {expiry && (
                     <span className={`quest-ui-card-expiry quest-ui-expiry-${urgency}`} title={expiry}>
