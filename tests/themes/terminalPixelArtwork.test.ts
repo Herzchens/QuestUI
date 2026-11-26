@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createArtworkQueue } from "../../src/themes/terminal/artworkQueue";
+import { rasterTerminalPanorama, TERMINAL_PANORAMA } from "../../src/themes/terminal/panoramaRaster";
 import { parseTerminalArtworkKey, pixelateTerminalArtwork, terminalArtworkAccent, terminalArtworkKey, TERMINAL_ARTWORK_SIZES, TERMINAL_PALETTE_LIMIT } from "../../src/themes/terminal/pixelArtwork";
 
 assert.deepEqual(TERMINAL_ARTWORK_SIZES, { dashboard: 56, notification: 48 });
@@ -72,6 +73,19 @@ assert.deepEqual(pixelateTerminalArtwork(new Uint8ClampedArray(16), 2, 2), new U
 assert.throws(() => pixelateTerminalArtwork(new Uint8ClampedArray(4), 2, 2), RangeError);
 assert.throws(() => pixelateTerminalArtwork(new Uint8ClampedArray(65 * 4), 65, 1), RangeError);
 assert.throws(() => pixelateTerminalArtwork(new Uint8ClampedArray(4), 1, 1, 1), RangeError);
+const { columns, rows, pitch, dot } = TERMINAL_PANORAMA;
+const panoramaInput = new Uint8ClampedArray(side * side * 4);
+for (let i = 0; i < panoramaInput.length; i += 4) panoramaInput.set([230, 120, 30, 255], i);
+const panoramaBefore = panoramaInput.slice();
+const panorama = rasterTerminalPanorama(panoramaInput);
+assert.deepEqual(panoramaInput, panoramaBefore);
+assert.deepEqual(panorama, rasterTerminalPanorama(panoramaInput));
+assert.equal(panorama.length, columns * rows * pitch * pitch * 4);
+assert.ok(panorama[0] > panorama[1] && panorama[1] > panorama[2] && panorama[3] > 0);
+assert.equal(panorama[dot * 4 + 3], 0, "horizontal phosphor gap");
+assert.equal(panorama[dot * columns * pitch * 4 + 3], 0, "vertical phosphor gap");
+assert.ok(rasterTerminalPanorama(new Uint8ClampedArray(side * side * 4)).every(value => value === 0));
+assert.throws(() => rasterTerminalPanorama(new Uint8ClampedArray(4)), RangeError);
 async function testQueue() {
     const pending = new Map<string, { finish: (value: string | null) => void; signal: AbortSignal; }>();
     let clock = 0, calls = 0;

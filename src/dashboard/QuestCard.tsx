@@ -15,6 +15,7 @@ import type { NormalizedQuest, QuestTaskType } from "../quests/data";
 import { useObsidianArtworkColor } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
 import { terminalArtworkGrid, useTerminalArtwork } from "../themes/terminal/useArtwork";
+import { TerminalPanorama } from "../themes/terminal/TerminalPanorama";
 import { SAKURA_PROGRESS_OUTLINE } from "../themes/sakura/progressShape";
 interface DiscordQuestCompletion {
     completedRatio: number;
@@ -379,6 +380,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
             {dashboardThemeId === "sakura" && sakuraOrnamentVariant != null && (
                 <span className="quest-ui-sakura-card-art" aria-hidden="true" />
             )}
+            {terminal && <TerminalPanorama source={terminalPixelUrl} />}
             <QuestArtwork imageUrl={artworkUrl} type={taskType} eager={obsidian} pixelUrl={terminalPixelUrl} />
 
             <div className="quest-ui-card-main">

@@ -109,6 +109,16 @@ check(style(".quest-ui-card-expiry").whiteSpace === "nowrap", "desktop expiry mu
 check(getComputedStyle(q(".quest-ui-artwork"), "::after").top === "0px" && getComputedStyle(q(".quest-ui-artwork"), "::after").left === "0px", "thumbnail frame must not leave a gap");
 check(getComputedStyle(q(".quest-ui-artwork-image")).clipPath !== "none", "artwork must follow frame corners");
 check(standard.backgroundImage === achievement.backgroundImage, "card surfaces must match");
+check(style(".quest-ui-terminal-panorama").position === "absolute" && style(".quest-ui-terminal-panorama").pointerEvents === "none", "panorama must not participate in layout or input");
+check(style(".quest-ui-terminal-panorama").zIndex === "0" && style(".quest-ui-card-main").zIndex === "1", "panorama must stay behind content");
+check(style(".quest-ui-terminal-panorama > img").imageRendering === "pixelated", "panorama dots must stay sharp");
+for (const backdrop of document.querySelectorAll(".quest-ui-terminal-panorama")) {
+    const card = backdrop.parentElement.getBoundingClientRect();
+    const art = backdrop.getBoundingClientRect();
+    check(card.width - art.width <= 7 && card.height - art.height <= 7, "panorama must cover both standard and achievement cards");
+    check(getComputedStyle(backdrop.querySelector("img")).objectFit === "cover", "panorama must cover without distorting dots");
+}
+check(style(".quest-ui-artwork-image").imageRendering === "pixelated", "processed thumbnail must retain hard pixels");
 const list = q(".quest-ui-dashboard-content");
 const cards = [...list.querySelectorAll(".quest-ui-card")];
 check(cards.length === 5 && cards.every(card => card.getBoundingClientRect().height <= 118.5), "standard and achievement cards must retain the Default 118px baseline");

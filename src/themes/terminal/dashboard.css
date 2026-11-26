@@ -3530,6 +3530,29 @@
 }
 .quest-ui-theme-terminal .quest-ui-update-center-icon > * { opacity: 0; }
 
+/* A full-card phosphor backdrop; attenuate light under controls, not its geometry. */
+.quest-ui-theme-terminal .quest-ui-terminal-panorama {
+    position: absolute;
+    inset: 2px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .82;
+}
+.quest-ui-theme-terminal .quest-ui-terminal-panorama > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    image-rendering: pixelated;
+    object-fit: cover;
+    mask-image: linear-gradient(90deg, rgba(0,0,0,.12), rgba(0,0,0,.23) 28%, #000 63%, rgba(0,0,0,.25));
+}
+@media (max-width: 700px) {
+    .quest-ui-theme-terminal .quest-ui-terminal-panorama { display: none; }
+}
+
 .quest-ui-theme-terminal .quest-ui-dashboard-notification-island::before,
 .quest-ui-theme-terminal .quest-ui-dashboard-notification-bell::before {
     content: "";
