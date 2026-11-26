@@ -300,7 +300,7 @@ function DetailMetaIcon({ kind }: { kind: "code" | "category" | "time" | "captur
 function DetailMetaRow({ kind, label, children }: { kind: "code" | "category" | "time" | "capture" | "account" | "detail"; label: string; children: any; }) {
     return (
         <div className="quest-ui-event-detail-meta-row">
-            <span className="quest-ui-event-detail-meta-icon-wrap"><DetailMetaIcon kind={kind} /></span>
+            <span className="quest-ui-event-detail-meta-icon-wrap" data-kind={kind}><DetailMetaIcon kind={kind} /></span>
             <span className="quest-ui-event-detail-meta-label">{label}</span>
             <div className="quest-ui-event-detail-meta-value">{children}</div>
         </div>

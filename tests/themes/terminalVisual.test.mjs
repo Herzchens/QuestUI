@@ -162,10 +162,11 @@ for (const phase of ["is-visible", "is-idle is-open", "is-exiting"]) {
 }
 island.className = "quest-ui-dashboard-notification-island is-idle";
 island.style.removeProperty("transition");
-for (const selector of [".quest-ui-filter-list-box", ".quest-ui-filter-list-row:not(.is-checked) .quest-ui-filter-list-box", ".quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box", ".quest-ui-dashboard-choice-list-radio", ".quest-ui-history-step-node"]) {
+for (const selector of [".quest-ui-filter-list-box", ".quest-ui-filter-list-row:not(.is-checked) .quest-ui-filter-list-box", ".quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box", ".quest-ui-dashboard-choice-list-radio", ".quest-ui-history-step-node", ".quest-ui-event-filter-list-box", ".quest-ui-event-filter-list-row:not(.is-checked) .quest-ui-event-filter-list-box"]) {
     const control = style(selector);
     check(!control.boxShadow.includes("inset") && control.borderTopWidth === "1px" && control.borderRadius === "0px", selector + " must retain a single flush frame without a dark moat");
 }
+check(decodeURIComponent(style(".quest-ui-event-broom-icon").maskImage).includes('viewBox="0 0 48 48"'), "native broom silhouette must use fine raster");
 check(decodeURIComponent(style(".quest-ui-reload-icon-button svg").maskImage).includes("A8.5 8.5"), "refresh must use the recognizable clockwise arrow");
 check(decodeURIComponent(style(".quest-ui-plugin-settings-glyph").maskImage).includes("<circle"), "settings gear must have a defined central aperture");
 check(style(".quest-ui-sort-icon").maskImage !== "none", "pixel glyph must be active");
@@ -206,8 +207,12 @@ check(style(".quest-ui-dashboard-shell").backgroundImage !== "none", "CRT surfac
 check(!q(".quest-ui-terminal-footer"), "Terminal footer must be absent");
 check(!style(".quest-ui-dashboard-display-title-icon > svg").maskImage || style(".quest-ui-dashboard-display-title-icon > svg").maskImage === "none", "native emblem must not be replaced");
 for (const selector of [".quest-ui-dashboard-choice-list", ".quest-ui-notification-center-panel", ".quest-ui-update-panel", ".quest-ui-update-product-entry"]) { check(style(selector).borderImageSource !== "none", selector + " must have a stepped frame"); }
-for (const selector of [".quest-ui-terminal-notice-read-glyph", ".quest-ui-terminal-update-current-glyph"]) { check(style(selector).maskImage !== "none", selector + " must use a pixel glyph"); }
+for (const selector of [".quest-ui-event-log-panel", ".quest-ui-event-detail", ".quest-ui-event-detail-meta-card", ".quest-ui-event-filter-menu", ".quest-ui-dashboard-choice-list", ".quest-ui-notification-center-panel", ".quest-ui-update-panel", ".quest-ui-update-product-entry"]) {
+    check(style(selector).borderImageSource !== "none", selector + " must have a stepped frame");
+}
+for (const selector of [".quest-ui-event-severity-icon", ".quest-ui-terminal-notice-read-glyph", ".quest-ui-terminal-update-current-glyph"]) { check(style(selector).maskImage !== "none", selector + " must use a pixel glyph"); }
 check(style(".quest-ui-notification-center-action").borderImageSource !== style(".quest-ui-notification-center-action.is-danger").borderImageSource, "notification danger frame must differ");
+check(style(".quest-ui-event-row").borderImageSource !== "none" && style(".quest-ui-event-view-detail").borderImageSource !== "none", "event row and detail control must use Terminal frames");
 const dashboardSort = style(".quest-ui-dashboard-filter-control");
 const filter = q(".quest-ui-filter-button");
 const filterFrame = getComputedStyle(filter).borderImageSource;
@@ -216,6 +221,13 @@ check(getComputedStyle(filter).borderImageSource === filterFrame && filterFrame 
 filter.classList.remove("is-open");
 check(style(".quest-ui-dashboard-notification-unread-dot").borderRadius === "50%", "unread dot must be round");
 check(style(".quest-ui-filter-count-badge").fontSize === "10px", "Filter count must be legible");
+for (const selector of [".quest-ui-event-sort-trigger", ".quest-ui-event-filter-launcher"]) {
+    const control = style(selector);
+    check(control.borderImageSource === dashboardSort.borderImageSource && control.height === dashboardSort.height && control.fontSize === dashboardSort.fontSize, selector + " must match dashboard Sort/Filter");
+}
+check(style(".quest-ui-event-detail-hero > h3").fontSize === "16px" && style(".quest-ui-event-detail-hero > h3").overflowWrap === "anywhere", "detail title must be compact and wrap");
+for (const selector of [".quest-ui-event-detail-hero", ".quest-ui-event-detail-hero-icon", ".quest-ui-event-detail-category", ".quest-ui-event-detail-meta-icon-wrap", ".quest-ui-event-detail-diagnostic > pre"]) check(style(selector).borderImageSource !== "none", selector + " must have a stepped frame");
+check(style(".quest-ui-event-detail-meta-icon").maskImage !== "none", "metadata glyph must be pixelized");
 document.body.dataset.result = errors.length ? "fail" : "pass";
 q("#result").textContent = JSON.stringify(errors);
 `;
