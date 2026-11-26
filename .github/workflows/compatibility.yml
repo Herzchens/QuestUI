@@ -173,6 +173,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/themes/controller.test.ts
 
+      - name: Test Terminal pixel artwork
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/themes/terminalPixelArtwork.test.ts
+
       - name: Test Event Log logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/eventLog.test.ts
