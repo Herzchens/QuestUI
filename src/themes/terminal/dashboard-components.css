@@ -1,0 +1,706 @@
+.quest-ui-enrollable [class*="iconBadge"] {
+    background-color: var(--status-danger) !important;
+}
+.quest-ui-enrolled [class*="iconBadge"] {
+    background-color: var(--status-warning) !important;
+}
+.quest-ui-claimable [class*="iconBadge"] {
+    background-color: var(--status-positive) !important;
+}
+.quest-ui-settings-button svg:has(> [mask^="url(#svg-mask-panel-button)"]) {
+    display: none;
+}
+.quest-ui-badges {
+    flex-shrink: 0;
+    margin-left: 6px;
+}
+.quest-ui-icon-wrap {
+    align-items: center;
+    display: inline-flex;
+    height: 20px;
+    justify-content: center;
+    overflow: visible;
+    position: relative;
+    width: 20px;
+}
+.quest-ui-icon-wrap > svg {
+    height: 20px;
+    width: 20px;
+}
+.quest-ui-detailed-count {
+    align-items: center;
+    border: 0;
+    border-radius: 999px;
+    bottom: -4px;
+    box-sizing: border-box;
+    color: var(--white-500, #eafff1);
+    display: inline-flex;
+    font-size: 8px;
+    font-weight: 700;
+    height: 12px;
+    justify-content: center;
+    line-height: 1;
+    min-width: 12px;
+    padding: 0 2px;
+    pointer-events: none;
+    position: absolute;
+    right: -6px;
+    z-index: 2;
+}
+.quest-ui-detail-available {
+    background: var(--status-danger);
+}
+.quest-ui-detail-in-progress {
+    background: var(--status-warning);
+    color: var(--background-base-lowest, #030f08);
+}
+.quest-ui-detail-claimable {
+    background: var(--status-positive);
+    color: var(--background-base-lowest, #030f08);
+}
+.quest-ui-status-tooltip {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 176px;
+    padding: 2px 1px;
+    text-align: left;
+}
+.quest-ui-status-tooltip > strong {
+    color: var(--text-strong, var(--header-primary, #d5f7e4));
+    font-size: 13px;
+    line-height: 16px;
+}
+.quest-ui-status-tooltip-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.quest-ui-status-tooltip-grid > span {
+    align-items: center;
+    display: flex;
+    font-size: 12px;
+    gap: 6px;
+    line-height: 15px;
+}
+.quest-ui-status-tooltip-grid > span::before {
+    background: currentColor;
+    border-radius: 2px;
+    content: "";
+    flex: 0 0 6px;
+    height: 6px;
+    width: 6px;
+}
+.quest-ui-status-tooltip-grid b {
+    font-weight: 750;
+}
+.quest-ui-tooltip-in-progress {
+    color: var(--status-warning);
+}
+.quest-ui-tooltip-claimable {
+    color: var(--status-positive);
+}
+.quest-ui-tooltip-available {
+    color: var(--status-danger);
+}
+.quest-ui-tooltip-total,
+.quest-ui-tooltip-expiry {
+    color: var(--text-muted, #a5d5bc);
+    font-size: 11px;
+    line-height: 14px;
+}
+.quest-ui-tooltip-expiry {
+    border-top: 1px solid var(--border-subtle, rgba(115,255,175, 0.08));
+    padding-top: 6px;
+}
+.quest-ui-dashboard {
+    background: var(--background-base-lowest, var(--background-primary, #030f08));
+    border: 1px solid var(--border-subtle, rgba(115,255,175, 0.08));
+    border-radius: 2px;
+    box-shadow: var(--shadow-high, 0 12px 34px var(--quest-ui-theme-popout-shadow));
+    color: var(--text-default, var(--header-primary));
+    display: flex;
+    flex-direction: column;
+    max-height: min(668px, calc(100vh - 72px));
+    overflow: hidden;
+    width: min(640px, calc(100vw - 24px));
+}
+.quest-ui-dashboard-header {
+    background: var(--background-base-lowest, var(--background-primary, #030f08));
+    border-bottom: 1px solid var(--border-subtle, rgba(115,255,175, 0.08));
+    padding: 14px 15px 12px;
+}
+.quest-ui-dashboard-summary {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    gap: 8px;
+    margin-top: 5px;
+}
+.quest-ui-summary-in-progress {
+    color: var(--status-warning);
+}
+.quest-ui-summary-claimable {
+    color: var(--status-positive);
+}
+.quest-ui-summary-available {
+    color: var(--status-danger);
+}
+.quest-ui-dashboard-orb-balance {
+    align-items: center;
+    appearance: none;
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    min-width: 0;
+}
+.quest-ui-dashboard-orb-balance:disabled {
+    cursor: default;
+}
+.quest-ui-dashboard-orb-balance:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-360, #9dffd1));
+    outline-offset: 2px;
+}
+.quest-ui-dashboard-orb-balance > strong {
+    white-space: nowrap;
+}
+.quest-ui-dashboard-orb-balance.is-unavailable > strong {
+    color: var(--text-muted);
+}
+.quest-ui-filter-button,
+.quest-ui-dashboard-primary-action {
+    cursor: pointer;
+    font: inherit;
+}
+.quest-ui-filter-button {
+    align-items: center;
+    background: color-mix(in srgb, var(--brand-500, #47dca0) 5%, var(--background-base-low, #06150d));
+    border: 1px solid color-mix(in srgb, var(--brand-500, #47dca0) 34%, transparent);
+    border-radius: 2px;
+    box-shadow:
+        0 1px 3px var(--quest-ui-dashboard-filter-shadow-rest),
+        inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #47dca0) 7%, transparent);
+    color: var(--interactive-normal);
+    display: inline-flex;
+    flex: 0 0 34px;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+    position: relative;
+    transition: background-color 120ms ease, box-shadow 120ms ease, color 120ms ease, transform 120ms ease;
+    width: 34px;
+}
+.quest-ui-filter-button:hover {
+    background: color-mix(in srgb, var(--brand-500, #47dca0) 9%, var(--background-base-low, #06150d));
+    box-shadow:
+        0 3px 8px var(--quest-ui-dashboard-filter-shadow-hover),
+        inset 0 0 0 1px color-mix(in srgb, var(--brand-500, #47dca0) 10%, transparent);
+    color: var(--interactive-hover);
+    transform: translateY(-1px);
+}
+.quest-ui-filter-icon {
+    fill: none;
+    height: 18px;
+    stroke: currentColor;
+    width: 18px;
+}
+.quest-ui-dashboard-content {
+    background: var(--background-base-lowest, var(--background-primary, #030f08));
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px;
+    scrollbar-gutter: stable;
+}
+.quest-ui-card {
+    --quest-ui-accent: var(--interactive-muted);
+    align-items: center;
+    background: var(--background-base-low, var(--background-secondary, #06150d));
+    border: 1px solid var(--border-subtle, rgba(115,255,175, 0.09));
+    border-radius: 2px;
+    box-sizing: border-box;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 56px minmax(0, 1fr) 82px;
+    min-height: 118px;
+    padding: 13px 14px;
+    transition: background-color 120ms ease, border-color 120ms ease;
+}
+.quest-ui-card:hover {
+    background: var(--background-base-lower, var(--background-secondary-alt, #06170e));
+    border-color: var(--border-normal, rgba(115,255,175, 0.14));
+}
+.quest-ui-card-expired {
+
+    opacity: .82;
+}
+.quest-ui-artwork {
+    align-self: center;
+    border-radius: 2px;
+    height: 56px;
+    overflow: visible;
+    position: relative;
+    width: 56px;
+}
+.quest-ui-artwork-fallback,
+.quest-ui-artwork-image {
+    border-radius: 0;
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 4px, 2px 2px, 4px 2px);
+    height: 56px;
+    inset: 0;
+    position: absolute;
+    width: 56px;
+}
+.quest-ui-artwork-fallback {
+    align-items: center;
+    background: color-mix(in srgb, var(--quest-ui-accent) 15%, var(--background-base-lower, #06170e));
+    border: 1px solid color-mix(in srgb, var(--quest-ui-accent) 26%, transparent);
+    box-sizing: border-box;
+    color: var(--quest-ui-accent);
+    display: flex;
+    justify-content: center;
+}
+.quest-ui-artwork-fallback svg {
+    fill: currentColor;
+    height: 27px;
+    width: 27px;
+}
+.quest-ui-artwork-image {
+    background: var(--background-base-lower, #06170e);
+    object-fit: cover;
+}
+.quest-ui-type-badge {
+    align-items: center;
+    background: var(--background-base-lowest, #030f08);
+    border: 2px solid var(--background-base-low, #06150d);
+    border-radius: 0;
+    bottom: -5px;
+    color: var(--quest-ui-accent);
+    display: flex;
+    height: 20px;
+    justify-content: center;
+    position: absolute;
+    right: -5px;
+    width: 20px;
+    z-index: 2;
+    border-image: var(--terminal-frame-muted) 5 / 4px / 0 stretch;
+    clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);
+}
+.quest-ui-type-badge svg {
+    fill: currentColor;
+    height: 13px;
+    width: 13px;
+}
+.quest-ui-task-icon-cutout {
+    fill: var(--background-base-lowest, #030f08);
+}
+.quest-ui-card-main {
+    min-width: 0;
+}
+.quest-ui-card-title-cluster {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 7px;
+    min-width: 0;
+}
+.quest-ui-card-open-quest {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 1 auto;
+    gap: 6px;
+    max-width: 100%;
+    min-width: 0;
+    padding: 0;
+    text-align: left;
+    text-decoration: none;
+}
+.quest-ui-card-open-quest:hover .quest-ui-card-title {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.quest-ui-card-open-quest:focus-visible {
+    outline: 2px solid var(--quest-ui-theme-accent);
+    outline-offset: 2px;
+}
+.quest-ui-card-open-icon {
+    color: var(--quest-ui-theme-text-strong);
+    fill: none;
+    flex: 0 0 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    width: 16px;
+}
+.quest-ui-card-title {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--text-strong, var(--header-primary));
+    display: -webkit-box;
+    flex: 0 1 auto;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 18px;
+    max-height: 36px;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+.quest-ui-card-status-line {
+    align-items: center;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    gap: 4px 6px;
+    line-height: 16px;
+    margin-top: 5px;
+    min-width: 0;
+}
+.quest-ui-card-status-dot {
+    background: var(--quest-ui-accent);
+
+    flex: 0 0 7px;
+    height: 7px;
+    width: 7px;
+}
+.quest-ui-card-status {
+    color: var(--quest-ui-accent);
+    flex: 0 0 auto;
+    font-weight: 600;
+}
+.quest-ui-card-separator {
+    color: var(--text-muted);
+    flex: 0 0 auto;
+}
+.quest-ui-card-progress-text {
+    color: var(--text-muted);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.quest-ui-card-meta-row {
+    align-items: center;
+    display: flex;
+    font-size: 11.5px;
+    gap: 5px 10px;
+    line-height: 16px;
+    margin-top: 7px;
+    min-width: 0;
+}
+.quest-ui-card-reward {
+    align-items: center;
+    color: var(--text-default, var(--header-secondary));
+    display: inline-flex;
+    gap: 4px;
+    min-width: 0;
+    overflow: hidden;
+}
+.quest-ui-card-reward > span {
+    color: var(--text-muted);
+    flex: 0 0 auto;
+}
+.quest-ui-card-reward > strong {
+    color: #f0baff;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.quest-ui-reward-orbs > strong {
+    color: #f0baff;
+}
+.quest-ui-orb-large > strong {
+    color: #f0baff;
+}
+.quest-ui-orb-boosted > strong {
+    color: #f0baff;
+    text-shadow: 0 0 10px color-mix(in srgb, var(--status-warning) 24%, transparent);
+}
+.quest-ui-orb-glyph {
+    flex: 0 0 15px;
+    height: 15px;
+    width: 15px;
+}
+.quest-ui-card-side {
+    align-items: center;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: center;
+    min-width: 0;
+}
+.quest-ui-card-expiry {
+    font-size: 10.5px;
+    font-weight: 650;
+    line-height: 12px;
+    max-width: 100%;
+    text-align: center;
+    white-space: nowrap;
+}
+.quest-ui-expiry-normal {
+    color: var(--status-positive);
+}
+.quest-ui-expiry-warning {
+    color: var(--status-warning);
+}
+.quest-ui-expiry-danger,
+.quest-ui-expiry-expired {
+    color: var(--status-danger);
+}
+.quest-ui-progress-ring {
+    --quest-ui-ring: var(--quest-ui-accent);
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 56px;
+    height: 56px;
+    justify-content: center;
+    position: relative;
+    width: 56px;
+}
+.quest-ui-progress-ring > svg:first-child {
+    height: 56px;
+    inset: 0;
+    position: absolute;
+    width: 56px;
+}
+.quest-ui-progress-track {
+    fill: #35594a;
+    stroke: none;
+}
+.quest-ui-progress-value {
+    fill: var(--quest-ui-ring);
+    stroke: none;
+}
+.quest-ui-progress-ring > span {
+    color: var(--text-strong, var(--header-primary));
+    font-size: 12px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px #020805, 0 0 3px #020805;
+    position: relative;
+    z-index: 1;
+}
+.quest-ui-progress-state-icon {
+    fill: var(--quest-ui-ring);
+    height: 27px;
+    position: relative;
+    width: 27px;
+    z-index: 1;
+}
+.quest-ui-dashboard-empty {
+    align-items: center;
+    color: var(--text-muted);
+    display: flex;
+    flex: 1 0 292px;
+    flex-direction: column;
+    justify-content: center;
+    padding: 22px 18px 26px;
+    text-align: center;
+}
+.quest-ui-empty-illustration {
+    align-items: center;
+    display: flex;
+    height: 92px;
+    justify-content: center;
+    margin-bottom: 10px;
+    width: 160px;
+}
+.quest-ui-empty-quest-icon {
+    align-items: center;
+    background:
+        radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--brand-500, #47dca0) 22%, transparent), transparent 68%);
+    border-radius: 2px;
+    color: var(--brand-360, #9dffd1);
+    display: flex;
+    height: 82px;
+    justify-content: center;
+    width: 82px;
+}
+.quest-ui-empty-quest-icon > svg {
+    fill: currentColor;
+    height: 52px;
+    width: 52px;
+}
+.quest-ui-dashboard-empty strong {
+    color: var(--text-strong, var(--header-primary));
+    font-size: 15px;
+    margin-top: 2px;
+}
+.quest-ui-dashboard-empty > span {
+    font-size: 12px;
+    line-height: 18px;
+    margin-top: 7px;
+}
+.quest-ui-dashboard-empty-actions {
+    display: flex;
+    gap: 9px;
+    justify-content: center;
+    margin-top: 18px;
+    width: min(100%, 310px);
+}
+.quest-ui-dashboard-primary-action {
+    align-items: center;
+    border: 0;
+    border-radius: 2px;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 5px;
+    justify-content: center;
+    padding: 9px 12px;
+    background: var(--brand-500, var(--blurple-50));
+    color: var(--text-strong, var(--header-primary, #d5f7e4));
+    flex: 1 1 0;
+}
+.quest-ui-dashboard-primary-action:hover {
+    filter: brightness(1.08);
+}
+
+@media (max-width: 520px) {
+    .quest-ui-card-title-cluster {
+        align-items: flex-start;
+    }
+    .quest-ui-card-title-cluster > .quest-ui-card-title,
+    .quest-ui-card-open-quest {
+        flex-basis: 100%;
+    }
+    .quest-ui-dashboard {
+        width: calc(100vw - 16px);
+    }
+    .quest-ui-card {
+        gap: 9px;
+        grid-template-columns: 48px minmax(0, 1fr) 72px;
+        padding: 11px;
+    }
+    .quest-ui-artwork,
+.quest-ui-artwork-fallback,
+.quest-ui-artwork-image {
+        height: 48px;
+        width: 48px;
+    }
+    .quest-ui-type-badge {
+        bottom: -4px;
+        right: -4px;
+    }
+    .quest-ui-progress-ring,
+.quest-ui-progress-ring > svg:first-child {
+        height: 52px;
+        width: 52px;
+    }
+    .quest-ui-card-expiry {
+        max-width: 72px;
+        white-space: normal;
+    }
+}
+
+/* Update attention on the Quest shortcut. */
+.quest-ui-update-attention-badge {
+    align-items: center;
+    border: 0;
+    border-radius: 2px;
+    box-shadow: none;
+    box-sizing: border-box;
+    color: var(--text-strong, var(--header-primary, #d5f7e4));
+    display: inline-flex;
+    font-size: 8px;
+    font-weight: 900;
+    height: 12px;
+    justify-content: center;
+    line-height: 1;
+    outline: 0;
+    padding: 0;
+    pointer-events: none;
+    position: absolute;
+    right: -4px;
+    top: -4px;
+    width: 12px;
+    z-index: 3;
+}
+.quest-ui-update-attention-badge.is-routine {
+    background: var(--brand-360, #9dffd1);
+}
+.quest-ui-update-attention-badge.is-recommended {
+    background: var(--status-warning, #ffe052);
+    color: var(--background-base-lowest, #030f08);
+}
+.quest-ui-critical-update-icon-wrap {
+    color: var(--status-danger, #ff626d);
+}
+.quest-ui-critical-update-icon {
+    fill: none;
+    height: 20px !important;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    width: 20px !important;
+}
+
+/* Shortcut badge cleanup for custom Discord themes. */.quest-ui-update-attention-badge > svg {
+    fill: none;
+    height: 8px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2.1;
+    width: 8px;
+}
+.quest-ui-enrollable [class*="iconBadge"],
+.quest-ui-enrolled [class*="iconBadge"],
+.quest-ui-claimable [class*="iconBadge"] {
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+/* Pixel sampling is exclusive to successfully converted thumbnails. */
+.quest-ui-artwork-image[data-terminal-pixel="true"] {
+    image-rendering: pixelated;
+}
+.quest-ui-artwork::after {
+    content: "";
+    inset: 0;
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+    border: 1px solid transparent;
+    border-image: var(--terminal-artwork-frame, url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2379f5b9%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E")) 5 / 5px / 0 stretch;
+}
+.quest-ui-artwork:has(> img[data-terminal-pixel="true"])::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: linear-gradient(0deg, rgba(0,8,4,.045) 0 8%, transparent 8%),
+        linear-gradient(90deg, rgba(0,8,4,.035) 0 8%, transparent 8%);
+    background-size: var(--terminal-artwork-cell, 100%) var(--terminal-artwork-cell, 100%);
+}
+.quest-ui-card-status-dot {
+    border-radius: 0;
+    box-shadow: 0 0 5px color-mix(in srgb, var(--quest-ui-accent) 65%, transparent);
+}
+.quest-ui-card-available { --quest-ui-accent: #ff626d; }
+.quest-ui-card-in-progress { --quest-ui-accent: #ffe052; }
+.quest-ui-card-claimable { --quest-ui-accent: #23f57b; }
+.quest-ui-card-claimed { --quest-ui-accent: #64dfff; }
+.quest-ui-card-expired { --quest-ui-accent: #a5b9ae; }
+
+
+.quest-ui-card-open-icon {
+    mask: var(--terminal-glyph-external) center / contain no-repeat;
+    background-color: currentColor;
+}
+.quest-ui-card-open-icon > * { opacity: 0; }

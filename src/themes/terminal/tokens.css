@@ -1,0 +1,71 @@
+/* Terminal theme palette and reusable values.
+ * Themes own their complete styles, including layout and interaction presentation.
+ * Tokens are an internal convenience, not a limit on theme design.
+ */
+.quest-ui-theme-terminal {
+    /* Small stepped frames for controls and semantic labels. */
+    --terminal-frame-mint: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2366dba1%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-frame-labeled-control: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2379f5b9%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%202H11V3H13V5H15V11H13V13H11V14H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-frame-muted: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%234d9673%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-frame-green: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2331ef91%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-frame-yellow: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23ffe052%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-frame-purple: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23dfa4ff%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E");
+    /* Native BroomIcon silhouette, sampled at 48x48 with its original 1.85-unit stroke. */
+    --terminal-glyph-check: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M18%206h3v1h-3zM17%207h4v1h-4zM16%208h5v1h-5zM15%209h5v1h-5zM14%2010h5v1h-5zM4%2011h3v1h-3zM13%2011h5v1h-5zM4%2012h4v1h-4zM12%2012h5v1h-5zM4%2013h5v1h-5zM11%2013h5v1h-5zM5%2014h10v1h-10zM6%2015h8v1h-8zM7%2016h6v1h-6zM8%2017h4v1h-4z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-glyph-external: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M12%202h10v1h-10zM12%203h10v1h-10zM3%204h10v1h-10zM18%204h4v1h-4zM3%205h10v1h-10zM17%205h5v1h-5zM3%206h2v1h-2zM16%206h3v1h-3zM20%206h2v1h-2zM3%207h2v1h-2zM15%207h3v1h-3zM20%207h2v1h-2zM3%208h2v1h-2zM14%208h3v1h-3zM20%208h2v1h-2zM3%209h2v1h-2zM13%209h3v1h-3zM20%209h2v1h-2zM3%2010h2v1h-2zM12%2010h3v1h-3zM20%2010h2v1h-2zM3%2011h2v1h-2zM11%2011h3v1h-3zM18%2011h4v1h-4zM3%2012h2v1h-2zM10%2012h3v1h-3zM18%2012h2v1h-2zM3%2013h2v1h-2zM10%2013h2v1h-2zM18%2013h2v1h-2zM3%2014h2v1h-2zM18%2014h2v1h-2zM3%2015h2v1h-2zM18%2015h2v1h-2zM3%2016h2v1h-2zM18%2016h2v1h-2zM3%2017h2v1h-2zM18%2017h2v1h-2zM3%2018h2v1h-2zM18%2018h2v1h-2zM3%2019h17v1h-17zM3%2020h17v1h-17z%22%2F%3E%3C%2Fsvg%3E");
+    /* Exact Phosphor Palette Bold silhouette (see THIRD_PARTY_NOTICES.md), sampled at 48x48. */
+    --terminal-glyph-refresh: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M19.4%207.35A8.5%208.5%200%201%200%2020.5%2014h-2.05A6.5%206.5%200%201%201%2017.9%208.8L15%2011.7h6.5V5.2l-2.1%202.15Z%22%2F%3E%3C%2Fsvg%3E");
+    --quest-ui-theme-accent: #60ffb3;
+    --quest-ui-dashboard-base: #030f08;
+    --quest-ui-dashboard-card: #05130b;
+
+    --quest-ui-theme-control: #05130b;
+    --quest-ui-theme-control-hover: #07180f;
+
+    --quest-ui-theme-text-strong: #eafff1;
+    --quest-ui-theme-ignored: #df9cff;
+
+    --quest-ui-theme-border-control: rgba(115,255,175, .105);
+
+    --quest-ui-theme-popout-shadow: rgba(0, 0, 0, .42);
+    --quest-ui-dashboard-filter-shadow-rest: rgba(0, 0, 0, .24);
+    --quest-ui-dashboard-filter-shadow-hover: rgba(0, 0, 0, .28);
+
+}
+
+/* Terminal palette also resolves Discord's native presentation variables inside owned roots. */
+.quest-ui-theme-terminal {
+    --background-base-low: #071b12;
+    --background-base-lower: #05130d;
+    --background-base-lowest: #020e09;
+    --background-secondary: #071b12;
+    --background-floating: #061810;
+    --background-modifier-accent: #215e43;
+    --background-modifier-hover: #102b1d;
+    --background-modifier-selected: #153b26;
+    --border-subtle: #32674b;
+    --header-primary: #dffff0;
+    --header-secondary: #c1e7d4;
+    --text-normal: #e5fbed;
+    --text-default: #e5fbed;
+    --text-strong: #eafff1;
+    --text-muted: #b2d6c4;
+    --text-link: #78e6ff;
+    --interactive-normal: #c6efda;
+    --interactive-muted: #789b88;
+    --interactive-hover: #e0ffec;
+    --interactive-active: #9dffd1;
+    --brand-360: #9dffd1;
+    --brand-500: #47dca0;
+    --brand-560: #238b60;
+    --brand-600: #185a3e;
+    --status-positive: #23f57b;
+    --status-warning: #ffe052;
+    --status-danger: #ff626d;
+    --status-positive-background: #0b3520;
+    font-family: "Cascadia Mono", "Consolas", "Liberation Mono", monospace;
+}
+.quest-ui-theme-terminal button,
+.quest-ui-theme-terminal input {
+    font-family: inherit;
+}

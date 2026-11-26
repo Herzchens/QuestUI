@@ -1,0 +1,182 @@
+.quest-ui-card-actions {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+.quest-ui-card-action {
+    align-items: center;
+    background: #1e1024;
+
+    border-radius: 2px;
+
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 600;
+    justify-content: center;
+    line-height: 16px;
+    min-height: 28px;
+    padding: 6px 10px;
+    white-space: nowrap;
+}
+.quest-ui-card-action:hover:not(:disabled) {
+    background: #34213e;
+}
+.quest-ui-card-action:active:not(:disabled) {
+    background: #291730;
+}
+.quest-ui-card-action:disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+.quest-ui-card-action-claim {
+    background: #142811;
+}
+.quest-ui-card-action-claim:hover:not(:disabled),
+.quest-ui-card-action-claim:active:not(:disabled) {
+    background: var(--status-positive-background, #31ef91);
+}
+.quest-ui-card-action-ignore {
+    align-items: center;
+    background: var(--background-mod-strong, rgba(115,255,175, 0.12));
+    border: 1px solid var(--border-subtle, rgba(115,255,175, 0.1));
+    color: var(--interactive-normal);
+    display: inline-flex;
+    font-size: 0;
+    height: 28px;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0;
+    width: 28px;
+}
+.quest-ui-card-action-ignore:hover:not(:disabled),
+.quest-ui-card-action-ignore:active:not(:disabled) {
+    background: var(--background-mod-stronger, rgba(115,255,175, 0.18));
+}
+.quest-ui-card-action-ignore:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-500));
+    outline-offset: 2px;
+}
+.quest-ui-card-action-ignore.is-unignore {
+    border-color: color-mix(in srgb, var(--quest-ui-theme-ignored) 46%, transparent);
+    color: var(--quest-ui-theme-ignored);
+}
+.quest-ui-card-orion-state,
+.quest-ui-card-ignored-state {
+    --quest-ui-orion-state-color: var(--interactive-muted);
+    align-items: center;
+    background: color-mix(in srgb, var(--quest-ui-orion-state-color) 11%, transparent);
+    border: 1px solid color-mix(in srgb, var(--quest-ui-orion-state-color) 38%, transparent);
+    border-radius: 2px;
+    box-sizing: border-box;
+    color: var(--quest-ui-orion-state-color);
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 9px;
+    font-weight: 750;
+    height: 20px;
+    letter-spacing: .035em;
+    line-height: 1;
+    padding: 0 6px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-image: var(--terminal-frame-muted) 5 / 4px / 0 stretch;
+    border-image: var(--terminal-frame-purple) 5 / 4px / 0 stretch;
+}
+.quest-ui-card-ignored-state {
+    --quest-ui-orion-state-color: var(--quest-ui-theme-ignored);
+}
+.quest-ui-card-ignored {
+    border-color: color-mix(in srgb, var(--quest-ui-theme-ignored) 28%, var(--border-subtle, rgba(115,255,175, 0.08)));
+}
+.quest-ui-card-orion-state.is-started {
+    --quest-ui-orion-state-color: var(--status-positive);
+    border-image: var(--terminal-frame-green) 5 / 4px / 0 stretch;
+}
+.quest-ui-card-orion-state.is-waiting,
+.quest-ui-card-orion-state.is-paused {
+    --quest-ui-orion-state-color: var(--status-warning, #ffe052);
+    border-image: var(--terminal-frame-yellow) 5 / 4px / 0 stretch;
+}
+.quest-ui-card-orion-state.is-stopped {
+    --quest-ui-orion-state-color: var(--interactive-muted);
+}
+.quest-ui-card-orion-control {
+    align-items: center;
+    background: var(--background-mod-strong, rgba(115,255,175, 0.12));
+    border: 1px solid var(--border-subtle, rgba(115,255,175, 0.08));
+    border-radius: 2px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    display: inline-flex;
+    height: 28px;
+    justify-content: center;
+    padding: 0;
+    width: 28px;
+    border-image: var(--terminal-frame-mint) 5 / 5px / 0 stretch;
+}
+.quest-ui-card-orion-control svg {
+    fill: currentColor;
+    height: 15px;
+    width: 15px;
+}
+.quest-ui-card-orion-control.is-start,
+.quest-ui-card-orion-control.is-resume {
+    color: var(--status-positive);
+    border-image: var(--terminal-frame-green) 5 / 5px / 0 stretch;
+}
+.quest-ui-card-orion-control.is-pause {
+    color: var(--status-warning, #ffe052);
+    border-image: var(--terminal-frame-yellow) 5 / 5px / 0 stretch;
+}
+.quest-ui-card-orion-control:hover:not(:disabled) {
+    background: var(--background-mod-stronger, rgba(115,255,175, 0.18));
+}
+.quest-ui-card-orion-control:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-500));
+    outline-offset: 2px;
+}
+.quest-ui-card-orion-control:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+/* Ignore/Unignore uses the real SVG rendered by QuestCardActions. */
+/* Keep the Ignore glyph self-contained under aggressive client/custom-theme SVG rules. */
+.quest-ui-card-action-ignore > .quest-ui-card-action-ignore-glyph {
+    display: block !important;
+    fill: none !important;
+    flex: 0 0 18px;
+    height: 18px !important;
+    overflow: visible;
+    stroke: currentColor !important;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2 !important;
+    vector-effect: non-scaling-stroke;
+    width: 18px !important;
+}
+.quest-ui-card-action-ignore > .quest-ui-card-action-ignore-glyph > path {
+    display: block !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+}
+
+.quest-ui-card-action {
+    border: 1px solid #df9cff;
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23df9cff%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+    color: #f1c9ff;
+}
+.quest-ui-card-action-claim {
+    border-color: #b9ff8b;
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23b9ff8b%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+    color: #dfffad;
+}
+.quest-ui-card-action-ignore { border-color: #df9cff; border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23df9cff%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch; }
+
+
+.quest-ui-card-action-claim:not(:disabled) {
+    filter: drop-shadow(0 0 4px rgba(185,255,139,.40));
+}

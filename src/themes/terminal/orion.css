@@ -1,0 +1,127 @@
+.quest-ui-orion-icon-button {
+    align-items: center;
+    background: var(--background-mod-strong, rgba(115,255,175, 0.12));
+    border: 1px solid var(--border-subtle, rgba(115,255,175, 0.08));
+    border-radius: 2px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    display: inline-flex;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+    width: 34px;
+}
+.quest-ui-orion-icon-button svg {
+    fill: currentColor;
+    height: 17px;
+    width: 17px;
+}
+.quest-ui-orion-icon-button.is-start,
+.quest-ui-orion-icon-button.is-resume {
+    color: var(--status-positive);
+}
+.quest-ui-orion-icon-button.is-pause {
+    color: var(--status-warning, #ffe052);
+}
+.quest-ui-orion-icon-button.is-stop {
+    color: var(--status-danger);
+}
+.quest-ui-orion-icon-button:hover:not(:disabled) {
+    background: var(--background-mod-stronger, rgba(115,255,175, 0.18));
+}
+.quest-ui-orion-icon-button:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-500));
+    outline-offset: 2px;
+}
+.quest-ui-orion-icon-button:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+@keyframes quest-ui-orion-connected-breathe {
+    0%, 100% {
+        opacity: 0.68;
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-positive) 0%, transparent);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 9px 2px color-mix(in srgb, var(--status-positive) 42%, transparent);
+    }
+}
+
+@keyframes quest-ui-orion-starting-breathe {
+    0%, 100% {
+        opacity: 0.62;
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-warning, #ffe052) 0%, transparent);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 8px 2px color-mix(in srgb, var(--status-warning, #ffe052) 40%, transparent);
+    }
+}
+.quest-ui-orion-status {
+    align-items: center;
+    color: var(--text-muted);
+    display: inline-flex;
+    flex: 0 1 auto;
+    font-size: 12px;
+    min-width: 0;
+}
+.quest-ui-orion-status-dot {
+    background: var(--interactive-muted);
+    border-radius: 2px;
+    flex: 0 0 8px;
+    height: 8px;
+    width: 8px;
+}
+.quest-ui-orion-status.is-connected .quest-ui-orion-status-dot {
+    animation: quest-ui-orion-connected-breathe 2.7s ease-in-out infinite;
+    background: var(--status-positive);
+}
+.quest-ui-orion-status.is-connected.is-engine-idle .quest-ui-orion-status-dot {
+    animation: none;
+    background: var(--interactive-muted);
+    box-shadow: none;
+    opacity: 1;
+}
+.quest-ui-orion-status.is-starting .quest-ui-orion-status-dot {
+    animation: quest-ui-orion-starting-breathe 1.65s ease-in-out infinite;
+    background: var(--status-warning, #ffe052);
+}
+.quest-ui-orion-status.is-disabled .quest-ui-orion-status-dot,
+.quest-ui-orion-status.is-integration-off .quest-ui-orion-status-dot {
+    background: var(--interactive-muted);
+}
+.quest-ui-orion-status-warning,
+.quest-ui-orion-status-question {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 12px;
+    font-size: 12px;
+    font-weight: 800;
+    justify-content: center;
+    line-height: 1;
+    width: 12px;
+}
+.quest-ui-orion-status-warning {
+    color: var(--status-warning, #ffe052);
+}
+.quest-ui-orion-status-question {
+    color: var(--text-muted);
+}
+.quest-ui-orion-status.is-connected {
+    color: var(--text-default, var(--header-secondary));
+}
+.quest-ui-orion-status.is-version-incompatible,
+.quest-ui-orion-status.is-integration-unavailable {
+    color: var(--status-warning, #ffe052);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-orion-status.is-connected .quest-ui-orion-status-dot,
+.quest-ui-orion-status.is-starting .quest-ui-orion-status-dot {
+        animation: none;
+        box-shadow: none;
+        opacity: 1;
+    }
+}

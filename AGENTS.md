@@ -248,6 +248,8 @@ Feedback channel is purpose-specific, not toast-only. Short-lived successful act
 
 ## Dashboard presentation invariants
 
+- Terminal visual contract: do not use plain rectangular or rounded-rectangle modern UI outlines for buttons, badges, chips, or panel frames. Use the theme's stepped pixel/ASCII-inspired geometry or a deliberately frameless glyph, preserving native icon silhouettes, semantic colors, focus indication, and hit targets. Intentional raster pixels, scanlines, checkbox cores, and other grid primitives are exempt. The shortcut's miniature count badge is a round counter (a pill only for longer counts), and notification unread dots are circular. Audit hover, focus, disabled, and expanded states as well as idle.
+
 - Visible title: **Quest Dashboard** + Discord's native Quest icon.
 - Use Discord's native Quest Orb multiplier classifier as the source of truth when available: `NITRO`, `XBOX_GAME_PASS`, `UPSELL`, or `INELIGIBLE`. Never infer Xbox from `premiumOrbQuantity` or from the absence of Nitro.
 - The header source badge is **Nitro** for Nitro eligibility and **Xbox+** for Xbox Game Pass eligibility, using an Xbox brand mark rather than a hand-drawn approximation. Prefer Discord's native classifier; if that exact webpack surface is unavailable, read Discord's `MORE_QUEST_ORBS` perk source directly. Nitro wins if both perk sources are present. Preserve the legacy Nitro identity badge for Nitro tiers that are not multiplier-eligible, and never infer Xbox from `!Nitro`.

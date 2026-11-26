@@ -47,6 +47,14 @@ import sakuraSceneAssets from "./sakura/scene-assets.css?managed";
 import sakuraOrnaments from "./sakura/ornaments.css?managed";
 import sakuraArtDirection from "./sakura/art-direction.css?managed";
 
+import terminalTokens from "./terminal/tokens.css?managed";
+import terminalDashboardComponents from "./terminal/dashboard-components.css?managed";
+import terminalScrollbar from "./terminal/scrollbar.css?managed";
+import terminalQuestActions from "./terminal/quest-actions.css?managed";
+import terminalQuestReload from "./terminal/quest-reload.css?managed";
+import terminalOrion from "./terminal/orion.css?managed";
+import terminalDashboard from "./terminal/dashboard.css?managed";
+
 import type { DashboardTheme } from "./controller";
 
 export const DEFAULT_DASHBOARD_THEME_ID = "default";
@@ -120,6 +128,19 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             sakuraSceneAssets,
             sakuraOrnaments,
             sakuraArtDirection,
+        ]
+    },
+    {
+        id: "terminal",
+        label: "Terminal",
+        styles: [
+            terminalTokens,
+            terminalDashboardComponents,
+            terminalScrollbar,
+            terminalQuestActions,
+            terminalQuestReload,
+            terminalOrion,
+            terminalDashboard,
         ]
     }
 ];
