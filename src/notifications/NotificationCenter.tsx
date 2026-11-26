@@ -7,7 +7,8 @@ import { resolveQuestArtwork, type QuestTheme } from "../quests/presentation";
 import { findQuestByIdentity, safeQuestArtworkUrl, taskTypeForKey } from "../quests/presentationLogic";
 import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { formatQuestRewardLabel } from "../orbs/rewards";
-import { useDashboardThemeClassName } from "../themes/runtime";
+import { useDashboardThemeClassName, useDashboardThemeId } from "../themes/runtime";
+import { terminalArtworkGrid, useTerminalArtwork } from "../themes/terminal/useArtwork";
 import { UpdateCenterIcon } from "../updates/status";
 import {
     notificationCenterItems,
@@ -233,18 +234,22 @@ function NotificationQuestArtwork({ item, quest }: {
     const savedArtwork = safeQuestArtworkUrl(theme === "light" ? item.event.quest?.artworkLight : item.event.quest?.artworkDark)
         ?? safeQuestArtworkUrl(theme === "light" ? item.event.quest?.artworkDark : item.event.quest?.artworkLight);
     const imageUrl = resolveQuestArtwork(quest, theme) ?? savedArtwork;
+    const dashboardThemeId = useDashboardThemeId();
+    const pixelUrl = useTerminalArtwork(dashboardThemeId === "terminal", imageUrl, "notification");
+    const displayUrl = pixelUrl ?? imageUrl;
     const savedTask = item.event.quest?.taskType;
     const taskType = quest?.primaryTask?.type ?? quest?.tasks[0]?.type ?? taskTypeForKey(savedTask ?? "");
 
     return (
-        <span className="quest-ui-notification-center-row-artwork" aria-hidden="true">
+        <span className="quest-ui-notification-center-row-artwork" aria-hidden="true" style={terminalArtworkGrid(pixelUrl, "notification")}>
             <span className="quest-ui-notification-center-row-artwork-fallback">
                 <NotificationFallbackIcon item={item} />
             </span>
-            {imageUrl && (
+            {displayUrl && (
                 <img
-                    key={imageUrl}
-                    src={imageUrl}
+                    key={displayUrl}
+                    data-terminal-pixel={pixelUrl ? "true" : undefined}
+                    src={displayUrl}
                     alt=""
                     loading="lazy"
                     draggable={false}

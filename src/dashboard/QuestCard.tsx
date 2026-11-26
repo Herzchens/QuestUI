@@ -14,6 +14,7 @@ import { expiryUrgency, formatExpiry, formatQuestProgress } from "../quests/data
 import type { NormalizedQuest, QuestTaskType } from "../quests/data";
 import { useObsidianArtworkColor } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
+import { terminalArtworkGrid, useTerminalArtwork } from "../themes/terminal/useArtwork";
 import { SAKURA_PROGRESS_OUTLINE } from "../themes/sakura/progressShape";
 interface DiscordQuestCompletion {
     completedRatio: number;
@@ -178,14 +179,17 @@ function TaskTypeGlyph({ type }: { type: QuestTaskType; }) {
     );
 }
 
-function QuestArtwork({ imageUrl, type, eager = false }: { imageUrl: string | null; type: QuestTaskType; eager?: boolean; }) {
+function QuestArtwork({ imageUrl, type, eager = false, pixelUrl = null }: { imageUrl: string | null; type: QuestTaskType; eager?: boolean; pixelUrl?: string | null; }) {
+    const displayUrl = pixelUrl ?? imageUrl;
     return (
-        <div className="quest-ui-artwork" aria-hidden="true">
+        <div className="quest-ui-artwork" aria-hidden="true" style={terminalArtworkGrid(pixelUrl, "dashboard")}>
             <div className="quest-ui-artwork-fallback"><TaskTypeGlyph type={type} /></div>
-            {imageUrl && (
+            {displayUrl && (
                 <img
+                    key={displayUrl}
                     className="quest-ui-artwork-image"
-                    src={imageUrl}
+                    data-terminal-pixel={pixelUrl ? "true" : undefined}
+                    src={displayUrl}
                     alt=""
                     loading={eager ? "eager" : "lazy"}
                     draggable={false}
@@ -322,6 +326,8 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
     const artworkUrl = resolveQuestArtwork(quest, theme);
     const dashboardThemeId = useDashboardThemeId();
+    const terminal = dashboardThemeId === "terminal";
+    const terminalPixelUrl = useTerminalArtwork(terminal, artworkUrl, "dashboard");
     const obsidian = dashboardThemeId === "obsidian";
     const artworkColor = useObsidianArtworkColor(obsidian, artworkUrl);
     const now = Date.now();
@@ -359,7 +365,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
             data-sakura-ornament={dashboardThemeId === "sakura" ? sakuraOrnamentVariant : undefined}
             style={obsidian && artworkColor ? { "--obsidian-artwork-rgb": artworkColor.join(" ") } as CSSProperties : undefined}
         >
-            {!obsidian && dashboardThemeId !== "sakura" && artworkUrl && (
+            {!obsidian && dashboardThemeId !== "sakura" && dashboardThemeId !== "terminal" && artworkUrl && (
                 <span className="quest-ui-card-backdrop" aria-hidden="true">
                     <img
                         src={artworkUrl}
@@ -373,7 +379,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
             {dashboardThemeId === "sakura" && sakuraOrnamentVariant != null && (
                 <span className="quest-ui-sakura-card-art" aria-hidden="true" />
             )}
-            <QuestArtwork imageUrl={artworkUrl} type={taskType} eager={obsidian} />
+            <QuestArtwork imageUrl={artworkUrl} type={taskType} eager={obsidian} pixelUrl={terminalPixelUrl} />
 
             <div className="quest-ui-card-main">
                 <div className="quest-ui-card-title-cluster">

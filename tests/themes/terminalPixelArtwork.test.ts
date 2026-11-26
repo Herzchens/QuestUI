@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createArtworkQueue } from "../../src/themes/terminal/artworkQueue";
 import { parseTerminalArtworkKey, pixelateTerminalArtwork, terminalArtworkAccent, terminalArtworkKey, TERMINAL_ARTWORK_SIZES, TERMINAL_PALETTE_LIMIT } from "../../src/themes/terminal/pixelArtwork";
 
 assert.deepEqual(TERMINAL_ARTWORK_SIZES, { dashboard: 56, notification: 48 });
@@ -71,4 +72,55 @@ assert.deepEqual(pixelateTerminalArtwork(new Uint8ClampedArray(16), 2, 2), new U
 assert.throws(() => pixelateTerminalArtwork(new Uint8ClampedArray(4), 2, 2), RangeError);
 assert.throws(() => pixelateTerminalArtwork(new Uint8ClampedArray(65 * 4), 65, 1), RangeError);
 assert.throws(() => pixelateTerminalArtwork(new Uint8ClampedArray(4), 1, 1, 1), RangeError);
-console.log("Terminal pixel artwork tests passed");
+async function testQueue() {
+    const pending = new Map<string, { finish: (value: string | null) => void; signal: AbortSignal; }>();
+    let clock = 0, calls = 0;
+    const queue = createArtworkQueue((url, signal) => {
+        calls++;
+        return new Promise(resolve => {
+            pending.set(url, { finish: resolve, signal });
+            signal.addEventListener("abort", () => resolve(null), { once: true });
+        });
+    }, 1, 2, () => clock);
+    const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+    const a = queue.acquire("a"), shared = queue.acquire("a"), b = queue.acquire("b");
+    const overflow = queue.acquire("c");
+    assert.equal(await overflow.promise, null);
+    await flush();
+    assert.equal(calls, 1);
+    a.release();
+    assert.equal(pending.get("a")!.signal.aborted, false);
+    b.release();
+    assert.equal(await b.promise, null);
+    pending.get("a")!.finish("pixel-a");
+    assert.equal(await shared.promise, "pixel-a");
+    await flush();
+    assert.equal(await queue.acquire("a").promise, "pixel-a");
+    assert.equal(calls, 1);
+    shared.release();
+    const failure = queue.acquire("failure");
+    await flush();
+    pending.get("failure")!.finish(null);
+    assert.equal(await failure.promise, null);
+    await flush();
+    assert.equal(await queue.acquire("failure").promise, null);
+    clock = 31_000;
+    const retry = queue.acquire("failure");
+    await flush();
+    assert.equal(calls, 3);
+    retry.release();
+    assert.equal(await retry.promise, null);
+    await flush();
+    assert.equal(pending.get("failure")!.signal.aborted, true);
+    assert.equal(queue.peek("failure"), undefined);
+    const separate = createArtworkQueue(async key => key, 2, 4);
+    const [dashboardRaster, notificationRaster] = await Promise.all([
+        separate.acquire(dashboardKey).promise, separate.acquire(notificationKey).promise
+    ]);
+    assert.equal(dashboardRaster, dashboardKey);
+    assert.equal(notificationRaster, notificationKey);
+    assert.equal(separate.peek(dashboardKey), dashboardKey);
+    assert.equal(separate.peek(notificationKey), notificationKey);
+    console.log("Terminal pixel artwork and queue tests passed");
+}
+void testQueue().catch(error => { console.error(error); process.exitCode = 1; });
