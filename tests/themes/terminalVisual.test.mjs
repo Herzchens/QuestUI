@@ -166,6 +166,24 @@ check(decodeURIComponent(style(".quest-ui-reload-icon-button svg").maskImage).in
 check(decodeURIComponent(style(".quest-ui-plugin-settings-glyph").maskImage).includes("<circle"), "settings gear must have a defined central aperture");
 check(style(".quest-ui-sort-icon").maskImage !== "none", "pixel glyph must be active");
 check(decodeURIComponent(style(".quest-ui-sort-icon").maskImage).includes('viewBox="0 0 24 24"'), "glyph must use the fine 24-unit grid");
+check(style(".quest-ui-summary-all").borderImageSource !== "none" && style(".quest-ui-summary-all").borderImageSource !== style(".quest-ui-summary-available").borderImageSource, "summary frames must carry semantic colors");
+for (const chip of document.querySelectorAll(".quest-ui-summary-chip")) {
+    const parent = chip.getBoundingClientRect();
+    const child = chip.querySelector(".quest-ui-summary-chip-count").getBoundingClientRect();
+    check(parent.right - child.right >= 5 && child.top - parent.top >= 3 && parent.bottom - child.bottom >= 3, "count must fit within stepped summary frame");
+}
+const bridge = q(".quest-ui-status-bridge");
+check(getComputedStyle(bridge, "::before").content.includes(">> <<") && style(".quest-ui-status-bridge-node").display === "none", "Terminal bridge must be ASCII, not a diamond");
+const topbar = style(".quest-ui-dashboard-topbar");
+const headerRaster = decodeURIComponent(topbar.backgroundImage);
+check(headerRaster.includes('viewBox="0 0 208 48"'), "header must use the higher-detail phosphor artwork");
+check(topbar.backgroundPositionY === "100%" || topbar.backgroundPositionY === "bottom" || topbar.backgroundPositionY === "bottom 0px", "header artwork must sit on the separator");
+check(headerRaster.includes(" 46h1.6v1.6h-1.6z") && !headerRaster.includes(" 46h2v2h-2z"), "header artwork must reach the bottom without an extra solid baseline");
+check(topbar.borderBottomStyle === "dashed" && topbar.borderBottomColor !== "rgba(0, 0, 0, 0)", "restore the original dashed header separator");
+check(style(".quest-ui-claim-all-count").color === "rgb(5, 32, 18)" && style(".quest-ui-claim-all-count").fontSize === "11px", "Claim All count must be dark and readable");
+check(style(".quest-ui-dashboard-boost-source-tag.is-xbox").borderImageSource !== "none" && style(".quest-ui-dashboard-boost-source-tag.is-xbox").backgroundColor === "rgb(8, 32, 22)", "Xbox badge must use a dark stepped frame");
+check(decodeURIComponent(style(".quest-ui-dashboard-xbox-icon").maskImage).includes('viewBox="0 0 48 48"'), "Xbox glyph must use the native raster");
+check(decodeURIComponent(style(".quest-ui-dashboard-palette-icon").maskImage).includes('viewBox="0 0 48 48"'), "palette must retain a fine-grid native glyph");
 const artworkFrame = q(".quest-ui-artwork");
 const fallbackFrame = getComputedStyle(artworkFrame, "::after").borderImageSource;
 artworkFrame.style.setProperty("--terminal-artwork-frame", "url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3C/svg%3E')");

@@ -3458,6 +3458,23 @@
     background-image: repeating-linear-gradient(0deg, transparent 0 3px, rgba(80,255,155,.048) 3px 4px) !important;
     border-radius: 0;
 }
+.quest-ui-theme-terminal .quest-ui-dashboard-list-title::before {
+    content: ">\00a0";
+    color: #55ffa6;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-list-title {
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    color: #bcffcd;
+    text-shadow: 0 0 2px rgba(77,255,140,.25);
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-palette-button,
+.quest-ui-theme-terminal .quest-ui-dashboard-filter-control {
+    border-color: #5bdca1;
+}
+@media (max-width: 760px) {
+    .quest-ui-theme-terminal .quest-ui-dashboard-topbar { background-image: none !important; }
+}
+
 /* Raster-grid glyph silhouettes; controls retain their native handlers and accessible names. */
 .quest-ui-theme-terminal .quest-ui-sort-icon  {
     mask: var(--terminal-glyph-sort) center / contain no-repeat;
@@ -3510,6 +3527,44 @@
 .quest-ui-theme-terminal .quest-ui-toolbar-button.quest-ui-claim-all-button:disabled {
     border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23416853%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
 }
+.quest-ui-theme-terminal .quest-ui-dashboard-boost-source-tag.is-nitro {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23dfa4ff%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-boost-source-tag.is-xbox {
+    border-image: var(--terminal-frame-green) 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-xbox-icon {
+    mask: var(--terminal-glyph-xbox) center / contain no-repeat;
+    background-color: #31ef91;
+    filter: none;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-xbox-icon > * { opacity: 0; }
+.quest-ui-theme-terminal .quest-ui-version-chip.is-stable {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2372caff%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-version-chip.is-beta {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23ffe052%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-product-update-chip.is-current {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2331ef91%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-product-update-chip.is-available {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23dfa4ff%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-product-update-chip.is-error {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23ff626d%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-list-title::after {
+    content: "";
+    margin-left: 12px;
+    min-width: 0;
+    max-width: 180px;
+    flex: 1 1 120px;
+    height: 8px;
+    background: repeating-linear-gradient(125deg, transparent 0 4px, #2ba56b 4px 5px, transparent 5px 8px);
+    opacity: .7;
+}
+
 /* Theme/Sort/Filter portals keep their existing positioning and keyboard navigation. */
 .quest-ui-theme-terminal.quest-ui-filter-list {
     border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2379f5b9%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 6px / 0 stretch;
