@@ -11,6 +11,10 @@ const read = p => readFileSync(new URL(p, import.meta.url), "utf8");
 const registry = read("../../src/themes/registry.ts");
 const shellSource = read("../../src/dashboard/QuestDashboardShell.tsx");
 assert.ok(!shellSource.includes("quest-ui-terminal-footer"), "footer must be removed from source");
+const shapeSource = read("../../src/themes/terminal/progressShape.ts");
+assert.ok(shapeSource.includes("terminalProgressPixels(100)") && shapeSource.includes("h2v2h-2z"), "Terminal ring must use filled raster cells");
+const cardSource = read("../../src/dashboard/QuestCard.tsx");
+assert.ok(cardSource.includes('shapeRendering="crispEdges"') && cardSource.includes("progress={progress}"), "Terminal render must use the raster path and live ratio");
 const imports = new Map([...registry.matchAll(/import\s+(\w+)\s+from\s+"\.\/([^"]+)\?managed";/g)].map(m => [m[1], m[2]]));
 const order = registry.match(/id:\s*"terminal"[\s\S]*?styles:\s*\[([\s\S]*?)\]/)?.[1].split(",").map(s => s.trim()).filter(Boolean);
 assert.ok(order?.length && order.every(n => imports.get(n)?.startsWith("terminal/")), "Terminal must own its styles");
@@ -183,6 +187,15 @@ check(topbar.borderBottomStyle === "dashed" && topbar.borderBottomColor !== "rgb
 check(style(".quest-ui-claim-all-count").color === "rgb(5, 32, 18)" && style(".quest-ui-claim-all-count").fontSize === "11px", "Claim All count must be dark and readable");
 check(style(".quest-ui-dashboard-boost-source-tag.is-xbox").borderImageSource !== "none" && style(".quest-ui-dashboard-boost-source-tag.is-xbox").backgroundColor === "rgb(8, 32, 22)", "Xbox badge must use a dark stepped frame");
 check(decodeURIComponent(style(".quest-ui-dashboard-xbox-icon").maskImage).includes('viewBox="0 0 48 48"'), "Xbox glyph must use the native raster");
+const ringFixture = document.createElement("div");
+ringFixture.innerHTML = '<div class="quest-ui-progress-ring quest-ui-progress-claimed"><svg><path class="quest-ui-progress-track"/><path class="quest-ui-progress-state-ring"/></svg><svg class="quest-ui-progress-state-icon is-claimed"><path/></svg></div><div class="quest-ui-progress-ring quest-ui-progress-expired"><svg><path class="quest-ui-progress-state-ring"/></svg><svg class="quest-ui-progress-state-icon is-expired"><path/></svg></div><div class="quest-ui-progress-ring quest-ui-progress-in-progress"><svg><path class="quest-ui-progress-value"/></svg></div>';
+ringFixture.style.display = "none";
+q(".quest-ui-dashboard-shell").append(ringFixture);
+for (const selector of [".quest-ui-progress-track", ".quest-ui-progress-value", ".quest-ui-progress-claimed .quest-ui-progress-state-ring", ".quest-ui-progress-expired .quest-ui-progress-state-ring"]) {
+    const ring = style(selector);
+    check(ring.stroke === "none" && ring.fill !== "none", selector + " must paint raster fills, not smooth strokes");
+}
+check(style(".quest-ui-progress-claimed .quest-ui-progress-state-ring").fill !== style(".quest-ui-progress-expired .quest-ui-progress-state-ring").fill, "state ring colors must remain distinct");
 check(decodeURIComponent(style(".quest-ui-dashboard-palette-icon").maskImage).includes('viewBox="0 0 48 48"'), "palette must retain a fine-grid native glyph");
 const artworkFrame = q(".quest-ui-artwork");
 const fallbackFrame = getComputedStyle(artworkFrame, "::after").borderImageSource;

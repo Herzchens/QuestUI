@@ -17,6 +17,7 @@ import { useDashboardThemeId } from "../themes/runtime";
 import { terminalArtworkGrid, useTerminalArtwork } from "../themes/terminal/useArtwork";
 import { TerminalPanorama } from "../themes/terminal/TerminalPanorama";
 import { SAKURA_PROGRESS_OUTLINE } from "../themes/sakura/progressShape";
+import { TERMINAL_CLAIMED_GLYPH, TERMINAL_EXPIRED_GLYPH, TERMINAL_PROGRESS_OUTLINE, terminalProgressPixels } from "../themes/terminal/progressShape";
 interface DiscordQuestCompletion {
     completedRatio: number;
     percentComplete: number;
@@ -40,7 +41,8 @@ const useDiscordQuestCompletion = findByCodeLazy(
     "completedRatio"
 ) as (quest: any, forcePercent?: boolean) => DiscordQuestCompletion;
 
-function ProgressShape({ angular, sakura, ...props }: { angular: boolean; sakura: boolean; className: string; strokeDasharray?: string; strokeDashoffset?: number; transform?: string; }) {
+function ProgressShape({ angular, sakura, terminal, progress, ...props }: { angular: boolean; sakura: boolean; terminal: boolean; progress?: number; className: string; strokeDasharray?: string; strokeDashoffset?: number; transform?: string; }) {
+    if (terminal) return <path className={props.className} d={progress === undefined ? TERMINAL_PROGRESS_OUTLINE : terminalProgressPixels(progress)} shapeRendering="crispEdges" />;
     if (sakura) return <path d={SAKURA_PROGRESS_OUTLINE} pathLength="100" {...props} transform="translate(2.8 2.8) scale(.504)" />;
     return angular
         ? <path d="M28 10.5 H46.5 L54.5 18.5 V37.5 L43.5 45.5 H9.5 L1.5 37.5 V18.5 L12.5 10.5 H28 Z" pathLength="100" {...props} transform={undefined} />
@@ -52,13 +54,15 @@ function ProgressRing({
     completion,
     ratioOverride = null,
     angular = false,
-    sakura = false
+    sakura = false,
+    terminal = false
 }: {
     quest: NormalizedQuest;
     completion: DiscordQuestCompletion;
     ratioOverride?: number | null;
     angular?: boolean;
     sakura?: boolean;
+    terminal?: boolean;
 }) {
     const hasRatioOverride = Number.isFinite(ratioOverride);
     const ratio = hasRatioOverride
@@ -80,18 +84,21 @@ function ProgressRing({
             aria-label={isClaimed ? "Claimed" : isExpired ? "Expired" : `${display} complete`}
         >
             <svg viewBox="0 0 56 56" aria-hidden="true">
-                <ProgressShape angular={angular} sakura={sakura} className="quest-ui-progress-track" />
+                <ProgressShape angular={angular} sakura={sakura} terminal={terminal} className="quest-ui-progress-track" />
                 {(isClaimed || isExpired) ? (
                     <ProgressShape
                         angular={angular}
                         sakura={sakura}
+                        terminal={terminal}
                         className="quest-ui-progress-state-ring"
                     />
                 ) : (
                     <ProgressShape
                         angular={angular}
                         sakura={sakura}
+                        terminal={terminal}
                         className="quest-ui-progress-value"
+                        progress={progress}
                         strokeDasharray="100"
                         strokeDashoffset={100 - progress}
                         transform="rotate(-90 28 28)"
@@ -100,12 +107,12 @@ function ProgressRing({
             </svg>
 
             {isClaimed ? (
-                <svg className="quest-ui-progress-state-icon is-claimed" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M6.5 12.4 10.1 16 17.7 8.4" />
+                <svg className="quest-ui-progress-state-icon is-claimed" viewBox="0 0 24 24" shapeRendering={terminal ? "crispEdges" : undefined} aria-hidden="true">
+                    <path d={terminal ? TERMINAL_CLAIMED_GLYPH : "M6.5 12.4 10.1 16 17.7 8.4"} />
                 </svg>
             ) : isExpired ? (
-                <svg className="quest-ui-progress-state-icon is-expired" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M7.2 7.2 16.8 16.8M16.8 7.2 7.2 16.8" />
+                <svg className="quest-ui-progress-state-icon is-expired" viewBox="0 0 24 24" shapeRendering={terminal ? "crispEdges" : undefined} aria-hidden="true">
+                    <path d={terminal ? TERMINAL_EXPIRED_GLYPH : "M7.2 7.2 16.8 16.8M16.8 7.2 7.2 16.8"} />
                 </svg>
             ) : (
                 <span>{display}</span>
@@ -429,7 +436,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                         complete={quest.status === "claimable" || quest.status === "claimed"}
                     />
                 ) : (
-                    <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} angular={obsidian} sakura={dashboardThemeId === "sakura"} />
+                    <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} angular={obsidian} sakura={dashboardThemeId === "sakura"} terminal={dashboardThemeId === "terminal"} />
                 )}
                 {expiry && (
                     <span className={`quest-ui-card-expiry quest-ui-expiry-${urgency}`} title={expiry}>

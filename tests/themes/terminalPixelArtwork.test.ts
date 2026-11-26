@@ -1,8 +1,24 @@
 import assert from "node:assert/strict";
 import { createArtworkQueue } from "../../src/themes/terminal/artworkQueue";
+import { terminalProgressPixels, TERMINAL_PROGRESS_OUTLINE, TERMINAL_CLAIMED_GLYPH, TERMINAL_EXPIRED_GLYPH } from "../../src/themes/terminal/progressShape";
 import { rasterTerminalPanorama, TERMINAL_PANORAMA } from "../../src/themes/terminal/panoramaRaster";
 import { parseTerminalArtworkKey, pixelateTerminalArtwork, terminalArtworkAccent, terminalArtworkKey, TERMINAL_ARTWORK_SIZES, TERMINAL_PALETTE_LIMIT } from "../../src/themes/terminal/pixelArtwork";
 
+assert.equal(terminalProgressPixels(0), "");
+assert.equal(terminalProgressPixels(NaN), "");
+assert.equal(terminalProgressPixels(100), TERMINAL_PROGRESS_OUTLINE);
+assert.equal(terminalProgressPixels(150), TERMINAL_PROGRESS_OUTLINE);
+const ringCells = (path: string) => path.split("M").filter(Boolean);
+const full = new Set(ringCells(TERMINAL_PROGRESS_OUTLINE));
+assert.ok(full.size > 100);
+let last = new Set<string>();
+for (const percent of [1, 25, 50, 75, 99, 100]) {
+    const cells = new Set(ringCells(terminalProgressPixels(percent)));
+    assert.ok([...cells].every(cell => full.has(cell)) && [...last].every(cell => cells.has(cell)));
+    assert.ok(cells.size >= last.size);
+    last = cells;
+}
+assert.notEqual(TERMINAL_CLAIMED_GLYPH, TERMINAL_EXPIRED_GLYPH);
 assert.deepEqual(TERMINAL_ARTWORK_SIZES, { dashboard: 56, notification: 48 });
 const source = "https://cdn.discordapp.com/quests/test/icon.png";
 const dashboardKey = terminalArtworkKey(source, TERMINAL_ARTWORK_SIZES.dashboard);
