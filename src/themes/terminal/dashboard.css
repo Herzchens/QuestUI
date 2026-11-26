@@ -3410,3 +3410,149 @@
     }
 }
 
+/* Terminal's stepped display frames do not clip interactive descendants or focus rings. */
+.quest-ui-theme-terminal.quest-ui-dashboard-shell {
+    background-color: #020805 !important;
+    background-image: repeating-linear-gradient(0deg, transparent 0 3px, rgba(102,255,170,.060) 3px 4px),
+        radial-gradient(ellipse at 50% 0%, #07170f 0%, #020805 72%) !important;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 32px);
+    border: 1px solid #a6ffbc;
+    border-radius: 12px;
+    box-shadow: 0 0 6px rgba(166,255,188,.38), 0 0 18px rgba(92,255,147,.14), inset 0 0 12px rgba(92,255,147,.12), 0 18px 48px rgba(0,0,0,.7);
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-topbar {
+    border-bottom: 1px dashed #327c52;
+    background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22208%22%20height%3D%2248%22%20viewBox%3D%220%200%20208%2048%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%238bffbc%22%20opacity%3D%220.79%22%20d%3D%22M2%2046h1.6v1.6h-1.6zM6%2046h1.6v1.6h-1.6zM6%2044h1.6v1.6h-1.6zM6%2042h1.6v1.6h-1.6zM8%2046h1.6v1.6h-1.6zM8%2044h1.6v1.6h-1.6zM8%2042h1.6v1.6h-1.6zM12%2046h1.6v1.6h-1.6zM12%2044h1.6v1.6h-1.6zM14%2046h1.6v1.6h-1.6zM14%2044h1.6v1.6h-1.6zM14%2042h1.6v1.6h-1.6zM18%2046h1.6v1.6h-1.6zM18%2044h1.6v1.6h-1.6zM18%2042h1.6v1.6h-1.6zM20%2046h1.6v1.6h-1.6zM20%2044h1.6v1.6h-1.6zM20%2042h1.6v1.6h-1.6zM24%2046h1.6v1.6h-1.6zM24%2044h1.6v1.6h-1.6zM24%2042h1.6v1.6h-1.6zM26%2046h1.6v1.6h-1.6zM26%2044h1.6v1.6h-1.6zM26%2042h1.6v1.6h-1.6zM30%2046h1.6v1.6h-1.6zM30%2044h1.6v1.6h-1.6zM30%2042h1.6v1.6h-1.6zM32%2046h1.6v1.6h-1.6zM32%2044h1.6v1.6h-1.6zM32%2042h1.6v1.6h-1.6zM36%2046h1.6v1.6h-1.6zM36%2044h1.6v1.6h-1.6zM36%2042h1.6v1.6h-1.6zM38%2046h1.6v1.6h-1.6zM38%2044h1.6v1.6h-1.6zM38%2042h1.6v1.6h-1.6zM42%2046h1.6v1.6h-1.6zM42%2044h1.6v1.6h-1.6zM42%2042h1.6v1.6h-1.6zM44%2046h1.6v1.6h-1.6zM44%2044h1.6v1.6h-1.6zM44%2042h1.6v1.6h-1.6zM48%2046h1.6v1.6h-1.6zM48%2044h1.6v1.6h-1.6zM48%2042h1.6v1.6h-1.6zM50%2046h1.6v1.6h-1.6zM50%2044h1.6v1.6h-1.6zM54%2046h1.6v1.6h-1.6zM54%2044h1.6v1.6h-1.6zM54%2042h1.6v1.6h-1.6zM56%2046h1.6v1.6h-1.6zM56%2044h1.6v1.6h-1.6zM56%2042h1.6v1.6h-1.6zM60%2046h1.6v1.6h-1.6zM60%2044h1.6v1.6h-1.6zM60%2042h1.6v1.6h-1.6zM62%2046h1.6v1.6h-1.6zM62%2044h1.6v1.6h-1.6zM62%2042h1.6v1.6h-1.6zM66%2046h1.6v1.6h-1.6zM66%2044h1.6v1.6h-1.6zM68%2046h1.6v1.6h-1.6zM68%2044h1.6v1.6h-1.6zM68%2042h1.6v1.6h-1.6zM72%2046h1.6v1.6h-1.6zM72%2044h1.6v1.6h-1.6zM72%2042h1.6v1.6h-1.6zM74%2046h1.6v1.6h-1.6zM78%2046h1.6v1.6h-1.6zM78%2044h1.6v1.6h-1.6zM80%2046h1.6v1.6h-1.6zM80%2044h1.6v1.6h-1.6zM80%2042h1.6v1.6h-1.6zM84%2046h1.6v1.6h-1.6zM84%2044h1.6v1.6h-1.6zM84%2042h1.6v1.6h-1.6zM86%2046h1.6v1.6h-1.6zM86%2044h1.6v1.6h-1.6zM86%2042h1.6v1.6h-1.6zM90%2046h1.6v1.6h-1.6z%22%2F%3E%3Cpath%20fill%3D%22%238bffbc%22%20opacity%3D%220.84%22%20d%3D%22M100%206h1.6v1.6h-1.6zM104%206h1.6v1.6h-1.6zM102%204h1.6v1.6h-1.6zM102%208h1.6v1.6h-1.6zM200%2012h1.6v1.6h-1.6zM204%2012h1.6v1.6h-1.6zM202%2010h1.6v1.6h-1.6zM202%2014h1.6v1.6h-1.6z%22%2F%3E%3Cpath%20fill%3D%22%238bffbc%22%20opacity%3D%220.86%22%20d%3D%22M120%2018h1.6v1.6h-1.6zM122%2020h1.6v1.6h-1.6zM126%2022h1.6v1.6h-1.6zM126%2024h1.6v1.6h-1.6zM128%2024h1.6v1.6h-1.6zM128%2026h1.6v1.6h-1.6zM130%2026h1.6v1.6h-1.6zM132%2026h1.6v1.6h-1.6zM132%2028h1.6v1.6h-1.6zM134%2028h1.6v1.6h-1.6zM136%2030h1.6v1.6h-1.6zM140%2032h1.6v1.6h-1.6zM142%2032h1.6v1.6h-1.6zM144%2034h1.6v1.6h-1.6zM146%2034h1.6v1.6h-1.6zM148%2036h1.6v1.6h-1.6zM150%2036h1.6v1.6h-1.6zM152%2036h1.6v1.6h-1.6zM152%2038h1.6v1.6h-1.6zM154%2038h1.6v1.6h-1.6zM156%2038h1.6v1.6h-1.6zM160%2040h1.6v1.6h-1.6zM162%2040h1.6v1.6h-1.6zM164%2042h1.6v1.6h-1.6zM166%2042h1.6v1.6h-1.6zM168%2042h1.6v1.6h-1.6zM170%2044h1.6v1.6h-1.6zM172%2044h1.6v1.6h-1.6zM174%2044h1.6v1.6h-1.6zM176%2046h1.6v1.6h-1.6zM178%2046h1.6v1.6h-1.6zM182%2046h1.6v1.6h-1.6zM136%206h1.6v1.6h-1.6zM136%208h1.6v1.6h-1.6zM138%208h1.6v1.6h-1.6zM140%2010h1.6v1.6h-1.6zM140%2012h1.6v1.6h-1.6zM142%2012h1.6v1.6h-1.6zM144%2014h1.6v1.6h-1.6zM146%2014h1.6v1.6h-1.6zM146%2016h1.6v1.6h-1.6zM150%2018h1.6v1.6h-1.6zM152%2018h1.6v1.6h-1.6zM154%2018h1.6v1.6h-1.6zM154%2020h1.6v1.6h-1.6zM156%2020h1.6v1.6h-1.6zM158%2020h1.6v1.6h-1.6zM160%2022h1.6v1.6h-1.6zM162%2022h1.6v1.6h-1.6zM166%2024h1.6v1.6h-1.6zM168%2024h1.6v1.6h-1.6zM170%2024h1.6v1.6h-1.6zM170%2026h1.6v1.6h-1.6zM172%2026h1.6v1.6h-1.6zM174%2026h1.6v1.6h-1.6zM176%2026h1.6v1.6h-1.6zM176%2028h1.6v1.6h-1.6zM178%2028h1.6v1.6h-1.6zM182%2028h1.6v1.6h-1.6zM184%2030h1.6v1.6h-1.6zM186%2030h1.6v1.6h-1.6zM188%2030h1.6v1.6h-1.6zM190%2030h1.6v1.6h-1.6zM196%2030h1.6v1.6h-1.6zM154%202h1.6v1.6h-1.6zM158%206h1.6v1.6h-1.6zM160%206h1.6v1.6h-1.6zM162%208h1.6v1.6h-1.6zM164%208h1.6v1.6h-1.6zM166%2010h1.6v1.6h-1.6zM168%2010h1.6v1.6h-1.6zM170%2012h1.6v1.6h-1.6zM172%2012h1.6v1.6h-1.6zM174%2012h1.6v1.6h-1.6zM176%2014h1.6v1.6h-1.6zM180%2014h1.6v1.6h-1.6zM182%2014h1.6v1.6h-1.6z%22%2F%3E%3Cpath%20fill%3D%22%238bffbc%22%20opacity%3D%220.87%22%20d%3D%22M140%204h1.6v1.6h-1.6zM148%202h1.6v1.6h-1.6zM150%202h1.6v1.6h-1.6zM158%202h1.6v1.6h-1.6zM160%202h1.6v1.6h-1.6zM162%202h1.6v1.6h-1.6zM168%204h1.6v1.6h-1.6zM170%204h1.6v1.6h-1.6zM112%2046h1.6v1.6h-1.6zM112%2044h1.6v1.6h-1.6zM112%2042h1.6v1.6h-1.6zM114%2042h1.6v1.6h-1.6zM114%2040h1.6v1.6h-1.6zM116%2036h1.6v1.6h-1.6zM116%2034h1.6v1.6h-1.6zM116%2032h1.6v1.6h-1.6zM118%2032h1.6v1.6h-1.6zM118%2030h1.6v1.6h-1.6zM118%2028h1.6v1.6h-1.6zM120%2028h1.6v1.6h-1.6zM120%2026h1.6v1.6h-1.6zM122%2024h1.6v1.6h-1.6zM124%2022h1.6v1.6h-1.6zM126%2020h1.6v1.6h-1.6zM126%2018h1.6v1.6h-1.6zM128%2018h1.6v1.6h-1.6zM128%2016h1.6v1.6h-1.6zM130%2016h1.6v1.6h-1.6zM132%2014h1.6v1.6h-1.6zM134%2012h1.6v1.6h-1.6zM136%2012h1.6v1.6h-1.6zM136%2010h1.6v1.6h-1.6zM138%2010h1.6v1.6h-1.6zM140%208h1.6v1.6h-1.6zM142%208h1.6v1.6h-1.6zM144%206h1.6v1.6h-1.6zM146%206h1.6v1.6h-1.6zM148%206h1.6v1.6h-1.6zM148%204h1.6v1.6h-1.6zM150%204h1.6v1.6h-1.6zM152%204h1.6v1.6h-1.6zM154%204h1.6v1.6h-1.6zM156%204h1.6v1.6h-1.6zM158%204h1.6v1.6h-1.6zM166%204h1.6v1.6h-1.6zM130%2046h1.6v1.6h-1.6zM130%2044h1.6v1.6h-1.6zM132%2044h1.6v1.6h-1.6zM132%2042h1.6v1.6h-1.6zM132%2040h1.6v1.6h-1.6zM134%2038h1.6v1.6h-1.6zM134%2036h1.6v1.6h-1.6zM136%2036h1.6v1.6h-1.6zM136%2034h1.6v1.6h-1.6zM136%2032h1.6v1.6h-1.6zM138%2032h1.6v1.6h-1.6zM138%2030h1.6v1.6h-1.6zM138%2028h1.6v1.6h-1.6zM140%2028h1.6v1.6h-1.6zM140%2026h1.6v1.6h-1.6zM142%2026h1.6v1.6h-1.6zM142%2024h1.6v1.6h-1.6zM144%2022h1.6v1.6h-1.6zM144%2020h1.6v1.6h-1.6zM146%2020h1.6v1.6h-1.6zM146%2018h1.6v1.6h-1.6zM148%2018h1.6v1.6h-1.6zM148%2016h1.6v1.6h-1.6zM150%2016h1.6v1.6h-1.6zM150%2014h1.6v1.6h-1.6zM152%2014h1.6v1.6h-1.6zM152%2012h1.6v1.6h-1.6zM154%2012h1.6v1.6h-1.6zM154%2010h1.6v1.6h-1.6zM156%2010h1.6v1.6h-1.6zM158%2010h1.6v1.6h-1.6zM158%208h1.6v1.6h-1.6zM160%208h1.6v1.6h-1.6zM162%206h1.6v1.6h-1.6zM164%206h1.6v1.6h-1.6zM166%206h1.6v1.6h-1.6zM180%2046h1.6v1.6h-1.6zM180%2044h1.6v1.6h-1.6zM180%2042h1.6v1.6h-1.6zM180%2040h1.6v1.6h-1.6zM180%2038h1.6v1.6h-1.6zM180%2036h1.6v1.6h-1.6zM180%2034h1.6v1.6h-1.6zM180%2032h1.6v1.6h-1.6zM180%2030h1.6v1.6h-1.6zM180%2028h1.6v1.6h-1.6zM180%2026h1.6v1.6h-1.6zM180%2024h1.6v1.6h-1.6zM180%2022h1.6v1.6h-1.6zM180%2020h1.6v1.6h-1.6zM180%2018h1.6v1.6h-1.6zM178%2016h1.6v1.6h-1.6zM178%2014h1.6v1.6h-1.6zM178%2012h1.6v1.6h-1.6zM176%2012h1.6v1.6h-1.6zM176%2010h1.6v1.6h-1.6zM176%208h1.6v1.6h-1.6zM174%208h1.6v1.6h-1.6zM174%206h1.6v1.6h-1.6zM196%2046h1.6v1.6h-1.6zM196%2044h1.6v1.6h-1.6zM196%2042h1.6v1.6h-1.6zM196%2040h1.6v1.6h-1.6zM196%2038h1.6v1.6h-1.6zM194%2038h1.6v1.6h-1.6zM194%2036h1.6v1.6h-1.6zM194%2034h1.6v1.6h-1.6zM194%2032h1.6v1.6h-1.6zM194%2030h1.6v1.6h-1.6zM192%2030h1.6v1.6h-1.6zM192%2028h1.6v1.6h-1.6zM192%2026h1.6v1.6h-1.6zM190%2024h1.6v1.6h-1.6zM190%2022h1.6v1.6h-1.6zM188%2020h1.6v1.6h-1.6zM188%2018h1.6v1.6h-1.6zM186%2018h1.6v1.6h-1.6zM186%2016h1.6v1.6h-1.6zM184%2014h1.6v1.6h-1.6zM182%2012h1.6v1.6h-1.6zM182%2010h1.6v1.6h-1.6zM180%2010h1.6v1.6h-1.6zM178%208h1.6v1.6h-1.6zM198%2030h1.6v1.6h-1.6zM196%2026h1.6v1.6h-1.6zM192%2020h1.6v1.6h-1.6zM190%2018h1.6v1.6h-1.6zM188%2016h1.6v1.6h-1.6zM186%2014h1.6v1.6h-1.6zM184%2012h1.6v1.6h-1.6z%22%2F%3E%3Cpath%20fill%3D%22%238bffbc%22%20opacity%3D%220.90%22%20d%3D%22M8%2040h1.6v1.6h-1.6zM8%2038h1.6v1.6h-1.6zM8%2036h1.6v1.6h-1.6zM14%2040h1.6v1.6h-1.6zM14%2038h1.6v1.6h-1.6zM18%2040h1.6v1.6h-1.6zM18%2038h1.6v1.6h-1.6zM18%2036h1.6v1.6h-1.6zM18%2034h1.6v1.6h-1.6zM18%2032h1.6v1.6h-1.6zM18%2030h1.6v1.6h-1.6zM18%2028h1.6v1.6h-1.6zM20%2040h1.6v1.6h-1.6zM20%2038h1.6v1.6h-1.6zM20%2036h1.6v1.6h-1.6zM20%2034h1.6v1.6h-1.6zM20%2032h1.6v1.6h-1.6zM20%2030h1.6v1.6h-1.6zM20%2028h1.6v1.6h-1.6zM20%2026h1.6v1.6h-1.6zM20%2024h1.6v1.6h-1.6zM20%2022h1.6v1.6h-1.6zM20%2020h1.6v1.6h-1.6zM20%2018h1.6v1.6h-1.6zM20%2016h1.6v1.6h-1.6zM20%2014h1.6v1.6h-1.6zM20%2012h1.6v1.6h-1.6zM20%2010h1.6v1.6h-1.6zM24%2040h1.6v1.6h-1.6zM24%2038h1.6v1.6h-1.6zM24%2036h1.6v1.6h-1.6zM24%2034h1.6v1.6h-1.6zM24%2032h1.6v1.6h-1.6zM24%2030h1.6v1.6h-1.6zM24%2028h1.6v1.6h-1.6zM24%2026h1.6v1.6h-1.6zM24%2024h1.6v1.6h-1.6zM26%2040h1.6v1.6h-1.6zM26%2038h1.6v1.6h-1.6zM26%2036h1.6v1.6h-1.6zM32%2040h1.6v1.6h-1.6zM32%2038h1.6v1.6h-1.6zM32%2036h1.6v1.6h-1.6zM32%2034h1.6v1.6h-1.6zM32%2032h1.6v1.6h-1.6zM32%2030h1.6v1.6h-1.6zM36%2040h1.6v1.6h-1.6zM36%2038h1.6v1.6h-1.6zM36%2036h1.6v1.6h-1.6zM36%2034h1.6v1.6h-1.6zM36%2032h1.6v1.6h-1.6zM36%2030h1.6v1.6h-1.6zM36%2028h1.6v1.6h-1.6zM36%2026h1.6v1.6h-1.6zM36%2024h1.6v1.6h-1.6zM36%2022h1.6v1.6h-1.6zM36%2020h1.6v1.6h-1.6zM38%2040h1.6v1.6h-1.6zM38%2038h1.6v1.6h-1.6zM38%2036h1.6v1.6h-1.6zM38%2034h1.6v1.6h-1.6zM38%2032h1.6v1.6h-1.6zM38%2030h1.6v1.6h-1.6zM38%2028h1.6v1.6h-1.6zM38%2026h1.6v1.6h-1.6zM38%2024h1.6v1.6h-1.6zM38%2022h1.6v1.6h-1.6zM38%2020h1.6v1.6h-1.6zM38%2018h1.6v1.6h-1.6zM38%2016h1.6v1.6h-1.6zM38%2014h1.6v1.6h-1.6zM38%2012h1.6v1.6h-1.6zM38%2010h1.6v1.6h-1.6zM38%208h1.6v1.6h-1.6zM42%2040h1.6v1.6h-1.6zM42%2038h1.6v1.6h-1.6zM42%2036h1.6v1.6h-1.6zM42%2034h1.6v1.6h-1.6zM42%2032h1.6v1.6h-1.6zM42%2030h1.6v1.6h-1.6zM42%2028h1.6v1.6h-1.6zM42%2026h1.6v1.6h-1.6zM42%2024h1.6v1.6h-1.6zM42%2022h1.6v1.6h-1.6zM42%2020h1.6v1.6h-1.6zM42%2018h1.6v1.6h-1.6zM44%2040h1.6v1.6h-1.6zM44%2038h1.6v1.6h-1.6zM44%2036h1.6v1.6h-1.6zM44%2034h1.6v1.6h-1.6zM44%2032h1.6v1.6h-1.6zM48%2040h1.6v1.6h-1.6zM54%2040h1.6v1.6h-1.6zM54%2038h1.6v1.6h-1.6zM54%2036h1.6v1.6h-1.6zM56%2040h1.6v1.6h-1.6zM56%2038h1.6v1.6h-1.6zM56%2036h1.6v1.6h-1.6zM56%2034h1.6v1.6h-1.6zM56%2032h1.6v1.6h-1.6zM56%2030h1.6v1.6h-1.6zM56%2028h1.6v1.6h-1.6zM56%2026h1.6v1.6h-1.6zM60%2040h1.6v1.6h-1.6zM60%2038h1.6v1.6h-1.6zM60%2036h1.6v1.6h-1.6zM60%2034h1.6v1.6h-1.6zM68%2040h1.6v1.6h-1.6zM68%2038h1.6v1.6h-1.6zM68%2036h1.6v1.6h-1.6zM68%2034h1.6v1.6h-1.6zM72%2040h1.6v1.6h-1.6zM80%2040h1.6v1.6h-1.6zM80%2038h1.6v1.6h-1.6zM80%2036h1.6v1.6h-1.6zM80%2034h1.6v1.6h-1.6zM80%2032h1.6v1.6h-1.6zM80%2030h1.6v1.6h-1.6zM80%2028h1.6v1.6h-1.6zM80%2026h1.6v1.6h-1.6zM84%2040h1.6v1.6h-1.6zM84%2038h1.6v1.6h-1.6zM84%2036h1.6v1.6h-1.6z%22%2F%3E%3Cpath%20fill%3D%22%238bffbc%22%20opacity%3D%220.96%22%20d%3D%22M114%2038h1.6v1.6h-1.6zM114%2036h1.6v1.6h-1.6zM156%2046h1.6v1.6h-1.6zM156%2044h1.6v1.6h-1.6zM156%2042h1.6v1.6h-1.6zM158%2042h1.6v1.6h-1.6zM158%2040h1.6v1.6h-1.6zM158%2038h1.6v1.6h-1.6zM160%2036h1.6v1.6h-1.6zM160%2034h1.6v1.6h-1.6zM160%2032h1.6v1.6h-1.6zM162%2032h1.6v1.6h-1.6zM162%2030h1.6v1.6h-1.6zM162%2028h1.6v1.6h-1.6zM162%2026h1.6v1.6h-1.6zM164%2026h1.6v1.6h-1.6zM164%2024h1.6v1.6h-1.6zM164%2022h1.6v1.6h-1.6zM166%2022h1.6v1.6h-1.6zM166%2020h1.6v1.6h-1.6zM166%2018h1.6v1.6h-1.6zM166%2016h1.6v1.6h-1.6zM168%2016h1.6v1.6h-1.6zM168%2014h1.6v1.6h-1.6zM168%2012h1.6v1.6h-1.6zM170%2010h1.6v1.6h-1.6zM170%208h1.6v1.6h-1.6zM170%206h1.6v1.6h-1.6zM172%206h1.6v1.6h-1.6zM112%2034h1.6v1.6h-1.6zM112%2036h1.6v1.6h-1.6zM116%2038h1.6v1.6h-1.6zM116%2040h1.6v1.6h-1.6zM118%2040h1.6v1.6h-1.6zM120%2042h1.6v1.6h-1.6zM122%2042h1.6v1.6h-1.6zM122%2044h1.6v1.6h-1.6zM124%2044h1.6v1.6h-1.6zM126%2046h1.6v1.6h-1.6zM128%2046h1.6v1.6h-1.6z%22%2F%3E%3Cpath%20fill%3D%22%238bffbc%22%20opacity%3D%220.98%22%20d%3D%22M202%2046h1.6v1.6h-1.6zM202%2044h1.6v1.6h-1.6zM202%2042h1.6v1.6h-1.6zM202%2040h1.6v1.6h-1.6zM202%2038h1.6v1.6h-1.6zM202%2036h1.6v1.6h-1.6zM202%2034h1.6v1.6h-1.6zM200%2034h1.6v1.6h-1.6zM200%2032h1.6v1.6h-1.6zM200%2030h1.6v1.6h-1.6zM198%2028h1.6v1.6h-1.6zM198%2026h1.6v1.6h-1.6zM196%2024h1.6v1.6h-1.6zM196%2022h1.6v1.6h-1.6zM194%2022h1.6v1.6h-1.6zM194%2020h1.6v1.6h-1.6zM192%2018h1.6v1.6h-1.6zM192%2016h1.6v1.6h-1.6zM190%2016h1.6v1.6h-1.6zM190%2014h1.6v1.6h-1.6zM188%2014h1.6v1.6h-1.6zM188%2012h1.6v1.6h-1.6zM186%2012h1.6v1.6h-1.6zM186%2010h1.6v1.6h-1.6zM184%2010h1.6v1.6h-1.6zM182%208h1.6v1.6h-1.6zM180%208h1.6v1.6h-1.6zM180%206h1.6v1.6h-1.6zM178%206h1.6v1.6h-1.6zM176%206h1.6v1.6h-1.6zM176%204h1.6v1.6h-1.6zM174%204h1.6v1.6h-1.6zM172%204h1.6v1.6h-1.6zM172%202h1.6v1.6h-1.6zM170%202h1.6v1.6h-1.6zM168%202h1.6v1.6h-1.6zM166%202h1.6v1.6h-1.6zM164%202h1.6v1.6h-1.6zM164%200h1.6v1.6h-1.6zM162%200h1.6v1.6h-1.6zM160%200h1.6v1.6h-1.6zM158%200h1.6v1.6h-1.6zM156%200h1.6v1.6h-1.6zM154%200h1.6v1.6h-1.6zM152%200h1.6v1.6h-1.6zM150%200h1.6v1.6h-1.6zM148%200h1.6v1.6h-1.6zM146%200h1.6v1.6h-1.6zM146%202h1.6v1.6h-1.6zM144%202h1.6v1.6h-1.6zM142%202h1.6v1.6h-1.6zM140%202h1.6v1.6h-1.6zM138%202h1.6v1.6h-1.6zM138%204h1.6v1.6h-1.6zM136%204h1.6v1.6h-1.6zM134%204h1.6v1.6h-1.6zM134%206h1.6v1.6h-1.6zM132%206h1.6v1.6h-1.6zM130%206h1.6v1.6h-1.6zM130%208h1.6v1.6h-1.6zM128%208h1.6v1.6h-1.6zM126%2010h1.6v1.6h-1.6zM124%2010h1.6v1.6h-1.6zM124%2012h1.6v1.6h-1.6zM122%2012h1.6v1.6h-1.6zM122%2014h1.6v1.6h-1.6zM120%2014h1.6v1.6h-1.6zM120%2016h1.6v1.6h-1.6zM118%2016h1.6v1.6h-1.6zM118%2018h1.6v1.6h-1.6zM116%2020h1.6v1.6h-1.6zM116%2022h1.6v1.6h-1.6zM114%2022h1.6v1.6h-1.6zM114%2024h1.6v1.6h-1.6zM112%2026h1.6v1.6h-1.6zM112%2028h1.6v1.6h-1.6zM110%2030h1.6v1.6h-1.6zM110%2032h1.6v1.6h-1.6zM110%2034h1.6v1.6h-1.6zM108%2034h1.6v1.6h-1.6zM108%2036h1.6v1.6h-1.6zM108%2038h1.6v1.6h-1.6zM108%2040h1.6v1.6h-1.6zM108%2042h1.6v1.6h-1.6zM108%2044h1.6v1.6h-1.6zM108%2046h1.6v1.6h-1.6z%22%2F%3E%3Cpath%20fill%3D%22%238bffbc%22%20opacity%3D%221.00%22%20d%3D%22M2%2044h1.6v1.6h-1.6zM6%2040h1.6v1.6h-1.6zM8%2034h1.6v1.6h-1.6zM12%2042h1.6v1.6h-1.6zM14%2036h1.6v1.6h-1.6zM18%2026h1.6v1.6h-1.6zM20%208h1.6v1.6h-1.6zM24%2022h1.6v1.6h-1.6zM26%2034h1.6v1.6h-1.6zM30%2040h1.6v1.6h-1.6zM32%2028h1.6v1.6h-1.6zM36%2018h1.6v1.6h-1.6zM42%2016h1.6v1.6h-1.6zM44%2030h1.6v1.6h-1.6zM48%2038h1.6v1.6h-1.6zM50%2042h1.6v1.6h-1.6zM54%2034h1.6v1.6h-1.6zM56%2024h1.6v1.6h-1.6zM60%2032h1.6v1.6h-1.6zM62%2040h1.6v1.6h-1.6zM66%2042h1.6v1.6h-1.6zM68%2032h1.6v1.6h-1.6zM72%2038h1.6v1.6h-1.6zM74%2044h1.6v1.6h-1.6zM78%2042h1.6v1.6h-1.6zM80%2024h1.6v1.6h-1.6zM84%2034h1.6v1.6h-1.6zM86%2040h1.6v1.6h-1.6zM90%2044h1.6v1.6h-1.6zM102%206h1.6v1.6h-1.6zM202%2012h1.6v1.6h-1.6z%22%2F%3E%3C%2Fsvg%3E") right 155px bottom 0 / 208px 48px no-repeat !important;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-display-title > strong {
+    color: #caffd9;
+    -webkit-text-fill-color: currentColor;
+    background: none;
+    text-shadow: 0 0 2px rgba(77,255,140,.22);
+    letter-spacing: 0;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    animation: none;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-display-title-icon > svg {
+    color: #91ffba;
+}
+.quest-ui-theme-terminal .quest-ui-card,
+.quest-ui-theme-terminal .quest-ui-card:not(.quest-ui-card-achievement),
+.quest-ui-theme-terminal .quest-ui-card.quest-ui-card-achievement,
+.quest-ui-theme-terminal .quest-ui-default-status-product,
+.quest-ui-theme-terminal .quest-ui-default-status-product.is-orion,
+.quest-ui-theme-terminal .quest-ui-default-status-product.is-questui,
+.quest-ui-theme-terminal .quest-ui-dashboard-actionbar-primary,
+.quest-ui-theme-terminal .quest-ui-dashboard-actionbar-destinations {
+    border: 1px solid transparent;
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2365ca95%22%20fill-rule%3D%22evenodd%22%20d%3D%22M6%200H18V2H20V4H22V6H24V18H22V20H20V22H18V24H6V22H4V20H2V18H0V6H2V4H4V2H6ZM7%201H17V3H19V5H21V7H23V17H21V19H19V21H17V23H7V21H5V19H3V17H1V7H3V5H5V3H7Z%22%2F%3E%3Cpath%20fill%3D%22%23b9ffce%22%20d%3D%22M6%200H8V2H6V4H4V6H2V8H0V6H2V4H4V2H6ZM16%200H18V2H20V4H22V6H24V8H22V6H20V4H18V2H16ZM0%2016H2V18H4V20H6V22H8V24H6V22H4V20H2V18H0ZM22%2016H24V18H22V20H20V22H18V24H16V22H18V20H20V18H22Z%22%2F%3E%3C%2Fsvg%3E") 8 / 8px / 0 stretch;
+    background-clip: border-box;
+    box-shadow: none;
+}
+.quest-ui-theme-terminal .quest-ui-card,
+.quest-ui-theme-terminal .quest-ui-card:not(.quest-ui-card-achievement),
+.quest-ui-theme-terminal .quest-ui-card.quest-ui-card-achievement {
+    background-color: #040c08 !important;
+    background-image: repeating-linear-gradient(0deg, transparent 0 3px, rgba(80,255,155,.048) 3px 4px) !important;
+    border-radius: 0;
+}
+/* Raster-grid glyph silhouettes; controls retain their native handlers and accessible names. */
+.quest-ui-theme-terminal .quest-ui-sort-icon  {
+    mask: var(--terminal-glyph-sort) center / contain no-repeat;
+    background-color: currentColor;
+}
+.quest-ui-theme-terminal .quest-ui-sort-icon > * { opacity: 0; }
+.quest-ui-theme-terminal .quest-ui-filter-icon  {
+    mask: var(--terminal-glyph-filter) center / contain no-repeat;
+    background-color: currentColor;
+}
+.quest-ui-theme-terminal .quest-ui-filter-icon > * { opacity: 0; }
+.quest-ui-theme-terminal .quest-ui-home-glyph  {
+    mask: var(--terminal-glyph-home) center / contain no-repeat;
+    background-color: currentColor;
+}
+.quest-ui-theme-terminal .quest-ui-home-glyph > * { opacity: 0; }
+.quest-ui-theme-terminal .quest-ui-plugin-settings-glyph  {
+    mask: var(--terminal-glyph-settings) center / contain no-repeat;
+    background-color: currentColor;
+}
+.quest-ui-theme-terminal .quest-ui-plugin-settings-glyph > * { opacity: 0; }
+.quest-ui-theme-terminal .quest-ui-market-glyph  {
+    mask: var(--terminal-glyph-market) center / contain no-repeat;
+    background-color: currentColor;
+}
+.quest-ui-theme-terminal .quest-ui-market-glyph > * { opacity: 0; }
+.quest-ui-theme-terminal .quest-ui-dashboard-notification-icon  {
+    mask: var(--terminal-glyph-bell) center / contain no-repeat;
+    background-color: currentColor;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-notification-icon > * { opacity: 0; }
+
+/* Small nine-slice pixel frames retain normal control hit targets and focus. */
+.quest-ui-theme-terminal :is(.quest-ui-toolbar-button, .quest-ui-reload-icon-button, .quest-ui-update-center-button,
+    .quest-ui-event-log-button, .quest-ui-status-settings-button, .quest-ui-dashboard-palette-button,
+    .quest-ui-dashboard-orb-balance) {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2366dba1%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-toolbar-button.quest-ui-claim-all-button:not(:disabled),
+.quest-ui-theme-terminal .quest-ui-orion-icon-button:is(.is-start, .is-resume) {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2331ef91%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-orion-icon-button.is-pause {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23ffe052%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-orion-icon-button.is-stop {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23ff626d%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-orion-icon-button:disabled,
+.quest-ui-theme-terminal .quest-ui-toolbar-button.quest-ui-claim-all-button:disabled {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23416853%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+/* Theme/Sort/Filter portals keep their existing positioning and keyboard navigation. */
+.quest-ui-theme-terminal.quest-ui-filter-list {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2379f5b9%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 6px / 0 stretch;
+    clip-path: polygon(4.8px 0, calc(100% - 4.8px) 0, calc(100% - 4.8px) 2.4px, calc(100% - 2.4px) 2.4px, calc(100% - 2.4px) 4.8px, 100% 4.8px, 100% calc(100% - 4.8px), calc(100% - 2.4px) calc(100% - 4.8px), calc(100% - 2.4px) calc(100% - 2.4px), calc(100% - 4.8px) calc(100% - 2.4px), calc(100% - 4.8px) 100%, 4.8px 100%, 4.8px calc(100% - 2.4px), 2.4px calc(100% - 2.4px), 2.4px calc(100% - 4.8px), 0 calc(100% - 4.8px), 0 4.8px, 2.4px 4.8px, 2.4px 2.4px, 4.8px 2.4px);
+}
+
+/* Selection frames and their inset cores are defined on the controls themselves. */
+
+/* Fine-grid dashboard glyphs, shared with the panel controls. */
+.quest-ui-theme-terminal .quest-ui-dashboard-palette-icon {
+    mask: var(--terminal-glyph-palette) center / contain no-repeat;
+    background-color: currentColor;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-palette-icon > * { opacity: 0; }
+.quest-ui-theme-terminal .quest-ui-update-center-icon {
+    mask: var(--terminal-glyph-update) center / contain no-repeat;
+    background-color: currentColor;
+}
+.quest-ui-theme-terminal .quest-ui-update-center-icon > * { opacity: 0; }
+
+.quest-ui-theme-terminal .quest-ui-dashboard-notification-island::before,
+.quest-ui-theme-terminal .quest-ui-dashboard-notification-bell::before {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    clip-path: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 4px, 2px 2px, 4px 2px);
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-notification-island::before {
+    inset: 0;
+    z-index: 1;
+    background: #040c08;
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%2379f5b9%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-notification-bell::before {
+    inset: 5px;
+    z-index: 3;
+    background: var(--terminal-bell-fill, #08170f);
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%234dba83%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+    transition: background-color 150ms ease;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-notification-island:focus-visible::before {
+    border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23d5ffe2%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
+}
+
