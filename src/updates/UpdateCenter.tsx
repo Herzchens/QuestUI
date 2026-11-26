@@ -46,21 +46,21 @@ function GitHubIcon() {
 function UpdateStateIcon({ kind }: { kind: "current" | "available" | "error" | "checking" | "muted"; }) {
     if (kind === "current") {
         return (
-            <svg viewBox="0 0 16 16" aria-hidden="true">
+            <svg className="quest-ui-terminal-update-current-glyph" viewBox="0 0 16 16" aria-hidden="true">
                 <path d="m3.3 8.2 2.8 2.8 6.6-6.6" />
             </svg>
         );
     }
     if (kind === "available") {
         return (
-            <svg viewBox="0 0 16 16" aria-hidden="true">
+            <svg className="quest-ui-terminal-update-available-glyph" viewBox="0 0 16 16" aria-hidden="true">
                 <path d="M8 12V4M4.8 7.2 8 4l3.2 3.2" />
             </svg>
         );
     }
     if (kind === "error") {
         return (
-            <svg viewBox="0 0 16 16" aria-hidden="true">
+            <svg className="quest-ui-terminal-update-error-glyph" viewBox="0 0 16 16" aria-hidden="true">
                 <path d="M8 4.2v4.7M8 11.8v.1" />
             </svg>
         );

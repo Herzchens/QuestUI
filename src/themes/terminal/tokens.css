@@ -14,6 +14,8 @@
     --terminal-glyph-bell: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M11%202h2v1h-2zM9%203h6v1h-6zM7%204h10v1h-10zM7%205h2v1h-2zM15%205h2v1h-2zM6%206h2v1h-2zM16%206h2v1h-2zM6%207h2v1h-2zM16%207h2v1h-2zM5%208h2v1h-2zM17%208h2v1h-2zM5%209h2v1h-2zM17%209h2v1h-2zM5%2010h2v1h-2zM17%2010h2v1h-2zM5%2011h2v1h-2zM17%2011h2v1h-2zM5%2012h2v1h-2zM17%2012h2v1h-2zM5%2013h2v1h-2zM17%2013h2v1h-2zM5%2014h2v1h-2zM17%2014h2v1h-2zM4%2015h3v1h-3zM17%2015h3v1h-3zM3%2016h3v1h-3zM18%2016h3v1h-3zM2%2017h20v1h-20zM2%2018h20v1h-20zM10%2020h4v1h-4zM10%2021h4v1h-4z%22%2F%3E%3C%2Fsvg%3E");
     /* Native BroomIcon silhouette, sampled at 48x48 with its original 1.85-unit stroke. */
     --terminal-glyph-check: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M18%206h3v1h-3zM17%207h4v1h-4zM16%208h5v1h-5zM15%209h5v1h-5zM14%2010h5v1h-5zM4%2011h3v1h-3zM13%2011h5v1h-5zM4%2012h4v1h-4zM12%2012h5v1h-5zM4%2013h5v1h-5zM11%2013h5v1h-5zM5%2014h10v1h-10zM6%2015h8v1h-8zM7%2016h6v1h-6zM8%2017h4v1h-4z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-glyph-doublecheck: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M16%206h2v1h-2zM21%206h2v1h-2zM15%207h3v1h-3zM20%207h3v1h-3zM14%208h3v1h-3zM19%208h3v1h-3zM13%209h3v1h-3zM18%209h3v1h-3zM12%2010h3v1h-3zM17%2010h3v1h-3zM1%2011h2v1h-2zM11%2011h3v1h-3zM16%2011h3v1h-3zM1%2012h3v1h-3zM10%2012h3v1h-3zM15%2012h3v1h-3zM2%2013h3v1h-3zM9%2013h3v1h-3zM14%2013h3v1h-3zM3%2014h3v1h-3zM8%2014h3v1h-3zM13%2014h3v1h-3zM4%2015h6v1h-6zM12%2015h3v1h-3zM5%2016h4v1h-4zM11%2016h3v1h-3zM6%2017h2v1h-2zM11%2017h2v1h-2z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-glyph-error: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M19%203h10v1h-10zM16%204h16v1h-16zM14%205h20v1h-20zM12%206h24v1h-24zM11%207h7v1h-7zM30%207h7v1h-7zM10%208h6v1h-6zM32%208h6v1h-6zM9%209h5v1h-5zM34%209h5v1h-5zM8%2010h5v1h-5zM35%2010h5v1h-5zM7%2011h5v1h-5zM36%2011h5v1h-5zM6%2012h5v1h-5zM37%2012h5v1h-5zM6%2013h4v1h-4zM38%2013h4v1h-4zM5%2014h4v1h-4zM39%2014h4v1h-4zM5%2015h4v1h-4zM39%2015h4v1h-4zM4%2016h4v1h-4zM16%2016h3v1h-3zM29%2016h3v1h-3zM40%2016h4v1h-4zM4%2017h4v1h-4zM16%2017h4v1h-4zM28%2017h4v1h-4zM40%2017h4v1h-4zM4%2018h3v1h-3zM16%2018h5v1h-5zM27%2018h5v1h-5zM41%2018h3v1h-3zM3%2019h4v1h-4zM17%2019h5v1h-5zM26%2019h5v1h-5zM41%2019h4v1h-4zM3%2020h4v1h-4zM18%2020h5v1h-5zM25%2020h5v1h-5zM41%2020h4v1h-4zM3%2021h4v1h-4zM19%2021h10v1h-10zM41%2021h4v1h-4zM3%2022h4v1h-4zM20%2022h8v1h-8zM41%2022h4v1h-4zM3%2023h4v1h-4zM21%2023h6v1h-6zM41%2023h4v1h-4zM3%2024h4v1h-4zM21%2024h6v1h-6zM41%2024h4v1h-4zM3%2025h4v1h-4zM20%2025h8v1h-8zM41%2025h4v1h-4zM3%2026h4v1h-4zM19%2026h10v1h-10zM41%2026h4v1h-4zM3%2027h4v1h-4zM18%2027h5v1h-5zM25%2027h5v1h-5zM41%2027h4v1h-4zM3%2028h4v1h-4zM17%2028h5v1h-5zM26%2028h5v1h-5zM41%2028h4v1h-4zM4%2029h3v1h-3zM16%2029h5v1h-5zM27%2029h5v1h-5zM41%2029h3v1h-3zM4%2030h4v1h-4zM16%2030h4v1h-4zM28%2030h4v1h-4zM40%2030h4v1h-4zM4%2031h4v1h-4zM16%2031h3v1h-3zM29%2031h3v1h-3zM40%2031h4v1h-4zM5%2032h4v1h-4zM39%2032h4v1h-4zM5%2033h4v1h-4zM39%2033h4v1h-4zM6%2034h4v1h-4zM38%2034h4v1h-4zM6%2035h5v1h-5zM37%2035h5v1h-5zM7%2036h5v1h-5zM36%2036h5v1h-5zM8%2037h5v1h-5zM35%2037h5v1h-5zM9%2038h5v1h-5zM34%2038h5v1h-5zM10%2039h6v1h-6zM32%2039h6v1h-6zM11%2040h7v1h-7zM30%2040h7v1h-7zM12%2041h24v1h-24zM14%2042h20v1h-20zM16%2043h16v1h-16zM19%2044h10v1h-10z%22%2F%3E%3C%2Fsvg%3E");
     --terminal-glyph-external: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M12%202h10v1h-10zM12%203h10v1h-10zM3%204h10v1h-10zM18%204h4v1h-4zM3%205h10v1h-10zM17%205h5v1h-5zM3%206h2v1h-2zM16%206h3v1h-3zM20%206h2v1h-2zM3%207h2v1h-2zM15%207h3v1h-3zM20%207h2v1h-2zM3%208h2v1h-2zM14%208h3v1h-3zM20%208h2v1h-2zM3%209h2v1h-2zM13%209h3v1h-3zM20%209h2v1h-2zM3%2010h2v1h-2zM12%2010h3v1h-3zM20%2010h2v1h-2zM3%2011h2v1h-2zM11%2011h3v1h-3zM18%2011h4v1h-4zM3%2012h2v1h-2zM10%2012h3v1h-3zM18%2012h2v1h-2zM3%2013h2v1h-2zM10%2013h2v1h-2zM18%2013h2v1h-2zM3%2014h2v1h-2zM18%2014h2v1h-2zM3%2015h2v1h-2zM18%2015h2v1h-2zM3%2016h2v1h-2zM18%2016h2v1h-2zM3%2017h2v1h-2zM18%2017h2v1h-2zM3%2018h2v1h-2zM18%2018h2v1h-2zM3%2019h17v1h-17zM3%2020h17v1h-17z%22%2F%3E%3C%2Fsvg%3E");
     --terminal-glyph-filter: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M4%203h2v1h-2zM11%203h2v1h-2zM18%203h2v1h-2zM4%204h2v1h-2zM11%204h2v1h-2zM18%204h2v1h-2zM4%205h2v1h-2zM11%205h2v1h-2zM18%205h2v1h-2zM2%206h6v1h-6zM11%206h2v1h-2zM18%206h2v1h-2zM2%207h6v1h-6zM11%207h2v1h-2zM18%207h2v1h-2zM2%208h6v1h-6zM11%208h2v1h-2zM16%208h6v1h-6zM2%209h6v1h-6zM11%209h2v1h-2zM16%209h6v1h-6zM4%2010h2v1h-2zM11%2010h2v1h-2zM16%2010h6v1h-6zM4%2011h2v1h-2zM11%2011h2v1h-2zM16%2011h6v1h-6zM4%2012h2v1h-2zM11%2012h2v1h-2zM18%2012h2v1h-2zM4%2013h2v1h-2zM9%2013h6v1h-6zM18%2013h2v1h-2zM4%2014h2v1h-2zM9%2014h6v1h-6zM18%2014h2v1h-2zM4%2015h2v1h-2zM9%2015h6v1h-6zM18%2015h2v1h-2zM4%2016h2v1h-2zM9%2016h6v1h-6zM18%2016h2v1h-2zM4%2017h2v1h-2zM11%2017h2v1h-2zM18%2017h2v1h-2zM4%2018h2v1h-2zM11%2018h2v1h-2zM18%2018h2v1h-2zM4%2019h2v1h-2zM11%2019h2v1h-2zM18%2019h2v1h-2zM4%2020h2v1h-2zM11%2020h2v1h-2zM18%2020h2v1h-2z%22%2F%3E%3C%2Fsvg%3E");
     --terminal-glyph-home: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M11%202h2v1h-2zM9%203h6v1h-6zM8%204h8v1h-8zM7%205h4v1h-4zM13%205h4v1h-4zM6%206h4v1h-4zM14%206h4v1h-4zM4%207h4v1h-4zM16%207h4v1h-4zM3%208h4v1h-4zM17%208h4v1h-4zM2%209h4v1h-4zM18%209h4v1h-4zM1%2010h5v1h-5zM18%2010h5v1h-5zM1%2011h2v1h-2zM4%2011h2v1h-2zM18%2011h2v1h-2zM21%2011h2v1h-2zM4%2012h2v1h-2zM18%2012h2v1h-2zM4%2013h2v1h-2zM18%2013h2v1h-2zM4%2014h2v1h-2zM9%2014h6v1h-6zM18%2014h2v1h-2zM4%2015h2v1h-2zM9%2015h6v1h-6zM18%2015h2v1h-2zM4%2016h2v1h-2zM9%2016h2v1h-2zM13%2016h2v1h-2zM18%2016h2v1h-2zM4%2017h2v1h-2zM9%2017h2v1h-2zM13%2017h2v1h-2zM18%2017h2v1h-2zM4%2018h2v1h-2zM9%2018h2v1h-2zM13%2018h2v1h-2zM18%2018h2v1h-2zM4%2019h2v1h-2zM9%2019h2v1h-2zM13%2019h2v1h-2zM18%2019h2v1h-2zM4%2020h7v1h-7zM13%2020h7v1h-7zM4%2021h7v1h-7zM13%2021h7v1h-7z%22%2F%3E%3C%2Fsvg%3E");
@@ -24,22 +26,88 @@
     --terminal-glyph-refresh: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M19.4%207.35A8.5%208.5%200%201%200%2020.5%2014h-2.05A6.5%206.5%200%201%201%2017.9%208.8L15%2011.7h6.5V5.2l-2.1%202.15Z%22%2F%3E%3C%2Fsvg%3E");
     --terminal-glyph-settings: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%20stroke-linejoin%3D%22miter%22%20d%3D%22M10%202.5h4l.6%203.2%201.6.9%203.1-1.1%202%203.4-2.5%202.2v1.8l2.5%202.2-2%203.4-3.1-1.1-1.6.9-.6%203.2h-4l-.6-3.2-1.6-.9-3.1%201.1-2-3.4%202.5-2.2v-1.8L2.7%208.9l2-3.4%203.1%201.1%201.6-.9Z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223.2%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%2F%3E%3C%2Fsvg%3E");
     --terminal-glyph-sort: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M2%203h3v1h-3zM2%204h3v1h-3zM8%204h14v1h-14zM2%205h3v1h-3zM8%205h14v1h-14zM2%2010h3v1h-3zM2%2011h3v1h-3zM8%2011h10v1h-10zM2%2012h3v1h-3zM8%2012h10v1h-10zM2%2017h3v1h-3zM2%2018h3v1h-3zM8%2018h6v1h-6zM2%2019h3v1h-3zM8%2019h6v1h-6z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-glyph-trash: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M8%201h8v1h-8zM8%202h8v1h-8zM8%203h2v1h-2zM14%203h2v1h-2zM8%204h2v1h-2zM14%204h2v1h-2zM3%205h18v1h-18zM3%206h18v1h-18zM4%207h2v1h-2zM18%207h2v1h-2zM4%208h2v1h-2zM18%208h2v1h-2zM4%209h2v1h-2zM18%209h2v1h-2zM4%2010h2v1h-2zM9%2010h2v1h-2zM13%2010h2v1h-2zM18%2010h2v1h-2zM4%2011h2v1h-2zM9%2011h2v1h-2zM13%2011h2v1h-2zM18%2011h2v1h-2zM4%2012h2v1h-2zM9%2012h2v1h-2zM13%2012h2v1h-2zM18%2012h2v1h-2zM4%2013h2v1h-2zM9%2013h2v1h-2zM13%2013h2v1h-2zM18%2013h2v1h-2zM5%2014h2v1h-2zM9%2014h2v1h-2zM13%2014h2v1h-2zM17%2014h2v1h-2zM5%2015h2v1h-2zM9%2015h2v1h-2zM13%2015h2v1h-2zM17%2015h2v1h-2zM5%2016h2v1h-2zM9%2016h2v1h-2zM13%2016h2v1h-2zM17%2016h2v1h-2zM5%2017h2v1h-2zM9%2017h2v1h-2zM13%2017h2v1h-2zM17%2017h2v1h-2zM5%2018h2v1h-2zM17%2018h2v1h-2zM5%2019h2v1h-2zM17%2019h2v1h-2zM5%2020h14v1h-14zM5%2021h14v1h-14z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-glyph-unread: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M10%202h4v1h-4zM3%203h2v1h-2zM10%203h7v1h-7zM3%204h2v1h-2zM10%204h8v1h-8zM3%205h2v1h-2zM15%205h4v1h-4zM3%206h2v1h-2zM17%206h3v1h-3zM3%207h2v1h-2zM18%207h3v1h-3zM3%208h2v1h-2zM18%208h3v1h-3zM3%209h2v1h-2zM19%209h2v1h-2zM2%2010h10v1h-10zM19%2010h3v1h-3zM2%2011h10v1h-10zM19%2011h3v1h-3zM2%2012h3v1h-3zM19%2012h3v1h-3zM2%2013h3v1h-3zM19%2013h3v1h-3zM3%2014h2v1h-2zM19%2014h2v1h-2zM3%2015h3v1h-3zM18%2015h3v1h-3zM3%2016h3v1h-3zM18%2016h3v1h-3zM4%2017h3v1h-3zM17%2017h3v1h-3zM5%2018h4v1h-4zM15%2018h4v1h-4zM6%2019h12v1h-12zM7%2020h10v1h-10zM10%2021h4v1h-4z%22%2F%3E%3C%2Fsvg%3E");
+    --terminal-glyph-up: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M11%202h2v1h-2zM10%203h4v1h-4zM9%204h6v1h-6zM8%205h8v1h-8zM7%206h3v1h-3zM11%206h2v1h-2zM14%206h3v1h-3zM6%207h3v1h-3zM11%207h2v1h-2zM15%207h3v1h-3zM5%208h3v1h-3zM11%208h2v1h-2zM16%208h3v1h-3zM4%209h3v1h-3zM11%209h2v1h-2zM17%209h3v1h-3zM4%2010h2v1h-2zM11%2010h2v1h-2zM18%2010h2v1h-2zM11%2011h2v1h-2zM11%2012h2v1h-2zM11%2013h2v1h-2zM11%2014h2v1h-2zM11%2015h2v1h-2zM11%2016h2v1h-2zM11%2017h2v1h-2zM11%2018h2v1h-2zM11%2019h2v1h-2zM11%2020h2v1h-2z%22%2F%3E%3C%2Fsvg%3E");
     --terminal-glyph-update: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M9%202h5v1h-5zM7%203h7v1h-7zM5%204h4v1h-4zM4%205h3v1h-3zM4%206h2v1h-2zM11%206h2v1h-2zM18%206h2v1h-2zM3%207h2v1h-2zM10%207h4v1h-4zM19%207h2v1h-2zM3%208h2v1h-2zM9%208h6v1h-6zM19%208h2v1h-2zM2%209h2v1h-2zM8%209h8v1h-8zM20%209h2v1h-2zM2%2010h2v1h-2zM7%2010h3v1h-3zM11%2010h2v1h-2zM14%2010h3v1h-3zM20%2010h2v1h-2zM2%2011h2v1h-2zM7%2011h2v1h-2zM11%2011h2v1h-2zM15%2011h2v1h-2zM20%2011h2v1h-2zM2%2012h2v1h-2zM11%2012h2v1h-2zM20%2012h2v1h-2zM2%2013h2v1h-2zM11%2013h2v1h-2zM20%2013h2v1h-2zM2%2014h2v1h-2zM11%2014h2v1h-2zM20%2014h2v1h-2zM3%2015h2v1h-2zM11%2015h2v1h-2zM19%2015h2v1h-2zM3%2016h2v1h-2zM11%2016h2v1h-2zM19%2016h2v1h-2zM4%2017h2v1h-2zM18%2017h2v1h-2zM4%2018h3v1h-3zM17%2018h3v1h-3zM5%2019h4v1h-4zM15%2019h4v1h-4zM7%2020h10v1h-10zM9%2021h6v1h-6z%22%2F%3E%3C%2Fsvg%3E");
     --quest-ui-theme-accent: #60ffb3;
     --quest-ui-dashboard-base: #030f08;
     --quest-ui-dashboard-card: #05130b;
 
+    --quest-ui-theme-panel: #020905;
+    --quest-ui-theme-surface: #040c08;
+    --quest-ui-theme-surface-avatar: #07180f;
     --quest-ui-theme-control: #05130b;
     --quest-ui-theme-control-hover: #07180f;
+    --quest-ui-theme-artwork: #06150d;
+
+    --quest-ui-theme-danger-surface: #05140c;
+    --quest-ui-theme-danger-hover: #05120a;
+    --quest-ui-theme-success-surface: #05120a;
+    --quest-ui-theme-success-artwork: #05140c;
+    --quest-ui-theme-warning-artwork: #05140c;
+    --quest-ui-theme-error-artwork: #05140c;
+    --quest-ui-theme-info-artwork: #06150d;
 
     --quest-ui-theme-text-strong: #eafff1;
+    --quest-ui-theme-text-primary: var(--header-primary, #d5f7e4);
+    --quest-ui-theme-text-normal: var(--text-default, #d5f7e4);
+    --quest-ui-theme-text-muted: var(--text-muted, #8cb5a3);
+    --quest-ui-theme-text-secondary: #c1e7d4;
+    --quest-ui-theme-text-subtle: #b4d8c6;
+    --quest-ui-theme-icon: #d5f7e4;
     --quest-ui-theme-ignored: #df9cff;
+    --quest-ui-notification-info: #72caff;
 
+    --quest-ui-theme-border-faint: rgba(115,255,175, .065);
+    --quest-ui-theme-border-soft: rgba(115,255,175, .075);
+    --quest-ui-theme-border-muted: rgba(115,255,175, .08);
     --quest-ui-theme-border-control: rgba(115,255,175, .105);
+    --quest-ui-theme-border-strong: rgba(115,255,175, .14);
+    --quest-ui-theme-row-hover: rgba(115,255,175, .022);
 
+    --quest-ui-theme-panel-shadow: rgba(0, 0, 0, .52);
+    --quest-ui-theme-float-shadow: rgba(0, 0, 0, .45);
     --quest-ui-theme-popout-shadow: rgba(0, 0, 0, .42);
     --quest-ui-dashboard-filter-shadow-rest: rgba(0, 0, 0, .24);
     --quest-ui-dashboard-filter-shadow-hover: rgba(0, 0, 0, .28);
+
+    /* Update Center */
+    --quest-ui-update-panel: #05120a;
+    --quest-ui-update-product-surface: #05140c;
+    --quest-ui-update-accent: #72caff;
+    --quest-ui-update-accent-surface-base: #72caff;
+    --quest-ui-update-accent-border-base: #72caff;
+    --quest-ui-update-accent-hover-border: #72caff;
+    --quest-ui-update-routine: #72caff;
+    --quest-ui-update-target-base: #72caff;
+    --quest-ui-update-title: #d5f7e4;
+    --quest-ui-update-check-text: #d5f7e4;
+    --quest-ui-update-banner-text: #d5f7e4;
+    --quest-ui-update-banner-muted: #9ecbb1;
+    --quest-ui-update-product-title: #d5f7e4;
+    --quest-ui-update-meta: #d5f7e4;
+    --quest-ui-update-muted: #75a68c;
+    --quest-ui-update-date: #75a68c;
+    --quest-ui-update-icon: #d5f7e4;
+    --quest-ui-update-link: #72caff;
+    --quest-ui-update-link-hover: #d0d5ff;
+    --quest-ui-update-support-link-hover: #d1d6ff;
+    --quest-ui-update-settings-hint: #75a68c;
+    --quest-ui-update-state-muted: #75a68c;
+    --quest-ui-update-banner-state-muted: #75a68c;
+    --quest-ui-update-checking: #9ecbb1;
+    --quest-ui-update-current: #31ef91;
+    --quest-ui-update-available: #72caff;
+    --quest-ui-update-error: #ff7580;
+    --quest-ui-update-warning: #ff7580;
+    --quest-ui-update-banner-current: #31ef91;
+    --quest-ui-update-banner-available: #72caff;
+    --quest-ui-update-banner-error: #ff7580;
+    --quest-ui-update-alpha: #ff7580;
+    --quest-ui-update-old-version: #ff7580;
+    --quest-ui-update-target: #72caff;
+    --quest-ui-update-arrow: #9ecbb1;
 
 }
 

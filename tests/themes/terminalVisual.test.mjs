@@ -205,6 +205,9 @@ artworkFrame.style.removeProperty("--terminal-artwork-frame");
 check(style(".quest-ui-dashboard-shell").backgroundImage !== "none", "CRT surface must not be reset");
 check(!q(".quest-ui-terminal-footer"), "Terminal footer must be absent");
 check(!style(".quest-ui-dashboard-display-title-icon > svg").maskImage || style(".quest-ui-dashboard-display-title-icon > svg").maskImage === "none", "native emblem must not be replaced");
+for (const selector of [".quest-ui-dashboard-choice-list", ".quest-ui-notification-center-panel", ".quest-ui-update-panel", ".quest-ui-update-product-entry"]) { check(style(selector).borderImageSource !== "none", selector + " must have a stepped frame"); }
+for (const selector of [".quest-ui-terminal-notice-read-glyph", ".quest-ui-terminal-update-current-glyph"]) { check(style(selector).maskImage !== "none", selector + " must use a pixel glyph"); }
+check(style(".quest-ui-notification-center-action").borderImageSource !== style(".quest-ui-notification-center-action.is-danger").borderImageSource, "notification danger frame must differ");
 const dashboardSort = style(".quest-ui-dashboard-filter-control");
 const filter = q(".quest-ui-filter-button");
 const filterFrame = getComputedStyle(filter).borderImageSource;

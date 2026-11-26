@@ -52,6 +52,8 @@ import terminalDashboardComponents from "./terminal/dashboard-components.css?man
 import terminalScrollbar from "./terminal/scrollbar.css?managed";
 import terminalQuestActions from "./terminal/quest-actions.css?managed";
 import terminalQuestReload from "./terminal/quest-reload.css?managed";
+import terminalNotifications from "./terminal/notifications.css?managed";
+import terminalUpdateCenter from "./terminal/update-center.css?managed";
 import terminalOrion from "./terminal/orion.css?managed";
 import terminalDashboard from "./terminal/dashboard.css?managed";
 
@@ -139,6 +141,8 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             terminalScrollbar,
             terminalQuestActions,
             terminalQuestReload,
+            terminalNotifications,
+            terminalUpdateCenter,
             terminalOrion,
             terminalDashboard,
         ]

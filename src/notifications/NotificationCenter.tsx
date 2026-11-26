@@ -148,7 +148,7 @@ function relativeTime(timestamp: number, now: number): string {
 
 function CheckIcon() {
     return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="quest-ui-terminal-notice-read-glyph" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 12l5 5l10 -10" />
             <path d="M2 12l5 5m5 -5l5 -5" />
         </svg>
@@ -157,7 +157,7 @@ function CheckIcon() {
 
 function UnreadIcon() {
     return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="quest-ui-terminal-notice-unread-glyph" viewBox="0 0 24 24" aria-hidden="true">
             <polyline points="7.5 9.5 3 9.5 3 5" />
             <path d="M6.34 17.66A8 8 0 1 0 6.34 6.34L3 9.5" />
         </svg>
@@ -166,7 +166,7 @@ function UnreadIcon() {
 
 function TrashIcon() {
     return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="quest-ui-terminal-notice-clear-glyph" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3 6h18" />
             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
