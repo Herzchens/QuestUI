@@ -1213,3 +1213,49 @@
 }
 
 
+/* Terminal geometry: preserve hit targets, replace generic rectangular frames. */
+.quest-ui-update-settings-control > button {
+    border-image: var(--terminal-frame-mint) 5 / 5px / 0 stretch;
+}
+.quest-ui-update-decision-actions > button:not(.is-destructive) {
+    border-image: var(--terminal-frame-mint) 5 / 5px / 0 stretch;
+}
+.quest-ui-update-settings-control {
+    border-image: var(--terminal-frame-muted) 5 / 6px / 0 stretch;
+}
+.quest-ui-update-row-version {
+    border-image: var(--terminal-frame-cyan) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-version.is-beta {
+    border-image: var(--terminal-frame-yellow) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-version.is-alpha {
+    border-image: var(--terminal-frame-red) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-version.is-prerelease {
+    border-image: var(--terminal-frame-mint) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-version.is-unknown {
+    border-image: var(--terminal-frame-muted) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-version.is-old-version {
+    border-image: var(--terminal-frame-red) 5 / 4px / 0 stretch !important;
+}
+.quest-ui-update-row-target {
+    border-image: var(--terminal-frame-mint) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-target.is-stable {
+    border-image: var(--terminal-frame-cyan) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-target.is-beta {
+    border-image: var(--terminal-frame-yellow) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-target.is-alpha {
+    border-image: var(--terminal-frame-red) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-target.is-prerelease {
+    border-image: var(--terminal-frame-mint) 5 / 4px / 0 stretch;
+}
+.quest-ui-update-row-target.is-unknown {
+    border-image: var(--terminal-frame-muted) 5 / 4px / 0 stretch;
+}

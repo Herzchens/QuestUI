@@ -2051,3 +2051,18 @@
 }
 .quest-ui-event-detail-meta-icon-wrap[data-kind] .quest-ui-event-detail-meta-icon > * { opacity: 0; }
 
+/* Terminal geometry: preserve hit targets, replace generic rectangular frames. */
+.quest-ui-event-row-bug {
+    border-image: var(--terminal-frame-muted) 5 / 5px / 0 stretch;
+}
+.quest-ui-event-row-bug:is(:hover, :focus-visible) {
+    border-image: var(--terminal-frame-mint) 5 / 5px / 0 stretch;
+    background: transparent;
+    color: #eafff1;
+}
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clear-confirm-button {
+    border-image: var(--terminal-frame-muted) 5 / 5px / 0 stretch;
+}
+.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clear-confirm-button.is-confirm {
+    border-image: var(--terminal-frame-red) 5 / 5px / 0 stretch;
+}

@@ -3634,3 +3634,10 @@
     border-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23d5ffe2%22%20fill-rule%3D%22evenodd%22%20d%3D%22M4%200H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5%201H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z%22%2F%3E%3C%2Fsvg%3E") 5 / 5px / 0 stretch;
 }
 
+/* Terminal geometry: preserve hit targets, replace generic rectangular frames. */
+.quest-ui-theme-terminal .quest-ui-filter-count-badge {
+    border-image: var(--terminal-frame-muted) 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-terminal .quest-ui-dashboard-notification-unread-chip {
+    border-image: var(--terminal-frame-red) 5 / 4px / 0 stretch;
+}

@@ -206,12 +206,17 @@ artworkFrame.style.removeProperty("--terminal-artwork-frame");
 check(style(".quest-ui-dashboard-shell").backgroundImage !== "none", "CRT surface must not be reset");
 check(!q(".quest-ui-terminal-footer"), "Terminal footer must be absent");
 check(!style(".quest-ui-dashboard-display-title-icon > svg").maskImage || style(".quest-ui-dashboard-display-title-icon > svg").maskImage === "none", "native emblem must not be replaced");
-for (const selector of [".quest-ui-dashboard-choice-list", ".quest-ui-notification-center-panel", ".quest-ui-update-panel", ".quest-ui-update-product-entry"]) { check(style(selector).borderImageSource !== "none", selector + " must have a stepped frame"); }
 for (const selector of [".quest-ui-event-log-panel", ".quest-ui-event-detail", ".quest-ui-event-detail-meta-card", ".quest-ui-event-filter-menu", ".quest-ui-dashboard-choice-list", ".quest-ui-notification-center-panel", ".quest-ui-update-panel", ".quest-ui-update-product-entry"]) {
     check(style(selector).borderImageSource !== "none", selector + " must have a stepped frame");
 }
-for (const selector of [".quest-ui-event-severity-icon", ".quest-ui-terminal-notice-read-glyph", ".quest-ui-terminal-update-current-glyph"]) { check(style(selector).maskImage !== "none", selector + " must use a pixel glyph"); }
+for (const selector of [".quest-ui-event-severity-icon", ".quest-ui-terminal-notice-read-glyph", ".quest-ui-terminal-update-current-glyph"]) {
+    check(style(selector).maskImage !== "none", selector + " must use a pixel glyph");
+}
 check(style(".quest-ui-notification-center-action").borderImageSource !== style(".quest-ui-notification-center-action.is-danger").borderImageSource, "notification danger frame must differ");
+check(style(".quest-ui-event-log-panel").isolation === "auto", "event portal must not trap nested popouts");
+for (const selector of [".quest-ui-event-log-panel", ".quest-ui-event-detail", ".quest-ui-event-filter-menu", ".quest-ui-dashboard-choice-list", ".quest-ui-filter-list", ".quest-ui-notification-center-panel", ".quest-ui-update-panel"]) {
+    check(style(selector).clipPath.startsWith("polygon("), selector + " must clip the background to stepped corners");
+}
 check(style(".quest-ui-event-row").borderImageSource !== "none" && style(".quest-ui-event-view-detail").borderImageSource !== "none", "event row and detail control must use Terminal frames");
 const dashboardSort = style(".quest-ui-dashboard-filter-control");
 const filter = q(".quest-ui-filter-button");
@@ -228,6 +233,28 @@ for (const selector of [".quest-ui-event-sort-trigger", ".quest-ui-event-filter-
 check(style(".quest-ui-event-detail-hero > h3").fontSize === "16px" && style(".quest-ui-event-detail-hero > h3").overflowWrap === "anywhere", "detail title must be compact and wrap");
 for (const selector of [".quest-ui-event-detail-hero", ".quest-ui-event-detail-hero-icon", ".quest-ui-event-detail-category", ".quest-ui-event-detail-meta-icon-wrap", ".quest-ui-event-detail-diagnostic > pre"]) check(style(selector).borderImageSource !== "none", selector + " must have a stepped frame");
 check(style(".quest-ui-event-detail-meta-icon").maskImage !== "none", "metadata glyph must be pixelized");
+for (const selector of [".quest-ui-event-row-bug", ".quest-ui-event-source", ".quest-ui-event-category", ".quest-ui-event-clear-confirm-button.is-confirm", ".quest-ui-event-clear-confirm-button.is-cancel", ".quest-ui-event-filter-count", ".quest-ui-card-ignored-state", ".quest-ui-card-orion-control", ".quest-ui-update-row-version", ".quest-ui-update-row-target", ".quest-ui-update-decision-actions > button"]) {
+    check(style(selector).borderImageSource !== "none", selector + " must not fall back to a rectangular CSS border");
+}
+check(style(".quest-ui-event-row-bug").maskImage === "none" && style(".quest-ui-event-row-bug .quest-ui-event-log-icon").maskImage !== "none", "bug frame and glyph must remain separate");
+check(style(".quest-ui-event-clear-confirm-button.is-confirm").borderImageSource !== style(".quest-ui-event-clear-confirm-button.is-cancel").borderImageSource, "clear confirmation must retain danger emphasis");
+const shortcut = q(".quest-ui-detailed-count");
+check(parseFloat(getComputedStyle(shortcut).borderRadius) >= 6 && shortcut.offsetWidth === shortcut.offsetHeight, "single digit shortcut badge must be circular");
+const errorGlyph = decodeURIComponent(style(".quest-ui-event-severity.is-error .quest-ui-event-severity-icon").maskImage);
+check(errorGlyph.includes('viewBox="0 0 48 48"'), "error glyph must use high resolution pixel mask");
+const errorPixels = new Set();
+for (const run of errorGlyph.matchAll(/M([0-9]+) ([0-9]+)h([0-9]+)v1h-[0-9]+z/g)) {
+    for (let x = Number(run[1]); x < Number(run[1]) + Number(run[3]); x++) errorPixels.add(x + "," + run[2]);
+}
+let innerCount = 0, ringCount = 0, gapCount = 0;
+for (const pixel of errorPixels) {
+    const [x, y] = pixel.split(",").map(Number);
+    const r = Math.hypot(x + .5 - 24, y + .5 - 24);
+    if (r < 12) innerCount++;
+    else if (r >= 17) ringCount++;
+    else gapCount++;
+}
+check(innerCount > 0 && ringCount > 0 && gapCount === 0, "error X must have an empty annulus separating it from its ring");
 document.body.dataset.result = errors.length ? "fail" : "pass";
 q("#result").textContent = JSON.stringify(errors);
 `;
