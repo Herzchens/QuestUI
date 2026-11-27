@@ -61,6 +61,9 @@ import terminalDashboard from "./terminal/dashboard.css?managed";
 import origamiTokens from "./origami/tokens.css?managed";
 import origamiDashboardComponents from "./origami/dashboard-components.css?managed";
 import origamiScrollbar from "./origami/scrollbar.css?managed";
+import origamiQuestActions from "./origami/quest-actions.css?managed";
+import origamiQuestReload from "./origami/quest-reload.css?managed";
+import origamiOrion from "./origami/orion.css?managed";
 import origamiDashboard from "./origami/dashboard.css?managed";
 
 import type { DashboardTheme } from "./controller";
@@ -161,6 +164,9 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             origamiTokens,
             origamiDashboardComponents,
             origamiScrollbar,
+            origamiQuestActions,
+            origamiQuestReload,
+            origamiOrion,
             origamiDashboard,
         ]
     }

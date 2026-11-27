@@ -1,0 +1,158 @@
+.quest-ui-card-actions {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+.quest-ui-card-action {
+    align-items: center;
+    background: var(--button-filled-brand-background, var(--brand-500));
+    border: 0;
+    border-radius: 6px;
+    color: var(--button-filled-brand-text, #fff);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 600;
+    justify-content: center;
+    line-height: 16px;
+    min-height: 28px;
+    padding: 6px 10px;
+    white-space: nowrap;
+}
+.quest-ui-card-action:hover:not(:disabled) {
+    background: var(--button-filled-brand-background-hover, var(--brand-560));
+}
+.quest-ui-card-action:active:not(:disabled) {
+    background: var(--button-filled-brand-background-active, var(--brand-600));
+}
+.quest-ui-card-action:disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+.quest-ui-card-action-claim {
+    background: var(--status-positive, #23a55a);
+}
+.quest-ui-card-action-claim:hover:not(:disabled),
+.quest-ui-card-action-claim:active:not(:disabled) {
+    background: var(--status-positive-background, #1f8f4d);
+}
+.quest-ui-card-action-ignore {
+    align-items: center;
+    background: var(--background-mod-strong, rgba(255, 255, 255, 0.12));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+    color: var(--interactive-normal);
+    display: inline-flex;
+    font-size: 0;
+    height: 28px;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0;
+    width: 28px;
+}
+.quest-ui-card-action-ignore:hover:not(:disabled),
+.quest-ui-card-action-ignore:active:not(:disabled) {
+    background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18));
+}
+.quest-ui-card-action-ignore:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-500));
+    outline-offset: 2px;
+}
+.quest-ui-card-action-ignore.is-unignore {
+    border-color: color-mix(in srgb, var(--quest-ui-theme-ignored) 46%, transparent);
+    color: var(--quest-ui-theme-ignored);
+}
+.quest-ui-card-orion-state,
+.quest-ui-card-ignored-state {
+    --quest-ui-orion-state-color: var(--interactive-muted);
+    align-items: center;
+    background: color-mix(in srgb, var(--quest-ui-orion-state-color) 11%, transparent);
+    border: 1px solid color-mix(in srgb, var(--quest-ui-orion-state-color) 38%, transparent);
+    border-radius: 5px;
+    box-sizing: border-box;
+    color: var(--quest-ui-orion-state-color);
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 9px;
+    font-weight: 750;
+    height: 20px;
+    letter-spacing: .035em;
+    line-height: 1;
+    padding: 0 6px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.quest-ui-card-ignored-state {
+    --quest-ui-orion-state-color: var(--quest-ui-theme-ignored);
+}
+.quest-ui-card-ignored {
+    border-color: color-mix(in srgb, var(--quest-ui-theme-ignored) 28%, var(--border-subtle, rgba(255, 255, 255, 0.08)));
+}
+.quest-ui-card-orion-state.is-started {
+    --quest-ui-orion-state-color: var(--status-positive);
+}
+.quest-ui-card-orion-state.is-waiting,
+.quest-ui-card-orion-state.is-paused {
+    --quest-ui-orion-state-color: var(--status-warning, #f0b232);
+}
+.quest-ui-card-orion-state.is-stopped {
+    --quest-ui-orion-state-color: var(--interactive-muted);
+}
+.quest-ui-card-orion-control {
+    align-items: center;
+    background: var(--background-mod-strong, rgba(255, 255, 255, 0.12));
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: 6px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    display: inline-flex;
+    height: 28px;
+    justify-content: center;
+    padding: 0;
+    width: 28px;
+}
+.quest-ui-card-orion-control svg {
+    fill: currentColor;
+    height: 15px;
+    width: 15px;
+}
+.quest-ui-card-orion-control.is-start,
+.quest-ui-card-orion-control.is-resume {
+    color: var(--status-positive);
+}
+.quest-ui-card-orion-control.is-pause {
+    color: var(--status-warning, #f0b232);
+}
+.quest-ui-card-orion-control:hover:not(:disabled) {
+    background: var(--background-mod-stronger, rgba(255, 255, 255, 0.18));
+}
+.quest-ui-card-orion-control:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-500));
+    outline-offset: 2px;
+}
+.quest-ui-card-orion-control:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+/* Ignore/Unignore uses the real SVG rendered by QuestCardActions. */
+/* Keep the Ignore glyph self-contained under aggressive client/custom-theme SVG rules. */
+.quest-ui-card-action-ignore > .quest-ui-card-action-ignore-glyph {
+    display: block !important;
+    fill: none !important;
+    flex: 0 0 18px;
+    height: 18px !important;
+    overflow: visible;
+    stroke: currentColor !important;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2 !important;
+    vector-effect: non-scaling-stroke;
+    width: 18px !important;
+}
+.quest-ui-card-action-ignore > .quest-ui-card-action-ignore-glyph > path {
+    display: block !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+}
