@@ -76,6 +76,7 @@ import origamiAnimalAssets from "./origami/animal-assets.css?managed";
 import origamiCardStock from "./origami/card-stock.css?managed";
 import origamiSceneAssets from "./origami/scene-assets.css?managed";
 import origamiPolishStock from "./origami/polish-stock.css?managed";
+import origamiPaperArt from "./origami/paper-art.css?managed";
 
 import type { DashboardTheme } from "./controller";
 
@@ -190,6 +191,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             origamiCardStock,
             origamiSceneAssets,
             origamiPolishStock,
+            origamiPaperArt,
         ]
     }
 ];

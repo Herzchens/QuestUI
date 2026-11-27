@@ -1,0 +1,1121 @@
+/* Origami art direction: cut-paper composition, independent of scene assets. */
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-dashboard-shell { background: #081d3c var(--origami-art-navy) center / cover no-repeat !important; border: 1px solid #315072; border-radius: 12px;
+    box-shadow: 0 18px 56px #0009; }
+/* Header: independent paper title, premium badge and living artwork gap. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-topbar {
+    align-items: center;
+    isolation: isolate;
+    border-bottom: 0;
+    gap: 9px;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-topbar::before {
+    content: "";
+    pointer-events: none;
+    position: relative;
+    order: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100px;
+    margin-block: -6px -44px;
+    align-self: flex-start;
+    background: var(--origami-header-raster-art) center top / contain no-repeat;
+    image-rendering: auto;
+    z-index: 0;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-topbar::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    width: 39px;
+    height: 35px;
+    left: 0;
+    top: 0;
+    background: var(--origami-art-header-leaf) center / contain no-repeat;
+    z-index: -1;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-topbar .quest-ui-dashboard-display-title {
+    display: grid;
+    grid-template-columns: auto minmax(0,auto) auto;
+    align-items: center;
+    gap: 0 5px;
+    flex: 0 1 auto;
+    padding: 0;
+    height: 42px;
+    background: none;
+    clip-path: none;
+    filter: none;
+    isolation: isolate;
+    overflow: visible;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title::before {
+    content: "";
+    grid-area: 1 / 1 / 2 / 3;
+    align-self: stretch;
+    margin-right: 0;
+    background: var(--origami-variant-crumpled) center / 100% 100% no-repeat,var(--origami-art-ivory) center / cover no-repeat,#f0dcc3;
+    mask: var(--origami-header-raster-title) center / 100% 100% no-repeat;
+    filter: drop-shadow(0 3px 2px #0009);
+    pointer-events: none;
+    z-index: -1;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title > strong {
+    grid-area: 1 / 2;
+    padding-right: 13px;
+    min-width: 0;
+    background: none;
+    color: #10253e;
+    -webkit-text-fill-color: #10253e;
+    animation: none;
+    font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif !important;
+    font-weight: 750;
+    letter-spacing: -.35px;
+    text-shadow: none;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title-icon {
+    grid-area: 1 / 1;
+    margin-left: 13px;
+    color: #10253e;
+    opacity: 1;
+    filter: brightness(.3);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-header-tools { margin-left: auto; order: 2; position: relative; z-index: 1; }
+/* Header artwork extends into the next row. Keep the independent notification
+ * lane above the topbar's stacking context (z-index: 4), even when expanded. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-region {
+    z-index: 5;
+}
+/* The existing actionbar capsules are folded paper trays. Clip the decorative
+ * sheet only, never the controls or their popouts. The notice lane stays separate. */
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-dashboard-actionbar-primary,.quest-ui-dashboard-actionbar-destinations) {
+    position: relative;
+    isolation: isolate;
+    border: 1px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    overflow: visible;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-dashboard-actionbar-primary,.quest-ui-dashboard-actionbar-destinations)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    clip-path: var(--origami-cut);
+    background: #dcc3a5;
+    border-image: var(--origami-slice-matte);
+    box-shadow: inset 0 -1px 0 #80573a44;
+}
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-dashboard-actionbar-primary,.quest-ui-dashboard-actionbar-destinations)::after {
+    content: "";
+    position: absolute;
+    inset: 2px 5px -2px;
+    z-index: -2;
+    pointer-events: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 2px #031126b8,0 4px 5px #03112666;
+}
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-toolbar-button,.quest-ui-reload-icon-button,.quest-ui-dashboard-palette-button,.quest-ui-event-log-button,.quest-ui-status-settings-button,.quest-ui-dashboard-filter-control,.quest-ui-dashboard-orb-balance,.quest-ui-version-chip,.quest-ui-product-update-chip,.quest-ui-card-action,.quest-ui-card-action-ignore,.quest-ui-card-orion-control,.quest-ui-card-ignored-state,.quest-ui-card-orion-state,.quest-ui-orion-icon-button) { background: var(--origami-paper) !important; color: #142944; border: 0; border-radius: 0; clip-path: var(--origami-cut);
+    box-shadow: var(--origami-shadow); text-shadow: none; }
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-toolbar-button,.quest-ui-reload-icon-button,.quest-ui-dashboard-palette-button,.quest-ui-event-log-button,.quest-ui-dashboard-filter-control,.quest-ui-card-action,.quest-ui-card-action-ignore,.quest-ui-card-orion-control,.quest-ui-orion-icon-button):hover:not(:disabled) { filter: brightness(1.09) saturate(1.12); }
+.quest-ui-theme-origami.quest-ui-theme :is(button,[role="button"]):focus-visible { outline: 2px solid #8a39c2; outline-offset: -3px; }
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-dashboard-orb-balance,.quest-ui-dashboard-boost-source-tag,.quest-ui-card-ignored-state,.quest-ui-card-action-ignore.is-unignore) { background: var(--origami-art-fold-left) left center / 13px 100% no-repeat,var(--origami-art-fold-right) right center / 13px 100% no-repeat,var(--origami-art-fold) center / 100% 100% no-repeat,linear-gradient(140deg,#c596ff,#8640d1 48%,#6732ae 49%,#ad70ef) !important; color: #fff; clip-path: var(--origami-cut); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-orb-balance > strong { color: #fff; }
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-card-action-claim,.quest-ui-card-orion-control.is-start,.quest-ui-card-orion-control.is-resume,.quest-ui-product-update-chip.is-current) { background: var(--origami-art-fold-left) left center / 13px 100% no-repeat,var(--origami-art-fold-right) right center / 13px 100% no-repeat,var(--origami-art-fold) center / 100% 100% no-repeat,linear-gradient(155deg,#14c67b,#008249 60%,#006638) !important; color: #fff; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-version-chip.is-stable { background: var(--origami-art-fold-left) left center / 13px 100% no-repeat,var(--origami-art-fold-right) right center / 13px 100% no-repeat,var(--origami-art-fold) center / 100% 100% no-repeat,linear-gradient(145deg,#5cbbff,#1671ca 49%,#1354a2 50%,#288ce0) !important; color: #fff; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-version-chip.is-beta { background: var(--origami-art-fold-left) left center / 13px 100% no-repeat,var(--origami-art-fold-right) right center / 13px 100% no-repeat,var(--origami-art-fold) center / 100% 100% no-repeat,linear-gradient(145deg,#ffe17a,#f7b725 49%,#d98a0a 50%,#ffcd44) !important; color: #2d200a; }
+
+/* Upper controls use the same matte paper stock, with independent pigment. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar :is(.quest-ui-claim-all-button,.quest-ui-orion-icon-button) {
+    --origami-control-stock: linear-gradient(155deg,#fff7e9,#efd8bd);
+    position: relative;
+    isolation: isolate;
+    background: transparent !important;
+    border-image: none;
+    clip-path: none;
+    box-shadow: none;
+    filter: var(--origami-contact-shadow);
+    font-weight: 800;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar :is(.quest-ui-claim-all-button,.quest-ui-orion-icon-button)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--origami-control-stock);
+    clip-path: var(--origami-cut);
+    border-image: var(--origami-slice-slip);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-orion-icon-button::before {
+    /* Actual folded sheet silhouette, with fixed 17px end panels. */
+    background: transparent;
+    clip-path: none;
+    border-image: var(--origami-action-sheet) 0 34 fill / 0 17px stretch;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-claim-all-button {
+    /* A folded action with its own face and shadow, never a title raster. */
+    --origami-control-stock: linear-gradient(155deg,#f8dda0,#edbf68);
+    color: #32240e;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-claim-all-button:disabled {
+    --origami-control-stock: #e5d2b8;
+    filter: none;
+    color: #554636;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-claim-all-count { background: #087e49;
+    color: #fff;
+    border-radius: 0;
+    border-image: var(--origami-slice-stamp);
+    clip-path: polygon(3px 0,calc(100% - 3px) 0,100% 3px,100% calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,0 calc(100% - 3px),0 3px);
+    box-shadow: 0 1px 1px #57372444;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-claim-all-button:disabled .quest-ui-claim-all-count {
+    background: #8c7861;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar :is(.quest-ui-claim-all-button,.quest-ui-orion-icon-button):hover:not(:disabled) {
+    filter: brightness(1.06) var(--origami-contact-shadow);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar :is(.quest-ui-reload-icon-button,.quest-ui-event-log-button,.quest-ui-toolbar-button:not(.quest-ui-claim-all-button)),
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-status-settings-button {
+    position: relative;
+    isolation: isolate;
+    background: transparent !important;
+    border-image: none;
+    clip-path: none;
+    box-shadow: none;
+    border-radius: 0;
+    color: #142944;
+    filter: var(--origami-contact-shadow);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar :is(.quest-ui-reload-icon-button,.quest-ui-event-log-button,.quest-ui-toolbar-button:not(.quest-ui-claim-all-button))::before,
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-status-settings-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--origami-fold-settings) center / 100% 100% no-repeat;
+    clip-path: none;
+    border-image: none;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar :is(.quest-ui-reload-icon-button,.quest-ui-event-log-button,.quest-ui-toolbar-button:not(.quest-ui-claim-all-button)):hover:not(:disabled),
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-status-settings-button:is(:hover,:focus-visible) {
+    filter: brightness(1.06) var(--origami-contact-shadow);
+    color: #142944;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-reload-icon-button { --origami-toolbar-fold: var(--origami-variant-top-right); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-event-log-button { --origami-toolbar-fold: var(--origami-variant-bottom-pair); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-toolbar-button:not(.quest-ui-claim-all-button) { --origami-toolbar-fold: var(--origami-variant-unfolded-cross); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-toolbar-button.quest-ui-market-button { --origami-toolbar-fold: var(--origami-variant-diagonal-pair); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-toolbar-button.quest-ui-home-button { --origami-toolbar-fold: var(--origami-variant-bottom-left); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar :is(.quest-ui-reload-icon-button,.quest-ui-event-log-button,.quest-ui-toolbar-button:not(.quest-ui-claim-all-button))::before {
+    background: var(--origami-toolbar-fold) center / 100% 100% no-repeat,#e3c9a6;
+    clip-path: var(--origami-cut);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-status-settings-button:active {
+    filter: brightness(.96) drop-shadow(0 1px 1px #4c35275c);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-orion-icon-button:is(.is-start,.is-resume) {
+    --origami-action-sheet: var(--origami-fold-action-start);
+    color: #fff;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-orion-icon-button.is-pause {
+    --origami-action-sheet: var(--origami-fold-action-pause);
+    color: #34250d;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-actionbar .quest-ui-orion-icon-button.is-stop {
+    --origami-action-sheet: var(--origami-fold-action-stop);
+    color: #fff;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip :is(.quest-ui-version-chip,.quest-ui-product-update-chip) {
+    --origami-control-stock: linear-gradient(155deg,#fff7e9,#e7c9aa);
+    background: var(--origami-control-stock) !important;
+    border-image: var(--origami-product-fold,var(--origami-stock-micro)) 0 20 fill / 0 10px stretch;
+    box-shadow: none;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-product.is-orion .quest-ui-version-chip { --origami-product-fold: var(--origami-variant-bottom-right); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-product.is-questui .quest-ui-version-chip { --origami-product-fold: var(--origami-variant-unfolded-diagonal); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-product.is-orion .quest-ui-product-update-chip { --origami-product-fold: var(--origami-variant-diagonal-pair); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-product.is-questui .quest-ui-product-update-chip { --origami-product-fold: var(--origami-variant-right-pair); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-version-chip.is-stable { --origami-control-stock: linear-gradient(150deg,#459ee9,#1260ac); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-version-chip.is-beta { --origami-control-stock: linear-gradient(150deg,#ffd764,#eea717); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-product-update-chip.is-current { --origami-control-stock: linear-gradient(150deg,#15b86b,#007b45); }
+
+/* Independent folded paper cards, with a shallow paper edge rather than a
+ * thick bevel. Keep actual content and settings controls outside the clip. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip :is(.quest-ui-default-status-product.is-orion,.quest-ui-default-status-product.is-questui) {
+    position: relative;
+    isolation: isolate;
+    background: transparent !important;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    color: #10253e;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip :is(.quest-ui-default-status-product.is-orion,.quest-ui-default-status-product.is-questui)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    clip-path: var(--origami-cut);
+    background: #f9ead8;
+    border-image: var(--origami-stock-status-3d) 0 120 fill / 0 60px stretch;
+    box-shadow: inset 0 -1px 0 #b6967a80;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip :is(.quest-ui-default-status-product.is-orion,.quest-ui-default-status-product.is-questui)::after {
+    content: "";
+    position: absolute;
+    inset: 3px 1px -3px;
+    pointer-events: none;
+    z-index: -2;
+    clip-path: var(--origami-cut);
+    background: #040f2399;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-version-chip {
+    min-height: 23px;
+    font-size: 10.5px;
+    padding-inline: 7px;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-product-update-chip {
+    min-height: 23px;
+    font-size: 9.5px;
+    padding-inline: 7px;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-version-chip.is-alpha { --origami-control-stock: linear-gradient(155deg,#e95965,#b7283a); color: #fff; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-version-chip.is-prerelease { --origami-control-stock: linear-gradient(155deg,#b779ed,#793ab3); color: #fff; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-product-update-chip.is-available { --origami-control-stock: linear-gradient(155deg,#6db4ef,#2369ad); color: #fff; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-product-update-chip.is-error { --origami-control-stock: linear-gradient(155deg,#e65b62,#ad2938); color: #fff; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-strip .quest-ui-product-update-chip.is-warning { --origami-control-stock: linear-gradient(155deg,#ffdb7c,#e7a72a); color: #4a2e0b; }
+
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-default-status-name { color: #10253e; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-status-bridge { grid-template-columns: minmax(0,1fr) 24px minmax(0,1fr); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-status-bridge-node { width: 24px; height: 18px; transform: none; border: 0; border-radius: 0;
+    box-shadow: none; filter: drop-shadow(0 2px 1px #001025b0); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip { --origami-chip: #f2dec8;
+    background: var(--origami-chip) !important; border: 0;
+    border-image: var(--origami-chip-fold,var(--origami-stock-micro)) 0 20 fill / 0 10px stretch; border-radius: 0; clip-path: var(--origami-cut); color: #10253e;
+    box-shadow: 0 1px 1px #57372433; font-weight: 750; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip.is-selected { box-shadow: inset 0 0 0 2px #10253e,var(--origami-shadow); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip .quest-ui-summary-chip-count { font-size: 10px;
+    background: var(--origami-count-stock,color-mix(in srgb,var(--origami-chip),#fff2df 35%)); color: var(--origami-count-ink,#142944); border: 1px solid transparent;
+    border-image: var(--origami-slice-stamp); border-radius: 0; clip-path: polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-expired { --origami-chip-fold: var(--origami-variant-unfolded-diagonal); --origami-chip: #d8c8df; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-tools {
+    position: relative;
+    isolation: isolate;
+    grid-template-columns: max-content minmax(0,1fr) max-content max-content;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-tools::before {
+    content: "";
+    grid-area: 1 / 2;
+    min-width: 0;
+    width: 100%;
+    height: 54px;
+    margin-block: -9px;
+    align-self: center;
+    background: var(--origami-header-raster-fuji) center bottom / contain no-repeat;
+    filter: drop-shadow(0 2px 1px #0007);
+    pointer-events: none;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-list-title {
+    grid-area: 1 / 1;
+    background: var(--origami-art-unfolded-button) center / 100% 100% no-repeat;
+    color: #10253e;
+    padding: 0 14px;
+    clip-path: var(--origami-cut);
+    box-shadow: inset 0 1px 0 #fff9,inset 0 -2px 0 #b5967755;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-sort-button { grid-area: 1 / 3; --origami-filter-fold: var(--origami-variant-unfolded-diagonal); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-filter-button { grid-area: 1 / 4; --origami-filter-fold: var(--origami-variant-bottom-right); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-tools .quest-ui-dashboard-filter-control {
+    background: var(--origami-filter-fold) center / 100% 100% no-repeat,var(--origami-art-unfolded-button) center / 100% 100% no-repeat !important;
+    color: #142944;
+    font-weight: 750;
+    box-shadow: inset 0 1px 0 #fff9,inset 0 -2px 0 #b5967755;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-tools .quest-ui-dashboard-filter-control:is(.is-open,.is-active) {
+    background: linear-gradient(#be906b16,#be906b16),var(--origami-filter-fold) center / 100% 100% no-repeat,var(--origami-art-unfolded-button) center / 100% 100% no-repeat !important;
+    color: #142944;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-tools .quest-ui-filter-count-badge {
+    background: #dfc5ac;
+    color: #142944;
+    border: 0;
+    border-image: var(--origami-slice-stamp);
+    border-radius: 0;
+    min-width: 19px;
+    clip-path: polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px);
+    box-shadow: 0 1px 1px #57372444;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-tools .quest-ui-dashboard-filter-control:focus-visible {
+    box-shadow: inset 0 0 0 2px #315072;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-content::after { content: ""; flex: 0 0 26px;
+    background: var(--origami-art-footer) center / contain no-repeat; pointer-events: none; }
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-notification-center-panel,.quest-ui-event-log-panel,.quest-ui-event-detail,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu,.quest-ui-update-panel,.quest-ui-filter-list,.quest-ui-dashboard-choice-list) { background-color: #fff0de !important;
+    background-image: var(--origami-art-ivory) !important;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat; border: 1px solid #c5a78c; border-radius: 7px; color: #142944;
+    box-shadow: 0 12px 30px #00172d88,inset 0 0 0 2px #fff7; }
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-event-filter-list-box,.quest-ui-event-sort-radio,.quest-ui-filter-list-box,.quest-ui-dashboard-choice-list-radio) { border-radius: 2px; }
+@media (max-width: 760px) {
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-topbar::before { height: 86px; margin-block: -4px -32px; }
+}
+@media (max-width: 520px) {
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-topbar::before, .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-tools::before { display: none; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-tools { grid-template-columns: minmax(0,1fr) max-content max-content; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-sort-button { grid-area: 1 / 2; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-filter-button { grid-area: 1 / 3; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-topbar::after { display: none; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-topbar .quest-ui-dashboard-display-title { height: 38px; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title > strong { padding-right: 8px; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title-icon { margin-left: 9px; }
+}
+/* Keep all native list controls reachable below the one-row minimum. */
+@media (max-width: 480px) {
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-tools {
+        grid-template-columns: minmax(0,1fr) max-content;
+        grid-template-rows: auto auto;
+    }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-list-title { grid-area: 1 / 1 / 2 / 3; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-sort-button {
+        grid-area: 2 / 1;
+        min-width: 0;
+        justify-self: stretch;
+    }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-sort-button > span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-control.quest-ui-filter-button { grid-area: 2 / 2; }
+}
+@media (prefers-reduced-motion: reduce) { .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title > strong { animation: none; } }
+
+/* Preserve native Xbox identity and keep the dynamic notification island legible. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-boost-source-tag.is-xbox {
+    background: var(--origami-art-fold-left) left center / 13px 100% no-repeat,var(--origami-art-fold-right) right center / 13px 100% no-repeat,var(--origami-art-fold) center / 100% 100% no-repeat,linear-gradient(142deg,#42bb45,#167918 49%,#075b0b 50%,#28a82c) !important;
+}
+/* Parent paper tray and inset child share the native animated button width.
+ * Neither changes layout, adds a hover target or reintroduces the round SVG. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-island {
+    background: transparent !important;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    isolation: isolate;
+    color: #142944;
+    --origami-notice-paper: #f3dfc6;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-island::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    clip-path: var(--origami-cut);
+    background:
+        var(--origami-paper-end-left) left center / 19px 100% no-repeat,
+        var(--origami-paper-end-right) right center / 19px 100% no-repeat,
+        linear-gradient(155deg,#f3e0c9,#d9b99a);
+    box-shadow: inset 0 1px 0 #fff8,inset 0 -2px 0 #80573a55;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-island::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    pointer-events: none;
+    z-index: 0;
+    clip-path: var(--origami-cut);
+    background: linear-gradient(155deg,#fff6e9,var(--origami-notice-paper));
+    border-image: var(--origami-slice-raised);
+    box-shadow: inset 0 0 0 1px #a4826066,inset 0 1px 0 #fff,inset 0 -2px 0 #80573a70;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-island:is(.is-mounted,.is-visible,.is-exiting) {
+    --origami-notice-paper: color-mix(in srgb,#f3dfc6 85%,var(--quest-ui-notification-tone));
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-island:is(:hover,:focus-visible,.is-open)::before {
+    box-shadow: inset 0 0 0 2px #a48260,inset 0 2px 0 #fff;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-island .quest-ui-dashboard-notification-surface {
+    display: none;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-island .quest-ui-dashboard-notification-icon {
+    color: #142944;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-island:is(.is-mounted,.is-visible,.is-exiting) .quest-ui-dashboard-notification-icon {
+    color: color-mix(in srgb,#142944 60%,var(--quest-ui-notification-tone));
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-notification-island.is-idle:is(:hover,:focus-visible,.is-open) .quest-ui-dashboard-notification-icon {
+    color: #7440a7;
+}
+/* Notification actions are individual sheets resting on the larger sheet.
+ * The image contains residual fold relief, not a bevel or printed outline. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-notification-center-actions > .quest-ui-notification-center-action:first-child { --origami-notice-action-fold: var(--origami-variant-bottom-left); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-notification-center-actions > .quest-ui-notification-center-action:nth-child(2) { --origami-notice-action-fold: var(--origami-variant-unfolded-cross); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-notification-center-actions > .quest-ui-notification-center-action.is-danger { --origami-notice-action-fold: var(--origami-variant-right-pair); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-notification-center-action {
+    --origami-notice-action-fold: var(--origami-variant-unfolded-diagonal);
+    background: var(--origami-notice-action-fold) center / 100% 100% no-repeat,var(--origami-art-unfolded-button) center / cover no-repeat;
+    border: 1px solid #ccb398;
+    border-radius: 3px;
+    color: #142944;
+    box-shadow: inset 0 1px 0 #fff9,0 1px 0 #c2a88e,0 2px 3px #75523738;
+    transition: box-shadow 120ms ease, filter 120ms ease, border-color 120ms ease;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-notification-center-action.is-danger { color: #ac283b; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-notification-center-action:hover:not(:disabled) {
+    background: var(--origami-notice-action-fold) center / 100% 100% no-repeat,var(--origami-art-unfolded-button) center / cover no-repeat;
+    color: #142944;
+    border-color: #a98b6d;
+    filter: brightness(1.045);
+    box-shadow: inset 0 1px 0 #fff,0 1px 0 #b99c81,0 3px 4px #7552374a;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-notification-center-action.is-danger:hover:not(:disabled) {
+    background: linear-gradient(#f9c6bd30,#f9c6bd30),var(--origami-notice-action-fold) center / 100% 100% no-repeat,var(--origami-art-unfolded-button) center / cover no-repeat;
+    color: #ac283b;
+    border-color: #ba7c75;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-notification-center-action:focus-visible {
+    outline: 2px solid #315072;
+    outline-offset: 2px;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-notification-center-action:active:not(:disabled) {
+    box-shadow: inset 0 1px 2px #75523745,0 1px 0 #c2a88e;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-status-dot { box-shadow: inset 0 1px 1px #fff8,0 1px 2px #132a4240; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-orion-state.is-stopped { background: #d7cbd9 !important; color: #253046;
+    border-image: var(--origami-variant-unfolded-cross) 0 20 fill / 0 10px stretch;
+    box-shadow: none; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-action-ignore { background: #8550c5 !important; color: #fff;
+    border-image: var(--origami-variant-bottom-pair) 0 20 fill / 0 7px stretch;
+    box-shadow: none; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-ignored-state { background: #7950b4 !important;
+    border-image: var(--origami-variant-top-right) 0 20 fill / 0 10px stretch;
+    box-shadow: none; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-orion-state:not(.is-stopped) { border-image: var(--origami-slice-micro);
+    box-shadow: none; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-action-ignore > .quest-ui-card-action-ignore-glyph { color: #fff; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-expiry { text-shadow: 0 1px 1px #fff8; }
+
+
+/* Explicit dashboard typography; a Discord/custom font cannot turn paper into terminal glyphs. */
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-dashboard-shell { font-family: Arial, "Segoe UI", sans-serif !important; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-dashboard-shell :is(strong,span,button,h2,div) { font-family: Arial, "Segoe UI", sans-serif !important; }
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-dashboard-display-title-icon,.quest-ui-sort-icon,.quest-ui-filter-icon,.quest-ui-plugin-settings-glyph,.quest-ui-home-glyph,.quest-ui-reload-icon-button svg,.quest-ui-dashboard-palette-icon) {
+    color: #142944;
+}
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-dashboard-display-title-icon > svg,.quest-ui-reload-icon-button svg) { fill: currentColor; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card-reward > svg { color: #142944; }
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-dashboard-list-title,.quest-ui-dashboard-summary > .quest-ui-summary-chip,.quest-ui-version-chip,.quest-ui-product-update-chip,.quest-ui-toolbar-button,.quest-ui-card-action,.quest-ui-orion-icon-button,.quest-ui-dashboard-filter-control) {
+    filter: drop-shadow(0 2px 1px #071930aa);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-filter-control:hover:not(:disabled) { filter: brightness(1.05) drop-shadow(0 2px 1px #07193066); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-main { position: relative; }
+
+/* Paper plaques use a visible folded edge and saturated pigments, not translucent glass. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary { justify-content: space-between; gap: 5px; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip { flex: 1 1 auto; justify-content: center; font-size: 11.5px; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > :is(.quest-ui-summary-available,.quest-ui-summary-claimable,.quest-ui-summary-claimed,.quest-ui-summary-hidden) { --origami-count-stock: color-mix(in srgb,var(--origami-chip),#142944 55%); --origami-count-ink: #fff; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-available { --origami-chip-fold: var(--origami-variant-top-right); --origami-chip: #f25a62; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimable { --origami-chip-fold: var(--origami-variant-bottom-left); --origami-chip: #65d18a; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-in-progress { --origami-chip-fold: var(--origami-variant-pleat); --origami-chip: #ffc639; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-claimed { --origami-chip-fold: var(--origami-variant-top-pair); --origami-chip: #79bdf1; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-ignored { --origami-chip-fold: var(--origami-variant-bottom-pair); --origami-chip: #f28bbd; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip.quest-ui-summary-hidden { --origami-chip-fold: var(--origami-variant-unfolded-cross); --origami-chip: #b982e9; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-title { font-weight: 800; font-size: 16px; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-status { font-weight: 700; color: #24374b; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene].quest-ui-card-claimable .quest-ui-card-status { color: #07532d; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-reward .quest-ui-orb-glyph { color: #142944 !important; filter: brightness(.22) saturate(.85); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-expiry { font-size: 11.5px; line-height: 14px; font-weight: 750; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-side.is-achievement { background: transparent; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-artwork { filter: drop-shadow(0 2px 2px #34233355); }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-node { background: var(--origami-paper-link-connected) center / contain no-repeat; border: 0;
+    box-shadow: none; animation: none; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-status-bridge.is-disconnected .quest-ui-status-bridge-node { background: var(--origami-paper-link-disconnected) center / contain no-repeat; border: 0;
+    box-shadow: none; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-status-bridge.is-connected .quest-ui-status-bridge-line { background: #a7d5c0; height: 1px; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-status-bridge.is-disconnected .quest-ui-status-bridge-line { background: #b86b70; height: 1px; }
+@media (max-width: 620px) {
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-summary > .quest-ui-summary-chip { flex: 0 1 auto; font-size: 10px; }
+}
+
+
+/* Header-only paper badges: fixed new material lighting, original alpha
+ * silhouettes only. No old glossy badge color is painted. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title > .quest-ui-dashboard-boost-source-tag {
+    grid-area: 1 / 3;
+    align-self: center;
+    margin-left: 0;
+    padding-inline: 13px;
+    height: 37px;
+    min-height: 37px;
+    background: var(--origami-variant-top-pair) center / 100% 100% no-repeat,#7140b4 !important;
+    mask: var(--origami-header-raster-purple) center / 100% 100% no-repeat;
+    clip-path: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    filter: drop-shadow(0 3px 2px #0009);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title > .quest-ui-dashboard-boost-source-tag.is-xbox {
+    background: var(--origami-variant-diagonal-pair) center / 100% 100% no-repeat,#176e3c !important;
+    mask: var(--origami-art-header-green) center / 100% 100% no-repeat;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title .quest-ui-dashboard-boost-source-wordmark {
+    font-size: 16px;
+    font-weight: 750;
+    text-shadow: 0 1px 1px #38195080;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-header-tools .quest-ui-dashboard-orb-balance {
+    height: 37px;
+    min-height: 37px;
+    min-width: 95px;
+    padding-inline: 12px;
+    background: var(--origami-variant-right-pair) center / 100% 100% no-repeat,var(--origami-variant-unfolded-cross) center / 100% 100% no-repeat,#7543ba !important;
+    mask: var(--origami-header-raster-purple) center / 100% 100% no-repeat;
+    clip-path: none;
+    box-shadow: none;
+    filter: drop-shadow(0 3px 2px #0009);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-header-tools .quest-ui-dashboard-orb-balance > strong {
+    font-size: 17px;
+    font-weight: 750;
+    text-shadow: 0 1px 1px #38195080;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-header-tools .quest-ui-dashboard-palette-button {
+    height: 35px;
+    width: 35px;
+    flex-basis: 35px;
+    background: var(--origami-variant-bottom-left) center / 100% 100% no-repeat,var(--origami-art-ivory) center / cover no-repeat,#ead4b5 !important;
+    mask: var(--origami-header-raster-palette) center / 100% 100% no-repeat;
+    clip-path: none;
+    box-shadow: none;
+    filter: drop-shadow(0 3px 2px #0009);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-header-tools .quest-ui-dashboard-palette-button:is(:hover,.is-open),
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-header-tools .quest-ui-dashboard-orb-balance:hover:not(:disabled) {
+    filter: brightness(1.09) drop-shadow(0 3px 2px #0009);
+}
+@media (max-width: 620px) {
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-topbar::before { display: none; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-display-title > .quest-ui-dashboard-boost-source-tag { padding-inline: 10px; }
+}
+
+/* Origami portal material system. Portal roots must stay unclipped and must
+ * never create a new stacking context; Discord owns placement and stacking.
+ * Only decorative stock is cropped. Row dimensions and animation are native. */
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu),
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel {
+    --origami-portal-stock: var(--origami-art-unfolded-button);
+    --origami-portal-ink: #142944;
+    --origami-portal-edge: #bd9f81;
+    /* Local nine-slice outline art: the diagonal is painted, not cut out of a rectangular border. */
+    --origami-frame-neutral: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20d%3D%22M7.55%200.85H22.45L29.15%207.55V22.45L22.45%2029.15H7.55L0.85%2022.45V7.55Z%22%20fill%3D%22none%22%20stroke%3D%22%23a98b70%22%20stroke-width%3D%221.15%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    --origami-frame-focus: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20d%3D%22M7.55%200.85H22.45L29.15%207.55V22.45L22.45%2029.15H7.55L0.85%2022.45V7.55Z%22%20fill%3D%22none%22%20stroke%3D%22%23315072%22%20stroke-width%3D%221.65%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    --origami-frame-current: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20d%3D%22M7.55%200.85H22.45L29.15%207.55V22.45L22.45%2029.15H7.55L0.85%2022.45V7.55Z%22%20fill%3D%22none%22%20stroke%3D%22%235c9275%22%20stroke-width%3D%221.15%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    --origami-frame-available: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20d%3D%22M7.55%200.85H22.45L29.15%207.55V22.45L22.45%2029.15H7.55L0.85%2022.45V7.55Z%22%20fill%3D%22none%22%20stroke%3D%22%23648ab5%22%20stroke-width%3D%221.15%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    --origami-frame-error: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20d%3D%22M7.55%200.85H22.45L29.15%207.55V22.45L22.45%2029.15H7.55L0.85%2022.45V7.55Z%22%20fill%3D%22none%22%20stroke%3D%22%23b86d69%22%20stroke-width%3D%221.15%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    --origami-frame-warning: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20d%3D%22M7.55%200.85H22.45L29.15%207.55V22.45L22.45%2029.15H7.55L0.85%2022.45V7.55Z%22%20fill%3D%22none%22%20stroke%3D%22%23b68b45%22%20stroke-width%3D%221.15%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    --origami-frame-tag: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20d%3D%22M3.55%200.85H26.45L29.15%203.55V26.45L26.45%2029.15H3.55L0.85%2026.45V3.55Z%22%20fill%3D%22none%22%20stroke%3D%22%23ae9279%22%20stroke-width%3D%221.15%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    --origami-frame-sheet: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2236%22%20height%3D%2236%22%20viewBox%3D%220%200%2036%2036%22%3E%3Cpath%20d%3D%22M.75%20.75H35.25V35.25H.75Z%22%20fill%3D%22none%22%20stroke%3D%22%23aa8b6d%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M1.5%2011V1.5H11Z%22%20fill%3D%22%23d6baa0%22%2F%3E%3Cpath%20d%3D%22M1.5%2011L11%201.5%22%20stroke%3D%22%239c7c61%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M25%2034.5H34.5V25Z%22%20fill%3D%22%23c3a78c%22%2F%3E%3Cpath%20d%3D%22M25%2034.5L34.5%2025%22%20stroke%3D%22%239c7c61%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M12%202H34M2%2012V34%22%20stroke%3D%22%23fff7e8%22%20stroke-width%3D%221.1%22%2F%3E%3Cpath%20d%3D%22M12%2034H24M34%2012V24%22%20stroke%3D%22%23aa8b6d%22%20stroke-opacity%3D%22.5%22%2F%3E%3C%2Fsvg%3E");
+    --origami-portal-frame: var(--origami-frame-neutral);
+    --origami-portal-shadow: inset 0 1px 0 #fff9,0 1px 0 #b99c81,0 2px 2px #75523724;
+    --origami-portal-selection: #e7cda9;
+    --origami-slip-cut: polygon(7px 0,calc(100% - 7px) 0,100% 7px,100% calc(100% - 7px),calc(100% - 7px) 100%,7px 100%,0 calc(100% - 7px),0 7px);
+    --origami-tag-cut: polygon(3px 0,calc(100% - 3px) 0,100% 3px,100% calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,0 calc(100% - 3px),0 3px);
+    font-family: Arial,"Segoe UI",sans-serif;
+    border-radius: 3px;
+    border-color: var(--origami-portal-edge);
+    border-image: var(--origami-frame-sheet) 12 / 12px / 0 stretch;
+    box-shadow: 0 12px 30px #00172d88,inset 0 1px 0 #fff,inset 0 -3px 0 #b99c8166;
+}
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-dashboard-choice-list-title,.quest-ui-event-sort-list-title,.quest-ui-filter-list-section h3,.quest-ui-event-filter-list-section h3) {
+    color: #594636;
+    font-weight: 800;
+    text-shadow: 0 1px 0 #fff8;
+}
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-section,.quest-ui-event-filter-list-section) + :is(.quest-ui-filter-list-section,.quest-ui-event-filter-list-section) {
+    border-top-color: #b99c8177;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-filter-list { --origami-menu-fold: var(--origami-variant-pleat); }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-dashboard-choice-list { --origami-menu-fold: var(--origami-variant-unfolded-cross); }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-filter-menu { --origami-menu-fold: var(--origami-variant-bottom-left); }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-sort-menu { --origami-menu-fold: var(--origami-variant-top-right); }
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-row,.quest-ui-event-filter-list-row,.quest-ui-dashboard-choice-list > button,.quest-ui-event-sort-menu > button) {
+    background: transparent;
+    color: var(--origami-portal-ink);
+    border-radius: 2px;
+}
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-row,.quest-ui-event-filter-list-row,.quest-ui-dashboard-choice-list > button,.quest-ui-event-sort-menu > button):hover:not(:disabled) { background: var(--origami-menu-fold) center / 100% 100% no-repeat,var(--origami-portal-stock) center / cover no-repeat;
+    color: var(--origami-portal-ink);
+    box-shadow: var(--origami-portal-shadow);
+}
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-dashboard-choice-list > button.is-selected,.quest-ui-event-sort-menu > button.is-selected,.quest-ui-filter-list-row.is-checked,.quest-ui-event-filter-list-row.is-checked),
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-dashboard-choice-list > button.is-selected,.quest-ui-event-sort-menu > button.is-selected,.quest-ui-filter-list-row.is-checked,.quest-ui-event-filter-list-row.is-checked):hover:not(:disabled) { background: var(--origami-menu-fold) center / 100% 100% no-repeat,var(--origami-portal-stock) center / cover no-repeat,var(--origami-portal-selection);
+    background-blend-mode: normal,multiply,normal;
+    color: #34291e;
+    clip-path: var(--origami-slip-cut);
+    border-image: var(--origami-portal-frame) 10 / 10px / 0 stretch;
+    box-shadow: var(--origami-portal-shadow);
+}
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) button:disabled { color: #776b62; opacity: .65; }
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) button:focus-visible,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel button:focus-visible,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail button:focus-visible {
+    outline: 2px solid #315072;
+    outline-offset: 1px;
+}
+/* Small folded-paper checkboxes and octagonal radio stamps. Keep the
+ * existing status-specific colors through background-color rather than
+ * overwriting them with the generic purple selection pigment. */
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-box,.quest-ui-event-filter-list-box,.quest-ui-dashboard-choice-list-radio,.quest-ui-event-sort-radio) { background-image: var(--origami-stock-stamp);
+    background-size: cover;
+    background-blend-mode: normal;
+    background-color: #ead6be;
+    border-color: #a7896d;
+    border-radius: 2px;
+    box-shadow: 0 1px 1px #75523738;
+}
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-row.is-radio .quest-ui-filter-list-box,.quest-ui-event-filter-list-row.is-radio .quest-ui-event-filter-list-box,.quest-ui-dashboard-choice-list-radio,.quest-ui-event-sort-radio) {
+    border-radius: 0;
+    clip-path: var(--origami-tag-cut);
+    border-image: var(--origami-frame-tag) 5 / 5px / 0 stretch;
+}
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-row.is-checked .quest-ui-filter-list-box,.quest-ui-event-filter-list-row.is-checked .quest-ui-event-filter-list-box,button.is-selected .quest-ui-dashboard-choice-list-radio,button.is-selected .quest-ui-event-sort-radio) { background-image: var(--origami-stock-stamp);
+    background-color: var(--origami-choice-pigment,#7850ae);
+    border-color: color-mix(in srgb,var(--origami-choice-pigment,#7850ae),#392e34 28%);
+}
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-row.is-available,.quest-ui-event-filter-list-row.tone-error) { --origami-choice-pigment: #c53648; }
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-row.is-ready,.quest-ui-event-filter-list-row.tone-success,.quest-ui-event-filter-list-row.tone-orion) { --origami-choice-pigment: #16864c; }
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-row.is-progress,.quest-ui-event-filter-list-row.tone-warning,.quest-ui-event-filter-list-row.tone-network) { --origami-choice-pigment: #ad7118; }
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-row.is-claimed,.quest-ui-event-filter-list-row.tone-info,.quest-ui-event-filter-list-row.tone-runtime) { --origami-choice-pigment: #327bb5; }
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) .quest-ui-filter-list-row.is-expired { --origami-choice-pigment: #827689; }
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) .quest-ui-filter-list-row.is-ignored { --origami-choice-pigment: #b04789; }
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-radio-dot,.quest-ui-event-filter-list-radio-dot,.quest-ui-dashboard-choice-list-radio > span,.quest-ui-event-sort-radio > span) {
+    background: #fff7e9;
+    border-radius: 1px;
+    transform: rotate(45deg) scale(.8);
+}
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu) :is(.quest-ui-filter-list-box,.quest-ui-event-filter-list-box) svg { color: #fff; stroke: #fff; }
+
+/* Event Viewer: the parent is a single unfolded sheet, rows are small
+ * laid-out slips with colored paper tabs, not glass or dark Discord chips. */
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel :is(.quest-ui-event-log-header > div > strong,.quest-ui-event-day > span:not(.quest-ui-event-day-line)),
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-hero > h3 { color: #142944; font-family: Arial,sans-serif; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-day-line { background: #bc9f8277; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-search-shell .quest-ui-event-search {
+    background: #fff4e5;
+    border-color: #b99c81;
+    border-radius: 0;
+    border-image: var(--origami-frame-sheet) 12 / 10px / 0 stretch;
+    color: #142944;
+    box-shadow: inset 0 2px 3px #75523724;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-search-shell .quest-ui-event-search:focus {
+    background: #fff9ed;
+    border-color: #315072;
+    border-image: none;
+    box-shadow: inset 0 0 0 1px #315072;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-search-shell .quest-ui-event-search::placeholder { color: #766655; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-flat-control { --origami-event-paper: var(--origami-variant-pleat) center / 100% 100% no-repeat; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-view-detail { --origami-event-paper: var(--origami-variant-bottom-right) center / 100% 100% no-repeat; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-new-events { --origami-event-paper: var(--origami-variant-diagonal-pair) center / 100% 100% no-repeat; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-back { --origami-event-paper: var(--origami-variant-top-right) center / 100% 100% no-repeat; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-copy-report { --origami-event-paper: var(--origami-variant-unfolded-cross) center / 100% 100% no-repeat; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel :is(.quest-ui-event-flat-control,.quest-ui-event-new-events,.quest-ui-event-view-detail,.quest-ui-event-row-bug),
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail :is(.quest-ui-event-detail-back,.quest-ui-event-copy-report),
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clear-confirm-button { background: var(--origami-event-paper,var(--origami-slip-left) left center / 18px 100% no-repeat,var(--origami-slip-right) right center / 18px 100% no-repeat),var(--origami-portal-stock) center / cover no-repeat;
+    border: 1px solid var(--origami-portal-edge);
+    border-image: var(--origami-portal-frame) 10 / 10px / 0 stretch;
+    border-radius: 0;
+    clip-path: var(--origami-slip-cut);
+    color: #142944;
+    box-shadow: 0 1px 1px #75523738;
+    font-family: Arial,"Segoe UI",sans-serif;
+    font-weight: 700;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel :is(.quest-ui-event-flat-control,.quest-ui-event-new-events,.quest-ui-event-view-detail,.quest-ui-event-row-bug):hover:not(:disabled),
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-flat-control.is-open,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail :is(.quest-ui-event-detail-back,.quest-ui-event-copy-report):hover:not(:disabled),
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clear-confirm-button:hover:not(:disabled) { background: linear-gradient(#bf94651a,#bf94651a),var(--origami-event-paper,var(--origami-slip-left) left center / 18px 100% no-repeat,var(--origami-slip-right) right center / 18px 100% no-repeat),var(--origami-portal-stock) center / cover no-repeat;
+    border-color: #a38365;
+    color: #142944;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions > .quest-ui-event-action-island {
+    background: var(--origami-portal-stock) center / cover no-repeat;
+    border-color: #b99c81;
+    border-image: var(--origami-frame-sheet) 12 / 10px / 0 stretch;
+    border-radius: 0;
+    clip-path: none;
+    box-shadow: inset 0 1px 0 #fff8,inset 0 -2px 0 #b99c8188;
+}
+/* The expandable child owns exactly one paper surface, including the
+ * countdown and confirmation actions. Slice the 60px folded icon stock into fixed
+ * 12px destination corners: at 36px it matches Folder, at 196px only the
+ * middle stretches. The native trigger is an unpainted hit target. */
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-clean-island {
+    background: transparent;
+    border-color: transparent;
+    border-image: var(--origami-fold-settings) 20 fill / 12px / 0 stretch;
+    border-radius: 0;
+    clip-path: none;
+    box-shadow: none;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-clean-island:not(.is-expanded):has(.quest-ui-event-clean-trigger:hover) {
+    filter: brightness(1.06);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-island-icon-button {
+    background: var(--origami-fold-settings) center / 100% 100% no-repeat;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:hover:not(:disabled) {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px #315072;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-island-icon-button,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-island-icon-button:hover { color: #90600c; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clean-trigger:hover,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-clear-confirm-button.is-confirm { color: #ac283b; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-log-actions button.quest-ui-event-island-icon-button:hover:not(:disabled) {
+    background: var(--origami-fold-settings) center / 100% 100% no-repeat;
+    filter: brightness(1.06);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row { --origami-log-tone: #76539f; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row.is-category-runtime { --origami-log-tone: #327bb5; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row.is-category-network { --origami-log-tone: #ad7118; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row.is-category-diagnostic { --origami-log-tone: #76539f; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row.is-warning:not(.is-account-change) { --origami-log-tone: #ad7118; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row.is-error:not(.is-account-change) { --origami-log-tone: #b83d4b; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row.is-success:not(.is-account-change) { --origami-log-tone: #247d4f; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row.is-account-change { --origami-log-tone: #ae6326; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row:is(.is-category-quest,.is-category-runtime,.is-category-network,.is-category-diagnostic,.is-warning,.is-error,.is-success,.is-account-change),
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row {
+    --origami-row-wash: color-mix(in srgb,var(--origami-log-tone),transparent 84%);
+    background: var(--origami-card-corner-tl) top left / 14px 14px no-repeat,
+        var(--origami-card-corner-br) bottom right / 14px 14px no-repeat,
+        linear-gradient(90deg,var(--origami-row-wash),transparent 65%),
+        var(--origami-portal-stock) center / 100% 100% no-repeat;
+    border-color: color-mix(in srgb,var(--origami-log-tone),#e1c7ab 65%);
+    border-image: var(--origami-portal-frame) 10 / 10px / 0 stretch;
+    border-radius: 0;
+    clip-path: var(--origami-slip-cut);
+    box-shadow: inset 3px 0 0 var(--origami-log-tone),inset 0 1px 0 #fff8,inset 0 -2px 0 #98725344;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row:is(.is-category-quest,.is-category-runtime,.is-category-network,.is-category-diagnostic,.is-warning,.is-error,.is-success,.is-account-change):hover,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-row:hover {
+    --origami-row-wash: color-mix(in srgb,var(--origami-log-tone),transparent 73%);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel :is(.quest-ui-event-match-count,.quest-ui-event-filter-count,.quest-ui-event-source,.quest-ui-event-category,.quest-ui-event-account-legacy),
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail :is(.quest-ui-event-detail-source,.quest-ui-event-detail-category) {
+    --origami-tag-tone: #72529b;
+    background-image: var(--origami-micro-left),var(--origami-micro-right);
+    background-size: 10px 100%,10px 100%;
+    background-position: left center,right center;
+    background-repeat: no-repeat;
+    background-blend-mode: normal;
+    background-color: color-mix(in srgb,var(--origami-tag-tone),#fff5e6 84%);
+    border-color: color-mix(in srgb,var(--origami-tag-tone),#dec2a5 64%);
+    border-image: var(--origami-frame-tag) 5 / 5px / 0 stretch;
+    border-radius: 0;
+    clip-path: var(--origami-tag-cut);
+    color: var(--origami-tag-tone);
+}
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-event-source,.quest-ui-event-detail-source).is-orion { --origami-tag-tone: #167348; }
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-event-category,.quest-ui-event-detail-category).is-runtime { --origami-tag-tone: #235b96; }
+.quest-ui-theme-origami.quest-ui-theme :is(.quest-ui-event-category,.quest-ui-event-detail-category).is-network { --origami-tag-tone: #8d570b; }
+/* Storage is a complete folded label, not a tiny metadata tag. The relief
+ * and outline have fixed-size ends; the amount, limit and icon stay live. */
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-storage {
+    --origami-storage-pigment: #e8d2b8;
+    --origami-storage-ink: #65503b;
+    background: var(--origami-micro-left) left center / 10px 100% no-repeat,var(--origami-micro-right) right center / 10px 100% no-repeat,var(--origami-portal-stock) center / cover no-repeat,var(--origami-storage-pigment);
+    background-blend-mode: normal,normal,multiply,normal;
+    border: 1px solid transparent;
+    border-image: var(--origami-portal-frame) 10 / 10px / 0 stretch;
+    border-radius: 0;
+    clip-path: var(--origami-slip-cut);
+    color: #65503b;
+    box-shadow: inset 0 1px 0 #fff8,inset 0 -2px 0 #98725355;
+    padding-inline: 10px;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-storage.is-safe {
+    --origami-storage-pigment: #d7e2c5;
+    --origami-storage-ink: #315941;
+    --origami-portal-frame: var(--origami-frame-current);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-storage.is-watch {
+    --origami-storage-pigment: #f1d7aa;
+    --origami-storage-ink: #8d570b;
+    --origami-portal-frame: var(--origami-frame-warning);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-storage.is-high {
+    --origami-storage-pigment: #edc6a3;
+    --origami-storage-ink: #9b431f;
+    --origami-portal-frame: var(--origami-frame-error);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-storage.is-critical {
+    --origami-storage-pigment: #e9b7b1;
+    --origami-storage-ink: #ac283b;
+    --origami-portal-frame: var(--origami-frame-error);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-storage :is(.quest-ui-event-storage-used,.quest-ui-event-storage-icon) {
+    color: var(--origami-storage-ink);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-storage-icon { stroke: currentColor; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-severity.is-info,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-hero-icon.is-info { color: #235b96; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-severity.is-warning,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-hero-icon.is-warning { color: #8d570b; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-severity.is-error,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-hero-icon.is-error { color: #ac283b; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-severity.is-success,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-hero-icon.is-success { color: #167348; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-severity { background: var(--origami-fold-settings) center / 100% 100% no-repeat; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-severity-icon { width: 13px; height: 13px; stroke-width: 1.8; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel .quest-ui-event-search-shell .quest-ui-event-match-count {
+    background: transparent;
+    border-image: none;
+    clip-path: none;
+    color: #65503b;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel :is(.quest-ui-event-copy,.quest-ui-event-time,.quest-ui-event-account-name,.quest-ui-event-day,.quest-ui-event-source,.quest-ui-event-category,.quest-ui-event-storage,.quest-ui-event-search,.quest-ui-event-match-count),
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail :is(.quest-ui-event-detail-meta-label,.quest-ui-event-detail-callout,.quest-ui-event-detail-diagnostic .quest-ui-event-detail-label) { font-family: Arial,"Segoe UI",sans-serif; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel :is(.quest-ui-event-flat-control,.quest-ui-event-new-events,.quest-ui-event-view-detail,.quest-ui-event-row-bug):focus-visible,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail :is(.quest-ui-event-detail-back,.quest-ui-event-copy-report):focus-visible {
+    border-image-source: var(--origami-frame-focus);
+    box-shadow: inset 0 0 0 2px #315072;
+}
+/* Detail sheets remain scrollable; long diagnostics must not be clipped. */
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail :is(.quest-ui-event-detail-meta-card,.quest-ui-event-detail-callout) {
+    background: var(--origami-art-ivory) center / cover no-repeat;
+    border-color: #c5a78c;
+    border-image: var(--origami-frame-sheet) 12 / 12px / 0 stretch;
+    border-radius: 0;
+    box-shadow: var(--origami-portal-shadow);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-callout.is-reason { background: linear-gradient(#e7ac4020,#e7ac4020),var(--origami-art-ivory) center / cover no-repeat; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-callout.is-message { background: linear-gradient(#5c9ded18,#5c9ded18),var(--origami-art-ivory) center / cover no-repeat; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-meta-row + .quest-ui-event-detail-meta-row,
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-diagnostic { border-color: #b99c8177; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail :is(.quest-ui-event-detail-meta-icon-wrap,.quest-ui-event-detail-hero-icon) {
+    background: var(--origami-fold-settings) center / 100% 100% no-repeat;
+    border-radius: 0;
+    box-shadow: none;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail .quest-ui-event-detail-diagnostic > pre {
+    background: #f8e9d5;
+    border-color: #c5a78c;
+    border-image: var(--origami-frame-sheet) 12 / 10px / 0 stretch;
+    border-radius: 0;
+    color: #55455f;
+}
+
+/* Update Center owns the same stock and continuous edge system as the Event
+ * Viewer. Keep the outer and expanded sheets unclipped: live controls, focus,
+ * and lengthy decision text must remain usable. Only the leaf stock is cut. */
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel.quest-ui-update-panel-v16 {
+    background: #fff0de var(--origami-art-ivory) center / cover no-repeat !important;
+    border: 1px solid #c5a78c !important;
+    border-image: var(--origami-frame-sheet) 12 / 12px / 0 stretch !important;
+    border-radius: 0 !important;
+    box-shadow: 0 12px 30px #00172d88,inset 0 1px 0 #fff,inset 0 -3px 0 #b99c8166 !important;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-panel-title-icon { background: var(--origami-fold-settings) center / 100% 100% no-repeat !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-banner {
+    --origami-update-wash: #e9d9c4;
+    background: linear-gradient(90deg,color-mix(in srgb,var(--origami-update-wash),transparent 55%),transparent 85%),
+        var(--origami-portal-stock) center / cover no-repeat;
+    border-image: var(--origami-portal-frame) 10 / 10px / 0 stretch;
+    border-radius: 0;
+    clip-path: var(--origami-slip-cut);
+    box-shadow: inset 0 1px 0 #fff8,inset 0 -2px 0 #98725344;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-banner.is-current {
+    --origami-update-wash: #9ac3a6;
+    --origami-portal-frame: var(--origami-frame-current);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-banner.has-update {
+    --origami-update-wash: #a3c2e3;
+    --origami-portal-frame: var(--origami-frame-available);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-banner.has-error {
+    --origami-update-wash: #dfa49d;
+    --origami-portal-frame: var(--origami-frame-error);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-banner-mark { background: var(--origami-fold-settings) center / 100% 100% no-repeat !important;
+    border-radius: 0;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-product-entry {
+    background: var(--origami-card-corner-tl) top left / 14px 14px no-repeat,
+        var(--origami-card-corner-br) bottom right / 14px 14px no-repeat,
+        var(--origami-portal-stock) center / cover no-repeat;
+    border-image: var(--origami-frame-sheet) 12 / 12px / 0 stretch;
+    border-radius: 0;
+    box-shadow: inset 0 1px 0 #fff8,inset 0 -2px 0 #98725344;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-product-entry:is(.is-available,.is-error,.is-warning) {
+    background: var(--origami-card-corner-tl) top left / 14px 14px no-repeat,
+        var(--origami-card-corner-br) bottom right / 14px 14px no-repeat,
+        linear-gradient(90deg,var(--origami-update-entry-wash),transparent 75%),
+        var(--origami-portal-stock) center / cover no-repeat;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-product-entry.is-available { --origami-update-entry-wash: #a3c2e34d; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-product-entry.is-error { --origami-update-entry-wash: #dfa49d66; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-product-entry.is-warning { --origami-update-entry-wash: #e6bf7c55; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel :is(.quest-ui-update-row-version,.quest-ui-update-row-target,.quest-ui-update-channel) { background-image: var(--origami-micro-left),var(--origami-micro-right);
+    background-size: 10px 100%,10px 100%;
+    background-position: left center,right center;
+    background-repeat: no-repeat;
+    background-blend-mode: normal;
+    border-radius: 0;
+    border-image: var(--origami-frame-tag) 5 / 5px / 0 stretch;
+    clip-path: var(--origami-tag-cut);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-row-version.is-old-version { background-image: var(--origami-micro-left),var(--origami-micro-right) !important;
+    border-image: var(--origami-frame-tag) 5 / 5px / 0 stretch !important;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-check-button { --origami-update-fold: var(--origami-variant-right-pair); }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-card-actions > button { --origami-update-fold: var(--origami-variant-top-right); }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-restart { --origami-update-fold: var(--origami-variant-bottom-pair); }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-decision-actions > button { --origami-update-fold: var(--origami-variant-pleat); }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-decision-actions > .is-destructive { --origami-update-fold: var(--origami-variant-diagonal-pair); }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel :is(.quest-ui-update-check-button,.quest-ui-update-card-actions > button,.quest-ui-update-decision-actions > button) { background: linear-gradient(var(--origami-update-button-wash,transparent),var(--origami-update-button-wash,transparent)),var(--origami-update-fold,var(--origami-variant-unfolded-diagonal)) center / 100% 100% no-repeat,var(--origami-portal-stock) center / cover no-repeat !important;
+    border: 1px solid var(--origami-portal-edge) !important;
+    border-image: var(--origami-portal-frame) 10 / 10px / 0 stretch !important;
+    border-radius: 0 !important;
+    clip-path: var(--origami-slip-cut);
+    color: var(--origami-update-button-ink,#142944) !important;
+    box-shadow: 0 1px 1px #75523738;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-card-actions > button:first-child {
+    --origami-update-button-wash: #a3c2e34d;
+    --origami-update-button-ink: #255e9f;
+    --origami-portal-frame: var(--origami-frame-available);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-card-actions > .quest-ui-update-restart {
+    --origami-update-button-wash: #9ac3a666;
+    --origami-update-button-ink: #087b4a;
+    --origami-portal-frame: var(--origami-frame-current);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-decision-actions > .is-destructive {
+    --origami-update-button-wash: #dfa49d66;
+    --origami-update-button-ink: #b02837;
+    --origami-portal-frame: var(--origami-frame-error);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel :is(.quest-ui-update-check-button,.quest-ui-update-card-actions > button,.quest-ui-update-decision-actions > button):hover:not(:disabled) {
+    box-shadow: inset 0 1px 0 #fff,inset 0 -3px 0 #98725377;
+    filter: brightness(1.045);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel :is(.quest-ui-update-check-button,.quest-ui-update-card-actions > button,.quest-ui-update-decision-actions > button):active:not(:disabled) {
+    box-shadow: inset 0 2px 4px #98725366;
+    filter: brightness(.97);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-github-button { background: var(--origami-fold-settings) center / 100% 100% no-repeat;
+    border: 0;
+    border-radius: 0;
+    color: #142944;
+    box-shadow: none;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-github-button:hover { filter: brightness(1.06); }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel button:focus-visible {
+    outline: 2px solid #315072;
+    outline-offset: 1px;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel :is(.quest-ui-update-check-button,.quest-ui-update-card-actions > button,.quest-ui-update-decision-actions > button):focus-visible {
+    border-image-source: var(--origami-frame-focus) !important;
+    box-shadow: inset 0 0 0 2px #315072;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-decision {
+    background: linear-gradient(#e6bf7c44,#e6bf7c44),var(--origami-portal-stock) center / cover no-repeat;
+    border-radius: 0;
+    border-image: var(--origami-frame-sheet) 12 / 10px / 0 stretch;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel .quest-ui-update-result { border-radius: 0; }
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-update-panel :is(.quest-ui-update-product-expanded,.quest-ui-update-support-footer,.quest-ui-update-manual-warning) {
+    border-top-color: #b99c8177;
+}
+
+/* Notification Center: the parent is a large sheet, account identity is a
+ * smaller sheet, and semantic badges are colored folded labels. Preserve
+ * the avatar crop, native list geometry, and thumbnail/task artwork. */
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel {
+    border-radius: 0;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel .quest-ui-notification-center-account {
+    background: var(--origami-portal-stock) center / cover no-repeat;
+    border: 1px solid transparent;
+    border-image: var(--origami-frame-sheet) 12 / 12px / 0 stretch;
+    border-radius: 0;
+    box-shadow: inset 0 1px 0 #fff8,inset 0 -2px 0 #98725344;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel :is(.quest-ui-notification-center-unread,.quest-ui-notification-center-current-chip) {
+    --origami-notice-label-pigment: #e8d5bd;
+    --origami-notice-label-ink: #65503b;
+    background: var(--origami-micro-left) left center / 10px 100% no-repeat,var(--origami-micro-right) right center / 10px 100% no-repeat,var(--origami-portal-stock) center / cover no-repeat,var(--origami-notice-label-pigment);
+    background-blend-mode: normal,normal,multiply,normal;
+    border: 1px solid transparent;
+    border-image: var(--origami-portal-frame) 10 / 8px / 0 stretch;
+    border-radius: 0;
+    clip-path: polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px);
+    color: var(--origami-notice-label-ink);
+    box-shadow: 0 1px 1px #75523738;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel .quest-ui-notification-center-unread.has-unread {
+    --origami-notice-label-pigment: #e9b7b1;
+    --origami-notice-label-ink: #8e2639;
+    --origami-portal-frame: var(--origami-frame-error);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel .quest-ui-notification-center-current-chip {
+    --origami-notice-label-pigment: #c5dfbd;
+    --origami-notice-label-ink: #176445;
+    --origami-portal-frame: var(--origami-frame-current);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel .quest-ui-notification-center-divider {
+    background: #b99c8177;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel .quest-ui-notification-center-row {
+    border-bottom-color: #b99c8155;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel .quest-ui-notification-center-row:hover {
+    background: var(--origami-portal-stock) center / cover no-repeat;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel .quest-ui-notification-center-row-artwork {
+    border-radius: 0;
+    border-image: var(--origami-frame-sheet) 12 / 6px / 0 stretch;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel :is(.quest-ui-notification-center-row-artwork > img,.quest-ui-notification-center-row-artwork-fallback) {
+    border-radius: 0;
+    clip-path: var(--origami-tag-cut);
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel .quest-ui-notification-center-row-artwork-fallback {
+    background-image: var(--origami-portal-stock);
+    background-size: cover;
+    background-blend-mode: multiply;
+}
+.quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel .quest-ui-notification-center-task-badge { background: var(--origami-fold-settings) center / 100% 100% no-repeat;
+    border-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+}
