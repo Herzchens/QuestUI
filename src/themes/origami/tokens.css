@@ -47,6 +47,41 @@
     --quest-ui-dashboard-filter-shadow-hover: rgba(0, 0, 0, .28);
 
     /* Update Center */
+    --quest-ui-update-panel: #fff0de;
+    --quest-ui-update-product-surface: #f4e2cd;
+    --quest-ui-update-accent: #7540aa;
+    --quest-ui-update-accent-surface-base: #7c5cff;
+    --quest-ui-update-accent-border-base: #9e80ff;
+    --quest-ui-update-accent-hover-border: #ae94ff;
+    --quest-ui-update-routine: #255e9f;
+    --quest-ui-update-target-base: #7289ff;
+    --quest-ui-update-title: #142944;
+    --quest-ui-update-check-text: #142944;
+    --quest-ui-update-banner-text: #142944;
+    --quest-ui-update-banner-muted: #65596b;
+    --quest-ui-update-product-title: #142944;
+    --quest-ui-update-meta: #514b5a;
+    --quest-ui-update-muted: #65596b;
+    --quest-ui-update-date: #65596b;
+    --quest-ui-update-icon: #142944;
+    --quest-ui-update-link: #255e9f;
+    --quest-ui-update-link-hover: #174879;
+    --quest-ui-update-support-link-hover: #174879;
+    --quest-ui-update-settings-hint: #65596b;
+    --quest-ui-update-state-muted: #65596b;
+    --quest-ui-update-banner-state-muted: #65596b;
+    --quest-ui-update-checking: #63586a;
+    --quest-ui-update-current: #087b4a;
+    --quest-ui-update-available: #255e9f;
+    --quest-ui-update-error: #b02837;
+    --quest-ui-update-warning: #985900;
+    --quest-ui-update-banner-current: #087b4a;
+    --quest-ui-update-banner-available: #255e9f;
+    --quest-ui-update-banner-error: #b02837;
+    --quest-ui-update-alpha: #b02837;
+    --quest-ui-update-old-version: #b02837;
+    --quest-ui-update-target: #255e9f;
+    --quest-ui-update-arrow: #65596b;
 
     /* Event Log */
 

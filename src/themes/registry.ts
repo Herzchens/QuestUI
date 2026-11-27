@@ -64,6 +64,7 @@ import origamiScrollbar from "./origami/scrollbar.css?managed";
 import origamiQuestActions from "./origami/quest-actions.css?managed";
 import origamiQuestReload from "./origami/quest-reload.css?managed";
 import origamiNotifications from "./origami/notifications.css?managed";
+import origamiUpdateCenter from "./origami/update-center.css?managed";
 import origamiOrion from "./origami/orion.css?managed";
 import origamiDashboard from "./origami/dashboard.css?managed";
 
@@ -168,6 +169,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             origamiQuestActions,
             origamiQuestReload,
             origamiNotifications,
+            origamiUpdateCenter,
             origamiOrion,
             origamiDashboard,
         ]
