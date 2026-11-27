@@ -84,6 +84,59 @@
     --quest-ui-update-arrow: #65596b;
 
     /* Event Log */
+    --quest-ui-event-panel-start: #fff0de;
+    --quest-ui-event-panel-end: #fff0de;
+    --quest-ui-event-detail-end: #f4e2cd;
+    --quest-ui-event-control-surface: #f4e2cd;
+    --quest-ui-event-control-hover: #e8d2b9;
+    --quest-ui-event-control-pressed: #e8d2b9;
+    --quest-ui-event-action-island: #f4e2cd;
+    --quest-ui-event-island-surface: #f4e2cd;
+    --quest-ui-event-island-border: #c4a98d;
+    --quest-ui-event-confirm-surface: #f4e2cd;
+    --quest-ui-event-confirm-hover: #e8d2b9;
+    --quest-ui-event-portal-surface: #fff0de;
+    --quest-ui-event-island-text: #142944;
+    --quest-ui-event-detail-action-text: #142944;
+    --quest-ui-event-detail-heading: #142944;
+    --quest-ui-event-detail-text: #142944;
+    --quest-ui-event-detail-label: #65596b;
+    --quest-ui-event-detail-diagnostic-label: #65596b;
+    --quest-ui-event-detail-diagnostic-text: #142944;
+    --quest-ui-event-detail-diagnostic-surface: #f4e2cd;
+    --quest-ui-event-detail-diagnostic-code: #5c4a63;
+    --quest-ui-event-portal-title: #142944;
+    --quest-ui-event-title: #142944;
+    --quest-ui-event-control-text: #142944;
+    --quest-ui-event-panel-shadow: rgba(0, 0, 0, .48);
+    --quest-ui-event-detail-shadow: rgba(0, 0, 0, .5);
+    --quest-ui-event-search-surface-base: #f4e2cd;
+    --quest-ui-event-flat-surface-base: #f4e2cd;
+    --quest-ui-event-flat-hover-base: #e8d2b9;
+    --quest-ui-event-storage-surface-base: #f4e2cd;
+    --quest-ui-event-account-change: #ba691d;
+    --quest-ui-event-choice-border: #666b75;
+    --quest-ui-event-filter-heading: #142944;
+    --quest-ui-event-filter-text: #142944;
+    --quest-ui-event-filter-error: #a82d39;
+    --quest-ui-event-filter-warning: #8d570b;
+    --quest-ui-event-filter-success: #167b46;
+    --quest-ui-event-filter-info: #378bd8;
+    --quest-ui-event-detail-category-text: #142944;
+    --quest-ui-event-detail-runtime-text: #235b96;
+    --quest-ui-event-detail-quest-text: #674097;
+    --quest-ui-event-detail-network-text: #985900;
+    --quest-ui-event-detail-diagnostic-text-accent: #674097;
+    --quest-ui-event-detail-diagnostic-base: #aa70ff;
+    --quest-ui-event-detail-meta-surface-start: #f4e2cd;
+    --quest-ui-event-detail-meta-surface-end: #f4e2cd;
+    --quest-ui-event-detail-meta-icon-base: #9470ff;
+    --quest-ui-event-detail-meta-icon-text: #674097;
+    --quest-ui-event-text-normal: #142944;
+    --quest-ui-event-text-strong: #142944;
+    --quest-ui-event-text-muted: #65596b;
+    --quest-ui-event-text-muted-soft: #65596b;
+    --quest-ui-event-interactive-normal: var(--interactive-normal, #b5bac1);
 
 }
 
