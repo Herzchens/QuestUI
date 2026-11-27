@@ -16,6 +16,9 @@ import { useObsidianArtworkColor } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
 import { terminalArtworkGrid, useTerminalArtwork } from "../themes/terminal/useArtwork";
 import { TerminalPanorama } from "../themes/terminal/TerminalPanorama";
+import { origamiScene, type OrigamiAnimal } from "../themes/origami/scene";
+import { useOrigamiArtworkColor } from "../themes/origami/useArtworkColor";
+import { OrigamiProgress } from "../themes/origami/OrigamiProgress";
 import { SAKURA_PROGRESS_OUTLINE } from "../themes/sakura/progressShape";
 import { TERMINAL_CLAIMED_GLYPH, TERMINAL_EXPIRED_GLYPH, TERMINAL_PROGRESS_OUTLINE, terminalProgressPixels } from "../themes/terminal/progressShape";
 interface DiscordQuestCompletion {
@@ -55,7 +58,8 @@ function ProgressRing({
     ratioOverride = null,
     angular = false,
     sakura = false,
-    terminal = false
+    terminal = false,
+    origami = false
 }: {
     quest: NormalizedQuest;
     completion: DiscordQuestCompletion;
@@ -63,6 +67,7 @@ function ProgressRing({
     angular?: boolean;
     sakura?: boolean;
     terminal?: boolean;
+    origami?: boolean;
 }) {
     const hasRatioOverride = Number.isFinite(ratioOverride);
     const ratio = hasRatioOverride
@@ -83,28 +88,34 @@ function ProgressRing({
             role="img"
             aria-label={isClaimed ? "Claimed" : isExpired ? "Expired" : `${display} complete`}
         >
-            <svg viewBox="0 0 56 56" aria-hidden="true">
-                <ProgressShape angular={angular} sakura={sakura} terminal={terminal} className="quest-ui-progress-track" />
-                {(isClaimed || isExpired) ? (
-                    <ProgressShape
-                        angular={angular}
-                        sakura={sakura}
-                        terminal={terminal}
-                        className="quest-ui-progress-state-ring"
-                    />
-                ) : (
-                    <ProgressShape
-                        angular={angular}
-                        sakura={sakura}
-                        terminal={terminal}
-                        className="quest-ui-progress-value"
-                        progress={progress}
-                        strokeDasharray="100"
-                        strokeDashoffset={100 - progress}
-                        transform="rotate(-90 28 28)"
-                    />
-                )}
-            </svg>
+            {origami ? (
+                <OrigamiProgress progress={isClaimed || isExpired ? 100 : progress} />
+            ) : (
+                <svg viewBox="0 0 56 56" aria-hidden="true">
+                    <ProgressShape angular={angular} sakura={sakura} terminal={terminal} className="quest-ui-progress-track" />
+                    {(isClaimed || isExpired) ? (
+                        <ProgressShape
+                            angular={angular}
+                            sakura={sakura}
+                            terminal={terminal}
+
+                            className="quest-ui-progress-state-ring"
+                        />
+                    ) : (
+                        <ProgressShape
+                            angular={angular}
+                            sakura={sakura}
+                            terminal={terminal}
+
+                            className="quest-ui-progress-value"
+                            progress={progress}
+                            strokeDasharray="100"
+                            strokeDashoffset={100 - progress}
+                            transform="rotate(-90 28 28)"
+                        />
+                    )}
+                </svg>
+            )}
 
             {isClaimed ? (
                 <svg className="quest-ui-progress-state-icon is-claimed" viewBox="0 0 24 24" shapeRendering={terminal ? "crispEdges" : undefined} aria-hidden="true">
@@ -320,7 +331,7 @@ function IgnoredQuestTag() {
     );
 }
 
-export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive, closePopout, obsidianFractureVariant, sakuraOrnamentVariant }: {
+export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive, closePopout, obsidianFractureVariant, sakuraOrnamentVariant, origamiSceneVariant }: {
     quest: NormalizedQuest;
     orionSnapshot: OrionControlSnapshot | null;
     ignored: boolean;
@@ -328,6 +339,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     claimBatchActive: boolean;
     obsidianFractureVariant: number | undefined;
     sakuraOrnamentVariant?: number;
+    origamiSceneVariant?: OrigamiAnimal;
     closePopout?: () => void;
 }) {
     const completion = useDiscordQuestCompletion(quest.rawQuest);
@@ -335,9 +347,11 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     const artworkUrl = resolveQuestArtwork(quest, theme);
     const dashboardThemeId = useDashboardThemeId();
     const terminal = dashboardThemeId === "terminal";
+    const origami = dashboardThemeId === "origami";
     const terminalPixelUrl = useTerminalArtwork(terminal, artworkUrl, "dashboard");
     const obsidian = dashboardThemeId === "obsidian";
     const artworkColor = useObsidianArtworkColor(obsidian, artworkUrl);
+    const origamiColor = useOrigamiArtworkColor(origami, artworkUrl);
     const now = Date.now();
     const expiry = dashboardExpiry(quest, now);
     const urgency = expiryUrgency(quest.expiresAt, now);
@@ -369,11 +383,16 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     return (
         <article
             className={`quest-ui-card quest-ui-card-${quest.status}${isAchievement ? " quest-ui-card-achievement" : ""}${ignored ? " quest-ui-card-ignored" : ""}`}
+            data-origami-scene={origami ? (origamiSceneVariant ?? origamiScene(quest.id)) : undefined}
             data-obsidian-fracture={obsidian ? obsidianFractureVariant : undefined}
             data-sakura-ornament={dashboardThemeId === "sakura" ? sakuraOrnamentVariant : undefined}
-            style={obsidian && artworkColor ? { "--obsidian-artwork-rgb": artworkColor.join(" ") } as CSSProperties : undefined}
+            style={origami && origamiColor
+                ? { "--origami-animal-rgb": origamiColor.join(" ") } as CSSProperties
+                : obsidian && artworkColor
+                    ? { "--obsidian-artwork-rgb": artworkColor.join(" ") } as CSSProperties
+                    : undefined}
         >
-            {!obsidian && dashboardThemeId !== "sakura" && dashboardThemeId !== "terminal" && artworkUrl && (
+            {!obsidian && !origami && dashboardThemeId !== "sakura" && dashboardThemeId !== "terminal" && artworkUrl && (
                 <span className="quest-ui-card-backdrop" aria-hidden="true">
                     <img
                         src={artworkUrl}
@@ -388,6 +407,10 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                 <span className="quest-ui-sakura-card-art" aria-hidden="true" />
             )}
             {terminal && <TerminalPanorama source={terminalPixelUrl} />}
+            {origami && <>
+                <span className="quest-ui-origami-card-paper" aria-hidden="true" />
+                <span className="quest-ui-origami-card-animal" aria-hidden="true" />
+            </>}
             <QuestArtwork imageUrl={artworkUrl} type={taskType} eager={obsidian} pixelUrl={terminalPixelUrl} />
 
             <div className="quest-ui-card-main">
@@ -436,7 +459,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                         complete={quest.status === "claimable" || quest.status === "claimed"}
                     />
                 ) : (
-                    <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} angular={obsidian} sakura={dashboardThemeId === "sakura"} terminal={dashboardThemeId === "terminal"} />
+                    <ProgressRing quest={quest} completion={completion} ratioOverride={progressRatioOverride} angular={obsidian} sakura={dashboardThemeId === "sakura"} terminal={dashboardThemeId === "terminal"} origami={origami} />
                 )}
                 {expiry && (
                     <span className={`quest-ui-card-expiry quest-ui-expiry-${urgency}`} title={expiry}>
