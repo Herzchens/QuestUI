@@ -1,3 +1,5 @@
+import { ORIGAMI_ANIMALS, origamiScene, normalizeOrigamiProgress } from "../../src/themes/origami/scene";
+import { dominantThumbnailColor } from "../../src/themes/origami/thumbnailColor";
 import { ornamentVariantSequence, SAKURA_ORNAMENT_COUNT } from "../../src/themes/sakura/ornament";
 import assert from "node:assert/strict";
 import { createDashboardThemeController } from "../../src/themes/controller";
@@ -91,4 +93,31 @@ for (const order of [ids, [...ids].reverse(), ids.filter((_, i) => i % 3 === 0),
         assert.ok(!sequence.slice(Math.max(0, i - (SAKURA_ORNAMENT_COUNT - 1)), i).includes(sequence[i]));
     }
 }
+const origamiIds = Array.from({ length: 64 }, (_, i) => String(i));
+assert.equal(new Set(origamiIds.map(origamiScene)).size, 10);
+assert.equal(new Set(ORIGAMI_ANIMALS).size, 10);
+assert.deepEqual(origamiIds.map(origamiScene), origamiIds.map(id => origamiScene(id)));
 console.log("QuestUI Dashboard theme lifecycle and material assignment tests - PASS");
+
+assert.deepEqual([...origamiIds].reverse().map(origamiScene).reverse(), origamiIds.map(origamiScene));
+assert.deepEqual(origamiIds.filter((_, i) => i % 3 === 0).map(origamiScene), origamiIds.map(origamiScene).filter((_, i) => i % 3 === 0));
+
+assert.equal(normalizeOrigamiProgress(0), 0);
+assert.equal(normalizeOrigamiProgress(50.125), 50.125);
+assert.equal(normalizeOrigamiProgress(100), 100);
+assert.equal(normalizeOrigamiProgress(Infinity), 0);
+assert.equal(normalizeOrigamiProgress(-1), 0);
+assert.equal(normalizeOrigamiProgress(1000), 100);
+
+const pixels = (...groups: [number, number, number, number, number][]) => Uint8Array.from(groups.flatMap(([r, g, b, a, n]) => Array.from({ length: n }, () => [r, g, b, a]).flat()));
+assert.deepEqual(dominantThumbnailColor(pixels([0, 0, 0, 255, 60], [255, 30, 30, 255, 40])), [255, 30, 30]);
+assert.deepEqual(dominantThumbnailColor(pixels([255, 255, 255, 255, 55], [0, 90, 230, 255, 45])), [0, 90, 230]);
+assert.deepEqual(dominantThumbnailColor(pixels([22, 120, 85, 255, 45], [230, 40, 20, 0, 100], [240, 220, 180, 255, 15])), [22, 120, 85]);
+assert.deepEqual(dominantThumbnailColor(pixels([120, 20, 25, 255, 25], [128, 22, 25, 255, 30], [30, 80, 200, 255, 45])), [124, 21, 25]);
+assert.deepEqual(dominantThumbnailColor(pixels([15, 70, 85, 255, 35], [225, 45, 50, 100, 65])), [15, 70, 85]);
+assert.equal(dominantThumbnailColor(pixels([0, 0, 0, 255, 50], [255, 255, 255, 255, 50], [130, 135, 140, 255, 40])), null);
+assert.deepEqual(dominantThumbnailColor(pixels([250, 247, 245, 255, 80], [23, 25, 29, 255, 80], [15, 30, 75, 255, 10], [235, 100, 20, 255, 15])), [235, 100, 20]);
+assert.deepEqual(dominantThumbnailColor(pixels([243, 205, 192, 255, 20])), [243, 205, 192]);
+assert.equal(dominantThumbnailColor(pixels([255, 0, 0, 0, 100])), null);
+assert.equal(dominantThumbnailColor([]), null);
+assert.deepEqual(dominantThumbnailColor(pixels([10, 30, 70, 255, 10], [220, 100, 30, 255, 10])), dominantThumbnailColor(pixels([220, 100, 30, 255, 10], [10, 30, 70, 255, 10])));
