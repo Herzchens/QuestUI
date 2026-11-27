@@ -67,6 +67,10 @@ jobs:
         working-directory: questui
         run: node tests/themes/terminalVisual.test.mjs
 
+      - name: Verify Origami visual contract
+        working-directory: questui
+        run: node tests/themes/origamiVisual.test.mjs
+
       - name: Verify Event Log rows across all themes
         working-directory: questui
         run: node tests/themes/eventLogRows.test.mjs
