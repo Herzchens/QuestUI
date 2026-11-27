@@ -1,0 +1,299 @@
+/* Card-only paper composition. Artwork never participates in layout or input. */
+/* A preset owns its landscape, pigment and staging. Thumbnail color is
+ * reserved for the animal's paper; even the corner wraps stay scene-colored. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="crane"] {
+    --origami-animal-image: var(--origami-animal-crane);
+    --origami-terrain-image: var(--origami-scene-crane);
+    --origami-scene-sky: #e9a9a3;
+    --origami-scene-ground: #bd445a;
+    --origami-animal-rgb: 189 68 90;
+    --origami-animal-x: 62%;
+    --origami-animal-top: 7%;
+    --origami-animal-width: 70%;
+    --origami-animal-height: 84%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="whale"] {
+    --origami-animal-image: var(--origami-animal-whale);
+    --origami-terrain-image: var(--origami-scene-whale);
+    --origami-scene-sky: #8ec9e8;
+    --origami-scene-ground: #2366ac;
+    --origami-animal-rgb: 35 102 172;
+    --origami-animal-x: 59%;
+    --origami-animal-top: 16%;
+    --origami-animal-width: 80%;
+    --origami-animal-height: 76%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="wolf"] {
+    --origami-animal-image: var(--origami-animal-wolf);
+    --origami-terrain-image: var(--origami-scene-wolf);
+    --origami-scene-sky: #aaa5d7;
+    --origami-scene-ground: #50427d;
+    --origami-animal-rgb: 80 66 125;
+    --origami-animal-x: 63%;
+    --origami-animal-top: 18%;
+    --origami-animal-width: 54%;
+    --origami-animal-height: 79%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="rabbit"] {
+    --origami-animal-image: var(--origami-animal-rabbit);
+    --origami-terrain-image: var(--origami-scene-rabbit);
+    --origami-scene-sky: #c9dca0;
+    --origami-scene-ground: #609354;
+    --origami-animal-rgb: 96 147 84;
+    --origami-animal-x: 58%;
+    --origami-animal-top: 40%;
+    --origami-animal-width: 44%;
+    --origami-animal-height: 57%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="fox"] {
+    --origami-animal-image: var(--origami-animal-fox);
+    --origami-terrain-image: var(--origami-scene-fox);
+    --origami-scene-sky: #e7b879;
+    --origami-scene-ground: #a34a2a;
+    --origami-animal-rgb: 163 74 42;
+    --origami-animal-x: 62%;
+    --origami-animal-top: 25%;
+    --origami-animal-width: 60%;
+    --origami-animal-height: 70%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="butterfly"] {
+    --origami-animal-image: var(--origami-animal-butterfly);
+    --origami-terrain-image: var(--origami-scene-butterfly);
+    --origami-scene-sky: #e5bee1;
+    --origami-scene-ground: #a36bba;
+    --origami-animal-rgb: 163 107 186;
+    --origami-animal-x: 58%;
+    --origami-animal-top: 12%;
+    --origami-animal-width: 56%;
+    --origami-animal-height: 50%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="elephant"] {
+    --origami-animal-image: var(--origami-animal-elephant);
+    --origami-terrain-image: var(--origami-scene-elephant);
+    --origami-scene-sky: #f6d69d;
+    --origami-scene-ground: #bc732f;
+    --origami-animal-rgb: 188 115 47;
+    --origami-animal-x: 60%;
+    --origami-animal-top: 24%;
+    --origami-animal-width: 75%;
+    --origami-animal-height: 72%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="turtle"] {
+    --origami-animal-image: var(--origami-animal-turtle);
+    --origami-terrain-image: var(--origami-scene-turtle);
+    --origami-scene-sky: #9bdac8;
+    --origami-scene-ground: #318c91;
+    --origami-animal-rgb: 49 140 145;
+    --origami-animal-x: 58%;
+    --origami-animal-top: 43%;
+    --origami-animal-width: 63%;
+    --origami-animal-height: 54%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="koi"] {
+    --origami-animal-image: var(--origami-animal-koi);
+    --origami-terrain-image: var(--origami-scene-koi);
+    --origami-scene-sky: #b5d9e2;
+    --origami-scene-ground: #46859a;
+    --origami-animal-rgb: 70 133 154;
+    --origami-animal-x: 58%;
+    --origami-animal-top: 25%;
+    --origami-animal-width: 65%;
+    --origami-animal-height: 60%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene="owl"] {
+    --origami-animal-image: var(--origami-animal-owl);
+    --origami-terrain-image: var(--origami-scene-owl);
+    --origami-scene-sky: #8296b7;
+    --origami-scene-ground: #30466c;
+    --origami-animal-rgb: 48 70 108;
+    --origami-animal-x: 64%;
+    --origami-animal-top: 16%;
+    --origami-animal-width: 49%;
+    --origami-animal-height: 66%;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] {
+    --origami-edge: color-mix(in srgb,var(--origami-scene-ground),#a9826c 18%);
+    --origami-scene-right: 3%;
+    --origami-scene-width: 68%;
+    --origami-fold-size: 34px;
+    --origami-card-cut: calc(var(--origami-fold-size) / 2);
+    --origami-card-outline: polygon(var(--origami-card-cut) 0,calc(100% - var(--origami-card-cut)) 0,100% var(--origami-card-cut),100% calc(100% - var(--origami-card-cut)),calc(100% - var(--origami-card-cut)) 100%,var(--origami-card-cut) 100%,0 calc(100% - var(--origami-card-cut)),0 var(--origami-card-cut));
+    position: relative;
+    isolation: isolate;
+    background: transparent !important;
+    border: 1px solid transparent;
+    border-radius: 0;
+    box-shadow: none;
+}
+/* Only the paper is cut. The interactive article stays rectangular with
+ * visible overflow (native badges, actions, and keyboard focus). */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] > .quest-ui-origami-card-paper {
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    z-index: -1;
+    filter: drop-shadow(0 2px 1px #040f2399) drop-shadow(0 4px 4px #0004);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] > .quest-ui-origami-card-paper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    clip-path: var(--origami-card-outline);
+    background: #fff0de var(--origami-art-ivory) center / cover no-repeat;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] > .quest-ui-origami-card-paper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    clip-path: var(--origami-card-outline);
+    transform: translateY(1px);
+    background: color-mix(in srgb,var(--origami-edge),#f4e2cc 32%);
+}
+/* Terrain and animal share exactly the same frame, including in achievement
+ * cards. Their coordinates remain relative to the scene as the card resizes. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene]::before,
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] > .quest-ui-origami-card-animal {
+    position: absolute;
+    top: 0;
+    right: var(--origami-scene-right);
+    height: 100%;
+    width: var(--origami-scene-width);
+    max-width: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene]::before {
+    content: "";
+    /* Cover the complete scene with exactly one terrain image. On wide cards
+     * crop vertically rather than stretching the paper objects or joining a
+     * second terrain crop. The pigment gradient never becomes exposed. */
+    background: var(--origami-terrain-image) center 40% / cover no-repeat,linear-gradient(160deg,var(--origami-scene-sky) 0%,var(--origami-scene-sky) 30%,var(--origami-scene-ground) 82%);
+    background-blend-mode: normal,normal;
+    mask-image: linear-gradient(90deg,transparent 0%,#0003 13%,#000b 30%,#000 43%,#000 73%,#000a 86%,transparent 100%);
+}
+/* Artwork lighting is neutral grey with an alpha silhouette. Hard-light blends
+ * the measured RGB paper pigment with the baked folds; no hue presets. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] > .quest-ui-origami-card-animal {
+    isolation: isolate;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] > .quest-ui-origami-card-animal::before {
+    content: "";
+    position: absolute;
+    left: var(--origami-animal-x);
+    top: var(--origami-animal-top);
+    width: var(--origami-animal-width);
+    height: var(--origami-animal-height);
+    transform: translateX(-50%);
+    z-index: 1;
+    background-image: var(--origami-animal-image);
+    background-color: rgb(var(--origami-animal-rgb));
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-blend-mode: hard-light;
+    mask: var(--origami-animal-image) center / contain no-repeat;
+    filter: none;
+}
+/* Species-specific staging shadow follows the sprite, without re-tinting it. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] > .quest-ui-origami-card-animal {
+    filter: drop-shadow(1px 2px 1px #29202c55);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card:is([data-origami-scene="crane"],[data-origami-scene="butterfly"],[data-origami-scene="whale"],[data-origami-scene="koi"]) > .quest-ui-origami-card-animal {
+    filter: drop-shadow(2px 4px 3px #24304444);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene].quest-ui-card-achievement { --origami-scene-right: 19%; --origami-scene-width: 57%; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene]::after {
+    /* Baked lighting of rigidly rotated corner triangles. The cut is the
+     * actual diagonal hinge; the flap and its shadow follow the live sheet. */
+    --origami-corner-size: var(--origami-fold-size) var(--origami-fold-size);
+    content: "";
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    z-index: 0;
+    clip-path: var(--origami-card-outline);
+    background: var(--origami-wrap-tl) top left / var(--origami-corner-size) no-repeat,
+        var(--origami-wrap-tr) top right / var(--origami-corner-size) no-repeat,
+        var(--origami-wrap-bl) bottom left / var(--origami-corner-size) no-repeat,
+        var(--origami-wrap-br) bottom right / var(--origami-corner-size) no-repeat;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] > :is(.quest-ui-card-main,.quest-ui-card-side,.quest-ui-artwork) { z-index: 1; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-main { text-shadow: 0 1px 1px #fff8; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] :is(.quest-ui-card-title,.quest-ui-card-open-quest,.quest-ui-card-open-icon,.quest-ui-progress-ring > span,.quest-ui-achievement-progress-copy) { color: #10253e; font-weight: 800; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-expiry { color: #245238; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-artwork-image { clip-path: var(--origami-cut); border-radius: 0; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-side.is-achievement .quest-ui-achievement-progress-segments {
+    gap: 3px;
+    filter: none;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-side.is-achievement .quest-ui-achievement-progress-segments > span {
+    /* Real folded sheet silhouette, not a rectangular tray or tinted image.
+     * Fixed end panels scale down together on very narrow task columns. */
+    box-sizing: border-box;
+    height: 16px;
+    border: 0;
+    border-radius: 0;
+    clip-path: none;
+    background: none;
+    border-image: var(--origami-fold-segment-empty) 0 18 fill / 0 9px stretch;
+    box-shadow: none;
+    filter: drop-shadow(0 1px .6px #49372e66);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-side.is-achievement .quest-ui-achievement-progress-segments > span.is-filled {
+    border-image-source: var(--origami-fold-segment-filled);
+}
+
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] :is(.quest-ui-card-action-claim,.quest-ui-card-orion-control.is-start,.quest-ui-card-orion-control.is-resume) {
+    background: #00834a !important;
+    border-image: var(--origami-slice-slip);
+    box-shadow: inset 0 -1px 0 #063b2b66;
+    font-weight: 800;
+    color: #fff;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-card-action-claim { border-image: var(--origami-variant-bottom-right) 0 20 fill / 0 10px stretch; }
+
+/* Native percentages are still supplied by QuestCard. The conic mask reveals
+ * the actual folded wreath clockwise; it does not quantize quest progress. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-origami-ring-art {
+    --origami-ring-pigment: var(--quest-ui-ring);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 1px 1px #41291f55);
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-origami-ring-art::before,
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-origami-ring-art::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    /* The 184px source has about 46px transparent padding on every edge.
+     * Scale the artwork, not the native 56px ring layout or progress mask. */
+    background: var(--origami-card-ring) center / 196% 196% no-repeat,#d9bfa3;
+    background-blend-mode: hard-light;
+    mask: var(--origami-card-ring) center / 196% 196% no-repeat;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-origami-ring-art::after {
+    background-color: var(--origami-ring-pigment);
+    mask-image: var(--origami-card-ring),conic-gradient(#000 0% var(--origami-ring-completion),transparent var(--origami-ring-completion) 100%);
+    mask-position: center,center;
+    mask-size: 196% 196%,100% 100%;
+    mask-repeat: no-repeat,no-repeat;
+    mask-composite: intersect;
+}
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-progress-claimable .quest-ui-origami-ring-art { --origami-ring-pigment: #078d4c; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-progress-claimed .quest-ui-origami-ring-art { --origami-ring-pigment: #8545c9; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-progress-expired .quest-ui-origami-ring-art { --origami-ring-pigment: #99899a; }
+/* Keep statistics legible at the original card dimensions. */
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-progress-ring > span { font-size: 14px; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-achievement-progress-copy { font-size: 12px; text-shadow: 0 1px 1px #fff9; }
+.quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] .quest-ui-achievement-progress-copy strong { font-size: 14px; font-variant-numeric: tabular-nums; }
+@media (max-width: 760px) {
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] { --origami-scene-right: 5%; --origami-scene-width: 61%; --origami-fold-size: 25px; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene].quest-ui-card-achievement { --origami-scene-right: 23%; --origami-scene-width: 53%; }
+}
+@media (max-width: 520px) {
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene]::before { opacity: .42; }
+    .quest-ui-theme-origami.quest-ui-theme .quest-ui-card[data-origami-scene] > .quest-ui-origami-card-animal { opacity: .46; }
+}
