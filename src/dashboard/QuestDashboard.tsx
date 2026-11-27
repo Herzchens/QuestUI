@@ -1,3 +1,4 @@
+import { preloadOrigamiArtworkColors } from "../themes/origami/useArtworkColor";
 import { useSettings } from "@api/Settings";
 import { findByCodeLazy } from "@webpack";
 import { ThemeStore, useEffect, useState, useStateFromStores } from "@webpack/common";
@@ -15,6 +16,7 @@ import type { NormalizedQuest } from "../quests/data";
 import { resolveQuestArtwork } from "../quests/presentation";
 import { fractureVariantSequence } from "../themes/obsidian/fracture";
 import { ornamentVariantSequence } from "../themes/sakura/ornament";
+import { origamiSceneSequence } from "../themes/origami/scene";
 import { preloadObsidianArtworkColors } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
 import { DashboardProductUpdateNotice } from "../updates/UpdateCenter";
@@ -129,10 +131,14 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const quests = useQuestSnapshot();
     const dashboardThemeId = useDashboardThemeId();
     const obsidian = dashboardThemeId === "obsidian";
+    const origami = dashboardThemeId === "origami";
     const artworkTheme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
     useEffect(() => {
-        if (obsidian) preloadObsidianArtworkColors(quests.map(quest => resolveQuestArtwork(quest, artworkTheme)));
-    }, [obsidian, quests, artworkTheme]);
+        if (!obsidian && !origami) return;
+        const urls = quests.map(quest => resolveQuestArtwork(quest, artworkTheme));
+        if (obsidian) preloadObsidianArtworkColors(urls);
+        if (origami) preloadOrigamiArtworkColors(urls);
+    }, [obsidian, origami, quests, artworkTheme]);
     const orbMultiplier = useQuestOrbMultiplierState();
     const { ids: ignoredIds } = useIgnoredQuests();
     const partition = partitionIgnored(quests, ignoredIds);
@@ -164,6 +170,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     );
     const obsidianVariants = obsidian ? fractureVariantSequence(visible.map(quest => quest.id)) : undefined;
     const sakuraVariants = dashboardThemeId === "sakura" ? ornamentVariantSequence(visible.map(quest => quest.id)) : undefined;
+    const origamiScenes = dashboardThemeId === "origami" ? origamiSceneSequence(visible.map(quest => quest.id)) : undefined;
     const hiddenCount = hiddenNormal.length;
     const ignoredCount = partition.ignored.length;
 
@@ -294,6 +301,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                             quest={quest}
                             obsidianFractureVariant={obsidianVariants?.[index]}
                             sakuraOrnamentVariant={sakuraVariants?.[index]}
+                            origamiSceneVariant={origamiScenes?.[index]}
                             orionSnapshot={orionSnapshot}
                             ignored={ignoredIds.has(quest.id)}
                             receivesOrbBoost={orbMultiplier.receivesBoost}
