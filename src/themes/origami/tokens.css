@@ -1,0 +1,72 @@
+/* Origami paper palette and reusable values.
+ * Themes own their complete styles, including layout and interaction presentation.
+ * Tokens are an internal convenience, not a limit on theme design.
+ */
+.quest-ui-theme-origami {
+    --quest-ui-theme-accent: #8a40b8;
+    --quest-ui-dashboard-border: color-mix(in srgb, var(--quest-ui-theme-accent) 24%, rgba(255, 255, 255, .08));
+    --quest-ui-dashboard-base: #081d3c;
+    --quest-ui-dashboard-card: #fff1df;
+
+    --quest-ui-theme-control: #f4e2cd;
+    --quest-ui-theme-control-hover: #e8d2b9;
+
+
+    --quest-ui-theme-text-strong: #142944;
+
+    --quest-ui-theme-border-control: #634b3538;
+
+    --quest-ui-theme-popout-shadow: rgba(0, 0, 0, .42);
+    --quest-ui-dashboard-filter-shadow-rest: rgba(0, 0, 0, .24);
+    --quest-ui-dashboard-filter-shadow-hover: rgba(0, 0, 0, .28);
+
+    /* Update Center */
+
+    /* Event Log */
+
+}
+
+/* Local Discord palette, including independently mounted portals. */
+.quest-ui-theme-origami.quest-ui-theme {
+    --header-primary: #142944;
+    --header-secondary: #514b5a;
+    --text-default: #142944;
+    --text-normal: #142944;
+    --text-strong: #10253e;
+    --text-muted: #63586a;
+    --interactive-normal: #27364c;
+    --interactive-hover: #11243c;
+    --interactive-active: #11243c;
+    --interactive-muted: #766d78;
+    --background-primary: #fff0de;
+    --background-secondary: #f3e1cc;
+    --background-tertiary: #e6ccb0;
+    --background-floating: #fff0de;
+    --background-base-lowest: #f8e7d2;
+    --background-base-low: #f3e1cc;
+    --background-mod-subtle: #f1dfca;
+    --background-mod-strong: #e9d4bd;
+    --background-mod-stronger: #d8bca1;
+    --background-modifier-hover: #ecd6bc;
+    --background-modifier-active: #ddc0a4;
+    --background-modifier-selected: #e5d0e8;
+    --background-modifier-accent: #bda990;
+    --border-subtle: #cdb69c;
+    --border-normal: #bfa58a;
+    --status-positive: #087b4a;
+    --status-positive-background: #00643a;
+    --status-danger: #c4263a;
+    --status-warning: #a15d06;
+    --brand-360: #7540aa;
+    --brand-500: #8240b7;
+    --brand-560: #6c319c;
+    --brand-600: #5e258d;
+    --blue-345: #1764aa;
+    --blue-330: #1b5c97;
+    --focus-primary: #8240b7;
+    --background-base-lower: #ecd6bc;
+    --background-secondary-alt: #ecd6bc;
+    --origami-cut: polygon(7px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 7px),calc(100% - 7px) 100%,8px 100%,0 calc(100% - 8px),0 7px);
+    --origami-paper: var(--origami-art-fold-left) left center / 13px 100% no-repeat,var(--origami-art-fold-right) right center / 13px 100% no-repeat,var(--origami-art-fold) center / 100% 100% no-repeat, linear-gradient(155deg,#fff4e7,#f2dcc4);
+    --origami-shadow: inset 0 1px 0 #fff9,inset 0 -2px 0 #64372540;
+}

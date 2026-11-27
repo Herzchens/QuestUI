@@ -58,6 +58,11 @@ import terminalEventLog from "./terminal/event-log.css?managed";
 import terminalOrion from "./terminal/orion.css?managed";
 import terminalDashboard from "./terminal/dashboard.css?managed";
 
+import origamiTokens from "./origami/tokens.css?managed";
+import origamiDashboardComponents from "./origami/dashboard-components.css?managed";
+import origamiScrollbar from "./origami/scrollbar.css?managed";
+import origamiDashboard from "./origami/dashboard.css?managed";
+
 import type { DashboardTheme } from "./controller";
 
 export const DEFAULT_DASHBOARD_THEME_ID = "default";
@@ -147,6 +152,16 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             terminalEventLog,
             terminalOrion,
             terminalDashboard,
+        ]
+    },
+    {
+        id: "origami",
+        label: "Origami",
+        styles: [
+            origamiTokens,
+            origamiDashboardComponents,
+            origamiScrollbar,
+            origamiDashboard,
         ]
     }
 ];
