@@ -8,15 +8,40 @@
     --quest-ui-dashboard-base: #081d3c;
     --quest-ui-dashboard-card: #fff1df;
 
+    --quest-ui-theme-panel: #fff0de;
+    --quest-ui-theme-surface: #f4e2cd;
+    --quest-ui-theme-surface-avatar: #f4e2cd;
     --quest-ui-theme-control: #f4e2cd;
     --quest-ui-theme-control-hover: #e8d2b9;
+    --quest-ui-theme-artwork: #f4e2cd;
 
+    --quest-ui-theme-danger-surface: #f4c9c2;
+    --quest-ui-theme-danger-hover: #f3b8b6;
+    --quest-ui-theme-success-surface: #c8e4cd;
+    --quest-ui-theme-success-artwork: #c8e4cd;
+    --quest-ui-theme-warning-artwork: #f7e2ac;
+    --quest-ui-theme-error-artwork: #f4c9c2;
+    --quest-ui-theme-info-artwork: #f4e2cd;
 
     --quest-ui-theme-text-strong: #142944;
+    --quest-ui-theme-text-primary: #142944;
+    --quest-ui-theme-text-normal: #142944;
+    --quest-ui-theme-text-muted: #65596b;
+    --quest-ui-theme-text-secondary: #65596b;
+    --quest-ui-theme-text-subtle: #65596b;
+    --quest-ui-theme-icon: #142944;
     --quest-ui-theme-ignored: #7733b1;
+    --quest-ui-notification-info: #7733b1;
 
+    --quest-ui-theme-border-faint: #634b3515;
+    --quest-ui-theme-border-soft: #634b3520;
+    --quest-ui-theme-border-muted: #634b3529;
     --quest-ui-theme-border-control: #634b3538;
+    --quest-ui-theme-border-strong: #634b3555;
+    --quest-ui-theme-row-hover: #e8d2b9;
 
+    --quest-ui-theme-panel-shadow: rgba(0, 0, 0, .52);
+    --quest-ui-theme-float-shadow: rgba(0, 0, 0, .45);
     --quest-ui-theme-popout-shadow: rgba(0, 0, 0, .42);
     --quest-ui-dashboard-filter-shadow-rest: rgba(0, 0, 0, .24);
     --quest-ui-dashboard-filter-shadow-hover: rgba(0, 0, 0, .28);
