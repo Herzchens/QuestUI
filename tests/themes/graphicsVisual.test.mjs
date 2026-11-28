@@ -215,6 +215,30 @@ for (const fixture of document.querySelectorAll(".graphics-policy-fixture")) {
     if (theme === "terminal" && (q === "medium" || q === "low")) check(getComputedStyle(fixture.querySelector(".quest-ui-terminal-panorama")).display === "none","Terminal panorama visible");
     if (theme === "origami" && (q === "medium" || q === "low")) check(getComputedStyle(fixture.querySelector(".quest-ui-origami-card-animal")).filter === "none","Origami animal filter not reduced");
 }
+// Independent portal roots do not inherit the dashboard shell. Exercise the
+// actual ordered styles on each portal separately, including Graphics itself.
+if (document.querySelector(".graphics-policy-fixture").dataset.theme === "liquid-glass") {
+    const surfaces = {
+        "quest-ui-filter-list": 16, "quest-ui-dashboard-choice-list": 16,
+        "quest-ui-event-log-panel": 18, "quest-ui-event-detail": 18,
+        "quest-ui-event-sort-menu": 16, "quest-ui-event-filter-menu": 16,
+        "quest-ui-update-panel quest-ui-update-panel-v16": 18,
+        "quest-ui-notification-center-panel": 18, "quest-ui-graphics-menu": 18
+    };
+    for (const [surface,max] of Object.entries(surfaces)) {
+        const portal = document.createElement("div");
+        portal.className = "quest-ui-theme quest-ui-theme-liquid-glass " + surface;
+        document.body.append(portal);
+        for (const quality of ["max","high","medium","low"]) {
+            portal.className = "quest-ui-theme quest-ui-theme-liquid-glass " + surface + " quest-ui-quality-" + quality;
+            const style = getComputedStyle(portal);
+            const expected = {max,high:12,medium:6}[quality];
+            check(quality === "low" ? style.backdropFilter === "none" : style.backdropFilter.includes("blur("+expected+"px)"),surface+" "+quality+" portal blur mismatch: "+style.backdropFilter);
+            if (quality === "low") check(style.backgroundColor === "rgb(24, 32, 57)",surface+" opaque fallback missing");
+        }
+        portal.remove();
+    }
+}
 document.body.dataset.result = errors.length ? "fail" : "pass";
 document.querySelector("#result").textContent = JSON.stringify(errors);
 `;

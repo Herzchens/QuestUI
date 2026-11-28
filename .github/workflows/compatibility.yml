@@ -153,6 +153,14 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/graphics.test.ts
 
+      - name: Test Graphics selector interaction handlers
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/graphicsInteraction.test.ts
+
+      - name: Test graphics motion lifecycle
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/graphicsMotion.test.ts
+
       - name: Test Dashboard sort logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/sort.test.ts

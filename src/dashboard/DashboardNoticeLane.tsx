@@ -79,10 +79,13 @@ export function DashboardNoticeLane() {
 
     useEffect(() => {
         if (!reduced || (phase !== "mounted" && phase !== "exiting")) return;
+        // A newer notification may arrive between render and this effect.
+        // Never finish the old animation against the newer notice.
+        if (noticeRef.current !== notice) return;
         if (phaseTimerRef.current != null) { clearTimeout(phaseTimerRef.current); phaseTimerRef.current = null; }
         if (phase === "mounted") setPhase("visible");
         else { noticeRef.current = null; setNotice(null); setPhase("hidden"); }
-    }, [reduced, phase]);
+    }, [reduced, phase, notice]);
 
     const shown = notice != null && phase !== "hidden";
     const displayText = notice?.text ?? "Notification Center";
