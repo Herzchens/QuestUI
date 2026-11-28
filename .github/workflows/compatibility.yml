@@ -636,6 +636,33 @@ jobs:
           fs.writeFileSync(path, source.replace(needle, replacement));
           NODE
 
+      - name: Discover native Quest Home candidates (diagnostics only)
+        working-directory: vencord
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const path = "src/webpack/patchWebpack.ts";
+          const source = fs.readFileSync(path, "utf8");
+          const needle = "function notifyFactoryListeners(moduleId: PropertyKey, factory: AnyModuleFactory) {";
+          if (source.split(needle).length !== 2) throw new Error("Quest Home discovery instrumentation point not found");
+          const probe = [
+            "const questHomeProbeSeen = new Set<string>();",
+            needle,
+            "    const code = String(factory);",
+            "    const route = /[\\\"']\\/quest-home(?:[\\\"'/?]|$)/i.test(code);",
+            "    const markers = [...new Set(code.match(/(?:QUEST_HOME|QUESTS_HOME|QUEST_DISCOVERY)[A-Z0-9_]{0,80}/g) ?? [])].slice(0, 16);",
+            "    const identity = String(moduleId);",
+            "    if ((route || markers.length) && questHomeProbeSeen.size < 80 && !questHomeProbeSeen.has(identity)) {",
+            "        questHomeProbeSeen.add(identity);",
+            "        const anchors = [\"/quest-home\", ...markers].filter(marker => code.includes(marker)).slice(0, 4);",
+            "        const snippets = anchors.map(marker => { const i = code.indexOf(marker); return code.slice(Math.max(0, i - 180), i + marker.length + 220); });",
+            "        console.log(\"[PUP_DEBUG]\", \"QUESTUI_HOME_CANDIDATE\", JSON.stringify({ moduleId: identity, route, markers, snippets }));",
+            "    }"
+          ].join("\n");
+          fs.writeFileSync(path, source.replace(needle, probe));
+          NODE
+
       - name: Build reporter
         working-directory: vencord
         run: pnpm buildReporter
@@ -676,6 +703,9 @@ jobs:
               echo '</details>'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+
+          # Bounded factory-source diagnostics, not account or runtime data.
+          grep -F 'QUESTUI_HOME_CANDIDATE ' "$stderr_file" | head -n 80 || true
 
           node "$GITHUB_WORKSPACE/questui/scripts/checkQuestUIReporter.mjs" \
             "$report_file" "$stderr_file" "$reporter_exit" --require-topbar-target
