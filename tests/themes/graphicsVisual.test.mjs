@@ -180,6 +180,41 @@ for (const menu of document.querySelectorAll(".quest-ui-graphics-menu")) {
         check(menu.querySelector(".quest-ui-graphics-label").textContent === "UltraComing Soon", "Ultra subtitle mismatch");
     }
 }
+for (const fixture of document.querySelectorAll(".graphics-policy-fixture")) {
+    const q = fixture.dataset.quality;
+    const theme = fixture.dataset.theme;
+    const reduced = fixture.classList.contains("quest-ui-reduced-motion");
+    const title = fixture.querySelector(".quest-ui-dashboard-display-title > strong");
+    const spinner = fixture.querySelector(".quest-ui-update-check-spinner");
+    const reload = fixture.querySelector(".quest-ui-reload-icon-button svg");
+    const chip = fixture.querySelector(".quest-ui-summary-chip");
+    check(getComputedStyle(spinner).animationName !== "none", theme+" "+q+" checking banner spinner disabled");
+    if (reduced) {
+        check(getComputedStyle(title).animationName === "none", theme+" decorative title still animates");
+        check(getComputedStyle(chip).transitionProperty === "none", theme+" transition still active");
+        check(getComputedStyle(spinner).animationName !== "none", theme+" functional update spinner disabled");
+        check(getComputedStyle(reload).animationName !== "none", theme+" functional reload spinner disabled");
+        check(getComputedStyle(spinner).animationDuration === "1.6s", theme+" spinner motion policy");
+    }
+    if (theme === "default" || theme === "liquid-glass") {
+        const backdrop = fixture.querySelector(".quest-ui-card-backdrop");
+        const expected = theme === "default" ? {max:22,high:16,medium:8} : {max:24,high:18,medium:8};
+        if (q === "low") check(getComputedStyle(backdrop).display === "none", theme+" low ambient artwork visible");
+        else check(getComputedStyle(backdrop.querySelector("img")).filter.includes("blur("+expected[q]+"px)"),theme+" "+q+" artwork filter mismatch");
+    }
+    if (theme === "liquid-glass") {
+        const expected = {max:20,high:12,medium:6};
+        check(q === "low" ? getComputedStyle(fixture).backdropFilter === "none" : getComputedStyle(fixture).backdropFilter.includes("blur("+expected[q]+"px)"),q+" shell blur mismatch");
+    }
+    if (theme === "obsidian") {
+        const count = {max:3,high:2,medium:1,low:1}[q];
+        const mask = getComputedStyle(fixture.querySelector("[data-obsidian-fracture]"),"::after").maskImage;
+        check((mask.match(/url\\(/g)||[]).length === count,"Obsidian "+q+" fracture masks "+mask.slice(0,60));
+    }
+    if (theme === "sakura" && q === "low") check(getComputedStyle(fixture.querySelector(".quest-ui-sakura-card-art")).display === "none","Sakura low ornament visible");
+    if (theme === "terminal" && (q === "medium" || q === "low")) check(getComputedStyle(fixture.querySelector(".quest-ui-terminal-panorama")).display === "none","Terminal panorama visible");
+    if (theme === "origami" && (q === "medium" || q === "low")) check(getComputedStyle(fixture.querySelector(".quest-ui-origami-card-animal")).filter === "none","Origami animal filter not reduced");
+}
 document.body.dataset.result = errors.length ? "fail" : "pass";
 document.querySelector("#result").textContent = JSON.stringify(errors);
 `;
@@ -235,7 +270,8 @@ try {
             return '<div class="quest-ui-theme quest-ui-theme-' + theme + ' quest-ui-graphics-menu quest-ui-dashboard-menu-surface' + (reduced ? ' is-reduced' : '') + (n === 5 ? ' is-light' : '') + '" data-case="' + n + '" data-graphics-index="' + (n === 5 ? 'light' : n) + '" style="--graphics-index:' + (n === 5 ? 0 : n) + '"><div class="quest-ui-graphics-heading"><button class="quest-ui-graphics-icon-button is-bolt" aria-pressed="' + (n === 5) + '"><svg viewBox="0 0 24 24"><path d="M3 4h5v8H3z"/></svg></button><div class="quest-ui-graphics-label"><strong><span class="quest-ui-graphics-title-text">' + name + '</span>' + (n === 4 ? '<svg class="quest-ui-graphics-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/></svg>' : '') + '</strong><span>' + (n === 4 ? 'Coming Soon' : 'Quality') + '</span></div><button class="quest-ui-graphics-icon-button is-motion" aria-pressed="' + reduced + '">RM</button></div><div class="quest-ui-graphics-slider"><span class="quest-ui-graphics-track"><span class="quest-ui-graphics-fill"></span></span><span class="quest-ui-graphics-dots"><i></i><i></i><i></i><i></i><i></i></span><span class="quest-ui-graphics-thumb"></span></div></div>';
         }).join("");
         const headerPairs = modes.flatMap((_, n) => [false, true].map(reduced => [n, reduced || n === 5])).map(([n, reduced], i) => { const open = i % 2 === 1; return '<div class="quest-ui-theme quest-ui-theme-' + theme + '"><div class="quest-ui-dashboard-header-tools graphics-header-fixture" data-mode="' + n + '" data-reduced="' + reduced + '"><button data-graphics-index="' + (n === 5 ? 'light' : n) + '" data-graphics-reduced="' + reduced + '" class="quest-ui-dashboard-palette-button quest-ui-graphics-trigger' + (open ? ' is-open' : '') + '">' + gaugeSvg('gauge-' + i) + '</button><button class="quest-ui-dashboard-palette-button' + (open ? ' is-open' : '') + '">' + paletteSvg + '</button></div></div>'; }).join("");
-        writeFileSync(join(dir, "fixture.html"), '<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="theme.css"><style>body{font-family:Arial;margin:8px}button{font-family:inherit}</style><body data-result="pending">' + headerPairs + '<div class="quest-ui-theme quest-ui-theme-' + theme + ' quest-ui-dashboard-choice-list quest-ui-dashboard-menu-surface graphics-reference-menu">Theme</div>' + cases + '<pre id="result"></pre><script>' + script + '</script>');
+        const policyFixtures = ["max","high","medium","low"].flatMap(q => [false,true].map(reduced => '<div class="quest-ui-theme quest-ui-theme-' + theme + ' quest-ui-dashboard-shell graphics-policy-fixture quest-ui-quality-' + q + (reduced ? ' quest-ui-reduced-motion' : '') + '" data-quality="' + q + '" data-theme="' + theme + '"><div class="quest-ui-dashboard-topbar"><div class="quest-ui-dashboard-display-title"><strong>Quest Dashboard</strong></div><button class="quest-ui-summary-chip">All</button><button class="quest-ui-reload-icon-button is-spinning"><svg viewBox="0 0 24 24"></svg></button><div class="quest-ui-update-banner is-checking"><span class="quest-ui-update-banner-mark"><svg class="quest-ui-update-check-spinner" viewBox="0 0 16 16"></svg></span></div></div><article class="quest-ui-card" data-obsidian-fracture="0" data-origami-scene="crane" data-sakura-ornament="0"><span class="quest-ui-card-backdrop"><img alt=""></span><span class="quest-ui-sakura-card-art"></span><span class="quest-ui-terminal-panorama"></span><span class="quest-ui-origami-card-paper"></span><span class="quest-ui-origami-card-animal"></span></article></div>')).join("");
+        writeFileSync(join(dir, "fixture.html"), '<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="theme.css"><style>body{font-family:Arial;margin:8px}button{font-family:inherit}</style><body data-result="pending">' + headerPairs + '<div class="quest-ui-theme quest-ui-theme-' + theme + ' quest-ui-dashboard-choice-list quest-ui-dashboard-menu-surface graphics-reference-menu">Theme</div>' + cases + policyFixtures + '<pre id="result"></pre><script>' + script + '</script>');
         for (const [systemReduced, dpr] of [[false, 1], [true, 1], [false, 1.25], [false, 2]]) {
         const proc = spawnSync(chrome, [...(systemReduced ? ["--force-prefers-reduced-motion"] : []), "--headless", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-background-networking", "--allow-file-access-from-files", "--force-device-scale-factor=" + dpr, "--virtual-time-budget=3000", "--dump-dom", pathToFileURL(join(dir, "fixture.html")).href], { encoding: "utf8", timeout: 45000, maxBuffer: 2 * 1024 * 1024 });
         assert.equal(proc.status, 0, proc.error?.message || proc.stderr);

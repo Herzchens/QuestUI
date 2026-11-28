@@ -1,5 +1,6 @@
 import { Popout, useEffect, useRef, useState } from "@webpack/common";
 
+import { useEffectiveReducedMotion } from "../graphics/runtime";
 import { NotificationCenterPanel, useNotificationCenterFeed } from "../notifications/NotificationCenter";
 
 import {
@@ -11,6 +12,9 @@ import {
 type NoticePhase = "hidden" | "mounted" | "visible" | "exiting";
 
 export function DashboardNoticeLane() {
+    const reduced = useEffectiveReducedMotion();
+    const reducedRef = useRef(reduced);
+    reducedRef.current = reduced;
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const [open, setOpen] = useState(false);
     const feed = useNotificationCenterFeed();
@@ -35,6 +39,7 @@ export function DashboardNoticeLane() {
             if (next) {
                 noticeRef.current = next;
                 setNotice(next);
+                if (reducedRef.current) { setPhase("visible"); return; }
                 setPhase("mounted");
 
                 // Commit the collapsed bell island first, then grow only its right edge.
@@ -51,6 +56,12 @@ export function DashboardNoticeLane() {
                 return;
             }
 
+            if (reducedRef.current) {
+                noticeRef.current = null;
+                setNotice(null);
+                setPhase("hidden");
+                return;
+            }
             setPhase("exiting");
             phaseTimerRef.current = setTimeout(() => {
                 phaseTimerRef.current = null;
@@ -65,6 +76,13 @@ export function DashboardNoticeLane() {
             unsubscribe();
         };
     }, []);
+
+    useEffect(() => {
+        if (!reduced || (phase !== "mounted" && phase !== "exiting")) return;
+        if (phaseTimerRef.current != null) { clearTimeout(phaseTimerRef.current); phaseTimerRef.current = null; }
+        if (phase === "mounted") setPhase("visible");
+        else { noticeRef.current = null; setNotice(null); setPhase("hidden"); }
+    }, [reduced, phase]);
 
     const shown = notice != null && phase !== "hidden";
     const displayText = notice?.text ?? "Notification Center";

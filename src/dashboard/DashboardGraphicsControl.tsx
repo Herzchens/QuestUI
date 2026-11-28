@@ -1,10 +1,12 @@
 import { Popout, React, useRef, useState } from "@webpack/common";
 
 import settings from "../plugin/settings";
+import { commitGraphicsDetent } from "../graphics/controller";
+import { useSystemReducedMotion } from "../graphics/runtime";
 import { useDashboardThemeClassName } from "../themes/runtime";
 import {
-    GRAPHICS_PRESETS, chooseGraphicsDetent, graphicsKeyboardDetent, graphicsPointerIndex,
-    readGraphicsPreference, showReducedGraphicsSubtitle, toggleGraphicsLight,
+    GRAPHICS_PRESETS, graphicsKeyboardDetent, graphicsPointerIndex,
+    readGraphicsPreference, toggleGraphicsLight,
     toggleGraphicsMotion, writeGraphicsPreference, type GraphicsPreference
 } from "./graphicsLogic";
 
@@ -45,40 +47,47 @@ function save(value: GraphicsPreference): void {
     if (settings.store.dashboardGraphicsPreference !== next) settings.store.dashboardGraphicsPreference = next;
 }
 
-function GraphicsMenu({ preview, setPreview }: { preview: boolean; setPreview: (value: boolean) => void; }) {
+function GraphicsMenu({ draft, setDraft }: { draft: number | null; setDraft: (value: number | null) => void; }) {
     const { dashboardGraphicsPreference } = settings.use(["dashboardGraphicsPreference"]);
     const value = readGraphicsPreference(dashboardGraphicsPreference);
     const [dragging, setDragging] = useState(false);
     const pointer = useRef<number | null>(null);
+    const latest = useRef<number | null>(null);
+    const systemReduced = useSystemReducedMotion();
     const themeClass = useDashboardThemeClassName("quest-ui-graphics-menu", "quest-ui-dashboard-menu-surface");
-    const idx = preview ? 4 : value.quality;
+    const idx = draft ?? value.quality;
+    const preview = idx === 4;
     const preset = GRAPHICS_PRESETS[idx];
-    const light = value.light && !preview;
-    function choose(index: number) {
+    const light = value.light && draft === null;
+    function apply(index: number | null) {
         const current = readGraphicsPreference(settings.store.dashboardGraphicsPreference);
-        const selected = chooseGraphicsDetent(current, index);
-        save(selected.preference);
-        setPreview(selected.preview);
+        save(commitGraphicsDetent(current, index));
+        setDraft(index === 4 ? 4 : null);
     }
 
     function pick(element: HTMLDivElement, clientX: number) {
         const rect = element.getBoundingClientRect();
         const next = graphicsPointerIndex(clientX - rect.left, rect.width);
-        if (next >= 0) choose(next);
+        if (next < 0 || latest.current === next) return;
+        latest.current = next;
+        setDraft(next);
     }
 
     function finish() {
+        const index = latest.current;
+        latest.current = null;
         pointer.current = null;
         setDragging(false);
+        return index;
     }
 
     function cancel() {
         finish();
-        setPreview(false);
+        setDraft(null);
     }
 
     return (
-        <div className={themeClass + (value.reduceMotion ? " is-reduced" : "") + (light ? " is-light" : "")}
+        <div className={themeClass + (value.reduceMotion || systemReduced ? " is-reduced" : "") + (light ? " is-light" : "")}
             data-graphics-index={light ? "light" : idx}
             style={{ "--graphics-index": idx } as React.CSSProperties}
             role="group" aria-label="Graphics quality selector">
@@ -90,10 +99,10 @@ function GraphicsMenu({ preview, setPreview }: { preview: boolean; setPreview: (
                 <div className="quest-ui-graphics-label" aria-live="polite">
                     <strong><span className="quest-ui-graphics-title-text">{light ? "Light" : preset.name}</span>{preview && <LockIcon />}</strong>
                     <span>{light ? "Minimum Graphics" : preset.subtitle}</span>
-                    {showReducedGraphicsSubtitle(value, preview) && <span>Reduced Motion</span>}
+                    {(value.reduceMotion || systemReduced) && !light && !preview && <span>Reduced Motion</span>}
                 </div>
                 <button type="button" className="quest-ui-graphics-icon-button is-motion" aria-label="Reduce Motion" aria-pressed={value.reduceMotion}
-                    title="Reduce Motion" onClick={() => { finish(); save(toggleGraphicsMotion(readGraphicsPreference(settings.store.dashboardGraphicsPreference))); }}>
+                    title={systemReduced ? "Reduce Motion (system preference is active)" : "Reduce Motion"} onClick={() => { if (pointer.current !== null) cancel(); save(toggleGraphicsMotion(readGraphicsPreference(settings.store.dashboardGraphicsPreference))); }}>
                     <MotionIcon />
                 </button>
             </div>
@@ -109,7 +118,7 @@ function GraphicsMenu({ preview, setPreview }: { preview: boolean; setPreview: (
                     pick(event.currentTarget, event.clientX);
                 }}
                 onPointerMove={event => { if (pointer.current === event.pointerId) pick(event.currentTarget, event.clientX); }}
-                onPointerUp={event => { if (pointer.current === event.pointerId) finish(); }}
+                onPointerUp={event => { if (pointer.current === event.pointerId) { pick(event.currentTarget, event.clientX); apply(finish()); } }}
                 onPointerCancel={event => { if (pointer.current === event.pointerId) cancel(); }}
                 onLostPointerCapture={event => { if (pointer.current === event.pointerId) cancel(); }}
                 onKeyDown={event => {
@@ -117,7 +126,7 @@ function GraphicsMenu({ preview, setPreview }: { preview: boolean; setPreview: (
                     if (next === null) return;
                     event.preventDefault();
                     finish();
-                    choose(next);
+                    apply(next);
                 }}>
                 <span className="quest-ui-graphics-track" aria-hidden="true"><span className="quest-ui-graphics-fill" /></span>
                 <span className="quest-ui-graphics-dots" aria-hidden="true">{GRAPHICS_PRESETS.map(p => <i key={p.name} />)}</span>
@@ -132,18 +141,19 @@ export function DashboardGraphicsControl() {
     const value = readGraphicsPreference(dashboardGraphicsPreference);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const [open, setOpen] = useState(false);
-    const [preview, setPreview] = useState(false);
-    const displayIndex = open && preview ? 4 : value.light ? "light" : value.quality;
+    const [draft, setDraft] = useState<number | null>(null);
+    const systemReduced = useSystemReducedMotion();
+    const displayIndex = open && draft !== null ? draft : value.light ? "light" : value.quality;
     const title = "Graphics Quality: " + (displayIndex === "light" ? "Light" : GRAPHICS_PRESETS[displayIndex].name + (displayIndex === 4 ? " (locked preview)" : ""));
     function close() {
-        setPreview(false);
+        setDraft(null);
         setOpen(false);
     }
     return (
         <Popout position="bottom" align="right" animation={Popout.Animation.NONE} shouldShow={open}
-            onRequestClose={close} targetElementRef={buttonRef} renderPopout={() => <GraphicsMenu preview={preview} setPreview={setPreview} />}>
+            onRequestClose={close} targetElementRef={buttonRef} renderPopout={() => <GraphicsMenu draft={draft} setDraft={setDraft} />}>
             {(_, { isShown }) => <button ref={buttonRef} type="button" className={"quest-ui-dashboard-palette-button quest-ui-graphics-trigger" + (isShown ? " is-open" : "")}
-                data-graphics-index={displayIndex} data-graphics-reduced={value.reduceMotion}
+                data-graphics-index={displayIndex} data-graphics-reduced={value.reduceMotion || systemReduced}
                 title={title} aria-label={title} aria-expanded={isShown} onClick={() => { if (open) close(); else setOpen(true); }}>
                 <GraphicsIcon />
             </button>}

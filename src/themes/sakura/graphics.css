@@ -51,3 +51,37 @@
     .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gauge path { stroke: currentColor; }
     .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gauge circle { fill: currentColor; }
 }
+
+
+/* Applied motion policy; keep functional status indicators alive. No host-wide selector. */
+.quest-ui-theme-sakura.quest-ui-reduced-motion,
+.quest-ui-theme-sakura.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"]),
+.quest-ui-theme-sakura.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"]) > :where(svg,span,strong,path,circle,rect,i),
+.quest-ui-theme-sakura.quest-ui-reduced-motion .quest-ui-progress-ring :where(svg,path,circle),
+.quest-ui-theme-sakura.quest-ui-reduced-motion::before, .quest-ui-theme-sakura.quest-ui-reduced-motion::after,
+.quest-ui-theme-sakura.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"])::before, .quest-ui-theme-sakura.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"])::after {
+    transition-property: none !important;
+    scroll-behavior: auto !important;
+}
+.quest-ui-theme-sakura.quest-ui-reduced-motion,
+.quest-ui-theme-sakura.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"]):not(.quest-ui-update-check-spinner, .quest-ui-reload-icon-button.is-spinning svg),
+.quest-ui-theme-sakura.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"]) > :where(svg,span,strong,path,circle,rect,i):not(.quest-ui-update-check-spinner, .quest-ui-reload-icon-button.is-spinning svg),
+.quest-ui-theme-sakura.quest-ui-reduced-motion::before, .quest-ui-theme-sakura.quest-ui-reduced-motion::after,
+.quest-ui-theme-sakura.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"])::before, .quest-ui-theme-sakura.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"])::after {
+    animation-name: none !important;
+}
+.quest-ui-theme-sakura.quest-ui-reduced-motion :is(.quest-ui-dashboard-orb-balance,.quest-ui-summary-chip):hover,
+.quest-ui-theme-sakura.quest-ui-reduced-motion :is(.quest-ui-dashboard-orb-balance,.quest-ui-summary-chip):active {
+    transform: none !important;
+}
+.quest-ui-theme-sakura.quest-ui-reduced-motion .quest-ui-reload-icon-button.is-spinning svg,
+.quest-ui-theme-sakura.quest-ui-reduced-motion .quest-ui-update-check-spinner {
+    animation-duration: 1.6s !important;
+}
+
+/* Applied quality overrides. Max intentionally uses the untouched theme baseline. */
+
+/* Retain floral frame and header scene; reduce only secondary ornament effects. */
+.quest-ui-theme-sakura.quest-ui-quality-high .quest-ui-dashboard-topbar::before { filter: brightness(.84); }
+.quest-ui-theme-sakura:is(.quest-ui-quality-medium,.quest-ui-quality-low) .quest-ui-dashboard-topbar::before { display: none; }
+.quest-ui-theme-sakura.quest-ui-quality-low .quest-ui-card > .quest-ui-sakura-card-art { display: none; }

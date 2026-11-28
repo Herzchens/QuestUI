@@ -1,6 +1,7 @@
 import { showToast, useEffect, useRef, useState } from "@webpack/common";
 
 import { recordQuestUIEvent } from "../../eventLog/runtime";
+import { useEffectiveReducedMotion } from "../../graphics/runtime";
 import { pushDashboardNotice } from "../../dashboard/notifications";
 import { markQuestReloadSuccessful } from "./auto";
 import { reloadQuestList } from "./native";
@@ -26,6 +27,9 @@ function ReloadSuccessIcon() {
 }
 
 export function QuestReloadControl() {
+    const reduced = useEffectiveReducedMotion();
+    const reducedRef = useRef(reduced);
+    reducedRef.current = reduced;
     const [pending, setPending] = useState(false);
     const [succeeded, setSucceeded] = useState(false);
     const pendingRef = useRef(false);
@@ -47,6 +51,10 @@ export function QuestReloadControl() {
             finishRotation();
         };
     }, []);
+
+    useEffect(() => {
+        if (reduced && requestSettledRef.current) finishRotation();
+    }, [reduced]);
 
     function finishRotation(): void {
         if (rotationRecoveryRef.current != null) clearTimeout(rotationRecoveryRef.current);
@@ -93,10 +101,11 @@ export function QuestReloadControl() {
             failure = error;
         } finally {
             requestSettledRef.current = true;
-            armRotationRecovery();
+            if (reducedRef.current) finishRotation();
+            else armRotationRecovery();
         }
 
-        // Finish only from animationiteration. If the request settles halfway through a later
+        // Full motion finishes at animationiteration; reduced motion does not wait. If the request settles halfway through a later
         // rotation, the spinner completes that full rotation instead of snapping back to 0deg.
         await finalRotationBoundary;
 

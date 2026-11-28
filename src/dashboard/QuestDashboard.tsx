@@ -19,6 +19,8 @@ import { ornamentVariantSequence } from "../themes/sakura/ornament";
 import { origamiSceneSequence } from "../themes/origami/scene";
 import { preloadObsidianArtworkColors } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
+import { useGraphicsQualityPolicy } from "../graphics/runtime";
+import { artworkPrewarmUrls } from "../graphics/policy";
 import { DashboardProductUpdateNotice } from "../updates/UpdateCenter";
 import { versionChannelClass } from "../updates/channel";
 import { QuestCard } from "./QuestCard";
@@ -133,6 +135,8 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const obsidian = dashboardThemeId === "obsidian";
     const origami = dashboardThemeId === "origami";
     const artworkTheme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
+    const graphics = useGraphicsQualityPolicy();
+    const prewarmLimit = graphics.prewarmLimit;
     const artworkOwner = useRef({}).current;
     useEffect(() => () => {
         if (obsidian) preloadObsidianArtworkColors(artworkOwner, []);
@@ -140,10 +144,10 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     }, [obsidian, origami, artworkOwner]);
     useEffect(() => {
         if (!obsidian && !origami) return;
-        const urls = quests.map(quest => resolveQuestArtwork(quest, artworkTheme));
+        const urls = artworkPrewarmUrls(quests, quest => resolveQuestArtwork(quest, artworkTheme), prewarmLimit);
         if (obsidian) preloadObsidianArtworkColors(artworkOwner, urls);
         if (origami) preloadOrigamiArtworkColors(artworkOwner, urls);
-    }, [obsidian, origami, quests, artworkTheme, artworkOwner]);
+    }, [obsidian, origami, quests, artworkTheme, artworkOwner, prewarmLimit]);
     const orbMultiplier = useQuestOrbMultiplierState();
     const { ids: ignoredIds } = useIgnoredQuests();
     const partition = partitionIgnored(quests, ignoredIds);
@@ -304,6 +308,7 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
                         <QuestCard
                             key={quest.id}
                             quest={quest}
+                            graphics={graphics}
                             obsidianFractureVariant={obsidianVariants?.[index]}
                             sakuraOrnamentVariant={sakuraVariants?.[index]}
                             origamiSceneVariant={origamiScenes?.[index]}

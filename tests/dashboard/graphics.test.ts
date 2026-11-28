@@ -44,3 +44,32 @@ assert.equal(key(0, "End"), 4);
 assert.equal(key(4, "Home"), 0);
 assert.equal(key(2, "Tab"), null);
 console.log("Ultra preview, subtitle and keyboard detents: PASS");
+
+import { graphicsQualityPolicy as quality, effectiveReducedMotion as reduced, graphicsRootClasses as classes, artworkPrewarmUrls } from "../../src/graphics/policy";
+import { commitGraphicsDetent as commit } from "../../src/graphics/controller";
+for (const preference of ["0","1","2","3","0:reduced","1:reduced","2:reduced","3:reduced","light",undefined,"4","constructor"]) {
+    const state = read(preference);
+    const p = quality(preference);
+    assert.equal(p.id, ["low","medium","high","max"][state.quality]);
+    assert.equal(reduced(preference, false), state.reduceMotion);
+    assert.equal(reduced(preference, true), true);
+    assert.equal(classes(preference, false).includes("quest-ui-reduced-motion"), state.reduceMotion);
+    assert.equal(classes(preference, true).length, 2);
+    for (const index of [null, -1, 5, NaN, 1.5]) assert.equal(commit(state, index), state);
+    assert.deepEqual(commit(state, 4), state.light ? read("0:reduced") : state);
+    for (let index = 0; index < 4; index++) assert.deepEqual(commit(state, index), select(state, index));
+}
+assert.equal(quality("light"), quality("0"));
+assert.equal(quality("3").prewarmLimit, 256);
+assert.equal(quality("2").prewarmLimit, 64);
+assert.equal(quality("1").prewarmLimit, 0);
+assert.equal(quality("0").artworkColor, false);
+assert.equal(quality("0").ambientArtwork, false);
+assert.equal(quality("0").sakuraOrnaments, false);
+assert.equal(quality("1").terminalPanorama, false);
+assert.equal(quality("2").terminalPanorama, true);
+let resolved = 0;
+assert.deepEqual(artworkPrewarmUrls([null,"a","a","b","c"], value => { resolved++; return value; }, 2), ["a","b"]);
+assert.equal(resolved, 4);
+assert.deepEqual(artworkPrewarmUrls(["a"], () => { throw Error("disabled prewarm did work"); }, 0), []);
+console.log("Applied graphics policy, locked preview, motion precedence and bounded prewarm: PASS");

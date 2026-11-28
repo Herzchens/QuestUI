@@ -1116,7 +1116,7 @@
     right: -3px !important;
     top: -3px !important;
 }
-.quest-ui-update-banner.is-checking .quest-ui-update-banner-mark svg {
+.quest-ui-update-banner.is-checking .quest-ui-update-banner-mark svg:not(.quest-ui-update-check-spinner) {
     animation: none !important;
 }
 .quest-ui-update-check-spinner {
@@ -1209,7 +1209,7 @@
 .quest-ui-update-panel .quest-ui-terminal-update-error-glyph > * { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-    .quest-ui-update-check-spinner { animation: none !important; }
+    .quest-ui-update-check-spinner { animation-duration: 1.6s !important; }
 }
 
 

@@ -14,6 +14,7 @@ import { expiryUrgency, formatExpiry, formatQuestProgress } from "../quests/data
 import type { NormalizedQuest, QuestTaskType } from "../quests/data";
 import { useObsidianArtworkColor } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
+import type { GraphicsQualityPolicy } from "../graphics/policy";
 import { terminalArtworkGrid, useTerminalArtwork } from "../themes/terminal/useArtwork";
 import { TerminalPanorama } from "../themes/terminal/TerminalPanorama";
 import { origamiScene, type OrigamiAnimal } from "../themes/origami/scene";
@@ -331,8 +332,9 @@ function IgnoredQuestTag() {
     );
 }
 
-export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive, closePopout, obsidianFractureVariant, sakuraOrnamentVariant, origamiSceneVariant }: {
+export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, claimBatchActive, closePopout, obsidianFractureVariant, sakuraOrnamentVariant, origamiSceneVariant, graphics }: {
     quest: NormalizedQuest;
+    graphics: GraphicsQualityPolicy;
     orionSnapshot: OrionControlSnapshot | null;
     ignored: boolean;
     receivesOrbBoost: boolean;
@@ -350,8 +352,8 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     const origami = dashboardThemeId === "origami";
     const terminalPixelUrl = useTerminalArtwork(terminal, artworkUrl, "dashboard");
     const obsidian = dashboardThemeId === "obsidian";
-    const artworkColor = useObsidianArtworkColor(obsidian, artworkUrl);
-    const origamiColor = useOrigamiArtworkColor(origami, artworkUrl);
+    const artworkColor = useObsidianArtworkColor(obsidian && graphics.artworkColor, artworkUrl);
+    const origamiColor = useOrigamiArtworkColor(origami && graphics.artworkColor, artworkUrl);
     const now = Date.now();
     const expiry = dashboardExpiry(quest, now);
     const urgency = expiryUrgency(quest.expiresAt, now);
@@ -392,7 +394,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                     ? { "--obsidian-artwork-rgb": artworkColor.join(" ") } as CSSProperties
                     : undefined}
         >
-            {!obsidian && !origami && dashboardThemeId !== "sakura" && dashboardThemeId !== "terminal" && artworkUrl && (
+            {graphics.ambientArtwork && !obsidian && !origami && dashboardThemeId !== "sakura" && dashboardThemeId !== "terminal" && artworkUrl && (
                 <span className="quest-ui-card-backdrop" aria-hidden="true">
                     <img
                         src={artworkUrl}
@@ -403,10 +405,10 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
                     />
                 </span>
             )}
-            {dashboardThemeId === "sakura" && sakuraOrnamentVariant != null && (
+            {graphics.sakuraOrnaments && dashboardThemeId === "sakura" && sakuraOrnamentVariant != null && (
                 <span className="quest-ui-sakura-card-art" aria-hidden="true" />
             )}
-            {terminal && <TerminalPanorama source={terminalPixelUrl} />}
+            {terminal && graphics.terminalPanorama && <TerminalPanorama source={terminalPixelUrl} />}
             {origami && <>
                 <span className="quest-ui-origami-card-paper" aria-hidden="true" />
                 <span className="quest-ui-origami-card-animal" aria-hidden="true" />

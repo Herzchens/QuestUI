@@ -51,3 +51,37 @@
     .quest-ui-theme-default .quest-ui-graphics-trigger .quest-ui-graphics-gauge path { stroke: currentColor; }
     .quest-ui-theme-default .quest-ui-graphics-trigger .quest-ui-graphics-gauge circle { fill: currentColor; }
 }
+
+
+/* Applied motion policy; keep functional status indicators alive. No host-wide selector. */
+.quest-ui-theme-default.quest-ui-reduced-motion,
+.quest-ui-theme-default.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"]),
+.quest-ui-theme-default.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"]) > :where(svg,span,strong,path,circle,rect,i),
+.quest-ui-theme-default.quest-ui-reduced-motion .quest-ui-progress-ring :where(svg,path,circle),
+.quest-ui-theme-default.quest-ui-reduced-motion::before, .quest-ui-theme-default.quest-ui-reduced-motion::after,
+.quest-ui-theme-default.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"])::before, .quest-ui-theme-default.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"])::after {
+    transition-property: none !important;
+    scroll-behavior: auto !important;
+}
+.quest-ui-theme-default.quest-ui-reduced-motion,
+.quest-ui-theme-default.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"]):not(.quest-ui-update-check-spinner, .quest-ui-reload-icon-button.is-spinning svg),
+.quest-ui-theme-default.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"]) > :where(svg,span,strong,path,circle,rect,i):not(.quest-ui-update-check-spinner, .quest-ui-reload-icon-button.is-spinning svg),
+.quest-ui-theme-default.quest-ui-reduced-motion::before, .quest-ui-theme-default.quest-ui-reduced-motion::after,
+.quest-ui-theme-default.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"])::before, .quest-ui-theme-default.quest-ui-reduced-motion :is([class^="quest-ui-"], [class*=" quest-ui-"])::after {
+    animation-name: none !important;
+}
+.quest-ui-theme-default.quest-ui-reduced-motion :is(.quest-ui-dashboard-orb-balance,.quest-ui-summary-chip):hover,
+.quest-ui-theme-default.quest-ui-reduced-motion :is(.quest-ui-dashboard-orb-balance,.quest-ui-summary-chip):active {
+    transform: none !important;
+}
+.quest-ui-theme-default.quest-ui-reduced-motion .quest-ui-reload-icon-button.is-spinning svg,
+.quest-ui-theme-default.quest-ui-reduced-motion .quest-ui-update-check-spinner {
+    animation-duration: 1.6s !important;
+}
+
+/* Applied quality overrides. Max intentionally uses the untouched theme baseline. */
+
+.quest-ui-theme-default.quest-ui-quality-high .quest-ui-card-backdrop > img { filter: blur(16px) saturate(1.55) brightness(1.18); }
+.quest-ui-theme-default.quest-ui-quality-medium .quest-ui-card-backdrop > img { filter: blur(8px) saturate(1.3) brightness(1.1); opacity: .22; }
+.quest-ui-theme-default.quest-ui-quality-medium .quest-ui-card:hover .quest-ui-card-backdrop > img { opacity: .26; }
+.quest-ui-theme-default.quest-ui-quality-low .quest-ui-card-backdrop { display: none; }

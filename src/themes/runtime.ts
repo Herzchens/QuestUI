@@ -2,6 +2,7 @@ import { disableStyle, enableStyle, requireStyle } from "@api/Styles";
 import { React } from "@webpack/common";
 
 import { createDashboardThemeController } from "./controller";
+import { useGraphicsRootClasses } from "../graphics/runtime";
 import { DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID } from "./registry";
 
 const controller = createDashboardThemeController(DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID, {
@@ -48,7 +49,8 @@ export const QUESTUI_THEME_ROOT_CLASS = "quest-ui-theme";
 
 export function useDashboardThemeClassName(...classNames: Array<string | false | null | undefined>): string {
     const id = useDashboardThemeId();
-    return [QUESTUI_THEME_ROOT_CLASS, QUESTUI_THEME_ROOT_CLASS + "-" + id, ...classNames]
+    const graphicsClasses = useGraphicsRootClasses();
+    return [QUESTUI_THEME_ROOT_CLASS, QUESTUI_THEME_ROOT_CLASS + "-" + id, ...graphicsClasses, ...classNames]
         .filter((value): value is string => typeof value === "string" && value.length > 0)
         .join(" ");
 }

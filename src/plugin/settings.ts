@@ -151,7 +151,7 @@ export default definePluginSettings({
     dashboardGraphicsPreference: {
         type: OptionType.STRING,
         displayName: "Dashboard • Graphics Quality",
-        description: "Internal graphics selector preference; rendering policy is not yet applied.",
+        description: "Choose graphics quality and reduced motion from the Dashboard graphics selector.",
         default: "3"
     },
     dashboardSortMode: {
