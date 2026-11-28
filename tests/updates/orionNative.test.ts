@@ -500,6 +500,40 @@ async function main(): Promise<void> {
             assert.equal((await updater.updateRelease("v4.11.4", "v4.11.2")).status, "invalid-version");
         }
 
+        {
+            const { vencord, userplugins, checkout } = await fixture.cloneInstalled("invalid-discard-action");
+            const path = join(checkout, "index.tsx");
+            await appendFile(path, "// local edit must survive\n");
+            let builds = 0;
+            const updater = fixture.engine(vencord, userplugins, async () => { builds++; });
+            const pending = await updater.updateRelease("v4.11.2", "v4.11.4");
+            assert.equal(pending.status, "decision-required");
+            const invalid = await updater.updateRelease("v4.11.2", "v4.11.4", {
+                action: "invalid" as "discard", token: pending.decision!.token
+            });
+            assert.equal(invalid.status, "decision-stale");
+            assert.equal(await git(checkout, "rev-parse", "HEAD"), fixture.v4112);
+            assert.match(await readFile(path, "utf8"), /local edit must survive/);
+            assert.equal(builds, 0);
+            // Invalid input must not consume a valid user's choice.
+            const kept = await updater.updateRelease("v4.11.2", "v4.11.4", {
+                action: "keep", token: pending.decision!.token
+            });
+            assert.equal(kept.status, "kept");
+        }
+
+        {
+            const { vencord, userplugins, checkout } = await fixture.cloneInstalled("missing-build-artifact");
+            const original = await writeKnownGoodDist(vencord);
+            const updater = fixture.engine(vencord, userplugins, async () => {
+                await rm(join(vencord, "dist", "renderer.js"));
+            });
+            const result = await updater.updateRelease("v4.11.2", "v4.11.4");
+            assert.equal(result.status, "build-failed");
+            assert.equal(await git(checkout, "rev-parse", "HEAD"), fixture.v4112);
+            await assertRuntimeDist(vencord, original);
+        }
+
         await testRewriteRecovery();
 
         console.log("QuestUI Orion managed updater integration tests - PASS");

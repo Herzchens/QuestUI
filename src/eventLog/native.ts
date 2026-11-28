@@ -1,5 +1,6 @@
 import { app, IpcMainInvokeEvent, shell } from "electron";
-import { appendFile, mkdir, readFile, stat } from "fs/promises";
+import { constants } from "fs";
+import { lstat, mkdir, open, readFile, stat } from "fs/promises";
 import { join } from "path";
 
 import { collectEventAccountUsernames, eventBelongsToAccount, eventMatchesAccountScopes, eventVisibleForAccount } from "./account";
@@ -12,7 +13,7 @@ import {
 } from "./pagination";
 import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort } from "./types";
 import { normalizePersistedEvent } from "./validation";
-import { readLogText, replaceLogFile } from "./storage";
+import { assertRegularLogPath, readLogText, replaceLogFile } from "./storage";
 import { createPageSessionStore } from "./sessionStore";
 import { createOrderedReadBatch } from "./orderedReadBatch";
 
@@ -20,6 +21,14 @@ import { createOrderedReadBatch } from "./orderedReadBatch";
 const MAX_LOG_BYTES = 10 * 1024 * 1024;
 const COMPACT_TO_BYTES = 5 * 1024 * 1024;
 const MAX_EVENT_BYTES = 256 * 1024;
+const MAX_PENDING_WRITE_BYTES = 4 * 1024 * 1024;
+const MAX_PENDING_WRITES = 512;
+let pendingWriteBytes = 0;
+let pendingWrites = 0;
+let rejectedAppends = 0;
+interface AppendBatch { lines: string[]; promise: Promise<void>; }
+let appendBatch: AppendBatch | null = null;
+const sealAppendBatch = () => { appendBatch = null; };
 const MAX_PAGE_SESSIONS = 3;
 const PAGE_SESSION_TTL_MS = 15 * 60 * 1000;
 
@@ -41,10 +50,10 @@ function enqueueStorage<T>(work: () => Promise<T>): Promise<T> {
     return result;
 }
 const readBatch = createOrderedReadBatch(enqueueStorage, async () => ({
-    text: await readLogText(LOG_FILE),
+    snapshot: prepareSnapshot(await readLogText(LOG_FILE)),
     generation: storageGeneration
 }));
-const pendingPrepared = new Map<Promise<{ text: string; generation: number; }>, Map<string, Promise<{ events: EventLogEvent[]; generation: number; }>>>();
+const pendingPrepared = new Map<Promise<{ snapshot: PreparedSnapshot; generation: number; }>, Map<string, Promise<{ events: EventLogEvent[]; generation: number; }>>>();
 const MAX_PENDING_READ_IDENTITIES = 16;
 let pendingReadIdentities = 0;
 let nextPageSessionId = 0;
@@ -80,12 +89,16 @@ export async function releaseEventPageSession(_: IpcMainInvokeEvent, sessionId: 
 }
 
 async function ensureLogDir(): Promise<void> {
-    await mkdir(LOG_DIR, { recursive: true });
+    await mkdir(LOG_DIR, { recursive: true, mode: 0o700 });
+    if (!(await lstat(LOG_DIR)).isDirectory()) throw new Error("Event Log directory is not a real directory.");
 }
 
 async function compactIfNeeded(): Promise<void> {
     let info;
-    try { info = await stat(LOG_FILE); } catch (error) {
+    try {
+        if (!await assertRegularLogPath(LOG_FILE)) return;
+        info = await stat(LOG_FILE);
+    } catch (error) {
         if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return;
         throw error;
     }
@@ -103,15 +116,47 @@ async function compactIfNeeded(): Promise<void> {
 }
 
 export async function appendEvent(_: IpcMainInvokeEvent, serialized: string): Promise<void> {
-    if (typeof serialized !== "string" || !serialized.trim()) return;
-    if (Buffer.byteLength(serialized, "utf8") > MAX_EVENT_BYTES) return;
-
+    if (typeof serialized !== "string" || !serialized.trim() || Buffer.byteLength(serialized, "utf8") > MAX_EVENT_BYTES) {
+        rejectedAppends++;
+        throw new Error("Invalid Event Log record.");
+    }
+    // One IPC request represents exactly one validated, canonical JSONL event.
+    const event = safeParse(serialized);
+    if (!event) {
+        rejectedAppends++;
+        throw new Error("Invalid Event Log record.");
+    }
+    const line = JSON.stringify(event) + "\n";
+    const bytes = Buffer.byteLength(line, "utf8");
+    if (bytes > MAX_EVENT_BYTES || pendingWrites >= MAX_PENDING_WRITES || pendingWriteBytes + bytes > MAX_PENDING_WRITE_BYTES) {
+        rejectedAppends++;
+        throw new Error("Event Log write capacity exceeded.");
+    }
+    pendingWrites++;
+    pendingWriteBytes += bytes;
     readBatch.invalidate();
-    await enqueueStorage(async () => {
-        await ensureLogDir();
-        await appendFile(LOG_FILE, serialized.endsWith("\n") ? serialized : `${serialized}\n`, "utf8");
-        await compactIfNeeded();
-    });
+
+    if (!appendBatch) {
+        const batch: AppendBatch = { lines: [], promise: Promise.resolve() };
+        // Appends submitted before a read/mutation barrier or dispatch share I/O.
+        batch.promise = enqueueStorage(async () => {
+            if (appendBatch === batch) sealAppendBatch();
+            await ensureLogDir();
+            await assertRegularLogPath(LOG_FILE);
+            const file = await open(LOG_FILE, constants.O_WRONLY | constants.O_APPEND | constants.O_CREAT | (constants.O_NOFOLLOW ?? 0), 0o600);
+            try {
+                if (!(await file.stat()).isFile()) throw new Error("Event Log is not a regular file.");
+                await file.appendFile(batch.lines.join(""), "utf8");
+            } finally { await file.close(); }
+            await compactIfNeeded();
+        });
+        appendBatch = batch;
+    }
+    const batch = appendBatch;
+    batch.lines.push(line);
+    try { await batch.promise; }
+    catch (error) { rejectedAppends++; throw error; }
+    finally { pendingWrites--; pendingWriteBytes -= bytes; }
 }
 
 function safeParse(line: string): EventLogEvent | null {
@@ -124,7 +169,7 @@ function safeParse(line: string): EventLogEvent | null {
 
 function normalizeSelection<T extends string>(value: unknown, allowed: readonly T[]): "all" | T[] {
     if (value === "all" || value == null) return "all";
-    const input = Array.isArray(value) ? value : [value];
+    const input = Array.isArray(value) ? value.slice(0, 16) : [value];
     const selected = allowed.filter(item => input.includes(item));
     if (selected.length === allowed.length) return "all";
     if (!Array.isArray(value) && selected.length === 0) return "all";
@@ -132,8 +177,9 @@ function normalizeSelection<T extends string>(value: unknown, allowed: readonly 
 }
 
 function normalizeQueryOptions(options: any = {}): NormalizedQueryOptions {
+    if (!options || typeof options !== "object" || Array.isArray(options)) throw new Error("Invalid Event Log query.");
     return {
-        query: typeof options.query === "string" ? options.query.trim().toLowerCase() : "",
+        query: typeof options.query === "string" ? options.query.slice(0, 512).trim().toLowerCase() : "",
         source: options.source === "orion" || options.source === "questui" ? options.source : "all",
         severity: normalizeSelection<EventLogSeverity>(options.severity, ["error", "warning", "success", "info"]),
         category: normalizeSelection<EventLogCategory>(options.category, ["quest", "runtime", "network", "diagnostic"]),
@@ -159,7 +205,13 @@ function querySignature(options: NormalizedQueryOptions): string {
     ]);
 }
 
-function filterAndSortEvents(text: string, options: NormalizedQueryOptions): EventLogEvent[] {
+interface PreparedSnapshot {
+    events: EventLogEvent[];
+    sorted: Map<EventLogSort, EventLogEvent[]>;
+    search: WeakMap<EventLogEvent, string>;
+}
+
+function prepareSnapshot(text: string): PreparedSnapshot {
     const events: EventLogEvent[] = [];
     for (const line of text.split(/\r?\n/)) {
         if (!line) continue;
@@ -169,11 +221,22 @@ function filterAndSortEvents(text: string, options: NormalizedQueryOptions): Eve
     }
 
     const accountNames = collectEventAccountUsernames(events);
-    let filtered = events.map(event => (
+    const enriched = events.map(event => (
         event.accountId && !event.accountUsername && accountNames.has(event.accountId)
             ? { ...event, accountUsername: accountNames.get(event.accountId)! }
             : event
     ));
+
+    return { events: enriched, sorted: new Map(), search: new WeakMap() };
+}
+
+function filterAndSortEvents(snapshot: PreparedSnapshot, options: NormalizedQueryOptions): EventLogEvent[] {
+    let ordered = snapshot.sorted.get(options.sort);
+    if (!ordered) {
+        ordered = sortEventLogEvents(snapshot.events, options.sort);
+        snapshot.sorted.set(options.sort, ordered);
+    }
+    let filtered = ordered;
     if (options.accountId) filtered = filtered.filter(event => eventVisibleForAccount(event, options.accountId!, options.includeLegacy));
     if (options.accountScope !== "all") {
         filtered = filtered.filter(event => eventMatchesAccountScopes(event, options.currentAccountId, options.accountScope));
@@ -181,8 +244,12 @@ function filterAndSortEvents(text: string, options: NormalizedQueryOptions): Eve
     if (options.source !== "all") filtered = filtered.filter(event => event.source === options.source);
     if (options.severity !== "all") filtered = filtered.filter(event => options.severity.includes(event.severity));
     if (options.category !== "all") filtered = filtered.filter(event => options.category.includes(event.category as EventLogCategory));
-    if (options.query) filtered = filtered.filter(event => eventSearchText(event).includes(options.query));
-    return sortEventLogEvents(filtered, options.sort);
+    if (options.query) filtered = filtered.filter(event => {
+        let text = snapshot.search.get(event);
+        if (text === undefined) { text = eventSearchText(event); snapshot.search.set(event, text); }
+        return text.includes(options.query);
+    });
+    return filtered;
 }
 
 async function readPreparedEvents(options: NormalizedQueryOptions): Promise<{ events: EventLogEvent[]; generation: number; }> {
@@ -194,13 +261,14 @@ async function readPreparedEvents(options: NormalizedQueryOptions): Promise<{ ev
     if (pendingReadIdentities >= MAX_PENDING_READ_IDENTITIES) {
         throw new Error("Event Log read capacity exceeded; retry the query.");
     }
+    sealAppendBatch();
     const snapshot = readBatch.read();
     let group = pendingPrepared.get(snapshot);
     if (!group) pendingPrepared.set(snapshot, group = new Map());
     const ownedGroup = group;
     pendingReadIdentities++;
-    const work = snapshot.then(({ text, generation }) => ({
-        events: filterAndSortEvents(text, options),
+    const work = snapshot.then(({ snapshot, generation }) => ({
+        events: filterAndSortEvents(snapshot, options),
         generation
     }));
     ownedGroup.set(signature, work);
@@ -215,7 +283,7 @@ async function readPreparedEvents(options: NormalizedQueryOptions): Promise<{ ev
 
 export async function queryEvents(_: IpcMainInvokeEvent, options: any = {}): Promise<{ events: EventLogEvent[]; total: number; hasMore: boolean; }> {
     const normalized = normalizeQueryOptions(options);
-    const limit = Math.max(1, Math.min(5000, Number(options.limit) || 200));
+    const limit = Math.max(1, Math.min(5000, typeof options.limit === "number" && Number.isFinite(options.limit) ? Math.trunc(options.limit) || 200 : 200));
     const { events } = await readPreparedEvents(normalized);
     return { events: events.slice(0, limit), total: events.length, hasMore: events.length > limit };
 }
@@ -270,8 +338,9 @@ export async function queryEventPage(_: IpcMainInvokeEvent, rawOptions: EventLog
 }
 
 export async function clearEvents(_: IpcMainInvokeEvent, accountId?: string): Promise<void> {
-    if (typeof accountId !== "string" || accountId.length === 0) return;
+    if (typeof accountId !== "string" || !accountId.trim() || accountId.length > 128) throw new Error("Invalid Event Log account.");
 
+    sealAppendBatch();
     readBatch.invalidate();
     await enqueueStorage(async () => {
         await ensureLogDir();
@@ -293,6 +362,7 @@ export async function getLogInfo(_: IpcMainInvokeEvent): Promise<{
     size: number;
     maxBytes: number;
     compactToBytes: number;
+    rejectedAppends: number;
 }> {
     await writeChain;
     let size = 0;
@@ -301,7 +371,8 @@ export async function getLogInfo(_: IpcMainInvokeEvent): Promise<{
         path: LOG_FILE,
         size,
         maxBytes: MAX_LOG_BYTES,
-        compactToBytes: COMPACT_TO_BYTES
+        compactToBytes: COMPACT_TO_BYTES,
+        rejectedAppends
     };
 }
 

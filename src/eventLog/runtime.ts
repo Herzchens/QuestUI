@@ -1,4 +1,5 @@
 import type { PluginNative } from "@utils/types";
+import { sanitizeDiagnosticDetail, validDiagnosticTimestamp } from "./redaction";
 import { UserStore } from "@webpack/common";
 
 import { collectEventAccountUsernames, eventBelongsToAccount, eventMatchesAccountScopes, eventVisibleForAccount, normalizeEventAccountId } from "./account";
@@ -98,16 +99,6 @@ function notify(): void {
     }
 }
 
-function sanitizeDetail(detail: Record<string, unknown> | null | undefined): Record<string, unknown> | null {
-    if (!detail) return null;
-    const sanitized: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(detail)) {
-        if (typeof value === "string") sanitized[key] = sanitizeEventText(value);
-        else sanitized[key] = value;
-    }
-    return sanitized;
-}
-
 export async function recordQuestUIEvent(input: {
     source?: EventLogSource;
     severity: EventLogSeverity;
@@ -124,7 +115,7 @@ export async function recordQuestUIEvent(input: {
     const source = input.source ?? "questui";
     const eventCode = sanitizeEventText(input.eventCode, 120);
     const summary = sanitizeEventText(input.summary, 240);
-    const suppliedTimestamp = Number(input.timestamp);
+    const suppliedTimestamp = input.timestamp;
     const currentAccountId = currentEventLogAccountId();
     const accountId = Object.prototype.hasOwnProperty.call(input, "accountId")
         ? normalizeEventAccountId(input.accountId)
@@ -139,7 +130,7 @@ export async function recordQuestUIEvent(input: {
     const event: EventLogEvent = {
         schemaVersion: 1,
         id: eventId(),
-        timestamp: Number.isFinite(suppliedTimestamp) && suppliedTimestamp > 0 ? suppliedTimestamp : Date.now(),
+        timestamp: validDiagnosticTimestamp(suppliedTimestamp) ? suppliedTimestamp : Date.now(),
         accountId,
         accountUsername,
         source,
@@ -154,7 +145,7 @@ export async function recordQuestUIEvent(input: {
             taskType: input.quest.taskType ? sanitizeEventText(input.quest.taskType, 120) : null,
             ...normalizeQuestPresentationMetadata({ ...input.quest })
         } : null,
-        detail: sanitizeDetail(input.detail)
+        detail: sanitizeDiagnosticDetail(input.detail)
     };
 
     // Enrich only Center-eligible Quest events, and never consult another account's
@@ -257,7 +248,7 @@ export async function openEventLogFolder(): Promise<void> {
     try { await Native.openLogFolder(); } catch { }
 }
 
-export async function getEventLogInfo(): Promise<{ path: string; size: number; }> {
+export async function getEventLogInfo(): Promise<{ path: string; size: number; rejectedAppends?: number; }> {
     if (!Native) return { path: "Memory only", size: 0 };
     try { return await Native.getLogInfo(); }
     catch { return { path: "Unavailable", size: 0 }; }

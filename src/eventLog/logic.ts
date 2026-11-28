@@ -1,13 +1,7 @@
 import type { EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSource } from "./types";
 
-const MAX_DETAIL_LENGTH = 32 * 1024;
-
-const SECRET_PATTERNS: Array<[RegExp, string]> = [
-    [/(authorization\s*[:=]\s*)(?:bearer\s+)?[^\s,;]+/gi, "$1[REDACTED]"],
-    [/(access[_-]?token|auth[_-]?token|proxy[_-]?ticket|cookie)\s*[:=]\s*[^\s,;]+/gi, "$1=[REDACTED]"],
-    [/(oauth\s+code|auth\s+code)\s*[:=]\s*[^\s,;]+/gi, "$1=[REDACTED]"],
-    [/([?&](?:code|token|access_token|ticket)=)[^&#\s]+/gi, "$1[REDACTED]"]
-];
+import { sanitizeEventText } from "./redaction";
+export { sanitizeEventText } from "./redaction";
 
 const ORION_TAGS = [
     "System",
@@ -25,27 +19,12 @@ const ORION_TAGS = [
 
 type OrionTag = typeof ORION_TAGS[number];
 
-export function sanitizeEventText(value: unknown, maxLength = MAX_DETAIL_LENGTH): string {
-    let text = typeof value === "string" ? value : String(value ?? "");
-    for (const [pattern, replacement] of SECRET_PATTERNS) text = text.replace(pattern, replacement);
-    if (text.length > maxLength) text = `${text.slice(0, maxLength)}… [truncated]`;
-    return text;
-}
-
 function safeConsoleArg(value: unknown): string {
-    if (value instanceof Error) {
-        return sanitizeEventText(`${value.name}: ${value.message}${value.stack ? `\n${value.stack}` : ""}`);
-    }
-    if (typeof value === "string") return sanitizeEventText(value);
-    try {
-        return sanitizeEventText(JSON.stringify(value));
-    } catch {
-        return sanitizeEventText(String(value));
-    }
+    return sanitizeEventText(value);
 }
 
 export function consoleArgsToText(args: unknown[]): string {
-    const parts = args
+    const parts = args.slice(0, 32)
         .map(safeConsoleArg)
         .filter(part => !/^background:\s|^color:\s|font-weight:|border-radius:/i.test(part));
     return sanitizeEventText(parts.join(" ")
@@ -55,10 +34,14 @@ export function consoleArgsToText(args: unknown[]): string {
 }
 
 export function consoleEventSource(args: unknown[]): EventLogSource | null {
-    const text = consoleArgsToText(args);
-    if (/\bOrionQuests\b|\[OrionQuests\]/i.test(text)) return "orion";
-    if (/\bQuestUI\b|\[QuestUI\]/i.test(text)) return "questui";
-    return null;
+    // The logger label is part of the first format string. Never inspect
+    // arbitrary object arguments or match a name in an unrelated message.
+    const first = args[0];
+    if (typeof first !== "string") return null;
+    const prefix = first.slice(0, 256).replace(/%c/g, "").trim();
+    const match = prefix.match(/^(?:Vencord\s+)?(?:\[(OrionQuests|QuestUI)\]|(OrionQuests|QuestUI)(?=\s|:|$))/i);
+    const name = (match?.[1] ?? match?.[2])?.toLowerCase();
+    return name === "orionquests" ? "orion" : name === "questui" ? "questui" : null;
 }
 
 function orionTag(text: string): OrionTag | null {

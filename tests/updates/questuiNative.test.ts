@@ -492,6 +492,18 @@ async function main() {
             await assertNoTemporaryRefs(checkout);
         }
 
+        {
+            const checkout = await fixture.cloneInstalled("missing-build-artifact");
+            const original = await writeKnownGoodDist(fixture.vencord);
+            const updater = fixture.engine(checkout, async () => {
+                await rm(join(fixture.vencord, "dist", "renderer.js"));
+            });
+            const result = await updater.updateRelease("v1.4.0", "v1.4.1");
+            assert.equal(result.status, "build-failed");
+            assert.equal(await git(checkout, "rev-parse", "HEAD"), fixture.v140);
+            await assertRuntimeDist(fixture.vencord, original);
+        }
+
         console.log("QuestUI managed updater integration tests - PASS");
     } finally {
         await fixture.cleanup();

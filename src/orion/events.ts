@@ -1,3 +1,4 @@
+import { sanitizeEventText, validDiagnosticTimestamp } from "../eventLog/redaction";
 import type { EventLogCategory, EventLogSeverity } from "../eventLog/types";
 
 export type OrionCompanionEventLevel = "debug" | "info" | "success" | "warning" | "error";
@@ -118,7 +119,7 @@ function optionalString(value: unknown, maxLength: number): string | undefined {
 
 function nullablePositiveInteger(value: unknown): number | null {
     if (value == null) return null;
-    const number = Number(value);
+    const number = typeof value === "number" ? value : typeof value === "string" && /^\d{1,15}$/.test(value) ? Number(value) : NaN;
     if (!Number.isFinite(number)) return null;
     const normalized = Math.floor(number);
     return normalized > 0 ? normalized : null;
@@ -179,14 +180,17 @@ function humanizeCode(code: string): string {
  * The human `message` is preserved only as detail; code/category/level/failure fields own meaning.
  */
 export function normalizeOrionCompanionEvent(value: unknown, now = Date.now()): NormalizedOrionEvent | null {
+    try { return normalize(value, now); } catch { return null; }
+}
+
+function normalize(value: unknown, now: number): NormalizedOrionEvent | null {
     if (!isRecord(value)) return null;
     if (typeof value.code !== "string" || !CODE_RE.test(value.code)) return null;
     if (typeof value.category !== "string" || !CATEGORIES.has(value.category as OrionCompanionEventCategory)) return null;
     if (typeof value.level !== "string" || !LEVELS.has(value.level as OrionCompanionEventLevel)) return null;
     if (typeof value.message !== "string") return null;
 
-    const rawTimestamp = Number(value.timestamp);
-    const timestamp = Number.isFinite(rawTimestamp) && rawTimestamp > 0 ? rawTimestamp : now;
+    const timestamp = validDiagnosticTimestamp(value.timestamp) ? value.timestamp : validDiagnosticTimestamp(now) ? now : Date.now();
     const category = value.category as OrionCompanionEventCategory;
     const level = value.level as OrionCompanionEventLevel;
 
@@ -202,7 +206,7 @@ export function normalizeOrionCompanionEvent(value: unknown, now = Date.now()): 
     const questName = optionalString(value.questName, 240);
     const taskType = optionalString(value.taskType, 120);
     const detail: Record<string, unknown> = {
-        message: value.message,
+        message: sanitizeEventText(value.message),
         orionCategory: category
     };
     if (reason) detail.reason = reason;
@@ -245,7 +249,8 @@ function candidateScore(candidate: OrionConsoleShadowCandidate, event: Normalize
     if (questNameMatches === false) return -1;
 
     let score = 0;
-    const exactAliases = STRUCTURED_TO_CONSOLE_CODES[event.eventCode] ?? [];
+    const exactAliases = Object.prototype.hasOwnProperty.call(STRUCTURED_TO_CONSOLE_CODES, event.eventCode)
+        ? STRUCTURED_TO_CONSOLE_CODES[event.eventCode] : [];
     if (exactAliases.includes(candidate.eventCode)) score += 8;
 
     const expectedTag = CATEGORY_TO_TAG[event.orionCategory];

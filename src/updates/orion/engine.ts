@@ -1,5 +1,5 @@
 import { execFile as execFileCallback } from "child_process";
-import { createHash } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { cp, lstat, mkdtemp, readFile, readlink, readdir, rm, stat } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -7,6 +7,7 @@ import { promisify } from "util";
 
 import { compareSemver, parseSemver } from "../logic";
 import { tryAcquireVencordUpdate } from "../transactionLock";
+import { assertManagedCheckoutRoot, assertNoIgnoredTargetCollision, assertRegularRuntimeTree } from "../checkoutSafety";
 
 export type OrionUpdateStatus =
     | "ready"
@@ -182,6 +183,7 @@ async function run(
 ): Promise<{ stdout: string; stderr: string; }> {
     const result = await execFile(command, args, {
         cwd,
+        env: { ...process.env, GIT_NO_REPLACE_OBJECTS: "1" },
         windowsHide: true,
         maxBuffer: MAX_BUFFER,
         encoding: "utf8"
@@ -232,7 +234,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
 
     function nextDecisionToken(): string {
         decisionCounter++;
-        const suffix = config.randomSuffix?.() ?? Math.random().toString(16).slice(2);
+        const suffix = config.randomSuffix?.() ?? randomBytes(24).toString("hex");
         return now() + "-" + suffix + "-" + decisionCounter;
     }
 
@@ -262,6 +264,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
     }
 
     async function verifyVencordRuntimeDist(distPath: string): Promise<void> {
+        await assertRegularRuntimeTree(distPath);
         for (const name of VENCORD_RUNTIME_FILES) {
             const path = join(distPath, name);
             const info = await stat(path);
@@ -356,20 +359,22 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         for (const entry of entries) {
             hash.update("\0" + entry.kind + "\0" + entry.path + "\0", "utf8");
             const full = join(dir, entry.path);
-            try {
-                const info = await lstat(full);
-                if (info.isSymbolicLink()) {
-                    hash.update("L\0" + await readlink(full), "utf8");
-                } else if (info.isFile()) {
-                    hash.update("F\0", "utf8");
-                    hash.update(await readFile(full));
-                } else if (info.isDirectory()) {
-                    hash.update("D", "utf8");
-                } else {
-                    hash.update("O", "utf8");
-                }
-            } catch {
+            let info;
+            try { info = await lstat(full); }
+            catch (error) {
+                // A tracked deletion is legitimate; an unreadable file is not proof.
+                if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
                 hash.update("MISSING", "utf8");
+                continue;
+            }
+            if (info.isSymbolicLink()) {
+                hash.update("L\0" + await readlink(full), "utf8");
+            } else if (info.isFile()) {
+                hash.update("F\0" + info.mode + "\0", "utf8");
+                hash.update(await readFile(full));
+            } else {
+                // Do not approve a fingerprint that cannot describe local content.
+                throw new Error("Unsupported local checkout entry: " + entry.path);
             }
         }
 
@@ -429,6 +434,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         const checkout = candidates[0];
         try {
             if (await gitText(checkout, "rev-parse", "--is-inside-work-tree") !== "true") throw new Error("not a worktree");
+            await assertManagedCheckoutRoot(checkout, (...args) => gitText(checkout, ...args));
         } catch {
             return {
                 checkout: null,
@@ -502,6 +508,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
 
         try {
             await config.buildVencord();
+            await verifyVencordRuntimeDist(join(config.vencordSrcDir, "dist"));
             trace.push("Build: completed successfully");
         } catch (buildError) {
             const buildDiagnostic = diagnosticText(buildError);
@@ -530,6 +537,8 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             try {
                 if (!distSnapshot) throw new Error("Pre-update Vencord dist snapshot is unavailable.");
                 trace.push("Rollback checkout: git reset --hard " + shortCommit(currentHead));
+                await assertNoIgnoredTargetCollision(async (...args) => (await git(checkout, ...args)).stdout, currentHead);
+                if (!await checkoutStillMatches(checkout, targetCommit, "main")) throw new Error("Checkout changed during rollback validation.");
                 await git(checkout, "reset", "--hard", currentHead);
                 trace.push("Rollback dist: restore the pre-update Vencord runtime snapshot");
                 await restoreVencordDist(distSnapshot);
@@ -801,7 +810,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         operation: OrionUpdateOperation
     ): Promise<OrionUpdateResult | null> {
         const trace = operation.trace;
-        const suffix = config.randomSuffix?.() ?? Math.random().toString(16).slice(2);
+        const suffix = config.randomSuffix?.() ?? randomBytes(24).toString("hex");
         operation.tagRef = "refs/orion-update/tag-decision-" + now() + "-" + suffix;
         trace.push("Fetch: git fetch --atomic --force --no-tags origin refs/tags/" + targetVersion + ":<temporary-ref> +refs/heads/main:refs/remotes/origin/main");
         await git(
@@ -840,6 +849,13 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             };
         }
 
+        return finalDiscardGuard(checkout, pending, runningVersion, targetVersion, trace);
+    }
+
+    async function finalDiscardGuard(
+        checkout: string, pending: PendingDecision, runningVersion: string,
+        targetVersion: string, trace: string[]
+    ): Promise<OrionUpdateResult | null> {
         if (await currentBranch(checkout) !== "main"
             || await gitText(checkout, "rev-parse", "HEAD") !== pending.currentHead
             || await checkoutFingerprint(checkout) !== pending.fingerprint) {
@@ -872,6 +888,11 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         const snapshotStep = await captureRuntimeSnapshot(operation, runningVersion, targetVersion, pending.currentHead, pending.targetCommit, "discard-reset");
         if (snapshotStep.blocked) return snapshotStep.blocked;
 
+        // Snapshot I/O can be slow. Revalidate after it, not just before it.
+        await assertManagedCheckoutRoot(checkout, (...args) => gitText(checkout, ...args));
+        await assertNoIgnoredTargetCollision(async (...args) => (await git(checkout, ...args)).stdout, pending.targetCommit);
+        const stale = await finalDiscardGuard(checkout, pending, runningVersion, targetVersion, trace);
+        if (stale) return stale;
         operation.phase = "checkout";
         trace.push("Checkout: git reset --hard " + shortCommit(pending.targetCommit));
         await git(checkout, "reset", "--hard", pending.targetCommit);
@@ -913,6 +934,15 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         request: OrionUpdateDecisionRequest,
         operation: OrionUpdateOperation
     ): Promise<OrionUpdateResult> {
+        if (!request || typeof request !== "object"
+            || (request.action !== "keep" && request.action !== "discard")
+            || typeof request.token !== "string" || !request.token || request.token.length > 256) {
+            return {
+                ok: false, status: "decision-stale", phase: "decision", method: "none",
+                message: "Invalid OrionQuests update decision. Nothing was discarded.",
+                fromVersion: runningVersion, toVersion: targetVersion
+            };
+        }
         const taken = takePendingDecision(runningVersion, targetVersion, request);
         if (taken.blocked) return taken.blocked;
 
@@ -1045,7 +1075,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         const { checkout, currentHead, changesBeforeFetch, previousRemoteMain } = prepared;
 
         operation.phase = "fetch";
-        const suffix = config.randomSuffix?.() ?? Math.random().toString(16).slice(2);
+        const suffix = config.randomSuffix?.() ?? randomBytes(24).toString("hex");
         operation.tagRef = "refs/orion-update/tag-" + now() + "-" + suffix;
         trace.push("Fetch: git fetch --atomic --force --no-tags origin refs/tags/" + targetVersion + ":<temporary-ref> +refs/heads/main:refs/remotes/origin/main");
         await git(
@@ -1143,7 +1173,9 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         operation.phase = "checkout";
         trace.push("Checkout: git merge --ff-only --quiet " + shortCommit(targetCommit));
         try {
-            await git(checkout, "merge", "--ff-only", "--quiet", targetCommit);
+            await assertManagedCheckoutRoot(checkout, (...args) => gitText(checkout, ...args));
+            if (!await checkoutStillMatches(checkout, currentHead, "main")) throw new Error("Checkout changed during runtime snapshot.");
+            await git(checkout, "merge", "--ff-only", "--quiet", "--no-overwrite-ignore", targetCommit);
         } catch (mergeError) {
             trace.push("Checkout: fast-forward failed; no force-reset attempted");
             return {
@@ -1229,6 +1261,12 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         if (snapshotStep.blocked) return snapshotStep.blocked;
 
         operation.phase = "checkout";
+        await assertManagedCheckoutRoot(checkout, (...args) => gitText(checkout, ...args));
+        await assertNoIgnoredTargetCollision(async (...args) => (await git(checkout, ...args)).stdout, targetCommit);
+        if (!await checkoutStillMatches(checkout, currentHead, "main")
+            || await gitText(checkout, "rev-parse", "refs/remotes/origin/main") !== remoteMain) {
+            throw new Error("Rewrite recovery proof changed during runtime snapshot.");
+        }
         trace.push("Rewrite recovery proof: branch, HEAD, cleanliness and fetched upstream revalidated");
         trace.push("Checkout: git reset --hard " + shortCommit(targetCommit));
         await git(checkout, "reset", "--hard", targetCommit);
@@ -1443,7 +1481,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
                 trace: ["Preflight: another managed update owns the Vencord runtime"],
                 message: "Another QuestUI or OrionQuests update is already running."
             };
-            if (decision) {
+            if (decision !== undefined) {
                 return await resolvePendingDecision(runningVersion, targetVersion, decision, operation);
             }
             return await runManagedUpdate(runningVersion, targetVersion, operation);

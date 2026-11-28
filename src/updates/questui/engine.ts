@@ -6,6 +6,7 @@ import { promisify } from "util";
 
 import { compareSemver, parseSemver } from "../logic";
 import { tryAcquireVencordUpdate } from "../transactionLock";
+import { assertManagedCheckoutRoot, assertNoIgnoredTargetCollision, assertRegularRuntimeTree } from "../checkoutSafety";
 
 export type QuestUIUpdateStatus =
     | "updated"
@@ -130,6 +131,7 @@ async function run(
 ): Promise<{ stdout: string; stderr: string; }> {
     const result = await execFile(command, args, {
         cwd,
+        env: { ...process.env, GIT_NO_REPLACE_OBJECTS: "1" },
         windowsHide: true,
         maxBuffer: MAX_BUFFER,
         encoding: "utf8"
@@ -153,6 +155,7 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
     }
 
     async function verifyVencordRuntimeDist(distPath: string): Promise<void> {
+        await assertRegularRuntimeTree(distPath);
         for (const name of VENCORD_RUNTIME_FILES) {
             const path = join(distPath, name);
             const info = await stat(path);
@@ -328,8 +331,8 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
     }
 
     async function restoreCheckout(head: string, branch: string | null): Promise<void> {
-        await git("switch", "--detach", head);
-        if (branch) await git("switch", branch);
+        await git("switch", "--no-overwrite-ignore", "--detach", head);
+        if (branch) await git("switch", "--no-overwrite-ignore", branch);
     }
 
     async function localPreflight(): Promise<QuestUIUpdateResult | null> {
@@ -346,6 +349,7 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
         }
 
         try {
+            await assertManagedCheckoutRoot(config.questUIDir, gitText);
             if (await gitText("rev-parse", "--is-inside-work-tree") !== "true") {
                 return {
                     ok: false,
@@ -760,7 +764,11 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
 
                 phase = "checkout";
                 trace.push("Checkout: git switch --detach " + shortCommit(targetTag.commit));
-                await git("switch", "--detach", targetTag.commit);
+                await git("switch", "--no-overwrite-ignore", "--detach", targetTag.commit);
+                if (await gitText("rev-parse", "HEAD") !== targetTag.commit || await currentBranch() !== null
+                    || await gitText("status", "--porcelain", "--untracked-files=all")) {
+                    throw new Error("Verified target checkout is not clean. Build refused; local work was left intact.");
+                }
                 trace.push("Checkout validation: detached signed target release commit is active");
 
                 phase = "build";
@@ -769,6 +777,9 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
 
                 try {
                     await config.buildVencord();
+                    await verifyVencordRuntimeDist(join(config.vencordSrcDir, "dist"));
+                    if (await gitText("rev-parse", "HEAD") !== targetTag.commit || await currentBranch() !== null
+                        || await gitText("status", "--porcelain", "--untracked-files=all")) throw new Error("Checkout changed during build.");
                     trace.push("Build: completed successfully");
                 } catch (buildError) {
                     const buildDiagnostic = diagnosticText(buildError);
@@ -778,6 +789,8 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                     try {
                         trace.push("Rollback checkout: restore " + shortCommit(currentHead)
                             + (branch ? " and branch " + branch : ""));
+                        if (await gitText("rev-parse", "HEAD") !== targetTag.commit || await currentBranch() !== null
+                            || await gitText("status", "--porcelain", "--untracked-files=all")) throw new Error("Checkout changed during build; automatic rollback refused.");
                         await restoreCheckout(currentHead, branch);
 
                         if (!distSnapshot) {

@@ -51,6 +51,7 @@ type EventLogStorageInfo = {
     size: number;
     maxBytes?: number;
     compactToBytes?: number;
+    rejectedAppends?: number;
 };
 
 const EVENT_LOG_PAGE_SIZE = 250;
@@ -390,12 +391,12 @@ function EventLogPanel() {
 
     const maxBytes = Number(info.maxBytes) || 0;
     const compactToBytes = Number(info.compactToBytes) || 0;
-    const storageState = storageTone(info.size, maxBytes);
+    const storageState = (info.rejectedAppends ?? 0) > 0 ? "critical" : storageTone(info.size, maxBytes);
     const storageUsedLabel = formatStorageBytes(info.size);
     const storageLimitLabel = maxBytes > 0 ? formatStorageBytes(maxBytes) : null;
-    const storageTitle = maxBytes > 0
+    const storageTitle = ((info.rejectedAppends ?? 0) > 0 ? `${info.rejectedAppends} Event Log writes could not be confirmed. ` : "") + (maxBytes > 0
         ? `Event Log storage: ${formatStorageBytes(info.size)} of ${formatStorageBytes(maxBytes)}. After exceeding the hard limit, QuestUI compacts the file toward ${formatStorageBytes(compactToBytes)}.`
-        : `Event Log storage: ${formatStorageBytes(info.size)}.`;
+        : `Event Log storage: ${formatStorageBytes(info.size)}.`);
     const matchState = matchingTone(total);
     const matchingLabel = `${total.toLocaleString()} matching`;
     const activeFilterCount = Number(source !== "all")

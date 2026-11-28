@@ -6,6 +6,8 @@ export interface EventLogCursor {
     timestamp: number;
     id: string;
     severity: EventLogSeverity;
+    /** Offset is bound to the immutable page session; legacy cursors still work. */
+    offset?: number;
 }
 
 export interface EventLogPageQuery {
@@ -95,9 +97,10 @@ export function isEventLogCursor(value: unknown, sort: EventLogSort): value is E
     const cursor = value as Partial<EventLogCursor>;
     return cursor.version === 1
         && cursor.sort === sort
-        && Number.isFinite(Number(cursor.timestamp))
+        && typeof cursor.timestamp === "number" && Number.isFinite(cursor.timestamp)
+        && (cursor.offset === undefined || (Number.isSafeInteger(cursor.offset) && cursor.offset > 0))
         && typeof cursor.id === "string"
-        && ["info", "success", "warning", "error"].includes(String(cursor.severity));
+        && typeof cursor.severity === "string" && ["info", "success", "warning", "error"].includes(cursor.severity);
 }
 
 /**
@@ -127,14 +130,17 @@ export function pageSortedEventLogEvents(
     pageSize: number,
     cursor?: EventLogCursor | null
 ): { events: EventLogEvent[]; hasMore: boolean; nextCursor: EventLogCursor | null; stale: boolean; } {
-    const safePageSize = Math.max(1, Math.min(500, Math.trunc(Number(pageSize) || 250)));
+    const safePageSize = Math.max(1, Math.min(500, typeof pageSize === "number" && Number.isFinite(pageSize) ? Math.trunc(pageSize) || 250 : 250));
     if (cursor != null && !isEventLogCursor(cursor, sort)) {
         return { events: [], hasMore: false, nextCursor: null, stale: true };
     }
 
-    const start = cursor ? eventLogCursorStartIndex(events, cursor, sort) : 0;
+    if (cursor?.offset !== undefined && (cursor.offset > events.length || compareEventLogOrder(events[cursor.offset - 1], cursor, sort) !== 0)) {
+        return { events: [], hasMore: false, nextCursor: null, stale: true };
+    }
+    const start = cursor?.offset ?? (cursor ? eventLogCursorStartIndex(events, cursor, sort) : 0);
     const page = events.slice(start, start + safePageSize);
     const hasMore = start + page.length < events.length;
-    const nextCursor = hasMore && page.length > 0 ? cursorFromEvent(page[page.length - 1], sort) : null;
+    const nextCursor = hasMore && page.length > 0 ? { ...cursorFromEvent(page[page.length - 1], sort), offset: start + page.length } : null;
     return { events: page, hasMore, nextCursor, stale: false };
 }

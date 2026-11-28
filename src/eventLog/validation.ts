@@ -1,3 +1,4 @@
+import { sanitizeDiagnosticDetail, sanitizeEventText, validDiagnosticTimestamp } from "./redaction";
 import { normalizeQuestPresentationMetadata } from "../quests/presentationLogic";
 import type { EventLogCaptureSource, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSource } from "./types";
 
@@ -7,7 +8,7 @@ const EVENT_CATEGORIES = new Set<EventLogCategory>(["quest", "runtime", "network
 const EVENT_CAPTURE_SOURCES = new Set<EventLogCaptureSource>(["questui", "console-preview", "orion-api"]);
 
 function optionalString(value: unknown): string | null {
-    return typeof value === "string" ? value : null;
+    return typeof value === "string" ? sanitizeEventText(value, 240) : null;
 }
 
 /**
@@ -17,11 +18,15 @@ function optionalString(value: unknown): string | null {
  * of allowing one bad historical line to break the whole viewer.
  */
 export function normalizePersistedEvent(value: unknown): EventLogEvent | null {
+    try { return normalize(value); } catch { return null; }
+}
+
+function normalize(value: unknown): EventLogEvent | null {
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
     const raw = value as Record<string, unknown>;
 
     const id = typeof raw.id === "string" ? raw.id.trim() : "";
-    const timestamp = Number(raw.timestamp);
+    const timestamp = raw.timestamp;
     const source = raw.source as EventLogSource;
     const severity = raw.severity as EventLogSeverity;
     const captureSource = raw.captureSource as EventLogCaptureSource;
@@ -29,8 +34,8 @@ export function normalizePersistedEvent(value: unknown): EventLogEvent | null {
     const summary = typeof raw.summary === "string" ? raw.summary : null;
 
     if (!id
-        || !Number.isFinite(timestamp)
-        || timestamp <= 0
+        || id.length > 240
+        || !validDiagnosticTimestamp(timestamp)
         || !EVENT_SOURCES.has(source)
         || !EVENT_SEVERITIES.has(severity)
         || !EVENT_CAPTURE_SOURCES.has(captureSource)
@@ -59,9 +64,7 @@ export function normalizePersistedEvent(value: unknown): EventLogEvent | null {
         };
     }
 
-    const detail = raw.detail && typeof raw.detail === "object" && !Array.isArray(raw.detail)
-        ? raw.detail as EventLogEvent["detail"]
-        : null;
+    const detail = sanitizeDiagnosticDetail(raw.detail) as EventLogEvent["detail"];
 
     const event: EventLogEvent = {
         schemaVersion: 1,
@@ -70,8 +73,8 @@ export function normalizePersistedEvent(value: unknown): EventLogEvent | null {
         source,
         severity,
         captureSource,
-        eventCode,
-        summary,
+        eventCode: sanitizeEventText(eventCode, 120),
+        summary: sanitizeEventText(summary, 240),
         quest,
         detail
     };
@@ -84,7 +87,7 @@ export function normalizePersistedEvent(value: unknown): EventLogEvent | null {
     }
     if (hasAccountUsername) {
         event.accountUsername = typeof raw.accountUsername === "string" && raw.accountUsername.trim()
-            ? raw.accountUsername.trim()
+            ? sanitizeEventText(raw.accountUsername.trim(), 80)
             : null;
     }
 

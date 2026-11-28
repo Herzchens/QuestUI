@@ -1,3 +1,4 @@
+import { sanitizeDiagnosticDetail } from "../../src/eventLog/redaction";
 import { createOwnedTaskQueue } from "../../src/plugin/latestTask";
 import { createOrderedReadBatch } from "../../src/eventLog/orderedReadBatch";
 import assert from "node:assert/strict";
@@ -381,3 +382,34 @@ async function testOwnedReadQueue() {
     assert.deepEqual(seen, ["a", "b"]);
 }
 void testOwnedReadQueue().catch(error => { console.error(error); process.exitCode = 1; });
+
+{
+    const secret = "SYNTHETIC_SECRET_FOR_TESTS_ONLY";
+    for (const input of [
+        "Authorization: Bearer " + secret,
+        "Authorization: Basic " + secret,
+        "Cookie: other=example; session=" + secret,
+        "https://example.invalid/?token=" + secret,
+        JSON.stringify({ authorization: "Bearer " + secret }),
+        JSON.stringify({ access_token: secret }),
+        JSON.stringify({ headers: { "Set-Cookie": "x=" + secret } }),
+        { nested: [{ clientSecret: secret }] },
+        { body: JSON.stringify({ refresh_token: secret }) }
+    ]) assert.ok(!sanitizeEventText(input).includes(secret));
+    let invoked = false;
+    const payload = { headers: { Authorization: secret }, toString() { invoked = true; return secret; },
+        get unsafe() { invoked = true; return secret; } };
+    assert.ok(!JSON.stringify(sanitizeDiagnosticDetail(payload)).includes(secret));
+    assert.equal(invoked, false);
+    assert.equal(consoleEventSource(["[OtherPlugin] related to QuestUI", payload]), null);
+    assert.equal(consoleEventSource(["%c Vencord %c %c OrionQuests ", payload]), "orion");
+    assert.equal(normalizePersistedEvent({ id: "bad", timestamp: 1e20, source: "questui", severity: "info", captureSource: "questui", eventCode: "BAD", summary: "bad" }), null);
+}
+
+{
+    const duplicateRows = [fakeEvent("duplicate", 500), { ...fakeEvent("duplicate", 500), summary: "second" }];
+    const first = pageSortedEventLogEvents(duplicateRows, "newest", 1);
+    const second = pageSortedEventLogEvents(duplicateRows, "newest", 1, first.nextCursor);
+    assert.equal(second.events.length, 1);
+    assert.equal(second.events[0].summary, "second");
+}
