@@ -217,6 +217,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/quickOpen.test.ts
 
+      - name: Test platform-neutral Quest model
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/model.test.ts
+
       - name: Test Dashboard theme lifecycle
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/themes/controller.test.ts
