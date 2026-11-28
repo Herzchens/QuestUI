@@ -1,4 +1,5 @@
 import { findByCodeLazy } from "@webpack";
+import { captureAccountSession, isCurrentAccountSession, type AccountSession } from "../plugin/accountSession";
 
 // Discord's native Virtual Currency balance action. It owns the request, Flux dispatches,
 // server error handling, and VirtualCurrencyStore hydration; QuestUI only invokes it.
@@ -8,7 +9,7 @@ const fetchDiscordVirtualCurrencyBalance = findByCodeLazy(
     "VIRTUAL_CURRENCY_USER_BALANCE"
 ) as () => Promise<unknown> | unknown;
 
-type BalanceFetch = { accountId: string; promise: Promise<void>; };
+type BalanceFetch = { session: AccountSession; promise: Promise<void>; };
 let balanceFetchInFlight: BalanceFetch | null = null;
 
 function runNativeBalanceFetch(): Promise<void> {
@@ -25,14 +26,19 @@ function runNativeBalanceFetch(): Promise<void> {
  * cannot be the final balance write after the newer request completes.
  */
 export function fetchOrbBalance(accountId: string): Promise<void> {
-    if (balanceFetchInFlight?.accountId === accountId) return balanceFetchInFlight.promise;
+    const session = captureAccountSession();
+    if (!session || session.accountId !== accountId) return Promise.reject(new Error("Discord account changed before Orb balance refresh."));
+    if (balanceFetchInFlight?.session === session) return balanceFetchInFlight.promise;
 
     const previous = balanceFetchInFlight?.promise;
     const work = (previous ? previous.catch(() => undefined) : Promise.resolve())
-        .then(runNativeBalanceFetch);
+        .then(() => {
+            if (!isCurrentAccountSession(session)) throw new Error("Discord account changed before Orb balance refresh.");
+            return runNativeBalanceFetch();
+        });
 
     const record: BalanceFetch = {
-        accountId,
+        session,
         promise: work.finally(() => {
             if (balanceFetchInFlight === record) balanceFetchInFlight = null;
         })

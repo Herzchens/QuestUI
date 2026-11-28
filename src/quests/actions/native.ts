@@ -11,11 +11,11 @@ import {
 import {
     attachChangeListenerSafely,
     classifyOptionalTimestamp,
-    questAccessSuspensionState,
-    storeWaitTimeoutResult
+    questAccessSuspensionState
 } from "./safety";
 import type { NormalizedQuest } from "../data";
 import { QuestsStore } from "../../plugin/stores";
+import { captureAccountSession, isCurrentAccountSession, type AccountSession } from "../../plugin/accountSession";
 
 const QUEST_HOME_DESKTOP_LOCATION = 11;
 const STORE_CONFIRM_TIMEOUT_MS = 5000;
@@ -117,10 +117,10 @@ function currentUserId(): string | null {
     }
 }
 
-function requireCurrentUserId(): string {
-    const id = currentUserId();
-    if (!id) throw new QuestActionError("Discord account state is unavailable. Open Quest Home and try again.");
-    return id;
+function requireAccountSession(): AccountSession {
+    const session = captureAccountSession();
+    if (!session) throw new QuestActionError("Discord account state is unavailable. Open Quest Home and try again.");
+    return session;
 }
 
 function actionKey(kind: QuestActionKind, userId: string, questId: string): string {
@@ -243,11 +243,11 @@ function apiErrorMessage(error: any, fallback: string): string {
 
 async function waitForStoreState(
     questId: string,
-    expectedUserId: string,
+    expectedSession: AccountSession,
     predicate: (rawQuest: any) => boolean
 ): Promise<StoreWaitResult> {
     const store = QuestsStore;
-    const sameAccount = () => currentUserId() === expectedUserId;
+    const sameAccount = () => isCurrentAccountSession(expectedSession);
     const read = () => {
         if (!sameAccount()) return null;
         try { return store?.getQuest?.(questId); }
@@ -279,7 +279,7 @@ async function waitForStoreState(
         };
 
         timer = setTimeout(
-            () => finish(storeWaitTimeoutResult(expectedUserId, currentUserId())),
+            () => finish(sameAccount() ? "timeout" : "account-changed"),
             STORE_CONFIRM_TIMEOUT_MS
         );
         try {
@@ -386,7 +386,8 @@ function uncertainEnrollError(
 }
 
 export async function enrollQuest(quest: NormalizedQuest): Promise<QuestActionResult> {
-    const userId = requireCurrentUserId();
+    const session = requireAccountSession();
+    const userId = session.accountId;
     const key = beginAction("enroll", userId, quest.id);
 
     try {
@@ -423,7 +424,7 @@ export async function enrollQuest(quest: NormalizedQuest): Promise<QuestActionRe
             throw new QuestActionError("Discord verification was required or cancelled. Open Quest Home if you still need to accept the Quest.");
         }
 
-        const storeResult = await waitForStoreState(rawQuest.id, userId, predicate);
+        const storeResult = await waitForStoreState(rawQuest.id, session, predicate);
         if (storeResult === "account-changed") {
             throw accountChangedError("enroll", userId, rawQuest.id, predicate);
         }
@@ -450,7 +451,7 @@ export function useNativeQuestRewardOpener(quest: NormalizedQuest): () => void {
 }
 
 export async function prepareQuestRewardCode(quest: NormalizedQuest): Promise<void> {
-    const userId = requireCurrentUserId();
+    const session = requireAccountSession();
     const rawQuest = currentQuest(quest.id);
     ensureCurrentQuestShape(rawQuest);
 
@@ -473,13 +474,14 @@ export async function prepareQuestRewardCode(quest: NormalizedQuest): Promise<vo
         );
     }
 
-    if (currentUserId() !== userId) {
+    if (!isCurrentAccountSession(session)) {
         throw new QuestActionError("Discord account changed while loading the Quest reward code.");
     }
 }
 
 export async function claimQuestReward(quest: NormalizedQuest): Promise<QuestActionResult> {
-    const userId = requireCurrentUserId();
+    const session = requireAccountSession();
+    const userId = session.accountId;
     const key = beginAction("claim", userId, quest.id);
 
     try {
@@ -512,7 +514,7 @@ export async function claimQuestReward(quest: NormalizedQuest): Promise<QuestAct
         }
 
         const assessment = assessClaimResponse(response);
-        const storeResult = await waitForStoreState(rawQuest.id, userId, predicate);
+        const storeResult = await waitForStoreState(rawQuest.id, session, predicate);
         if (storeResult === "account-changed") {
             throw accountChangedError("claim", userId, rawQuest.id, predicate);
         }

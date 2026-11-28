@@ -6,6 +6,8 @@ import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 
 import { createOrionUpdateEngine } from "../../src/updates/orion/engine";
+import { createQuestUIUpdateEngine } from "../../src/updates/questui/engine";
+import { tryAcquireVencordUpdate } from "../../src/updates/transactionLock";
 
 const exec = promisify(execFile);
 const TEST_RUNTIME_FILES = ["patcher.js", "preload.js", "renderer.js", "renderer.css"] as const;
@@ -461,10 +463,35 @@ async function main(): Promise<void> {
 
             const first = updater.updateRelease("v4.11.2", "v4.11.4");
             await buildEntered;
-            const second = await updater.updateRelease("v4.11.2", "v4.11.4");
-            assert.equal(second.status, "busy");
-            unblock();
+            try {
+                const second = await updater.updateRelease("v4.11.2", "v4.11.4");
+                assert.equal(second.status, "busy");
+                const other = createQuestUIUpdateEngine({
+                    questUIDir: join(userplugins, "QuestUI"),
+                    vencordSrcDir: join(vencord, "."),
+                    officialRepo: "https://example.invalid/questui",
+                    signerPrincipal: "fixture",
+                    signerPublicKey: "fixture",
+                    buildVencord: async () => { throw new Error("must not build"); }
+                });
+                assert.equal((await other.updateRelease("v1.4.0", "v1.4.1")).status, "busy");
+                assert.equal(await tryAcquireVencordUpdate(vencord), null);
+            } finally {
+                unblock();
+            }
             assert.equal((await first).status, "updated");
+            const release = await tryAcquireVencordUpdate(vencord);
+            assert.ok(release);
+            try {
+                assert.equal((await updater.updateRelease("v4.11.2", "v4.11.4")).status, "busy");
+            } finally {
+                release();
+            }
+            const next = await tryAcquireVencordUpdate(vencord);
+            assert.ok(next);
+            release(); // An old disposer cannot release a newer owner.
+            assert.equal(await tryAcquireVencordUpdate(vencord), null);
+            next();
         }
 
         {

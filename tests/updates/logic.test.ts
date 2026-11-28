@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createSerialTaskQueue } from "../../src/updates/serialTaskQueue";
 
 import {
     compareSemver,
@@ -147,3 +148,30 @@ function main() {
 }
 
 main();
+
+async function testTransactionalQueue(): Promise<void> {
+    const enqueue = createSerialTaskQueue();
+    let committed = { questui: false, orion: false };
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const first = enqueue(async () => {
+        const next = { ...committed, questui: true };
+        await gate;
+        assert.equal(next.questui, true);
+        throw new Error("injected persistence failure");
+    });
+    const rejected = assert.rejects(first, /injected persistence failure/);
+    const second = enqueue(async () => { committed = { ...committed, orion: true }; });
+    assert.deepEqual(committed, { questui: false, orion: false });
+    release();
+    await rejected;
+    await second;
+    assert.deepEqual(committed, { questui: false, orion: true });
+    await enqueue(async () => { committed = { ...committed, questui: true }; });
+    assert.deepEqual(committed, { questui: true, orion: true });
+}
+
+void testTransactionalQueue().then(() => console.log("Update mutation queue regression - PASS")).catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+});

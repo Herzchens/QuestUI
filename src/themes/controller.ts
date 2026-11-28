@@ -31,24 +31,37 @@ export function createDashboardThemeController(
     if (!fallback) throw new Error("Default Dashboard theme is missing.");
 
     let active: DashboardTheme | null = null;
+    const possiblyEnabled = new Set<string>();
     const listeners = new Set<() => void>();
-    const notify = () => { for (const listener of listeners) listener(); };
+    const notify = () => {
+        for (const listener of [...listeners]) {
+            try { listener(); } catch { /* A view cannot abort theme ownership changes. */ }
+        }
+    };
     const resolve = (id: unknown) => typeof id === "string" ? byId.get(id) ?? fallback : fallback;
     const getSnapshot = () => active?.id ?? fallback.id;
     const subscribe = (listener: () => void) => {
         listeners.add(listener);
         return () => { listeners.delete(listener); };
     };
-    const disableAll = (theme: DashboardTheme) => {
+    const disableOwned = () => {
         const failures: unknown[] = [];
-        for (const style of [...theme.styles].reverse()) {
-            try { adapter.disable(style); }
-            catch (error) { failures.push(error); }
+        for (const style of [...possiblyEnabled].reverse()) {
+            try {
+                adapter.disable(style);
+                possiblyEnabled.delete(style);
+            } catch (error) {
+                failures.push(error);
+            }
         }
-        if (failures.length) throw new Error("Could not remove Dashboard styles.");
+        if (failures.length) throw new AggregateError(failures, "Could not remove Dashboard styles.");
     };
     const enableAll = (theme: DashboardTheme) => {
-        for (const style of theme.styles) adapter.enable(style);
+        for (const style of theme.styles) {
+            // A host may throw after attaching a style. Keep it in the cleanup set.
+            possiblyEnabled.add(style);
+            adapter.enable(style);
+        }
     };
 
     function select(id: unknown): string {
@@ -56,25 +69,28 @@ export function createDashboardThemeController(
         if (active === target) return target.id;
         for (const style of target.styles) adapter.validate(style);
         const previous = active;
-        if (previous) disableAll(previous);
         active = null;
         try {
+            disableOwned();
             enableAll(target);
             active = target;
         } catch (error) {
-            // Remove every partially enabled target stylesheet before rollback.
-            disableAll(target);
-            const restore = previous ?? (target !== fallback ? fallback : null);
-            if (restore) {
-                try {
+            const failures: unknown[] = [error];
+            try {
+                disableOwned();
+                const restore = previous ?? (target !== fallback ? fallback : null);
+                if (restore) {
                     for (const style of restore.styles) adapter.validate(style);
                     enableAll(restore);
                     active = restore;
-                } catch {
-                    disableAll(restore);
                 }
+            } catch (cleanupError) {
+                failures.push(cleanupError);
+                // Retain any still-owned styles for a later explicit retry.
+                try { disableOwned(); } catch (retryError) { failures.push(retryError); }
             }
             notify();
+            if (failures.length > 1) throw new AggregateError(failures, "Dashboard theme transition and recovery failed.");
             throw error;
         }
         notify();
@@ -82,10 +98,10 @@ export function createDashboardThemeController(
     }
 
     function stop(): void {
-        if (!active) return;
-        disableAll(active);
+        if (!active && possiblyEnabled.size === 0) return;
         active = null;
-        notify();
+        try { disableOwned(); }
+        finally { notify(); }
     }
 
     return { select, stop, subscribe, getSnapshot };

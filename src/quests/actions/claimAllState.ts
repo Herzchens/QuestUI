@@ -17,7 +17,9 @@ const listeners = new Set<() => void>();
 
 function publish(next: ClaimAllRuntimeState): void {
     state = next;
-    for (const listener of listeners) listener();
+    for (const listener of [...listeners]) {
+        try { listener(); } catch { /* View failures cannot leave the batch lock half-published. */ }
+    }
 }
 
 export function getClaimAllRuntimeState(): ClaimAllRuntimeState {

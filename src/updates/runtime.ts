@@ -13,7 +13,9 @@ import {
     type ReleaseLike
 } from "./logic";
 import { QUESTUI_VERSION } from "../plugin/version";
-import { currentUpdateAccountId, recordAvailableUpdate } from "./notificationEvents";
+import { recordAvailableUpdate } from "./notificationEvents";
+import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
+import { createSerialTaskQueue } from "./serialTaskQueue";
 
 export type UpdateProduct = "questui" | "orion";
 export type UpdateSuppression = "skipped" | "snoozed" | null;
@@ -90,11 +92,11 @@ const listeners = new Set<() => void>();
 let persisted: PersistedUpdateState = defaultPersistedState();
 let persistedReady = false;
 let loadPromise: Promise<void> | null = null;
-let writeChain: Promise<void> = Promise.resolve();
+const enqueuePersistedMutation = createSerialTaskQueue();
 let preferenceReader: (() => UpdatePreferences) | null = null;
 let lastPreferences: UpdatePreferences | null = null;
 let timer: ReturnType<typeof setTimeout> | null = null;
-let activeCheck: { generation: number; promise: Promise<UpdateSnapshot>; } | null = null;
+let activeCheck: { generation: number; controller: AbortController; promise: Promise<UpdateSnapshot>; } | null = null;
 let lifecycleGeneration = 0;
 let lastAttemptAt = 0;
 let lastAttemptFailed = false;
@@ -210,34 +212,28 @@ async function ensurePersistedState(): Promise<void> {
     return loadPromise;
 }
 
-async function writePersistedState(next: PersistedUpdateState): Promise<void> {
-    writeChain = writeChain
-        .catch(() => undefined)
-        .then(async () => {
-            await DataStore.update<PersistedUpdateState>(DATA_STORE_KEY, () => next);
+function mutatePersistedState(
+    mutate: (current: PersistedUpdateState) => PersistedUpdateState,
+    isCurrent: () => boolean = () => true
+): Promise<void> {
+    return enqueuePersistedMutation(async () => {
+        if (!isCurrent()) return;
+        let committed: PersistedUpdateState | null = null;
+        await DataStore.update<PersistedUpdateState>(DATA_STORE_KEY, stored => {
+            if (!isCurrent()) return stored ?? persisted;
+            committed = mutate(normalizePersistedState(stored ?? persisted));
+            return committed;
         });
-    return writeChain;
-}
-
-async function reloadPersistedAfterFailure(): Promise<void> {
-    try { persisted = normalizePersistedState(await DataStore.get(DATA_STORE_KEY)); }
-    catch { persisted = defaultPersistedState(); }
-    hydrateCachesFromPersisted();
-    snapshot = {
-        ...snapshot,
-        questUIHealth: {
-            ...snapshot.questUIHealth,
-            lastSuccessfulCheckAt: persisted.questUILastSuccessfulCheckAt
-        },
-        orionHealth: {
-            ...snapshot.orionHealth,
-            lastSuccessfulCheckAt: persisted.orionLastSuccessfulCheckAt
-        }
-    };
+        // Publish only a successfully committed mutation. A following task
+        // never derives its snapshot from a failed optimistic write.
+        if (committed) persisted = committed;
+    });
 }
 
 function notify(): void {
-    for (const listener of listeners) listener();
+    for (const listener of [...listeners]) {
+        try { listener(); } catch { /* A view cannot interrupt updater state publication. */ }
+    }
 }
 
 function readPreferences(): UpdatePreferences {
@@ -283,9 +279,12 @@ function normalizeApiRelease(value: unknown, product: UpdateProduct): UpdateRele
     };
 }
 
-async function fetchReleaseFeed(product: UpdateProduct): Promise<UpdateRelease[]> {
+async function fetchReleaseFeed(product: UpdateProduct, owner: AbortSignal): Promise<UpdateRelease[]> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const abort = () => controller.abort();
+    if (owner.aborted) abort();
+    else owner.addEventListener("abort", abort, { once: true });
+    const timeout = setTimeout(abort, REQUEST_TIMEOUT_MS);
     try {
         const response = await fetch(RELEASE_FEEDS[product], {
             cache: "no-store",
@@ -304,6 +303,7 @@ async function fetchReleaseFeed(product: UpdateProduct): Promise<UpdateRelease[]
         throw error;
     } finally {
         clearTimeout(timeout);
+        owner.removeEventListener("abort", abort);
     }
 }
 
@@ -432,9 +432,9 @@ type ReleaseFetchResult =
     | { ok: true; value: UpdateRelease[]; }
     | { ok: false; error: unknown; };
 
-async function settleReleaseFeed(product: UpdateProduct): Promise<ReleaseFetchResult> {
+async function settleReleaseFeed(product: UpdateProduct, owner: AbortSignal): Promise<ReleaseFetchResult> {
     try {
-        return { ok: true, value: await fetchReleaseFeed(product) };
+        return { ok: true, value: await fetchReleaseFeed(product, owner) };
     } catch (error) {
         return { ok: false, error };
     }
@@ -508,45 +508,49 @@ async function persistUpdateCheck(
     questResult: ReleaseFetchResult,
     orionResult: ReleaseFetchResult | null,
     wantsOrion: boolean,
-    checkedAt: number
+    checkedAt: number,
+    isCurrent: () => boolean
 ): Promise<void> {
     lastAttemptFailed = !questResult.ok || (wantsOrion && orionResult?.ok !== true);
-    const nextHealth = nextUpdateHealthTimestamps({
-        questUI: persisted.questUILastSuccessfulCheckAt,
-        orion: persisted.orionLastSuccessfulCheckAt
-    }, checkedAt, questResult.ok, wantsOrion, orionResult?.ok === true);
-
-    const nextPersisted: PersistedUpdateState = {
-        ...persisted,
-        questUILastSuccessfulCheckAt: nextHealth.questUI,
-        orionLastSuccessfulCheckAt: nextHealth.orion,
-        questUIReleases: questResult.ok
-            ? questResult.value.slice(0, MAX_CACHED_RELEASES)
-            : persisted.questUIReleases,
-        orionReleases: orionResult?.ok
-            ? orionResult.value.slice(0, MAX_CACHED_RELEASES)
-            : persisted.orionReleases
-    };
-    persisted = nextPersisted;
-    try { await writePersistedState(nextPersisted); } catch { }
+    try {
+        await mutatePersistedState(current => {
+            const nextHealth = nextUpdateHealthTimestamps({
+                questUI: current.questUILastSuccessfulCheckAt,
+                orion: current.orionLastSuccessfulCheckAt
+            }, checkedAt, questResult.ok, wantsOrion, orionResult?.ok === true);
+            return {
+                ...current,
+                questUILastSuccessfulCheckAt: nextHealth.questUI,
+                orionLastSuccessfulCheckAt: nextHealth.orion,
+                questUIReleases: questResult.ok ? questResult.value.slice(0, MAX_CACHED_RELEASES) : current.questUIReleases,
+                orionReleases: orionResult?.ok ? orionResult.value.slice(0, MAX_CACHED_RELEASES) : current.orionReleases
+            };
+        }, isCurrent);
+    } catch {
+        // Keep the fresh in-memory feed but avoid tight retries when durable
+        // metadata is unavailable. A failed write cannot poison preferences.
+        if (isCurrent()) lastAttemptFailed = true;
+    }
 }
 
 async function runUpdateCheck(
     preferences: UpdatePreferences,
     startedAt: number,
-    generation: number
+    generation: number,
+    owner: AbortSignal
 ): Promise<UpdateSnapshot> {
     if (!isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) return snapshot;
 
-    const accountId = currentUpdateAccountId();
+    const accountSession = captureAccountSession();
+    const accountId = accountSession?.accountId;
     lastAttemptAt = startedAt;
     snapshot = { ...snapshot, checking: true };
     notify();
 
     const wantsOrion = preferences.checkOrion && orionInstalled();
     const [questResult, orionResult] = await Promise.all([
-        settleReleaseFeed("questui"),
-        wantsOrion ? settleReleaseFeed("orion") : Promise.resolve(null)
+        settleReleaseFeed("questui", owner),
+        wantsOrion ? settleReleaseFeed("orion", owner) : Promise.resolve(null)
     ]);
 
     if (!isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) return snapshot;
@@ -554,7 +558,8 @@ async function runUpdateCheck(
     const checkedAt = Date.now();
     applyQuestUIReleaseResult(questResult, preferences, checkedAt);
     applyOrionReleaseResult(orionResult, preferences, checkedAt);
-    await persistUpdateCheck(questResult, orionResult, wantsOrion, checkedAt);
+    await persistUpdateCheck(questResult, orionResult, wantsOrion, checkedAt,
+        () => isCurrentUpdateCheckRun(started, generation, lifecycleGeneration) && !owner.aborted);
 
     if (!isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) return snapshot;
 
@@ -575,7 +580,7 @@ async function runUpdateCheck(
     // Do not emit from cache hydration, failed feeds or stale account transitions.
     if (accountId) {
         const isCurrent = () => isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)
-            && currentUpdateAccountId() === accountId;
+            && isCurrentAccountSession(accountSession);
         const publish = (product: UpdateProduct, state: PluginUpdateState) => {
             const stillEligible = () => {
                 const current = product === "questui" ? snapshot.questUI : snapshot.orion;
@@ -607,11 +612,12 @@ export async function checkForUpdates(manual = true): Promise<UpdateSnapshot> {
         return snapshot;
     }
 
-    const entry: { generation: number; promise: Promise<UpdateSnapshot>; } = {
+    const entry = {
         generation,
+        controller: new AbortController(),
         promise: Promise.resolve(snapshot)
     };
-    entry.promise = runUpdateCheck(preferences, now, generation).finally(() => {
+    entry.promise = runUpdateCheck(preferences, now, generation, entry.controller.signal).finally(() => {
         if (activeCheck === entry) activeCheck = null;
     });
     activeCheck = entry;
@@ -620,42 +626,21 @@ export async function checkForUpdates(manual = true): Promise<UpdateSnapshot> {
 
 export async function snoozeUpdate(product: UpdateProduct, hours = 24): Promise<void> {
     await ensurePersistedState();
-    const previous = persisted;
     const until = Date.now() + Math.max(1, Math.min(24 * 30, hours)) * 60 * 60 * 1000;
-    const next = product === "questui"
-        ? { ...persisted, snoozeQuestUIUntil: until }
-        : { ...persisted, snoozeOrionUntil: until };
-    persisted = next;
-    try {
-        await writePersistedState(next);
-    } catch (error) {
-        persisted = previous;
-        await reloadPersistedAfterFailure();
-        recomputeCachedPolicy();
-        throw error;
-    }
-    recomputeCachedPolicy();
+    await mutatePersistedState(current => product === "questui"
+        ? { ...current, snoozeQuestUIUntil: until }
+        : { ...current, snoozeOrionUntil: until });
+    if (started) recomputeCachedPolicy();
 }
 
 export async function skipUpdate(product: UpdateProduct, version: string): Promise<void> {
     await ensurePersistedState();
     const normalizedVersion = version.trim();
     if (!normalizedVersion) return;
-
-    const previous = persisted;
-    const next = product === "questui"
-        ? { ...persisted, skippedQuestUIVersion: normalizedVersion, snoozeQuestUIUntil: null }
-        : { ...persisted, skippedOrionVersion: normalizedVersion, snoozeOrionUntil: null };
-    persisted = next;
-    try {
-        await writePersistedState(next);
-    } catch (error) {
-        persisted = previous;
-        await reloadPersistedAfterFailure();
-        recomputeCachedPolicy();
-        throw error;
-    }
-    recomputeCachedPolicy();
+    await mutatePersistedState(current => product === "questui"
+        ? { ...current, skippedQuestUIVersion: normalizedVersion, snoozeQuestUIUntil: null }
+        : { ...current, skippedOrionVersion: normalizedVersion, snoozeOrionUntil: null });
+    if (started) recomputeCachedPolicy();
 }
 
 export function notifyUpdateSettingsChanged(): void {
@@ -671,6 +656,7 @@ export function notifyUpdateSettingsChanged(): void {
 }
 
 export function startUpdateChecks(read: () => UpdatePreferences): void {
+    if (started) stopUpdateChecks();
     preferenceReader = read;
     lastPreferences = readPreferences();
     started = true;
@@ -696,6 +682,9 @@ export function startUpdateChecks(read: () => UpdatePreferences): void {
 export function stopUpdateChecks(): void {
     started = false;
     lifecycleGeneration++;
+    const previous = activeCheck;
+    activeCheck = null;
+    previous?.controller.abort();
     clearTimer();
     preferenceReader = null;
     lastPreferences = null;

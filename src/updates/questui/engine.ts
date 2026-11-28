@@ -5,6 +5,7 @@ import { join } from "path";
 import { promisify } from "util";
 
 import { compareSemver, parseSemver } from "../logic";
+import { tryAcquireVencordUpdate } from "../transactionLock";
 
 export type QuestUIUpdateStatus =
     | "updated"
@@ -458,6 +459,7 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
         }
 
         updateInFlight = true;
+        let releaseTransaction: (() => void) | null = null;
         let officialMain: FetchedMain | null = null;
         let targetTag: VerifiedTag | null = null;
         let distSnapshot: VencordDistSnapshot | null = null;
@@ -467,6 +469,15 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
         const trace: string[] = [];
 
         try {
+            releaseTransaction = await tryAcquireVencordUpdate(config.vencordSrcDir);
+            if (!releaseTransaction) return {
+                ok: false,
+                status: "busy",
+                phase: "preflight",
+                method: "none",
+                trace: ["Preflight: another managed update owns the Vencord runtime"],
+                message: "Another QuestUI or OrionQuests update is already running."
+            };
             trace.push("Preflight: requested update to " + targetVersion);
 
             const blocked = await localPreflight();
@@ -848,12 +859,16 @@ export function createQuestUIUpdateEngine(config: QuestUIUpdateEngineConfig) {
                     : "QuestUI update failed before the checkout was changed."
             };
         } finally {
-            if (officialMain) await deleteRef(officialMain.ref);
-            await cleanupFetchedTag(targetTag);
-            if (!preserveDistSnapshot) {
-                await cleanupVencordDistSnapshot(distSnapshot);
+            try {
+                if (officialMain) await deleteRef(officialMain.ref);
+                await cleanupFetchedTag(targetTag);
+                if (!preserveDistSnapshot) {
+                    await cleanupVencordDistSnapshot(distSnapshot);
+                }
+            } finally {
+                releaseTransaction?.();
+                updateInFlight = false;
             }
-            updateInFlight = false;
         }
     }
 

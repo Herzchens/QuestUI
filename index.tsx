@@ -9,10 +9,38 @@ import { QuestButton, QuestsCount } from "./src/dashboard/QuestButton";
 import { resetDashboardNotices, startDashboardNotices } from "./src/dashboard/notifications";
 import { resetClaimAllRuntime } from "./src/quests/actions/claimAllState";
 import { QUESTUI_VERSION } from "./src/plugin/version";
+import { invalidateAccountSession, startAccountSession, stopAccountSession } from "./src/plugin/accountSession";
+import { createServiceLifecycle } from "./src/plugin/lifecycle";
 import { startDashboardThemes, stopDashboardThemes } from "./src/themes/runtime";
 import settings from "./src/plugin/settings";
 import { updateCheckHoursFromStep } from "./src/updates/logic";
 import { startUpdateChecks, stopUpdateChecks } from "./src/updates/runtime";
+
+const lifecycle = createServiceLifecycle([
+    { start: startAccountSession, stop: stopAccountSession },
+    { start: () => startDashboardThemes(settings.store.dashboardTheme), stop: stopDashboardThemes },
+    { start: startDashboardNotices, stop: resetDashboardNotices },
+    { start: startEventLogCapture, stop: stopEventLogCapture },
+    { start: startIgnoredQuestLifecycle, stop: stopIgnoredQuestLifecycle },
+    { start: startQuestNotifications, stop: stopQuestNotifications },
+    {
+        start: () => startQuestAutoReload(() => ({
+            enabled: settings.store.autoReloadQuestList,
+            intervalMinutes: questAutoReloadMinutesFromStep(settings.store.autoReloadQuestListStep)
+        })),
+        stop: stopQuestAutoReload
+    },
+    {
+        start: () => startUpdateChecks(() => ({
+            checkHours: updateCheckHoursFromStep(settings.store.updateCheckStep),
+            questUIIncludePrereleases: settings.store.updateIncludePrereleases,
+            orionIncludePrereleases: settings.store.updateIncludeOrionPrereleases,
+            checkOrion: settings.store.updateCheckOrion
+        })),
+        stop: stopUpdateChecks
+    },
+    { start: () => undefined, stop: resetClaimAllRuntime }
+]);
 
 export default definePlugin({
     name: "QuestUI",
@@ -27,32 +55,12 @@ export default definePlugin({
     settings,
 
     start() {
-        startDashboardThemes(settings.store.dashboardTheme);
-        startDashboardNotices();
-        startEventLogCapture();
-        startIgnoredQuestLifecycle();
-        startQuestNotifications();
-        startQuestAutoReload(() => ({
-            enabled: settings.store.autoReloadQuestList,
-            intervalMinutes: questAutoReloadMinutesFromStep(settings.store.autoReloadQuestListStep)
-        }));
-        startUpdateChecks(() => ({
-            checkHours: updateCheckHoursFromStep(settings.store.updateCheckStep),
-            questUIIncludePrereleases: settings.store.updateIncludePrereleases,
-            orionIncludePrereleases: settings.store.updateIncludeOrionPrereleases,
-            checkOrion: settings.store.updateCheckOrion
-        }));
+        lifecycle.start();
     },
 
     stop() {
-        resetClaimAllRuntime();
-        stopUpdateChecks();
-        stopQuestAutoReload();
-        stopQuestNotifications();
-        stopIgnoredQuestLifecycle();
-        stopEventLogCapture();
-        resetDashboardNotices();
-        stopDashboardThemes();
+        invalidateAccountSession();
+        lifecycle.stop();
     },
 
     patches: [

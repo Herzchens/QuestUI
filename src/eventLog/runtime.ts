@@ -1,7 +1,7 @@
 import type { PluginNative } from "@utils/types";
 import { UserStore } from "@webpack/common";
 
-import { collectEventAccountUsernames, eventBelongsToAccount, eventMatchesAccountScopes, eventVisibleForAccount, normalizeEventAccountId, UNAVAILABLE_ACCOUNT_SCOPE } from "./account";
+import { collectEventAccountUsernames, eventBelongsToAccount, eventMatchesAccountScopes, eventVisibleForAccount, normalizeEventAccountId } from "./account";
 import {
     classifyConsoleEvent,
     consoleArgsToText,
@@ -32,6 +32,7 @@ import { notificationCenterPresentation } from "../notifications/centerLogic";
 import { readQuestByIdentity } from "../quests/data";
 import { captureQuestEventRef } from "../quests/presentation";
 import { normalizeQuestPresentationMetadata } from "../quests/presentationLogic";
+import { isCurrentAccountSession, type AccountSession } from "../plugin/accountSession";
 
 const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>
@@ -91,7 +92,9 @@ function currentEventLogAccountUsername(): string | null {
 }
 
 function notify(): void {
-    for (const listener of listeners) listener();
+    for (const listener of [...listeners]) {
+        try { listener(); } catch { /* Subscriber failure must not interrupt persistence. */ }
+    }
 }
 
 function sanitizeDetail(detail: Record<string, unknown> | null | undefined): Record<string, unknown> | null {
@@ -228,16 +231,18 @@ export async function queryEventLog(options: EventLogQuery): Promise<EventLogQue
     catch { return memoryQuery(globalOptions); }
 }
 
-export async function clearEventLog(): Promise<void> {
-    const accountId = currentEventLogAccountId() ?? UNAVAILABLE_ACCOUNT_SCOPE;
-    // Do not let an already-captured console shadow repopulate this account's log after clear.
-    // Pending shadows from a different account remain intact and keep their capture-time owner.
-    clearPendingOrionConsole(false, accountId);
-    for (let index = memoryEvents.length - 1; index >= 0; index--) {
-        if (eventBelongsToAccount(memoryEvents[index], accountId)) memoryEvents.splice(index, 1);
+export async function clearEventLog(session: AccountSession | null): Promise<void> {
+    const accountId = session?.accountId;
+    if (!accountId || !isCurrentAccountSession(session)) {
+        throw new Error("Discord account changed before Event Log clear.");
     }
-    if (Native) {
-        try { await Native.clearEvents(accountId); } catch { }
+    // Flush captured rows before submitting Clear. If storage fails, their
+    // history remains intact. New rows after submission are not part of Clear.
+    clearPendingOrionConsole(true, accountId);
+    const cleared = new Set(memoryEvents.filter(event => eventBelongsToAccount(event, accountId)));
+    if (Native) await Native.clearEvents(accountId);
+    for (let index = memoryEvents.length - 1; index >= 0; index--) {
+        if (cleared.has(memoryEvents[index])) memoryEvents.splice(index, 1);
     }
     notify();
 }

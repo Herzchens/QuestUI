@@ -25,6 +25,7 @@ import { claimQuestReward, hasPendingClaimAction, QuestActionError } from "./nat
 import { useQuestSnapshot } from "../data";
 import { captureQuestEventRef } from "../presentation";
 import { QuestsStore } from "../../plugin/stores";
+import { captureAccountSession, isCurrentAccountSession } from "../../plugin/accountSession";
 
 function currentUserId(): string | null {
     try {
@@ -70,6 +71,7 @@ export function useClaimAllBatchActive(): boolean {
 
 export function ClaimAllControl() {
     const accountId = useStateFromStores([UserStore], currentUserId);
+    const session = captureAccountSession();
     const runtimeState = useClaimAllRuntimeState();
     const quests = useQuestSnapshot();
     const { ids: ignoredIds } = useIgnoredQuests();
@@ -77,7 +79,7 @@ export function ClaimAllControl() {
     const claimable = buildClaimAllSnapshot(eligibleQuests);
 
     const run = async () => {
-        if (!accountId || currentUserId() !== accountId) return;
+        if (!accountId || session?.accountId !== accountId || !isCurrentAccountSession(session)) return;
 
         const snapshot = buildClaimAllSnapshot(eligibleQuests);
         if (snapshot.length === 0) return;
@@ -117,7 +119,7 @@ export function ClaimAllControl() {
                     currentState: currentClaimState,
                     claim: claimQuestReward,
                     waitBetweenClaims: waitBetweenClaimAllRequests,
-                    shouldContinue: () => isClaimAllRuntimeGenerationActive(runtimeGeneration),
+                    shouldContinue: () => isClaimAllRuntimeGenerationActive(runtimeGeneration) && isCurrentAccountSession(session),
                     onConfirmed: quest => {
                         void recordQuestUIEvent({
                             severity: "success",
@@ -134,7 +136,7 @@ export function ClaimAllControl() {
 
             if (!isClaimAllRuntimeGenerationActive(runtimeGeneration)) return;
 
-            if (currentUserId() === accountId) {
+            if (isCurrentAccountSession(session)) {
                 pushDashboardNotice({
                     tone: result.claimed > 0 ? "success" : "info",
                     text: result.claimed > 0 ? "All rewards claimed" : "Rewards already claimed",
@@ -160,7 +162,7 @@ export function ClaimAllControl() {
                 : stopped?.message ?? (error instanceof Error ? error.message : "Claim all stopped unexpectedly.");
             const message = `Claim all stopped at ${at}/${total}: ${reason}`;
 
-            if (currentUserId() === accountId) showToast({ text: message, variant: "critical", duration: 7000 });
+            if (isCurrentAccountSession(session)) showToast({ text: message, variant: "critical", duration: 7000 });
             void recordQuestUIEvent({
                 severity: isVerification ? "warning" : "error",
                 eventCode: "QUEST_CLAIM_ALL_STOPPED",

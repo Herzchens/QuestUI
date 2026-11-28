@@ -30,9 +30,9 @@ export function startDashboardThemes(preference: unknown): void {
 }
 
 export function stopDashboardThemes(): void {
-    if (!started) return;
-    controller.stop();
     started = false;
+    // A partially started or failed stop may still own managed styles.
+    controller.stop();
 }
 
 export function selectDashboardTheme(preference: unknown): string {

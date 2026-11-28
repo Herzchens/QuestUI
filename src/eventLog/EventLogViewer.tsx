@@ -42,6 +42,7 @@ import {
     type EventLogVirtualRow
 } from "./presentation";
 import { clearEventLog, getEventLogInfo, openEventLogFolder, subscribeEventLog } from "./runtime";
+import { captureAccountSession, isCurrentAccountSession, type AccountSession } from "../plugin/accountSession";
 import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort, EventLogSource } from "./types";
 
 type EventLogStorageInfo = {
@@ -85,6 +86,7 @@ function EventLogPanel() {
     const [filterOpen, setFilterOpen] = useState(false);
     const [selected, setSelected] = useState<EventLogEvent | null>(null);
     const [clearCountdown, setClearCountdown] = useState<number | null>(null);
+    const [clearSession, setClearSession] = useState<AccountSession | null>(null);
     const [clearing, setClearing] = useState(false);
     const [loadingInitial, setLoadingInitial] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -192,6 +194,7 @@ function EventLogPanel() {
 
     useEffect(() => {
         setSelected(null);
+        setClearSession(null);
         setClearCountdown(null);
         setClearing(false);
     }, [currentUserId]);
@@ -475,6 +478,9 @@ function EventLogPanel() {
                             disabled={clearing || clearCountdown != null}
                             onClick={() => {
                                 if (clearing || clearCountdown != null) return;
+                                const session = captureAccountSession();
+                                if (!session || session.accountId !== currentUserId) return;
+                                setClearSession(session);
                                 setClearCountdown(5);
                             }}
                         >
@@ -493,12 +499,20 @@ function EventLogPanel() {
                                         title="Confirm clear"
                                         aria-label="Confirm clear Event Log"
                                         onClick={() => {
+                                            if (!isCurrentAccountSession(clearSession)) return;
                                             setClearing(true);
-                                            void clearEventLog().then(() => {
+                                            void clearEventLog(clearSession).then(() => {
+                                                if (!isCurrentAccountSession(clearSession)) return;
                                                 setClearCountdown(null);
                                                 showToast({ text: "Event Log cleared successfully.", variant: "success" });
                                                 setRefreshNonce(value => value + 1);
-                                            }).finally(() => setClearing(false));
+                                            }).catch(() => {
+                                                if (!isCurrentAccountSession(clearSession)) return;
+                                                setClearCountdown(null);
+                                                showToast({ text: "Could not clear Event Log.", variant: "critical" });
+                                            }).finally(() => {
+                                                if (isCurrentAccountSession(clearSession)) setClearing(false);
+                                            });
                                         }}
                                     >
                                         <CheckIcon />

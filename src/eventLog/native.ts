@@ -1,5 +1,5 @@
 import { app, IpcMainInvokeEvent, shell } from "electron";
-import { appendFile, mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
+import { appendFile, mkdir, readFile, stat } from "fs/promises";
 import { join } from "path";
 
 import { collectEventAccountUsernames, eventBelongsToAccount, eventMatchesAccountScopes, eventVisibleForAccount } from "./account";
@@ -12,6 +12,7 @@ import {
 } from "./pagination";
 import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort } from "./types";
 import { normalizePersistedEvent } from "./validation";
+import { readLogText, replaceLogFile } from "./storage";
 
 
 const MAX_LOG_BYTES = 10 * 1024 * 1024;
@@ -28,8 +29,15 @@ function vencordDataDir(): string {
 
 const LOG_DIR = join(vencordDataDir(), "QuestUI");
 const LOG_FILE = join(LOG_DIR, "events.jsonl");
-const TEMP_FILE = join(LOG_DIR, "events.tmp");
 let writeChain: Promise<void> = Promise.resolve();
+let storageGeneration = 0;
+
+function enqueueStorage<T>(work: () => Promise<T>): Promise<T> {
+    const result = writeChain.then(work);
+    // Keep the queue usable after a failure, but reject the actual caller.
+    writeChain = result.then(() => undefined, () => undefined);
+    return result;
+}
 let nextPageSessionId = 0;
 
 interface NormalizedQueryOptions {
@@ -56,6 +64,7 @@ interface PageSession {
 const pageSessions = new Map<string, PageSession>();
 
 function invalidatePageSessions(): void {
+    storageGeneration++;
     pageSessions.clear();
 }
 
@@ -83,7 +92,10 @@ async function ensureLogDir(): Promise<void> {
 
 async function compactIfNeeded(): Promise<void> {
     let info;
-    try { info = await stat(LOG_FILE); } catch { return; }
+    try { info = await stat(LOG_FILE); } catch (error) {
+        if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return;
+        throw error;
+    }
     if (info.size <= MAX_LOG_BYTES) return;
 
     const buffer = await readFile(LOG_FILE);
@@ -93,13 +105,7 @@ async function compactIfNeeded(): Promise<void> {
         start = nextNewline >= 0 ? nextNewline + 1 : buffer.length;
     }
     const kept = buffer.subarray(start);
-    await writeFile(TEMP_FILE, kept);
-    try {
-        await rename(TEMP_FILE, LOG_FILE);
-    } catch {
-        await rm(LOG_FILE, { force: true });
-        await rename(TEMP_FILE, LOG_FILE);
-    }
+    await replaceLogFile(LOG_FILE, kept);
     invalidatePageSessions();
 }
 
@@ -107,12 +113,11 @@ export async function appendEvent(_: IpcMainInvokeEvent, serialized: string): Pr
     if (typeof serialized !== "string" || !serialized.trim()) return;
     if (Buffer.byteLength(serialized, "utf8") > MAX_EVENT_BYTES) return;
 
-    writeChain = writeChain.then(async () => {
+    await enqueueStorage(async () => {
         await ensureLogDir();
         await appendFile(LOG_FILE, serialized.endsWith("\n") ? serialized : `${serialized}\n`, "utf8");
         await compactIfNeeded();
-    }).catch(() => undefined);
-    await writeChain;
+    });
 }
 
 function safeParse(line: string): EventLogEvent | null {
@@ -186,17 +191,17 @@ function filterAndSortEvents(text: string, options: NormalizedQueryOptions): Eve
     return sortEventLogEvents(filtered, options.sort);
 }
 
-async function readPreparedEvents(options: NormalizedQueryOptions): Promise<EventLogEvent[]> {
-    await writeChain;
-    let text = "";
-    try { text = await readFile(LOG_FILE, "utf8"); } catch { }
-    return filterAndSortEvents(text, options);
+async function readPreparedEvents(options: NormalizedQueryOptions): Promise<{ events: EventLogEvent[]; generation: number; }> {
+    return enqueueStorage(async () => ({
+        events: filterAndSortEvents(await readLogText(LOG_FILE), options),
+        generation: storageGeneration
+    }));
 }
 
 export async function queryEvents(_: IpcMainInvokeEvent, options: any = {}): Promise<{ events: EventLogEvent[]; total: number; hasMore: boolean; }> {
     const normalized = normalizeQueryOptions(options);
     const limit = Math.max(1, Math.min(5000, Number(options.limit) || 200));
-    const events = await readPreparedEvents(normalized);
+    const { events } = await readPreparedEvents(normalized);
     return { events: events.slice(0, limit), total: events.length, hasMore: events.length > limit };
 }
 
@@ -223,7 +228,10 @@ export async function queryEventPage(_: IpcMainInvokeEvent, rawOptions: EventLog
         }
         session.lastAccess = Date.now();
     } else {
-        const events = await readPreparedEvents(normalized);
+        const { events, generation } = await readPreparedEvents(normalized);
+        if (generation !== storageGeneration) {
+            return { events: [], total: 0, hasMore: false, nextCursor: null, sessionId: null, stale: true };
+        }
         session = newPageSession(signature, normalized.sort, events);
     }
 
@@ -252,10 +260,9 @@ export async function queryEventPage(_: IpcMainInvokeEvent, rawOptions: EventLog
 export async function clearEvents(_: IpcMainInvokeEvent, accountId?: string): Promise<void> {
     if (typeof accountId !== "string" || accountId.length === 0) return;
 
-    writeChain = writeChain.then(async () => {
+    await enqueueStorage(async () => {
         await ensureLogDir();
-        let text = "";
-        try { text = await readFile(LOG_FILE, "utf8"); } catch { }
+        const text = await readLogText(LOG_FILE);
 
         const kept: string[] = [];
         for (const line of text.split(/\r?\n/)) {
@@ -263,10 +270,9 @@ export async function clearEvents(_: IpcMainInvokeEvent, accountId?: string): Pr
             const event = safeParse(line);
             if (!event || !eventBelongsToAccount(event, accountId)) kept.push(line);
         }
-        await writeFile(LOG_FILE, kept.length > 0 ? `${kept.join("\n")}\n` : "", "utf8");
+        await replaceLogFile(LOG_FILE, kept.length > 0 ? `${kept.join("\n")}\n` : "");
         invalidatePageSessions();
-    }).catch(() => undefined);
-    await writeChain;
+    });
 }
 
 export async function getLogInfo(_: IpcMainInvokeEvent): Promise<{

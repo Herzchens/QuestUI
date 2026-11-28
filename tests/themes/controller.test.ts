@@ -3,6 +3,7 @@ import { dominantThumbnailColor } from "../../src/themes/origami/thumbnailColor"
 import { ornamentVariantSequence, SAKURA_ORNAMENT_COUNT } from "../../src/themes/sakura/ornament";
 import assert from "node:assert/strict";
 import { createDashboardThemeController } from "../../src/themes/controller";
+import { createServiceLifecycle } from "../../src/plugin/lifecycle";
 import { dominantArtworkColor, fractureVariant, fractureVariantSequence } from "../../src/themes/obsidian/fracture";
 import { OBSIDIAN_FRACTURE_VARIANT_COUNT } from "../../src/themes/obsidian/fractureVariantCount";
 
@@ -121,3 +122,48 @@ assert.deepEqual(dominantThumbnailColor(pixels([243, 205, 192, 255, 20])), [243,
 assert.equal(dominantThumbnailColor(pixels([255, 0, 0, 0, 100])), null);
 assert.equal(dominantThumbnailColor([]), null);
 assert.deepEqual(dominantThumbnailColor(pixels([10, 30, 70, 255, 10], [220, 100, 30, 255, 10])), dominantThumbnailColor(pixels([220, 100, 30, 255, 10], [10, 30, 70, 255, 10])));
+
+// Failure after partial startup must still dispose every acquired service.
+{
+    const calls: string[] = [];
+    let fail = true;
+    const lifecycle = createServiceLifecycle([
+        { start: () => { calls.push("+a"); }, stop: () => { calls.push("-a"); } },
+        { start: () => { calls.push("+b"); if (fail) throw new Error("start"); }, stop: () => { calls.push("-b"); } }
+    ]);
+    assert.throws(lifecycle.start, /start/);
+    assert.deepEqual(calls, ["+a", "+b", "-b", "-a"]);
+    fail = false;
+    lifecycle.start(); lifecycle.start(); lifecycle.stop(); lifecycle.stop();
+    assert.deepEqual(calls, ["+a", "+b", "-b", "-a", "+a", "+b", "-b", "-a"]);
+}
+{
+    const calls: string[] = [];
+    let fail = true;
+    const lifecycle = createServiceLifecycle([
+        { start() {}, stop: () => { calls.push("a"); } },
+        { start() {}, stop: () => { calls.push("b"); if (fail) throw new Error("stop"); } }
+    ]);
+    lifecycle.start();
+    assert.throws(lifecycle.stop, /cleanup failed/);
+    assert.deepEqual(calls, ["b", "a"]);
+    fail = false;
+    lifecycle.stop();
+    assert.deepEqual(calls, ["b", "a", "b"]);
+}
+{
+    const owned = new Set<string>();
+    let fail = true;
+    const fixture = createDashboardThemeController(themes, "default", {
+        validate() {}, enable: style => { assert.ok(!owned.has(style)); owned.add(style); },
+        disable: style => { if (fail && style === "default/a") throw new Error("disable"); owned.delete(style); }
+    });
+    fixture.select("default");
+    assert.throws(() => fixture.select("fixture"), /transition and recovery failed/);
+    assert.deepEqual([...owned], ["default/a"]);
+    fail = false;
+    fixture.select("fixture");
+    assert.deepEqual([...owned], ["fixture/a", "fixture/b"]);
+    fixture.stop();
+    assert.equal(owned.size, 0);
+}

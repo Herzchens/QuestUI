@@ -1,18 +1,14 @@
 import { findByCodeLazy } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { captureAccountSession, isCurrentAccountSession, type AccountSession } from "../../plugin/accountSession";
 
 const nativeFetchCurrentQuests = findByCodeLazy("QUESTS_FETCH_CURRENT_QUESTS_BEGIN") as () => Promise<unknown> | unknown;
 
 interface InFlightReload {
-    accountId: string;
+    session: AccountSession;
     promise: Promise<void>;
 }
 
 let inFlightReload: InFlightReload | null = null;
-
-function currentAccountId(): string | null {
-    return UserStore.getCurrentUser()?.id ?? null;
-}
 
 export class QuestReloadError extends Error {
     constructor(message: string, public readonly cause?: unknown) {
@@ -29,17 +25,17 @@ function reloadFailureMessage(error: unknown): string {
 
 /** Use Discord's own fetch-and-dispatch action; QuestUI never mutates QuestStore itself. */
 export function reloadQuestList(): Promise<void> {
-    const reloadAccountId = currentAccountId();
-    if (!reloadAccountId) {
+    const session = captureAccountSession();
+    if (!session) {
         return Promise.reject(new QuestReloadError("Discord account is unavailable for Quest refresh."));
     }
 
     const current = inFlightReload;
-    if (current?.accountId === reloadAccountId) return current.promise;
+    if (current?.session === session) return current.promise;
 
     const predecessor = current?.promise ?? null;
     const entry: InFlightReload = {
-        accountId: reloadAccountId,
+        session,
         promise: Promise.resolve()
     };
 
@@ -47,7 +43,7 @@ export function reloadQuestList(): Promise<void> {
         if (predecessor) {
             try { await predecessor; } catch { }
         }
-        if (currentAccountId() !== reloadAccountId) {
+        if (!isCurrentAccountSession(session)) {
             throw new QuestReloadError("Discord account changed before Quest refresh could start.");
         }
 

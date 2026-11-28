@@ -5,6 +5,7 @@ import { recordQuestUIEvent } from "../../eventLog/runtime";
 import { isIgnoredQuestStateReady } from "../ignored/runtime";
 import { isCurrentQuestAutoReloadRun, nextQuestAutoReloadDelay, normalizeQuestAutoReloadMinutes } from "./autoLogic";
 import { reloadQuestList } from "./native";
+import { captureAccountSession, isCurrentAccountSession, type AccountSession } from "../../plugin/accountSession";
 
 interface QuestAutoReloadPreferences {
     enabled: boolean;
@@ -49,8 +50,11 @@ async function ensurePersistedState(): Promise<void> {
     if (loadPromise) return loadPromise;
 
     loadPromise = DataStore.get(DATA_STORE_KEY)
-        .then(value => { lastSuccessfulReloadAt = normalizePersistedState(value).lastSuccessfulReloadAt; })
-        .catch(() => { lastSuccessfulReloadAt = null; })
+        .then(value => {
+            const stored = normalizePersistedState(value).lastSuccessfulReloadAt;
+            if (stored != null && (lastSuccessfulReloadAt == null || stored > lastSuccessfulReloadAt)) lastSuccessfulReloadAt = stored;
+        })
+        .catch(() => undefined)
         .then(() => {
             persistedReady = true;
             loadPromise = null;
@@ -109,20 +113,21 @@ async function persistSuccessfulReload(timestamp: number): Promise<void> {
     try {
         await DataStore.update<PersistedQuestAutoReloadState>(
             DATA_STORE_KEY,
-            () => ({ version: 1, lastSuccessfulReloadAt: timestamp })
+            stored => ({ version: 1, lastSuccessfulReloadAt: Math.max(timestamp, normalizePersistedState(stored).lastSuccessfulReloadAt ?? 0) })
         );
     } catch {
         // Persistence is scheduling metadata only. Do not turn a successful native fetch into failure.
     }
 }
 
-export async function markQuestReloadSuccessful(timestamp = Date.now()): Promise<void> {
+export async function markQuestReloadSuccessful(timestamp = Date.now(), session: AccountSession | null = captureAccountSession()): Promise<void> {
     const normalized = finiteTimestamp(timestamp);
-    if (normalized == null) return;
+    if (normalized == null || !isCurrentAccountSession(session)) return;
 
-    lastSuccessfulReloadAt = normalized;
+    const generation = lifecycleGeneration;
+    lastSuccessfulReloadAt = Math.max(normalized, lastSuccessfulReloadAt ?? 0);
     await persistSuccessfulReload(normalized);
-    if (started) scheduleNext();
+    if (started && generation === lifecycleGeneration && isCurrentAccountSession(session)) scheduleNext();
 }
 
 async function runScheduledReload(): Promise<void> {
@@ -130,10 +135,11 @@ async function runScheduledReload(): Promise<void> {
 
     const generation = lifecycleGeneration;
     const reloadAccountId = accountId();
+    const session = captureAccountSession();
     const preferences = readPreferences();
     if (!preferences.enabled) return;
 
-    if (!reloadAccountId || !isIgnoredQuestStateReady()) {
+    if (!reloadAccountId || session?.accountId !== reloadAccountId || !isIgnoredQuestStateReady()) {
         scheduleAfter(READY_RETRY_MS);
         return;
     }
@@ -142,10 +148,10 @@ async function runScheduledReload(): Promise<void> {
 
     try {
         await reloadQuestList();
-        if (!isCurrentQuestAutoReloadRun(started, generation, lifecycleGeneration, reloadAccountId, accountId())) return;
-        await markQuestReloadSuccessful(Date.now());
+        if (!isCurrentAccountSession(session) || !isCurrentQuestAutoReloadRun(started, generation, lifecycleGeneration, reloadAccountId, accountId())) return;
+        await markQuestReloadSuccessful(Date.now(), session);
     } catch (error) {
-        if (!isCurrentQuestAutoReloadRun(started, generation, lifecycleGeneration, reloadAccountId, accountId())) return;
+        if (!isCurrentAccountSession(session) || !isCurrentQuestAutoReloadRun(started, generation, lifecycleGeneration, reloadAccountId, accountId())) return;
 
         void recordQuestUIEvent({
             severity: "error",
@@ -164,6 +170,8 @@ function onAccountChanged(): void {
     const next = accountId();
     if (next === currentAccountId) return;
     currentAccountId = next;
+    lifecycleGeneration++;
+    clearTimer();
 
     if (!started || !readPreferences().enabled || next == null) return;
     lastAutoAttemptAt = null;
@@ -172,7 +180,10 @@ function onAccountChanged(): void {
 
 export function notifyQuestAutoReloadSettingsChanged(): void {
     if (!started) return;
-    void ensurePersistedState().then(scheduleNext);
+    const generation = lifecycleGeneration;
+    void ensurePersistedState().then(() => {
+        if (started && generation === lifecycleGeneration) scheduleNext();
+    });
 }
 
 export function startQuestAutoReload(readPreferences: () => QuestAutoReloadPreferences): void {
@@ -189,7 +200,10 @@ export function startQuestAutoReload(readPreferences: () => QuestAutoReloadPrefe
         } catch { }
     }
 
-    void ensurePersistedState().then(scheduleNext);
+    const generation = lifecycleGeneration;
+    void ensurePersistedState().then(() => {
+        if (started && generation === lifecycleGeneration) scheduleNext();
+    });
 }
 
 export function stopQuestAutoReload(): void {

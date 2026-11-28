@@ -6,6 +6,7 @@ import { join } from "path";
 import { promisify } from "util";
 
 import { compareSemver, parseSemver } from "../logic";
+import { tryAcquireVencordUpdate } from "../transactionLock";
 
 export type OrionUpdateStatus =
     | "ready"
@@ -1406,6 +1407,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         }
 
         updateInFlight = true;
+        let releaseTransaction: (() => void) | null = null;
         const operation: OrionUpdateOperation = {
             checkout: null,
             tagRef: null,
@@ -1416,6 +1418,15 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         };
 
         try {
+            releaseTransaction = await tryAcquireVencordUpdate(config.vencordSrcDir);
+            if (!releaseTransaction) return {
+                ok: false,
+                status: "busy",
+                phase: "preflight",
+                method: "none",
+                trace: ["Preflight: another managed update owns the Vencord runtime"],
+                message: "Another QuestUI or OrionQuests update is already running."
+            };
             if (decision) {
                 return await resolvePendingDecision(runningVersion, targetVersion, decision, operation);
             }
@@ -1434,11 +1445,15 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
                 diagnostic: diagnosticText(error)
             };
         } finally {
-            if (operation.checkout && operation.tagRef) {
-                await deleteRef(operation.checkout, operation.tagRef);
+            try {
+                if (operation.checkout && operation.tagRef) {
+                    await deleteRef(operation.checkout, operation.tagRef);
+                }
+                if (!operation.preserveDistSnapshot) await cleanupVencordDistSnapshot(operation.distSnapshot);
+            } finally {
+                releaseTransaction?.();
+                updateInFlight = false;
             }
-            if (!operation.preserveDistSnapshot) await cleanupVencordDistSnapshot(operation.distSnapshot);
-            updateInFlight = false;
         }
     }
 

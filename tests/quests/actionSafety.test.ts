@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createAccountSessionTracker } from "../../src/plugin/accountSessionState";
 
 import {
     attachChangeListenerSafely,
@@ -81,3 +82,29 @@ assert.equal(storeWaitTimeoutResult("user-a", null), "account-changed");
 }
 
 console.log("QuestUI quest-action runtime logic tests - PASS");
+
+// A stale token cannot become current again after account or plugin ABA.
+{
+    let account: string | null = "A";
+    const tracker = createAccountSessionTracker(() => account);
+    tracker.start();
+    const first = tracker.capture();
+    assert.ok(first);
+    assert.equal(tracker.isCurrent(first), true);
+    account = "B"; tracker.observe();
+    account = "A"; tracker.observe();
+    const second = tracker.capture();
+    assert.ok(second);
+    assert.equal(tracker.isCurrent(first), false);
+    assert.equal(tracker.isCurrent(second), true);
+    account = null; tracker.observe();
+    assert.equal(tracker.capture(), null);
+    account = "A"; tracker.observe();
+    const third = tracker.capture();
+    tracker.stop();
+    tracker.start();
+    assert.equal(tracker.isCurrent(third), false);
+    assert.equal(tracker.isCurrent(tracker.capture()), true);
+    tracker.stop();
+    assert.equal(tracker.capture(), null);
+}

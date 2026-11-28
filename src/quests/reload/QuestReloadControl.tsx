@@ -5,6 +5,9 @@ import { pushDashboardNotice } from "../../dashboard/notifications";
 import { markQuestReloadSuccessful } from "./auto";
 import { reloadQuestList } from "./native";
 import { shouldFinishReloadSpin } from "./logic";
+import { captureAccountSession, isCurrentAccountSession } from "../../plugin/accountSession";
+
+const ROTATION_EVENT_RECOVERY_MS = 5_000;
 
 function ReloadIcon({ onIteration }: { onIteration: () => void; }) {
     return (
@@ -30,6 +33,7 @@ export function QuestReloadControl() {
     const completedRotationsRef = useRef(0);
     const finishBoundaryRef = useRef<(() => void) | null>(null);
     const successResetTimerRef = useRef<number | null>(null);
+    const rotationRecoveryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const mountedRef = useRef(true);
 
     useEffect(() => {
@@ -40,24 +44,37 @@ export function QuestReloadControl() {
                 window.clearTimeout(successResetTimerRef.current);
                 successResetTimerRef.current = null;
             }
-            const resolve = finishBoundaryRef.current;
-            finishBoundaryRef.current = null;
-            resolve?.();
+            finishRotation();
         };
     }, []);
+
+    function finishRotation(): void {
+        if (rotationRecoveryRef.current != null) clearTimeout(rotationRecoveryRef.current);
+        rotationRecoveryRef.current = null;
+        const resolve = finishBoundaryRef.current;
+        finishBoundaryRef.current = null;
+        resolve?.();
+    }
+
+    function armRotationRecovery(): void {
+        if (rotationRecoveryRef.current != null) clearTimeout(rotationRecoveryRef.current);
+        if (!finishBoundaryRef.current || !requestSettledRef.current) return;
+        // Normal motion completes at animationiteration. Only recover when events
+        // stop arriving entirely (e.g. a removed style or suspended animation).
+        rotationRecoveryRef.current = setTimeout(finishRotation, ROTATION_EVENT_RECOVERY_MS);
+    }
 
     const onIteration = () => {
         if (!pendingRef.current) return;
         completedRotationsRef.current += 1;
 
-        if (!shouldFinishReloadSpin(completedRotationsRef.current, requestSettledRef.current)) return;
-        const resolve = finishBoundaryRef.current;
-        finishBoundaryRef.current = null;
-        resolve?.();
+        if (shouldFinishReloadSpin(completedRotationsRef.current, requestSettledRef.current)) finishRotation();
+        else if (requestSettledRef.current) armRotationRecovery();
     };
 
     const run = async () => {
-        if (pendingRef.current) return;
+        const session = captureAccountSession();
+        if (pendingRef.current || !mountedRef.current || !session) return;
 
         pendingRef.current = true;
         requestSettledRef.current = false;
@@ -71,19 +88,21 @@ export function QuestReloadControl() {
         let failure: unknown = null;
         try {
             await reloadQuestList();
-            await markQuestReloadSuccessful();
+            await markQuestReloadSuccessful(Date.now(), session);
         } catch (error) {
             failure = error;
         } finally {
             requestSettledRef.current = true;
+            armRotationRecovery();
         }
 
         // Finish only from animationiteration. If the request settles halfway through a later
         // rotation, the spinner completes that full rotation instead of snapping back to 0deg.
         await finalRotationBoundary;
 
-        if (!mountedRef.current) {
+        if (!mountedRef.current || !isCurrentAccountSession(session)) {
             pendingRef.current = false;
+            if (mountedRef.current) setPending(false);
             return;
         }
 
@@ -93,6 +112,7 @@ export function QuestReloadControl() {
                     severity: "error",
                     eventCode: "QUEST_RELOAD_FAILED",
                     summary: "Quest list refresh failed",
+                    accountId: session.accountId,
                     detail: { message: failure instanceof Error ? failure.message : String(failure), stack: failure instanceof Error ? failure.stack ?? null : null }
                 });
                 showToast({
@@ -101,7 +121,7 @@ export function QuestReloadControl() {
                     duration: 6000
                 });
             } else {
-                void recordQuestUIEvent({ severity: "success", eventCode: "QUEST_RELOAD_SUCCEEDED", summary: "Quest list refreshed" });
+                void recordQuestUIEvent({ severity: "success", eventCode: "QUEST_RELOAD_SUCCEEDED", summary: "Quest list refreshed", accountId: session.accountId });
                 setSucceeded(true);
                 pushDashboardNotice({
                     tone: "success",

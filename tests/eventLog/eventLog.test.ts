@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { readLogText, replaceLogFile } from "../../src/eventLog/storage";
 
 import {
     collectEventAccountUsernames,
@@ -295,4 +299,28 @@ const safeVirtualLayout = buildEventLogVirtualLayout(3, index => [0, Number.NaN,
 assert.deepEqual(safeVirtualLayout.metrics.map(metric => metric.height), [1, 1, 20]);
 assert.equal(safeVirtualLayout.totalHeight, 22);
 
-console.log("Event Log logic tests passed.");
+async function testLogReplacement(): Promise<void> {
+    const root = await mkdtemp(join(tmpdir(), "questui-event-log-test-"));
+    const path = join(root, "events.jsonl");
+    try {
+        assert.equal(await readLogText(path), "");
+        const original = "account A\naccount B\n";
+        await writeFile(path, original);
+        const readError = Object.assign(new Error("injected EIO"), { code: "EIO" });
+        await assert.rejects(readLogText(path, (async () => { throw readError; }) as typeof readFile), error => error === readError);
+        const renameError = Object.assign(new Error("injected EPERM"), { code: "EPERM" });
+        await assert.rejects(replaceLogFile(path, "", async () => { throw renameError; }), error => error === renameError);
+        assert.equal(await readFile(path, "utf8"), original);
+        assert.deepEqual(await readdir(root), ["events.jsonl"]);
+        await replaceLogFile(path, "account B\n");
+        assert.equal(await readLogText(path), "account B\n");
+        assert.deepEqual(await readdir(root), ["events.jsonl"]);
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+}
+
+void testLogReplacement().then(() => console.log("Event Log logic and storage tests passed.")).catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+});

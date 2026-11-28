@@ -1,4 +1,4 @@
-import { showToast, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { showToast, UserStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { recordQuestUIEvent } from "../../eventLog/runtime";
 import { pushDashboardNotice } from "../../dashboard/notifications";
@@ -23,6 +23,7 @@ import { getClaimAllRuntimeState } from "./claimAllState";
 import type { NormalizedQuest } from "../data";
 import { captureQuestEventRef } from "../presentation";
 import settings from "../../plugin/settings";
+import { captureAccountSession, isCurrentAccountSession } from "../../plugin/accountSession";
 
 type QuestAction = "enroll" | "claim";
 type SubmittedState = { action: QuestAction; userId: string; releaseAt: number; };
@@ -74,6 +75,12 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
     const showViewCode = quest.status === "claimed"
         && isExplicitRewardCodeConfig(quest.rawQuest?.config?.rewardsConfig);
     const currentUserIdFromStore = useStateFromStores([UserStore], currentUserId);
+    const session = captureAccountSession();
+    const mounted = useRef(true);
+    useEffect(() => {
+        mounted.current = true;
+        return () => { mounted.current = false; };
+    }, []);
     const openNativeQuestReward = useNativeQuestRewardOpener(quest);
     const { orionIntegration } = settings.use(["orionIntegration"]);
     const [pending, setPending] = useState(false);
@@ -91,7 +98,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
 
     const run = async () => {
         const userIdAtClick = currentUserIdFromStore;
-        if (!action || !userIdAtClick || pending || currentUserId() !== userIdAtClick) return;
+        if (!action || !userIdAtClick || pending || !mounted.current || session?.accountId !== userIdAtClick || !isCurrentAccountSession(session)) return;
         if (submitted?.action === action && submitted.userId === userIdAtClick) return;
         // Disabled UI is not a synchronization primitive: a stale click event can still arrive
         // during the render that starts Claim all. Re-check the module-global batch lock here.
@@ -114,14 +121,14 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
             // A store-confirmed action is already protected by its new server/store state. Only
             // keep local Sent state for a successful submission whose store transition is still
             // pending, and bind it to the account that made the request.
-            setSubmitted(result.resubmitAfterMs == null
+            if (mounted.current && isCurrentAccountSession(session)) setSubmitted(result.resubmitAfterMs == null
                 ? null
                 : submittedState(action, userIdAtClick, result.resubmitAfterMs));
             const confirmed = result.storeConfirmed;
             const outcome = action === "enroll"
                 ? confirmed ? "Quest accepted" : "Acceptance submitted"
                 : confirmed ? "Reward claimed" : "Claim submitted";
-            if (currentUserId() === userIdAtClick) {
+            if (isCurrentAccountSession(session)) {
                 pushDashboardNotice({ tone: confirmed ? "success" : "info", text: outcome, duration: 2100 });
             }
             void recordQuestUIEvent({
@@ -138,7 +145,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
             // QuestUI's explicit Accept should start farming even when Orion's independent
             // watchForEnrollments setting is off. Only do this after Discord's store confirmed
             // enrolledAt; a merely submitted/uncertain enrollment is not enough to start a run.
-            if (action === "enroll" && result.storeConfirmed && currentUserId() === userIdAtClick && orionIntegration && isOrionCommandReady()) {
+            if (action === "enroll" && result.storeConfirmed && isCurrentAccountSession(session) && orionIntegration && isOrionCommandReady()) {
                 const snapshot = getOrionControlSnapshot();
                 if (snapshot && !snapshot.running) {
                     try {
@@ -152,7 +159,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                             detail: { message: error instanceof Error ? error.message : String(error) },
                             accountId: userIdAtClick
                         });
-                        if (currentUserId() === userIdAtClick) showToast({
+                        if (isCurrentAccountSession(session)) showToast({
                             text: `Quest was accepted, but Orion could not start automatically: ${error instanceof Error ? error.message : "unknown control error"}`,
                             variant: "critical",
                             duration: 6000
@@ -161,7 +168,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 }
             }
         } catch (error) {
-            if (error instanceof QuestActionError && error.resubmitAfterMs != null) {
+            if (mounted.current && isCurrentAccountSession(session) && error instanceof QuestActionError && error.resubmitAfterMs != null) {
                 // The request may have reached Discord even though confirmation failed. Mirror
                 // the module-level duplicate guard so the button does not look immediately
                 // reusable while the mutation outcome is intentionally uncertain.
@@ -182,32 +189,32 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                     stack: error instanceof Error ? error.stack ?? null : null
                 }
             });
-            if (currentUserId() === userIdAtClick) showToast({ text: message, variant: "critical", duration: 6000 });
+            if (isCurrentAccountSession(session)) showToast({ text: message, variant: "critical", duration: 6000 });
         } finally {
-            setPending(false);
+            if (mounted.current) setPending(false);
         }
     };
 
     const viewCode = async () => {
-        if (!showViewCode || pending || currentUserIdFromStore == null) return;
+        if (!showViewCode || pending || !mounted.current || session?.accountId !== currentUserIdFromStore || !isCurrentAccountSession(session)) return;
         setPending(true);
         try {
             await prepareQuestRewardCode(quest);
-            openNativeQuestReward();
+            if (mounted.current && isCurrentAccountSession(session)) openNativeQuestReward();
         } catch (error) {
             const message = error instanceof QuestActionError
                 ? error.message
                 : "Discord could not open this Quest reward code.";
-            showToast({ text: message, variant: "critical", duration: 6000 });
+            if (isCurrentAccountSession(session)) showToast({ text: message, variant: "critical", duration: 6000 });
         } finally {
-            setPending(false);
+            if (mounted.current) setPending(false);
         }
     };
 
     const canToggleIgnored = ignored || quest.status === "in-progress";
     const toggleIgnored = async () => {
         const userIdAtClick = currentUserIdFromStore;
-        if (!canToggleIgnored || !userIdAtClick || ignorePending) return;
+        if (!canToggleIgnored || !userIdAtClick || ignorePending || !mounted.current || session?.accountId !== userIdAtClick || !isCurrentAccountSession(session)) return;
         setIgnorePending(true);
         const nextIgnored = !ignored;
         let orionPausedForIgnore = false;
@@ -233,6 +240,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                         // A completion/rescan/plugin transition may settle while the pause request
                         // is in flight. Re-read Orion before failing: if it no longer publishes the
                         // Quest as active, there is no invisible work left to protect against.
+                        if (!isCurrentAccountSession(session)) return;
                         const latestSnapshot = getOrionControlSnapshot();
                         if (shouldPauseOrionQuestBeforeIgnore(latestSnapshot, quest.id)) {
                             const reason = error instanceof Error ? error.message : String(error);
@@ -245,7 +253,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                                 detail: { message: reason },
                                 accountId: userIdAtClick
                             });
-                            if (currentUserId() === userIdAtClick) {
+                            if (isCurrentAccountSession(session)) {
                                 showToast({ text: message, variant: "critical", duration: 6000 });
                             }
                             return;
@@ -266,7 +274,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 detail: nextIgnored ? { orionPaused: orionPausedForIgnore } : undefined,
                 accountId: userIdAtClick
             });
-            if (currentUserId() === userIdAtClick) {
+            if (isCurrentAccountSession(session)) {
                 showToast({
                     text: nextIgnored
                         ? orionPausedForIgnore
@@ -291,11 +299,11 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 detail: { message: reason, orionPaused: orionPausedForIgnore },
                 accountId: userIdAtClick
             });
-            if (currentUserId() === userIdAtClick) {
+            if (isCurrentAccountSession(session)) {
                 showToast({ text: message, variant: "critical", duration: 6000 });
             }
         } finally {
-            setIgnorePending(false);
+            if (mounted.current) setIgnorePending(false);
         }
     };
 
