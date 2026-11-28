@@ -86,6 +86,10 @@ import sakuraGraphics from "./sakura/graphics.css?managed";
 import terminalGraphics from "./terminal/graphics.css?managed";
 import origamiGraphics from "./origami/graphics.css?managed";
 import type { DashboardTheme } from "./controller";
+import { startObsidianArtwork, stopObsidianArtwork } from "./obsidian/useArtworkColor";
+import { startOrigamiArtwork, stopOrigamiArtwork } from "./origami/useArtworkColor";
+import { startTerminalArtwork, stopTerminalArtwork } from "./terminal/useArtwork";
+import { startTerminalPanoramas, stopTerminalPanoramas } from "./terminal/TerminalPanorama";
 
 export const DEFAULT_DASHBOARD_THEME_ID = "default";
 
@@ -128,6 +132,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
     {
         id: "obsidian",
         label: "Obsidian",
+        services: [{ start: startObsidianArtwork, stop: stopObsidianArtwork }],
         styles: [
             obsidianTokens,
             obsidianDashboardComponents,
@@ -167,6 +172,10 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
     {
         id: "terminal",
         label: "Terminal",
+        services: [
+            { start: startTerminalArtwork, stop: stopTerminalArtwork },
+            { start: startTerminalPanoramas, stop: stopTerminalPanoramas }
+        ],
         styles: [
             terminalTokens,
             terminalDashboardComponents,
@@ -184,6 +193,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
     {
         id: "origami",
         label: "Origami",
+        services: [{ start: startOrigamiArtwork, stop: stopOrigamiArtwork }],
         styles: [
             origamiTokens,
             origamiDashboardComponents,

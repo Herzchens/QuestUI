@@ -50,5 +50,5 @@ export function createServiceLifecycle(services: readonly LifecycleService[]) {
         if (stopRequested) stop();
     }
 
-    return { start, stop };
+    return { start, stop, isRunning: () => running };
 }

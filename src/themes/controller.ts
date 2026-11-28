@@ -2,6 +2,8 @@ export interface DashboardTheme {
     id: string;
     label: string;
     styles: readonly string[];
+    /** Trusted built-in services, owned for the plugin session, not each selection. */
+    services?: readonly { start(): void; stop(): void; }[];
 }
 
 export interface ThemeStyleAdapter {

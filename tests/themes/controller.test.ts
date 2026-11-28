@@ -5,6 +5,7 @@ import { ornamentVariantSequence, SAKURA_ORNAMENT_COUNT } from "../../src/themes
 import assert from "node:assert/strict";
 import { createDashboardThemeController } from "../../src/themes/controller";
 import { createServiceLifecycle } from "../../src/plugin/lifecycle";
+import { createThemePluginLifecycle } from "../../src/themes/lifecycle";
 import { dominantArtworkColor, fractureVariant, fractureVariantSequence } from "../../src/themes/obsidian/fracture";
 import { OBSIDIAN_FRACTURE_VARIANT_COUNT } from "../../src/themes/obsidian/fractureVariantCount";
 
@@ -263,3 +264,48 @@ void (async () => {
     assert.deepEqual(started, ["a", "d", "b"]);
     pool.replaceCatalogue(owner, []);
 })().catch(error => { console.error(error); process.exitCode = 1; });
+
+{
+    const calls: string[] = [];
+    let failStart = false, failStop = false, failSelection = false;
+    const session = createThemePluginLifecycle({
+        select(value) {
+            calls.push("select:" + value);
+            if (failSelection && value === "fixture") throw new Error("selection");
+            return String(value);
+        },
+        stop() { calls.push("styles:stop"); }
+    }, [
+        { id: "default", label: "Default", styles: ["default"], services: [
+            { start() { calls.push("+a"); }, stop() { calls.push("-a"); } }
+        ] },
+        { id: "fixture", label: "Fixture", styles: ["fixture"], services: [
+            { start() { calls.push("+b"); if (failStart) throw new Error("start"); },
+              stop() { calls.push("-b"); if (failStop) throw new Error("stop"); } }
+        ] }
+    ], "default", () => calls.push("fallback"));
+    assert.throws(() => session.select("fixture"), /not started/);
+    session.start("default");
+    session.start("fixture");
+    session.select("fixture");
+    assert.deepEqual(calls, ["select:default", "+a", "+b", "select:fixture"]);
+    session.stop();
+    session.stop();
+    assert.deepEqual(calls.slice(4), ["-b", "-a", "styles:stop"]);
+    calls.length = 0;
+    failStart = true;
+    assert.throws(() => session.start("default"), /start/);
+    assert.deepEqual(calls, ["select:default", "+a", "+b", "-b", "-a", "styles:stop"]);
+    assert.throws(() => session.select("default"), /not started/);
+    calls.length = 0;
+    failStart = false;
+    failSelection = true;
+    session.start("fixture");
+    assert.deepEqual(calls, ["select:fixture", "select:default", "fallback", "+a", "+b"]);
+    failStop = true;
+    assert.throws(session.stop, /cleanup failed/);
+    assert.deepEqual(calls.slice(5), ["-b", "-a", "styles:stop"]);
+    failStop = false;
+    session.stop();
+    assert.equal(calls.at(-1), "-b");
+}

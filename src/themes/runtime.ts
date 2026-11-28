@@ -1,10 +1,7 @@
 import { disableStyle, enableStyle, requireStyle } from "@api/Styles";
 import { React } from "@webpack/common";
 
-import { startObsidianArtwork, stopObsidianArtwork } from "./obsidian/useArtworkColor";
-import { startOrigamiArtwork, stopOrigamiArtwork } from "./origami/useArtworkColor";
-import { startTerminalArtwork, stopTerminalArtwork } from "./terminal/useArtwork";
-import { startTerminalPanoramas, stopTerminalPanoramas } from "./terminal/TerminalPanorama";
+import { createThemePluginLifecycle } from "./lifecycle";
 import { createDashboardThemeController } from "./controller";
 import { useGraphicsRootClasses } from "../graphics/runtime";
 import { DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID } from "./registry";
@@ -21,37 +18,13 @@ const controller = createDashboardThemeController(DASHBOARD_THEMES, DEFAULT_DASH
     }
 });
 
-let started = false;
+const lifecycle = createThemePluginLifecycle(controller, DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID, error => {
+    console.warn("[QuestUI] Could not load preferred Dashboard theme; using Default.", error);
+});
 
-export function startDashboardThemes(preference: unknown): void {
-    if (started) return;
-    try {
-        controller.select(preference);
-    } catch (error) {
-        controller.select(DEFAULT_DASHBOARD_THEME_ID);
-        console.warn("[QuestUI] Could not load preferred Dashboard theme; using Default.", error);
-    }
-    startObsidianArtwork();
-    startOrigamiArtwork();
-    startTerminalArtwork();
-    startTerminalPanoramas();
-    started = true;
-}
-
-export function stopDashboardThemes(): void {
-    started = false;
-    stopObsidianArtwork();
-    stopOrigamiArtwork();
-    stopTerminalArtwork();
-    stopTerminalPanoramas();
-    // A partially started or failed stop may still own managed styles.
-    controller.stop();
-}
-
-export function selectDashboardTheme(preference: unknown): string {
-    if (!started) throw new Error("Dashboard themes are not started.");
-    return controller.select(preference);
-}
+export const startDashboardThemes = lifecycle.start;
+export const stopDashboardThemes = lifecycle.stop;
+export const selectDashboardTheme = lifecycle.select;
 
 export function useDashboardThemeId(): string {
     return React.useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
