@@ -1,6 +1,5 @@
 /* Graphics selector: this theme owns its complete visual contract. */
 .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gauge { display: block; flex: 0 0 20px; margin: 0; width: 20px; height: 20px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gauge circle { stroke: none; }
 .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gradient-start { stop-color: var(--graphics-gradient-start); }
 .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gradient-end { stop-color: var(--graphics-gradient-end); }
 .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-needle { transform-origin: 12px 14px; transform: rotate(var(--graphics-needle-angle)); transition: transform 140ms ease-out; }
@@ -48,8 +47,8 @@
 .quest-ui-theme-sakura.quest-ui-graphics-menu .quest-ui-graphics-label .quest-ui-graphics-title-text { font: inherit; line-height: inherit; color: var(--graphics-accent); background-image: linear-gradient(135deg, var(--graphics-gradient-start), var(--graphics-gradient-end)); background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none; }
 @media (forced-colors: active) {
     .quest-ui-theme-sakura.quest-ui-graphics-menu .quest-ui-graphics-label .quest-ui-graphics-title-text { background: none; -webkit-text-fill-color: currentColor; }
-    .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gauge path { stroke: currentColor; }
-    .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gauge circle { fill: currentColor; }
+    .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gauge path:not(.quest-ui-graphics-needle) { stroke: currentColor; }
+    .quest-ui-theme-sakura .quest-ui-graphics-trigger .quest-ui-graphics-gauge .quest-ui-graphics-needle { fill: currentColor; stroke: none; }
 }
 
 

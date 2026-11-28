@@ -13,8 +13,8 @@ import {
 function GraphicsIcon() {
     const gradientId = "quest-ui-gauge-" + React.useId();
     const paint = "url(#" + gradientId + ")";
-    // Keep the 24x24 gauge arc and its original rotation pivot. A shorter
-    // needle leaves a visible gap from the arc throughout the entire sweep.
+    // A filled, tapered needle has a rounded base and a pointed tip.
+    // Keep the original rotation pivot and clearance from the arc.
     return <svg className="quest-ui-graphics-gauge" viewBox="0 0 24 24" aria-hidden="true">
         <defs>
             <linearGradient id={gradientId} gradientUnits="userSpaceOnUse" x1="2" y1="12" x2="22" y2="12">
@@ -24,8 +24,7 @@ function GraphicsIcon() {
             </linearGradient>
         </defs>
         <path d="M3.34 19a10 10 0 1 1 17.32 0" stroke={paint} strokeWidth="2" vectorEffect="non-scaling-stroke" />
-        <path className="quest-ui-graphics-needle" d="M12 14V8" stroke={paint} strokeWidth="2" vectorEffect="non-scaling-stroke" />
-        <circle cx="12" cy="14" r="1.4" fill={paint} />
+        <path className="quest-ui-graphics-needle" d="M12 7L14.1 13.3Q14.8 16 12 16Q9.2 16 9.9 13.3Z" fill={paint} stroke="none" />
     </svg>;
 }
 

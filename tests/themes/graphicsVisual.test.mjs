@@ -83,10 +83,9 @@ for (const pair of document.querySelectorAll(".graphics-header-fixture")) {
     const themeName = ["default","terminal","origami"].find(name => pair.closest(".quest-ui-theme-" + name));
     const expectedSvgX = themeName ? .5 : 0;
     check(Math.abs((glyphBox.left + glyphBox.width/2 - (a.left+a.width/2)) - expectedSvgX) < .08 && Math.abs(glyphBox.top + glyphBox.height/2 - (a.top+a.height/2)) < .08, "gauge optical position mismatch");
-    for (const path of glyph.querySelectorAll("path")) {
-        check(getComputedStyle(path).strokeWidth === "2px", "gauge stroke mismatch");
-        check(getComputedStyle(path).vectorEffect === "non-scaling-stroke", "gauge stroke must be phase-stable");
-    }
+    const arcStroke = getComputedStyle(glyph.querySelector("path"));
+    check(arcStroke.strokeWidth === "2px", "gauge arc stroke mismatch");
+    check(arcStroke.vectorEffect === "non-scaling-stroke", "gauge arc stroke must be phase-stable");
     check(getComputedStyle(glyph).shapeRendering !== "crispEdges", "gauge antialiasing disabled");
     const arcShape = glyph.querySelector("path");
     const box = arcShape.getBBox();
@@ -96,18 +95,25 @@ for (const pair of document.querySelectorAll(".graphics-header-fixture")) {
     if (themeName) check(getComputedStyle(glyph).left === "0.5px", themeName + " +0.5px runtime optical correction missing");
     check(Math.abs((glyphBox.left + glyphBox.width/2 - (a.left+a.width/2)) - expectedSvgX) < .08, "gauge SVG X optical offset drifted");
     check(Math.abs(glyphBox.top + glyphBox.height/2 - (a.top+a.height/2)) < .02, "gauge SVG Y center drifted");
-    const hub = glyph.querySelector("circle");
-    const hubPoint = new DOMPoint(Number(hub.getAttribute("cx")), Number(hub.getAttribute("cy"))).matrixTransform(hub.getCTM());
-    const needlePivot = new DOMPoint(12,14).matrixTransform(glyph.querySelector(".quest-ui-graphics-needle").getCTM());
+    const needleShape = glyph.querySelector(".quest-ui-graphics-needle");
+    const hubPoint = new DOMPoint(12,14).matrixTransform(arcShape.getCTM());
+    const needlePivot = new DOMPoint(12,14).matrixTransform(needleShape.getCTM());
     check(Math.hypot(hubPoint.x-needlePivot.x,hubPoint.y-needlePivot.y) < .01, "gauge pivot off center");
+    check(needleShape.isPointInFill(new DOMPoint(12,14)), "needle base must cover pivot");
+    for (const x of [10.5,13.5]) {
+        check(needleShape.isPointInFill(new DOMPoint(x,13.5)), "needle base must be broad");
+        check(!needleShape.isPointInFill(new DOMPoint(x,9.5)), "needle tip must taper");
+    }
+    check(!glyph.querySelector("circle"), "needle must not have a separate hub");
     const gradient = glyph.querySelector("linearGradient");
     check(gradient.getAttribute("gradientUnits") === "userSpaceOnUse", "degenerate needle gradient");
     check(gradient.children.length === 3, "gauge gradient must use symmetric three-stop lighting");
     check(getComputedStyle(gradient.children[0]).stopColor === rgb(stops[n][1]), "gauge left edge mismatch " + n);
     check(getComputedStyle(gradient.children[1]).stopColor === rgb(stops[n][0]), "gauge center highlight mismatch " + n);
     check(getComputedStyle(gradient.children[2]).stopColor === rgb(stops[n][1]), "gauge right edge mismatch " + n);
-    for (const path of glyph.querySelectorAll("path")) check(getComputedStyle(path).stroke.includes("#" + gradient.id), "gauge paint reference mismatch");
-    check(getComputedStyle(hub).fill.includes("#" + gradient.id), "gauge hub paint mismatch");
+    check(getComputedStyle(arcShape).stroke.includes("#" + gradient.id), "gauge arc paint reference mismatch");
+    check(getComputedStyle(needleShape).fill.includes("#" + gradient.id), "gauge needle paint mismatch");
+    check(getComputedStyle(needleShape).stroke === "none", "needle must retain its filled silhouette");
     const paletteGlyph = palette.querySelector("svg");
     check(box.width > 19.9 && box.width < 20.1, "Lucide gauge arc width drifted");
     const needle = getComputedStyle(glyph.querySelector(".quest-ui-graphics-needle"));
@@ -117,19 +123,20 @@ for (const pair of document.querySelectorAll(".graphics-header-fixture")) {
     checkNeedleClearance(glyph, "detent " + n);
     check(needle.transitionDuration === (reduced || matchMedia("(prefers-reduced-motion: reduce)").matches ? "0s" : "0.14s"), "gauge motion mismatch " + n);
 }
-// Measure the actual path tip and arc in rendered CSS pixels. Round caps
-// occupy half the non-scaling stroke width on either side of the centerline.
+// Measure the filled needle outline against the arc in rendered CSS pixels.
+// Only the arc has a stroke; its round caps extend by half the stroke width.
 function checkNeedleClearance(glyph, context) {
     const end = glyph.querySelector(".quest-ui-graphics-needle");
     const arc = glyph.querySelector("path");
-    const tip = end.getPointAtLength(end.getTotalLength()).matrixTransform(end.getCTM());
-    const length = arc.getTotalLength();
+    const length = arc.getTotalLength(), needleLength = end.getTotalLength();
+    const arcMatrix = arc.getCTM(), needleMatrix = end.getCTM();
+    const arcPoints = Array.from({ length: 241 }, (_, i) => arc.getPointAtLength(length * i / 240).matrixTransform(arcMatrix));
     let nearest = Infinity;
-    for (let i = 0; i <= 240; i++) {
-        const point = arc.getPointAtLength(length * i / 240).matrixTransform(arc.getCTM());
-        nearest = Math.min(nearest, Math.hypot(tip.x - point.x, tip.y - point.y));
+    for (let i = 0; i <= 80; i++) {
+        const point = end.getPointAtLength(needleLength * i / 80).matrixTransform(needleMatrix);
+        for (const a of arcPoints) nearest = Math.min(nearest, Math.hypot(point.x - a.x, point.y - a.y));
     }
-    const capWidth = (parseFloat(getComputedStyle(end).strokeWidth) + parseFloat(getComputedStyle(arc).strokeWidth)) / 2;
+    const capWidth = parseFloat(getComputedStyle(arc).strokeWidth) / 2;
     check(nearest - capWidth >= 1, "gauge needle touches or approaches arc: " + context);
 }
 // Exercise a real CSS transition, not just the static endpoint styles.
