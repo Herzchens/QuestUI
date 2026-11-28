@@ -1,2 +1,2 @@
 // Release source of truth used by plugin metadata and the Dashboard.
-export const QUESTUI_VERSION = "v1.6.0-beta2";
+export const QUESTUI_VERSION = "v1.6.0-beta3";

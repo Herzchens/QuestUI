@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.6.0-beta3 - 2026-11-28
+
+- Added five new built-in Dashboard themes alongside Default: **Liquid Glass**, **Obsidian**, **Sakura**, **Terminal**, and **Origami**, each with its own visual identity across the Dashboard, Event Viewer, Notification Center, Update Center, and other UI surfaces, switchable live from the palette button without restarting Discord.
+- Added the **Graphics Selector** with **Light**, **Low**, **Medium**, **High**, and **Max** presets, independent **Reduced Motion** controls with system `prefers-reduced-motion` support, and a locked **Ultra** preview.
+- Added **Accept All**, sharing the dynamic toolbar batch button with **Claim All**; both batch actions respect active Dashboard filters.
+- Added native **Quick Open** for supported Video and Activity Quests.
+- Added QuestUI and OrionQuests update notifications to the Notification Center.
+- Extended **Ignore** support to **Available** Quests, updated global Resume to skip ignored Quests, blocked per-Quest Resume on ignored Quests until unignored, and added background enforcement that attempts to pause ignored Quests when they become active in Orion (using a reactive fallback until Orion supports native Quest exclusion).
+- Improved batch action safety, HTTP 429 / `Retry-After` rate-limit handling, and QuestStore outcome confirmation.
+- Improved Ignore persistence (fail-closed read/write handling, shared account snapshots, and 512-Quest / 32-account capacity enforcement) and account isolation.
+- Hardened managed updates, checkout provenance validation, and runtime transaction handling.
+- Improved Event Viewer storage compaction/validation, structured credential redaction, and diagnostic reports.
+- Optimized artwork processing, LRU caching, and resource cancellation/disposal across themes.
+- Fixed UI inconsistencies, lifecycle ownership issues, and async race conditions; expanded regression tests (45 test files in CI) and updated project documentation.
+- Retained **OrionQuests v4.10.7+** as the minimum supported version (**v4.11.0+** recommended for full scheduler metadata and structured logging); Stable remains **v1.5.1**.
+
 ## v1.6.0-beta2 - 2026-11-24
 
 - Refined the Dashboard layout, toolbar, Quest List, status summaries, reward filtering, and update indicators.

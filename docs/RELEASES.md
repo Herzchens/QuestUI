@@ -1,6 +1,17 @@
 # Release channels
 
-## Beta - v1.6.0-beta2
+## Beta - v1.6.0-beta3
+
+- Stable remains **v1.5.1** until v1.6 is promoted.
+- Beta release target: **v1.6.0-beta3** (2026-11-28).
+- Like earlier beta releases, the reviewed candidate must be promoted to official `main` before its pinned-key SSH-signed annotated release tag is created, and exact-target Compatibility CI must pass before publication.
+- Users will receive this release through Update Center only when QuestUI pre-release updates are enabled.
+- Scope includes the six built-in Dashboard themes (Default, Liquid Glass, Obsidian, Sakura, Terminal, Origami), shared Graphics quality and Reduced Motion controls, dynamic Accept All / Claim All batch actions with native mutation guards, fail-closed Ignore persistence with shared account snapshots and Orion exclusion/fallback enforcement, and runtime/diagnostics hardening.
+- A public custom-theme API and independent Quest Home theming remain planned for v1.6.0 Stable, not this beta.
+- The legacy root `version.ts` remains compatibility metadata; `src/plugin/version.ts` remains the canonical runtime version source.
+- OrionQuests core control compatibility remains v4.10.7+ (v4.11.0+ for structured events and full scheduler tags).
+
+## Previous Beta - v1.6.0-beta2
 
 - Stable remains **v1.5.1** until v1.6 is promoted.
 - Beta release target: **v1.6.0-beta2** (2026-11-24).
