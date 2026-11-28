@@ -423,9 +423,27 @@ void testOwnedReadQueue().catch(error => { console.error(error); process.exitCod
         "response: {\"authorization\": {\"value\": \"" + secret + "\"}}",
         "Authorization: Basic example\r\n " + secret,
         "https://example.invalid/?access%5ftoken=" + secret,
+        "https://example.invalid/?access%255Ftoken=" + secret,
+        "https://example.invalid/?access%25255Ftoken=" + secret,
+        "https://example.invalid/?access%5Ftoken=" + secret + "&bad=%ZZ",
+        "https://example.invalid/?bad=%FF&access%255Ftoken=" + secret,
+        "https://example.invalid/?access%252525255Ftoken=" + secret,
+        "Bearer%20" + secret,
+        "https://user%3A" + secret + "%40example.invalid/",
+        { "access%25255Ftoken": secret },
+        { "access%252525255Ftoken": secret },
+        { headers: [["x%25252Dapi%25252Dkey", secret]] },
+        JSON.stringify({ "access%25255Ftoken": secret }),
         { xAuthToken: secret, passphrase: secret },
+        { "x-refresh-token": secret, "x-private-key": secret, "access%5Ftoken": secret, "access%255Ftoken": secret },
     ];
     for (const input of inputs) assert.ok(!sanitizeEventText(input).includes(secret), "Synthetic secret was not redacted");
     assert.ok(!consoleArgsToText(["[QuestUI]", "access_token", secret]).includes(secret));
     assert.ok(sanitizeEventText("Normal quest update succeeded").includes("Normal quest update succeeded"));
+    assert.equal(sanitizeEventText("progress 100%25"), "progress 100%25");
+    assert.equal(sanitizeEventText("https://example.invalid/?name=%E6%97%A5"), "https://example.invalid/?name=%E6%97%A5");
+    assert.equal(sanitizeEventText("bad=%ZZ&value=%FF"), "bad=%ZZ&value=%FF");
+    assert.ok(sanitizeEventText({ "display%2520name": "Quest UI" }).includes("Quest UI"));
 }
+
+void import("./nativeStorage.test.mjs").catch(error => { console.error(error); process.exitCode = 1; });

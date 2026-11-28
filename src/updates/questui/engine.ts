@@ -6,7 +6,7 @@ import { promisify } from "util";
 
 import { compareSemver, parseSemver } from "../logic";
 import { tryAcquireVencordUpdate } from "../transactionLock";
-import { assertManagedCheckoutRoot, assertNoIgnoredTargetCollision, assertRegularRuntimeTree } from "../checkoutSafety";
+import { assertManagedCheckoutRoot, assertRegularRuntimeTree } from "../checkoutSafety";
 
 export type QuestUIUpdateStatus =
     | "updated"

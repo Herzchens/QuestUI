@@ -15,20 +15,34 @@ const query = /([?&](?:code|token|access_token|refresh_token|ticket|api_key|clie
 
 const ambiguousContainer = new RegExp(String.raw`(?:["\']${KEY}["\']|\b${KEY})\s*[:=]\s*[\[{]`, "i");
 const escapedKey = new RegExp(String.raw`\\["\']${KEY}\\["\']`, "i");
-function textOnly(text: string): string {
-    if (text.length > MAX_INPUT) return OMITTED;
-    // Embedded malformed/escaped containers cannot be reliably redacted field by field.
-    if (ambiguousContainer.test(text) || escapedKey.test(text)) return OMITTED;
-    // Percent-encoded field names are common in URL/form diagnostics. Decode
-    // only for detection and omit the original if it reveals a credential.
-    if (/%[0-9a-f]{2}/i.test(text)) {
-        try {
-            const decoded = decodeURIComponent(text);
-            if (decoded !== text && (decoded.length > MAX_INPUT || ambiguousContainer.test(decoded) || escapedKey.test(decoded)
-                || new RegExp(query.source, "i").test(decoded) || new RegExp(assignment.source, "i").test(decoded)
-                || new RegExp(jsonValue.source, "i").test(decoded))) return OMITTED;
-        } catch { /* malformed URI remains subject to ordinary redaction */ }
+// Every recognized free-text credential format needs at least one of these
+// markers. Plain IDs, summaries and diagnostic messages need no regex chain.
+function mayContainCredential(text: string): boolean {
+    return /[:=.%\\]|-----BEGIN |\b(?:Bearer|Basic)\s/i.test(text);
+}
+
+const PERCENT_ESCAPE = /%[0-9a-f]{2}/i;
+const MAX_DECODE_PASSES = 4;
+
+// Decode for detection only. All callers retain the original representation.
+function containsEncodedCredential(text: string, sensitive: (candidate: string) => boolean): boolean {
+    let candidate = text;
+    for (let pass = 0; pass < MAX_DECODE_PASSES && PERCENT_ESCAPE.test(candidate); pass++) {
+        let next: string;
+        try { next = decodeURIComponent(candidate); }
+        catch {
+            next = candidate.replace(/%([0-7][0-9a-f])/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+        }
+        if (next === candidate) return false;
+        candidate = next;
+        if (candidate.length > MAX_INPUT || sensitive(candidate)) return true;
     }
+    // Nested escapes beyond the work budget are ambiguous. Unchanged malformed
+    // non-ASCII escapes are handled by the early equality check above.
+    return PERCENT_ESCAPE.test(candidate);
+}
+
+function redactKnownText(text: string): string {
     return text
         .replace(/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)/g, REDACTED)
         .replace(jsonValue, '$1"[REDACTED]"')
@@ -40,9 +54,27 @@ function textOnly(text: string): string {
         .replace(/(https?:\/\/)[^/\s@]+:[^/\s@]+@/gi, "$1" + REDACTED + "@");
 }
 
+function containsKnownCredential(text: string): boolean {
+    return ambiguousContainer.test(text) || escapedKey.test(text) || redactKnownText(text) !== text;
+}
+
+function textOnly(text: string): string {
+    if (text.length > MAX_INPUT) return OMITTED;
+    if (!mayContainCredential(text)) return text;
+    if (ambiguousContainer.test(text) || escapedKey.test(text)) return OMITTED;
+    if (PERCENT_ESCAPE.test(text) && containsEncodedCredential(text, containsKnownCredential)) return OMITTED;
+    return redactKnownText(text);
+}
+
+function sensitiveCanonicalKey(decoded: string): boolean {
+    const canonical = decoded.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const sensitive = /^(?:proxyauthorization|authorization(?:header)?|setcookie|cookies?|(?:access|auth|refresh|session|discord|bot|bearer|oauth|id)?token|proxyticket|apikey|clientsecret|secretkey|personalaccesstoken|password|passwd|passphrase|credentials?|secret|privatekey|(?:oauth|auth|gift|reward)code)$/;
+    return sensitive.test(canonical) || (canonical.startsWith("x") && sensitive.test(canonical.slice(1)));
+}
+
 export function isSensitiveDiagnosticKey(key: string): boolean {
-    const canonical = key.toLowerCase().replace(/[^a-z0-9]/g, "").replace(/^x(?=auth|api|token|discord|access|session)/, "");
-    return /^(?:proxyauthorization|authorization(?:header)?|setcookie|cookies?|(?:access|auth|refresh|session|discord|bot|bearer|oauth|id)?token|proxyticket|apikey|clientsecret|secretkey|personalaccesstoken|password|passwd|passphrase|credentials?|secret|privatekey|(?:oauth|auth|gift|reward)code)$/.test(canonical);
+    if (key.length > MAX_INPUT) return true;
+    return sensitiveCanonicalKey(key) || (PERCENT_ESCAPE.test(key) && containsEncodedCredential(key, sensitiveCanonicalKey));
 }
 
 function forbiddenKey(key: string): boolean {
@@ -122,6 +154,11 @@ function truncate(text: string, maxLength: number): string {
 
 export function sanitizeEventText(value: unknown, maxLength = MAX_OUTPUT): string {
     if (value == null) return "";
+    if (typeof value === "string") {
+        if (value.length > MAX_INPUT) return truncate(OMITTED, maxLength);
+        const first = value.trimStart()[0];
+        if (first !== "{" && first !== "[") return truncate(textOnly(value), maxLength);
+    }
     const safe = walk(value, newBudget(), 0);
     return truncate(typeof safe === "string" ? safe : JSON.stringify(safe), maxLength);
 }

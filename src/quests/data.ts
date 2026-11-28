@@ -497,7 +497,7 @@ export function useQuestSnapshot(mode: QuestSnapshotMode = "live"): NormalizedQu
             liveConsumers++;
             snapshotSource.setIntervalMs(REFRESH_FALLBACK_MS);
         }
-        let lastForcedAt = Date.now();
+        let lastForcedAt = -Infinity;
         const unsubscribe = snapshotSource.subscribe((next, force) => {
             const now = Date.now();
             const forceShortcut = force && (now < lastForcedAt || now - lastForcedAt >= SHORTCUT_REFRESH_FALLBACK_MS);

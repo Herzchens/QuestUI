@@ -1,6 +1,6 @@
 import { app, IpcMainInvokeEvent, shell } from "electron";
 import { constants } from "fs";
-import { lstat, mkdir, open, readFile, stat } from "fs/promises";
+import { lstat, mkdir, open, stat } from "fs/promises";
 import { join } from "path";
 
 import { collectEventAccountUsernames, eventBelongsToAccount, eventMatchesAccountScopes, eventVisibleForAccount } from "./account";
@@ -13,7 +13,7 @@ import {
 } from "./pagination";
 import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort } from "./types";
 import { normalizePersistedEvent } from "./validation";
-import { assertRegularLogPath, readLogText, replaceLogFile } from "./storage";
+import { assertRegularLogPath, readLogCompactionTail, readLogText, replaceLogFile } from "./storage";
 import { createPageSessionStore } from "./sessionStore";
 import { createOrderedReadBatch } from "./orderedReadBatch";
 
@@ -94,23 +94,8 @@ async function ensureLogDir(): Promise<void> {
 }
 
 async function compactIfNeeded(): Promise<void> {
-    let info;
-    try {
-        if (!await assertRegularLogPath(LOG_FILE)) return;
-        info = await stat(LOG_FILE);
-    } catch (error) {
-        if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return;
-        throw error;
-    }
-    if (info.size <= MAX_LOG_BYTES) return;
-
-    const buffer = await readFile(LOG_FILE);
-    let start = Math.max(0, buffer.length - COMPACT_TO_BYTES);
-    if (start > 0) {
-        const nextNewline = buffer.indexOf(0x0a, start);
-        start = nextNewline >= 0 ? nextNewline + 1 : buffer.length;
-    }
-    const kept = buffer.subarray(start);
+    const kept = await readLogCompactionTail(LOG_FILE, MAX_LOG_BYTES, COMPACT_TO_BYTES);
+    if (!kept) return;
     await replaceLogFile(LOG_FILE, kept);
     invalidatePageSessions();
 }
@@ -181,6 +166,12 @@ function normalizeSelection<T extends string>(value: unknown, allowed: readonly 
 
 function normalizeQueryOptions(options: any = {}): NormalizedQueryOptions {
     if (!options || typeof options !== "object" || Array.isArray(options)) throw new Error("Invalid Event Log query.");
+    for (const key of ["accountId", "currentAccountId"]) {
+        const value = options[key];
+        if (value != null && (typeof value !== "string" || !value.trim() || value.length > 128)) {
+            throw new Error("Invalid Event Log account filter.");
+        }
+    }
     return {
         query: typeof options.query === "string" ? options.query.slice(0, 512).trim().toLowerCase() : "",
         source: options.source === "orion" || options.source === "questui" ? options.source : "all",
