@@ -24,7 +24,7 @@ export function start() {
         id: "custom-example",
         label: "Example",
         css: `:scope { color: #eee; }
-.quest-ui-dashboard-shell { background: #181820; }`
+:scope.quest-ui-dashboard-shell { background: #181820; }`
     });
 }
 

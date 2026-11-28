@@ -439,3 +439,43 @@ void (async () => {
     dispose2();
     assert.equal(sdk.api.getThemes().length, themes.length);
 }
+
+{
+    const errors: unknown[] = [];
+    const calls: string[] = [];
+    const rendering = createThemeRendering(error => errors.push(error));
+    const root = {} as HTMLElement;
+    const otherRoot = {} as HTMLElement;
+    const context = { root, surface: "dashboard" as const, graphics: graphicsQualityPolicy("3"), reducedMotion: false };
+    const other = { ...context, root: otherRoot, surface: "quest-home" as const };
+    let revisions = 0;
+    const unsub = rendering.subscribe(() => revisions++);
+    rendering.start();
+    const initial = rendering.getEpoch();
+    rendering.attach(({ defer, signal }) => {
+        defer(() => {
+            rendering.attach(() => calls.push("escaped disposer"), other);
+            calls.push("disposed");
+        });
+        signal.addEventListener("abort", () => rendering.attach(() => calls.push("escaped abort"), other));
+        rendering.attach(() => calls.push("escaped mount"), context);
+    }, context);
+    const close = rendering.attach(({ defer }) => defer(() => calls.push("replacement")), context);
+    rendering.attach(({ defer }) => defer(() => {
+        rendering.clear();
+        rendering.attach(() => calls.push("escaped clear"), context);
+        calls.push("other");
+    }), other);
+    rendering.clear();
+    close();
+    assert.deepEqual(calls, ["disposed", "replacement", "other"]);
+    assert.equal(errors.length, 0);
+    assert.ok(rendering.getEpoch() > initial);
+    rendering.stop();
+    assert.equal(rendering.isRunning(), false);
+    rendering.start();
+    assert.equal(rendering.isRunning(), true);
+    assert.ok(revisions >= 4);
+    unsub();
+    rendering.stop();
+}

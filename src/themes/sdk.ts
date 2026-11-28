@@ -35,6 +35,11 @@ export function createThemeSDK(host: SDKHost, prepareCss: (id: string, css: stri
         if (entries.has(style)) throw new Error("Custom theme already registered.");
         if (entries.size >= 64) throw new Error("Too many custom themes.");
         const scoped = prepareCss(id, css);
+        if (typeof scoped !== "string" || !scoped.trim() || scoped.length > 1048576) {
+            throw new Error("Invalid or oversized prepared theme CSS.");
+        }
+        // Preparation may call into a host; re-check ownership before insertion.
+        if (entries.has(style) || entries.size >= 64) throw new Error("Custom theme registration conflict.");
         const entry: StyleEntry = { css: scoped };
         entries.set(style, entry);
         let unregister: () => void;

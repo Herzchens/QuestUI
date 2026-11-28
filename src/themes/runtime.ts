@@ -6,6 +6,7 @@ import { createDashboardThemeController } from "./controller";
 import { useEffectiveReducedMotion, useGraphicsQualityPolicy, useGraphicsRootClasses } from "../graphics/runtime";
 import { createThemeRendering, type ThemeSurface } from "./rendering";
 import { createThemeSDK } from "./sdk";
+import { prepareScopedThemeCSS } from "./scope";
 import type { ThemeStyleAdapter } from "./controller";
 import settings from "../plugin/settings";
 import { DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID } from "./registry";
@@ -42,9 +43,8 @@ export function stopDashboardThemes(): void {
 
 export function selectDashboardTheme(preference: unknown): string {
     const previous = controller.getSnapshot();
-    const selected = lifecycle.select(preference);
-    if (selected !== previous) rendering.clear();
-    return selected;
+    try { return lifecycle.select(preference); }
+    finally { if (controller.getSnapshot() !== previous) rendering.clear(); }
 }
 
 export function useThemeRenderingSurface(surface: ThemeSurface) {
@@ -52,12 +52,13 @@ export function useThemeRenderingSurface(surface: ThemeSurface) {
     const id = useDashboardThemeId();
     const graphics = useGraphicsQualityPolicy();
     const reducedMotion = useEffectiveReducedMotion();
+    const epoch = React.useSyncExternalStore(rendering.subscribe, rendering.getEpoch, rendering.getEpoch);
     React.useEffect(() => {
         const element = root.current;
         const render = DASHBOARD_THEMES.find(theme => theme.id === id)?.render;
         if (!element || !render || controller.getSnapshot() !== id) return;
         return rendering.attach(render, { root: element, surface, graphics, reducedMotion });
-    }, [id, surface, graphics, reducedMotion]);
+    }, [id, surface, graphics, reducedMotion, epoch]);
     return root;
 }
 
@@ -66,30 +67,14 @@ const custom = createThemeSDK({
     catalogue: () => controller.getCatalogue(),
     active: () => controller.getSnapshot(),
     restore(id) {
-        if (settings.store.dashboardTheme !== id || controller.getSnapshot() !== DEFAULT_DASHBOARD_THEME_ID) return;
+        if (!rendering.isRunning() || settings.store.dashboardTheme !== id
+            || controller.getSnapshot() !== DEFAULT_DASHBOARD_THEME_ID) return;
         try { selectDashboardTheme(id); }
         catch (error) { console.warn("[QuestUI] Could not restore registered theme.", error); }
     }
-}, prepareScopedThemeCSS);
+}, (id, css) => prepareScopedThemeCSS(".quest-ui-theme-" + id, css));
 
 export const themeSDK = custom.api;
-
-/** Browser-parsed @scope prevents accidental global selector application.
- * CSS is trusted local code, not untrusted input; network URLs and CSS side
- * channels are not sandboxed. Reject top-level rule escapes and unsupported hosts. */
-export function prepareScopedThemeCSS(id: string, css: string): string {
-    if (!/^custom-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) throw new TypeError("Invalid theme ID.");
-    const selector = ".quest-ui-theme-" + id;
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync("@scope (" + selector + ") {\n" + css + "\n}");
-    const rule = sheet.cssRules[0];
-    if (sheet.cssRules.length !== 1 || !rule || !rule.cssText.startsWith("@scope (" + selector + ")")
-        || !("cssRules" in rule) || !(rule as CSSGroupingRule).cssRules.length) {
-        throw new Error("Invalid custom theme CSS or unsupported CSS scope.");
-    }
-    return rule.cssText;
-}
-
 
 export function useDashboardThemeOptions() {
     return React.useSyncExternalStore(controller.subscribe, controller.getCatalogue, controller.getCatalogue);

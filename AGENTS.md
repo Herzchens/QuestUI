@@ -69,7 +69,7 @@ The maintainer approved the current companion surface: global Start/Pause/Resume
 - `src/orion/schedulerState.ts` - optional Orion scheduler snapshot normalization used by the companion integration; unordered live batches are normalized without inferring queue order.
 - `src/orion/ignorePolicy.ts`, `src/orion/ignoreRuntime.ts` - Orion Ignore policy helpers and Dashboard-independent reactive enforcement/exclusion reconciliation.
 - `src/graphics/controller.ts`, `src/graphics/policy.ts`, `src/graphics/runtime.ts`, `src/dashboard/DashboardGraphicsControl.tsx`, `src/dashboard/graphicsLogic.ts` - shared Graphics quality selector (`Light`, `Low`, `Medium`, `High`, `Max`, locked `Ultra` preview), Reduced Motion policy, system-motion subscription, and bounded artwork prewarming/cache gating.
-- `src/themes/registry.ts`, `src/themes/controller.ts`, `src/themes/runtime.ts`, `src/themes/artworkColorPool.ts`, `src/themes/{default,liquid-glass,obsidian,sakura,terminal,origami}/` - six standalone built-in themes (`Default`, `Liquid Glass`, `Obsidian`, `Sakura`, `Terminal`, `Origami`), single-active-theme lifecycle, reactive theme roots, and bounded artwork color/raster caches. Each theme owns all its CSS (layout, geometry, typography, motion, responsive rules, and visual styling); `.quest-ui-theme` is a stable markup hook, not a mandatory shared stylesheet. Only `src/themes/registry.ts` imports `?managed` theme CSS. Obsidian fracture assets (`generateFractureAssets.mjs --check`) and Origami baked assets (`origamiVisual.test.mjs`) have deterministic generator verification. A public custom-theme API and independent Quest Home theming are planned future work, not implemented in v1.6.0-beta3.
+- `src/themes/registry.ts`, `src/themes/controller.ts`, `src/themes/runtime.ts`, `src/themes/artworkColorPool.ts`, `src/themes/{default,liquid-glass,obsidian,sakura,terminal,origami}/` - six standalone built-in themes (`Default`, `Liquid Glass`, `Obsidian`, `Sakura`, `Terminal`, `Origami`), single-active-theme lifecycle, reactive theme roots, and bounded artwork color/raster caches. Each theme owns all its CSS (layout, geometry, typography, motion, responsive rules, and visual styling); `.quest-ui-theme` is a stable markup hook, not a mandatory shared stylesheet. Only `src/themes/registry.ts` imports `?managed` theme CSS. Obsidian fracture assets (`generateFractureAssets.mjs --check`) and Origami baked assets (`origamiVisual.test.mjs`) have deterministic generator verification. The development branch adds a versioned trusted-local CSS Theme SDK (`src/themes/sdk.ts`, `src/themes/scope.ts`, `docs/THEME_SDK.md`) and abortable rendering-surface ownership (`src/themes/rendering.ts`). Custom CSS is not a security sandbox. Independent Quest Home theming remains future work.
 - `src/dashboard/DashboardThemeControl.tsx`, `src/dashboard/DashboardChoiceMenu.tsx` - palette button left of the Orb balance and a shared single-choice menu for themes and Sort. Persist the applied Dashboard theme in Vencord settings, never list an unfinished theme, and keep future Quest Home themes separate.
 - `src/quests/actions/QuestCardActions.tsx` - explicit Accept/Claim/View Code, Ignore/Unignore (persisting preference first, then attempting Orion exclusion/pause), `Processing…`, confirmed per-card enrollment Orion auto-start, and per-Quest control slot.
 - `src/quests/actions/ClaimAllControl.tsx`, `src/quests/actions/claimAll.ts`, `src/quests/actions/claimAllState.ts` - dynamic **Claim All / Accept All** UI, pure batch semantics, and the synchronous cross-render batch lock (filenames retained for both batch modes).
@@ -101,7 +101,7 @@ Install QuestUI at:
 Vencord/src/userplugins/QuestUI
 ```
 
-Run from the Vencord root. `.github/workflows/compatibility.yml` is the authoritative full CI matrix (currently 45 test files across `tests/` plus contract, generated-asset, build, type-check, upstream Orion coexistence, and Stable/Canary reporter gates):
+Run from the Vencord root. `.github/workflows/compatibility.yml` is the authoritative full CI matrix (currently 46 test files across `tests/` plus contract, generated-asset, build, type-check, upstream Orion coexistence, and Stable/Canary reporter gates):
 
 ```bash
 pnpm install --frozen-lockfile
@@ -112,7 +112,7 @@ node src/userplugins/QuestUI/scripts/checkThemeContract.mjs --self-test
 node src/userplugins/QuestUI/scripts/checkThemeContract.mjs
 node src/userplugins/QuestUI/src/themes/obsidian/generateFractureAssets.mjs --check
 
-# Focused examples (see .github/workflows/compatibility.yml for all 45 test files):
+# Focused examples (see .github/workflows/compatibility.yml for all 46 test files):
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/batchToolbar.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignoredRuntime.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/orion/exclusionIntegration.test.ts

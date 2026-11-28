@@ -18,6 +18,16 @@ export function createThemeRendering(onError: (error: unknown) => void) {
     const pending = new Set<() => void>();
     let enabled = false;
     let generation = 0;
+    let clearing = false;
+    let disposing = 0;
+    let mounting = false;
+    const listeners = new Set<() => void>();
+
+    function publish() {
+        for (const listener of [...listeners]) {
+            try { listener(); } catch (error) { report(error); }
+        }
+    }
 
     function report(error: unknown) {
         try { onError(error); } catch { /* Diagnostics cannot break cleanup. */ }
@@ -31,31 +41,44 @@ export function createThemeRendering(onError: (error: unknown) => void) {
     }
 
     function clear() {
+        if (clearing) return;
+        clearing = true;
         generation++;
-        // Retry prior failures once per boundary, not in an unbounded loop.
-        flush();
-        for (const close of [...sessions.values()]) close();
+        try {
+            // Retry prior failures once per boundary, not in an unbounded loop.
+            flush();
+            for (const close of [...sessions.values()]) close();
+        } finally {
+            clearing = false;
+            publish();
+        }
     }
 
     function attach(renderer: ThemeRenderer, context: Omit<ThemeRenderContext, "signal" | "defer">): () => void {
-        if (!enabled) return () => {};
+        if (!enabled || clearing || disposing || mounting) return () => {};
         const epoch = generation;
         sessions.get(context.root)?.();
-        if (!enabled || epoch !== generation || pending.size) return () => {};
+        if (!enabled || clearing || epoch !== generation || pending.size) return () => {};
         const abort = new AbortController();
         const disposers: Array<() => void> = [];
         let closed = false;
         function disposeOne(dispose: () => void) {
+            disposing++;
             try { dispose(); } catch (error) { pending.add(dispose); report(error); }
+            finally { disposing--; }
         }
         function close() {
             if (closed) return;
             closed = true;
             if (sessions.get(context.root) === close) sessions.delete(context.root);
-            abort.abort();
-            for (const dispose of disposers.splice(0).reverse()) disposeOne(dispose);
+            disposing++;
+            try {
+                abort.abort();
+                for (const dispose of disposers.splice(0).reverse()) disposeOne(dispose);
+            } finally { disposing--; }
         }
         sessions.set(context.root, close);
+        mounting = true;
         try {
             renderer(Object.freeze({
                 ...context, signal: abort.signal,
@@ -68,13 +91,23 @@ export function createThemeRendering(onError: (error: unknown) => void) {
         } catch (error) {
             close();
             report(error);
-        }
+        } finally { mounting = false; }
         return close;
     }
 
     return {
-        start() { enabled = true; },
+        start() {
+            if (enabled || clearing || disposing || mounting) return;
+            enabled = true;
+            clear();
+        },
         stop() { enabled = false; clear(); },
+        isRunning: () => enabled,
+        getEpoch: () => generation,
+        subscribe(listener: () => void) {
+            listeners.add(listener);
+            return () => { listeners.delete(listener); };
+        },
         clear,
         attach
     };
