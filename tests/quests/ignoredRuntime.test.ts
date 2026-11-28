@@ -55,6 +55,10 @@ async function main(){
     start();await flush();assert.equal(ready(),true);
     await mod.exports.setIgnoreRules("A",[],[{kind:"name-contains",value:"dune"}]);
     assert.ok(ids().has("rule"));assert.equal(hook().rules.length,1);
+    session={accountId:"B"};publish(userListeners);assert.equal(hook().rules.length,0);assert.ok(!ids().has("rule"));
+    await assert.rejects(mod.exports.setIgnoreRules("A",[],[]),/account changed/);
+    session={accountId:"A"};publish(userListeners);assert.ok(ids().has("rule"));
+    await assert.rejects(mod.exports.setIgnoreRules("A",[],[]),/rules changed/);assert.equal(ready(),true);
     await set("A","rule",false);assert.ok(!ids().has("rule"));assert.deepEqual(stored.ruleExceptions?.A,["rule"]);
     await set("A","rule",true);assert.ok(ids().has("rule"));assert.equal(stored.ruleExceptions,undefined);
     await mod.exports.setIgnoreRules("A",hook().rules,[]);assert.ok(ids().has("rule"),"manual Ignore survives rule removal");

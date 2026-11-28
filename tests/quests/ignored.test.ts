@@ -128,3 +128,12 @@ import { matchingIgnoredQuestIds, replaceAccountIgnoreRules, updateEffectiveIgno
     state = pruneIgnoreExceptions(state,"B",["name"]);
     assert.equal(state.ruleExceptions,undefined);
 }
+
+{
+    const rule = [{kind:"name-contains",value:"Dune"}] as const;
+    const huge = function* () { for(let i=0;i<10001;i++) yield {id:"q"+i,config:{messages:{questName:"Dune"}}}; };
+    assert.throws(()=>matchingIgnoredQuestIds(rule,huge()),/safety limit/);
+    assert.equal(matchingIgnoredQuestIds([],huge()).size,0);
+    assert.throws(()=>replaceAccountIgnoreRules(null,"__proto__",[],rule),/Invalid Ignore account/);
+    assert.throws(()=>replaceAccountIgnoreRules(null,"A",[],Array.from({length:65},(_,i)=>({kind:"application-id",value:String(i)}))),/limit/);
+}

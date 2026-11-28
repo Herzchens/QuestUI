@@ -81,20 +81,30 @@ function normalizeAccountMap<T>(value: unknown, parse: (value: unknown) => T[]):
 
 export function ignoreRuleMatches(rule: IgnoreRule, quest: any): boolean {
     const config = quest?.config;
-    if (rule.kind === "application-id") return String(config?.application?.id ?? "") === rule.value;
+    if (rule.kind === "application-id") return typeof config?.application?.id === "string" && config.application.id === rule.value;
     const name = config?.messages?.questName ?? config?.application?.name ?? config?.messages?.gameTitle;
     return typeof name === "string" && nameKey(name).includes(nameKey(rule.value));
 }
 
 export function matchingIgnoredQuestIds(rules: readonly IgnoreRule[], quests: Iterable<unknown>, now = Date.now()): ReadonlySet<string> {
     const ids = new Set<string>();
+    if (!rules.length) return ids;
+    const names = rules.filter(rule => rule.kind === "name-contains").map(rule => nameKey(rule.value));
+    const applications = new Set(rules.filter(rule => rule.kind === "application-id").map(rule => rule.value));
     let scanned = 0;
     for (const candidate of quests) {
         if (++scanned > 10000) throw new Error("Quest rule catalogue exceeds safety limit.");
         const quest = candidate as any;
         const id = normalizedId(quest?.id ?? quest?.config?.id);
-        if (!id || terminalIgnoredQuestIds([quest], now).size || !rules.some(rule => ignoreRuleMatches(rule, quest))) continue;
-        ids.add(id);
+        if (!id || terminalIgnoredQuestIds([quest], now).size) continue;
+        const config = quest?.config;
+        const applicationId = config?.application?.id;
+        if (typeof applicationId === "string" && applications.has(applicationId)) { ids.add(id); continue; }
+        const rawName = config?.messages?.questName ?? config?.application?.name ?? config?.messages?.gameTitle;
+        if (typeof rawName === "string" && names.length) {
+            const name = nameKey(rawName);
+            if (names.some(pattern => name.includes(pattern))) ids.add(id);
+        }
     }
     return ids;
 }

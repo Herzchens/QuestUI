@@ -9,6 +9,7 @@ import {
     pruneIgnoreExceptions,
     updateEffectiveIgnore,
     matchingIgnoredQuestIds,
+    ignoreRuleMatches,
     sameIgnoreRules,
     replaceAccountIgnoreRules,
     type IgnoreRule,
@@ -72,14 +73,20 @@ function exceptionsFor(accountId: string | null): readonly string[] {
     return accountId && cachedState?.ruleExceptions && Object.hasOwn(cachedState.ruleExceptions, accountId)
         ? cachedState.ruleExceptions[accountId] : [];
 }
-function ruleCatalogue(): Iterable<unknown> {
+function* ruleCatalogue(): Iterable<unknown> {
     const quests = QuestsStore?.quests;
     if (!quests) throw new Error("Quest catalogue unavailable.");
-    if (Array.isArray(quests)) return quests;
-    if (typeof quests.values === "function") return quests.values();
-    if (typeof quests === "object") return Object.values(quests);
-    throw new Error("Invalid Quest catalogue.");
+    const values = Array.isArray(quests) ? quests : typeof quests.values === "function" ? quests.values()
+        : typeof quests === "object" ? Object.values(quests) : null;
+    if (!values) throw new Error("Invalid Quest catalogue.");
+    for (const quest of values) {
+        const id = quest?.id ?? quest?.config?.id;
+        // Use the same authoritative getQuest preference as Dashboard snapshots.
+        const current = typeof id === "string" ? QuestsStore?.getQuest?.(id) : null;
+        yield current && String(current.id ?? current.config?.id) === id ? current : quest;
+    }
 }
+
 function equalIds(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
     return a.size === b.size && [...a].every(id => b.has(id));
 }
@@ -93,14 +100,15 @@ function refreshSnapshot(): void {
     let ruleIds: ReadonlySet<string> = EMPTY_IDS;
     let ruleReady = true;
     if (rules.length) {
-        try { ruleIds = matchingIgnoredQuestIds(rules, ruleCatalogue()); }
+        try { ruleIds = matchingIgnoredQuestIds(rules, ruleCatalogue(), Date.now()); }
         catch {
             ruleReady = false;
             if (snapshot.accountId === accountId) ruleIds = snapshot.ruleIds;
         }
     }
     const ids = new Set(stored.filter(id => !terminal.has(id)));
-    for (const id of ruleIds) if (!exceptions.has(id)) ids.add(id);
+    const ruleTerminal = ruleReady ? EMPTY_IDS : terminalIds(ruleIds);
+    for (const id of ruleIds) if (!exceptions.has(id) && !ruleTerminal.has(id)) ids.add(id);
     const effectiveReady = ready && ruleReady;
     if (snapshot.accountId === accountId && snapshot.ready === effectiveReady && snapshot.storageReady === ready
         && sameIgnoreRules(snapshot.rules, rules) && equalIds(snapshot.ids, ids) && equalIds(snapshot.ruleIds, ruleIds)) return;
@@ -213,7 +221,18 @@ export async function setQuestIgnored(accountId: string, questId: string, ignore
         if (!lifecycleStarted || epoch !== lifecycleGeneration || !isCurrentAccountSession(session)) throw new Error("Discord account changed before Ignore.");
         if (!isIgnoredQuestStateReady()) throw new Error("Ignored Quests are still loading. Try again shortly.");
         if (ignored && terminalIds([questId]).has(questId)) throw new Error("This Quest has already been claimed or expired.");
-        await persist(stored => updateEffectiveIgnore(stored, accountId, questId, ignored, snapshot.ruleIds.has(questId)),
+        await persist(stored => {
+            const current = normalizeIgnoredQuestState(stored);
+            const rules = current.ruleAccounts?.[accountId] ?? EMPTY_RULES;
+            let matched = false;
+            if (!ignored && rules.length) {
+                const quest = QuestsStore?.getQuest?.(questId);
+                if (quest && String(quest.id ?? quest.config?.id) === questId) matched = rules.some(rule => ignoreRuleMatches(rule, quest));
+                else if (sameIgnoreRules(rules, snapshot.rules)) matched = snapshot.ruleIds.has(questId);
+                else throw new IgnoredQuestPreferenceError("Ignore rules changed. Refresh and try again.");
+            }
+            return updateEffectiveIgnore(current, accountId, questId, ignored, matched);
+        },
             () => lifecycleStarted && epoch === lifecycleGeneration && isCurrentAccountSession(session));
         queueSweep();
     });
@@ -252,7 +271,11 @@ export async function pruneExpiredIgnoredQuests(
         if (!terminal.size) return;
         const session = captureAccountSession();
         if (!session || session.accountId !== accountId) return;
-        await persist(stored => pruneIgnoreExceptions(pruneIgnoredQuestState(stored, accountId, terminal), accountId, terminal),
+        await persist(stored => {
+            const current = normalizeIgnoredQuestState(stored);
+            const latestTerminal = terminalIds([...(current.accounts[accountId] ?? []), ...(current.ruleExceptions?.[accountId] ?? [])]);
+            return pruneIgnoreExceptions(pruneIgnoredQuestState(current, accountId, latestTerminal), accountId, latestTerminal);
+        },
             () => lifecycleStarted && epoch === lifecycleGeneration && isCurrentAccountSession(session));
     });
     writeChain = work;
