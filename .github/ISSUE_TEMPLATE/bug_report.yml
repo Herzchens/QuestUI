@@ -10,7 +10,7 @@ body:
       value: |
         Thank you for reporting a QuestUI problem.
 
-        This form is for issues caused by QuestUI itself, including the Dashboard, Notification Center, native Accept/Claim/View Code, Reload, Update Center, Orb/runtime metadata, Orion controls, and Event Log diagnostics. Quest completion/progress automation itself belongs to the completion engine.
+        This form is for issues caused by QuestUI itself, including the Dashboard, themes, graphics quality and Reduced Motion, Notification Center, native Accept/Accept All/Claim/Claim All/View Code, Ignore and Orion fallback enforcement, Reload, Update Center, Orb/runtime metadata, Orion controls, and Event Log diagnostics. Quest completion/progress automation itself belongs to the completion engine.
 
         Do not include Discord tokens, account credentials, private account data, or other sensitive information in logs or screenshots.
 
@@ -52,9 +52,13 @@ body:
       description: Select the part of QuestUI most closely related to the problem.
       options:
         - Dashboard or Quest cards
+        - Themes, graphics quality, or Reduced Motion
+        - Artwork or rendering performance
         - Dashboard filters or sorting
         - Orb balance or rewards
         - Manual Accept, Claim, or View Code
+        - Accept All or Claim All batch actions
+        - Ignore or Orion fallback enforcement
         - Orion status or controls
         - Notification Center
         - Event Log or diagnostic report
@@ -126,6 +130,15 @@ body:
         - label: Dashboard Mode
         - label: Dashboard Orion Integration
         - label: Detailed Status
+
+  - type: input
+    id: visual-settings
+    attributes:
+      label: Theme, graphics quality, and Reduced Motion (for visual/performance issues)
+      description: Optional. If this is a visual or rendering issue, include the selected theme (Default, Liquid Glass, Obsidian, Sakura, Terminal, Origami), graphics preset (Light, Low, Medium, High, Max), and Reduced Motion state.
+      placeholder: Origami, Max, Reduced Motion off
+    validations:
+      required: false
 
   - type: textarea
     id: other-plugins

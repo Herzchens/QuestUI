@@ -4,8 +4,8 @@ QuestUI is maintained by [Herzchens](https://github.com/Herzchens).
 
 ## Project contributors
 
-- [Herzchens](https://github.com/Herzchens) - Project maintainer; started QuestUI from the extracted Quest shortcut/status indicator seed, then independently built and maintains the standalone Dashboard, Quest cards, manual actions, diagnostics, notifications, updater, Orion integration, compatibility work, documentation, and releases.
-- [nyxxbit](https://github.com/nyxxbit) - Contributed the settings-bar accessibility and tooltip fix in [pull request #3](https://github.com/Herzchens/QuestUI/pull/3), compatibility analysis, and maintenance guidance.
+- [Herzchens](https://github.com/Herzchens) - Project maintainer; started QuestUI from the extracted Quest shortcut/status indicator seed, then independently built and maintains the standalone Dashboard, six built-in themes, graphics and reduced-motion controls, Quest cards, manual and batch actions, diagnostics, Notification Center, updater, Orion integration, compatibility work, documentation, and releases.
+- [nyxxbit](https://github.com/nyxxbit) - Contributed the settings-bar accessibility and tooltip fix in [pull request #3](https://github.com/Herzchens/QuestUI/pull/3), upstream OrionQuests collaboration, companion API review, live integration testing, and compatibility support.
 
 ## Upstream credit
 

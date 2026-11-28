@@ -10,7 +10,7 @@ body:
       value: |
         Use this form to propose an improvement to QuestUI.
 
-        QuestUI is UI-focused. It may display Discord Quest state, provide navigation, perform explicit user-clicked native Accept/Claim actions, request Discord's native Quest-list refresh, and optionally delegate controls to a separately installed compatible OrionQuests plugin.
+        QuestUI is UI-focused. It may display Discord Quest state, provide navigation, perform explicit user-clicked native Accept / Accept All / Claim / Claim All actions, request Discord's native Quest-list refresh, and optionally delegate controls to a separately installed compatible OrionQuests plugin.
 
         QuestUI does not generate Quest progress, spoof games/streams, auto-enroll, auto-claim, bypass Discord challenges, or duplicate Orion's farming engine. Requests that would change those boundaries should explain why the functionality belongs in QuestUI.
 
@@ -38,11 +38,13 @@ body:
       label: Area
       options:
         - User interface
+        - Themes, graphics quality, or Reduced Motion
         - Accessibility
         - Dashboard filters or sorting
         - Quest status display
         - Orb balance or runtime metadata
-        - Manual Quest actions
+        - Manual or batch Quest actions
+        - Ignore or Orion fallback enforcement
         - Orion integration
         - Event Log or diagnostics
         - Notification Center
