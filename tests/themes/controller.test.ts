@@ -1,3 +1,4 @@
+import { createArtworkColorPool } from "../../src/themes/artworkColorPool";
 import { ORIGAMI_ANIMALS, origamiScene, normalizeOrigamiProgress } from "../../src/themes/origami/scene";
 import { dominantThumbnailColor } from "../../src/themes/origami/thumbnailColor";
 import { ornamentVariantSequence, SAKURA_ORNAMENT_COUNT } from "../../src/themes/sakura/ornament";
@@ -84,6 +85,16 @@ assert.equal(dominantArtworkColor([]), null);
 assert.equal(dominantArtworkColor([255, 0, 0, 0, 0, 0, 0, 255]), null);
 assert.deepEqual(dominantArtworkColor([230, 150, 40, 255, 230, 150, 40, 255, 40, 70, 200, 255]), [230, 150, 40]);
 assert.deepEqual(dominantArtworkColor([100, 100, 100, 255]), [100, 100, 100]);
+const obsidianPixels = (groups: readonly (readonly [number, readonly number[]])[]) =>
+    groups.flatMap(([count, pixel]) => Array.from({ length: count }, () => pixel).flat());
+const pastelArtwork = obsidianPixels([[420, [241, 240, 242, 255]], [100, [249, 218, 233, 255]], [56, [252, 251, 251, 255]]]);
+assert.deepEqual(dominantArtworkColor(pastelArtwork), [249, 218, 233]);
+const pastelShades = obsidianPixels([[160, [248, 214, 230, 255]], [160, [240, 205, 222, 255]], [200, [220, 40, 45, 255]], [56, [240, 240, 240, 255]]]);
+assert.deepEqual(dominantArtworkColor(pastelShades), [244, 210, 226]);
+assert.deepEqual(dominantArtworkColor(obsidianPixels([[20, [230, 231, 230, 255]], [1, [250, 215, 230, 0]]])), [230, 231, 230]);
+assert.equal(dominantArtworkColor(obsidianPixels([[10, [255, 255, 255, 255]], [10, [0, 0, 0, 255]]])), null);
+assert.deepEqual(dominantArtworkColor(obsidianPixels([[2, [240, 190, 214, 255]], [2, [40, 160, 210, 255]]])), dominantArtworkColor(obsidianPixels([[2, [40, 160, 210, 255]], [2, [240, 190, 214, 255]]])));
+
 const sakuraAssigned = ornamentVariantSequence(ids);
 assert.deepEqual(sakuraAssigned, ornamentVariantSequence(ids));
 assert.equal(SAKURA_ORNAMENT_COUNT, 10);
@@ -166,4 +177,48 @@ assert.deepEqual(dominantThumbnailColor(pixels([10, 30, 70, 255, 10], [220, 100,
     assert.deepEqual([...owned], ["fixture/a", "fixture/b"]);
     fixture.stop();
     assert.equal(owned.size, 0);
+}
+
+async function testArtworkOwnership() {
+    let started = 0;
+    let active = 0;
+    const pool = createArtworkColorPool<string>((url, signal) => new Promise(resolve => {
+        started++;
+        active++;
+        signal.addEventListener("abort", () => { active--; resolve(null); }, { once: true });
+    }));
+    const owner = {};
+    const urls = Array.from({ length: 1000 }, (_, i) => String(i));
+    pool.replaceCatalogue(owner, urls);
+    const visible = pool.acquire("0");
+    await Promise.resolve();
+    assert.equal(started, 4);
+    pool.replaceCatalogue(owner, []);
+    assert.equal(active, 1);
+    visible.release();
+    visible.release();
+    assert.equal(await visible.promise, null);
+    assert.equal(active, 0);
+    for (let i = 0; i < 8; i++) await Promise.resolve();
+    assert.equal(started, 4);
+    const a = {}, b = {};
+    pool.replaceCatalogue(a, ["shared"]);
+    pool.replaceCatalogue(b, ["shared"]);
+    await Promise.resolve();
+    assert.equal(active, 1);
+    pool.replaceCatalogue(a, []);
+    assert.equal(active, 1);
+    pool.replaceCatalogue(b, []);
+    assert.equal(active, 0);
+}
+void testArtworkOwnership().catch(error => { console.error(error); process.exitCode = 1; });
+
+{
+    const calls: string[] = [];
+    const lifecycle = createServiceLifecycle([
+        { start() { calls.push("+a"); lifecycle.stop(); }, stop() { calls.push("-a"); } },
+        { start() { calls.push("+b"); }, stop() { calls.push("-b"); } }
+    ]);
+    lifecycle.start();
+    assert.deepEqual(calls, ["+a", "-a"]);
 }

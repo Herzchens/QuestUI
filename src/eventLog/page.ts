@@ -1,5 +1,6 @@
 import type { PluginNative } from "@utils/types";
 import { queryEventLog } from "./runtime";
+import { getMemoryPageGeneration, memorySessions } from "./memoryPageSessions";
 import {
     pageSortedEventLogEvents,
     sortEventLogEvents,
@@ -11,13 +12,7 @@ const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>
     : null;
 
-const MEMORY_SESSION_LIMIT = 3;
 let nextMemorySessionId = 0;
-const memorySessions = new Map<string, {
-    signature: string;
-    sort: NonNullable<EventLogPageQuery["sort"]>;
-    events: EventLogPageResult["events"];
-}>();
 
 function normalizedSort(options: EventLogPageQuery): NonNullable<EventLogPageQuery["sort"]> {
     return options.sort === "oldest" || options.sort === "severity" ? options.sort : "newest";
@@ -38,11 +33,6 @@ function sessionSignature(options: EventLogPageQuery): string {
 }
 
 function rememberMemorySession(signature: string, sort: NonNullable<EventLogPageQuery["sort"]>, events: EventLogPageResult["events"]): string {
-    while (memorySessions.size >= MEMORY_SESSION_LIMIT) {
-        const oldest = memorySessions.keys().next().value as string | undefined;
-        if (!oldest) break;
-        memorySessions.delete(oldest);
-    }
     const id = `memory-${Date.now().toString(36)}-${(++nextMemorySessionId).toString(36)}`;
     memorySessions.set(id, { signature, sort, events });
     return id;
@@ -59,6 +49,7 @@ async function memoryPage(options: EventLogPageQuery): Promise<EventLogPageResul
     }
 
     if (!session) {
+        const generation = getMemoryPageGeneration();
         const result = await queryEventLog({
             query: options.query,
             source: options.source,
@@ -71,6 +62,9 @@ async function memoryPage(options: EventLogPageQuery): Promise<EventLogPageResul
             accountId: options.accountId,
             includeLegacy: options.includeLegacy
         });
+        if (generation !== getMemoryPageGeneration()) {
+            return { events: [], total: 0, hasMore: false, nextCursor: null, sessionId: null, stale: true };
+        }
         const events = sortEventLogEvents(result.events, sort);
         sessionId = rememberMemorySession(signature, sort, events);
         session = memorySessions.get(sessionId)!;
@@ -103,5 +97,13 @@ export async function queryEventLogPage(options: EventLogPageQuery): Promise<Eve
         // Desktop builds ship renderer and native helper together. Falling back to the legacy
         // 5,000-row query here would silently reintroduce incomplete history traversal.
         return { events: [], total: 0, hasMore: false, nextCursor: null, sessionId: null, stale: true };
+    }
+}
+
+export async function releaseEventLogPageSession(sessionId: string | null): Promise<void> {
+    if (!sessionId) return;
+    if (!Native) memorySessions.delete(sessionId);
+    else {
+        try { await Native.releaseEventPageSession(sessionId); } catch { }
     }
 }

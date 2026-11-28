@@ -364,7 +364,7 @@ jobs:
           grep -Fq 'QuestUI:ignored-quests:v1' src/userplugins/QuestUI/src/quests/ignored/runtime.ts
           grep -Fq 'completedQuestTransitions' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'newAvailableQuestTransitions' src/userplugins/QuestUI/src/notifications/runtime.ts
-          grep -Fq 'subscribeEventLog(scheduleProblemScan)' src/userplugins/QuestUI/src/notifications/runtime.ts
+          grep -Fq 'subscribeEventLog(() => { if (isCurrent()) scheduleProblemScan(); })' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'openQuestDashboard()' src/userplugins/QuestUI/src/notifications/runtime.ts
           grep -Fq 'registerQuestDashboardOpener(type' src/userplugins/QuestUI/src/dashboard/QuestButton.tsx
           grep -Fq 'openPluginModal(plugin)' src/userplugins/QuestUI/src/dashboard/DashboardToolbar.tsx

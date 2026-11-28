@@ -125,6 +125,7 @@ interface VencordDistSnapshot {
 const execFile = promisify(execFileCallback);
 const MAX_BUFFER = 16 * 1024 * 1024;
 const DECISION_TTL_MS = 10 * 60 * 1000;
+const MAX_PENDING_DECISIONS = 32;
 const VENCORD_RUNTIME_FILES = ["patcher.js", "preload.js", "renderer.js", "renderer.css"] as const;
 
 export function normalizeOrionUpdaterRepoUrl(value: string): string {
@@ -204,6 +205,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
     const pendingDecisions = new Map<string, PendingDecision>();
     let updateInFlight = false;
     let decisionCounter = 0;
+    let decisionExpiryTimer: ReturnType<typeof setTimeout> | undefined;
 
     function now(): number {
         return config.now?.() ?? Date.now();
@@ -212,7 +214,19 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
     function pruneDecisions(): void {
         const cutoff = now() - DECISION_TTL_MS;
         for (const [token, pending] of pendingDecisions) {
-            if (pending.createdAt < cutoff) pendingDecisions.delete(token);
+            if (pending.createdAt <= cutoff) pendingDecisions.delete(token);
+        }
+        while (pendingDecisions.size > MAX_PENDING_DECISIONS) {
+            const oldest = pendingDecisions.keys().next().value;
+            if (oldest === undefined) break;
+            pendingDecisions.delete(oldest);
+        }
+        if (decisionExpiryTimer !== undefined) clearTimeout(decisionExpiryTimer);
+        decisionExpiryTimer = undefined;
+        if (pendingDecisions.size) {
+            const expires = Math.min(...Array.from(pendingDecisions.values(), pending => pending.createdAt + DECISION_TTL_MS));
+            decisionExpiryTimer = setTimeout(pruneDecisions, Math.max(1, expires - now()));
+            decisionExpiryTimer.unref?.();
         }
     }
 
@@ -684,6 +698,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
         }
 
         pendingDecisions.delete(request.token);
+        pruneDecisions();
         return { blocked: null, value: pending };
     }
 
@@ -1302,6 +1317,7 @@ export function createOrionUpdateEngine(config: OrionUpdateEngineConfig) {
             trace: [...trace],
             createdAt: now()
         });
+        pruneDecisions();
 
         return {
             ok: false,

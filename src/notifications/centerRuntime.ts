@@ -17,7 +17,9 @@ let loadPromise: Promise<NotificationCenterState> | null = null;
 let writeChain: Promise<void> = Promise.resolve();
 
 function notify(): void {
-    for (const listener of listeners) listener();
+    for (const listener of [...listeners]) {
+        try { listener(); } catch { /* Subscriber failure must not interrupt persistence. */ }
+    }
 }
 
 async function loadState(): Promise<NotificationCenterState> {
@@ -89,10 +91,10 @@ export async function markNotificationCenterAllRead(accountId: string, now = Dat
 export async function markNotificationCenterAllUnread(accountId: string): Promise<void> {
     const id = accountId.trim();
     if (!id) return;
-    await loadState();
-    const current = notificationCenterAccountState(cachedState, id);
-    const readThrough = current?.clearedThrough ?? 0;
-    await persistMutation(value => updateNotificationCenterAccount(value, id, { readThrough }));
+    await persistMutation(value => {
+        const readThrough = notificationCenterAccountState(value, id)?.clearedThrough ?? 0;
+        return updateNotificationCenterAccount(value, id, { readThrough });
+    });
 }
 
 export async function clearNotificationCenter(accountId: string, now = Date.now()): Promise<void> {

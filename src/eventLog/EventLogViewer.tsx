@@ -16,7 +16,7 @@ import {
 import { EventLogWindowedScroller } from "./EventLogWindowedScroller";
 import { useDashboardThemeClassName } from "../themes/runtime";
 import { inferEventCategory } from "./logic";
-import { queryEventLogPage } from "./page";
+import { queryEventLogPage, releaseEventLogPageSession } from "./page";
 import type { EventLogCursor } from "./pagination";
 import {
     BugLogIcon,
@@ -88,6 +88,7 @@ function EventLogPanel() {
     const [clearCountdown, setClearCountdown] = useState<number | null>(null);
     const [clearSession, setClearSession] = useState<AccountSession | null>(null);
     const [clearing, setClearing] = useState(false);
+    const clearOperationRef = useRef<object | null>(null);
     const [loadingInitial, setLoadingInitial] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [newEventsAvailable, setNewEventsAvailable] = useState(false);
@@ -98,6 +99,8 @@ function EventLogPanel() {
     const filterButtonRef = useRef<HTMLButtonElement | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
     const requestGenerationRef = useRef(0);
+    const ownedPageRef = useRef<string | null>(null);
+    const mountedRef = useRef(true);
     const queryIdentityRef = useRef<string | null>(null);
     const loadMoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const liveRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -142,6 +145,8 @@ function EventLogPanel() {
             setTotal(0);
             setHasMore(false);
             setNextCursor(null);
+            void releaseEventLogPageSession(ownedPageRef.current);
+            ownedPageRef.current = null;
             setSessionId(null);
             setLoadingMore(false);
             setLoadingInitial(true);
@@ -149,16 +154,24 @@ function EventLogPanel() {
             if (listRef.current) listRef.current.scrollTop = 0;
         }
 
+        let disposed = false;
         const timer = setTimeout(() => {
+            if (disposed) return;
             void Promise.all([
                 queryEventLogPage({ query, source, accountScope: accountScopeFilter, currentAccountId: currentUserId, severity: severityFilter, category: categoryFilter, sort, pageSize: EVENT_LOG_PAGE_SIZE, includeLegacy: true }),
                 getEventLogInfo() as Promise<EventLogStorageInfo>
             ]).then(([result, nextInfo]) => {
-                if (generation !== requestGenerationRef.current) return;
+                if (disposed || generation !== requestGenerationRef.current) {
+                    void releaseEventLogPageSession(result.sessionId);
+                    return;
+                }
                 if (result.stale) {
+                    void releaseEventLogPageSession(result.sessionId);
                     if (hardReset) setLoadingInitial(false);
                     return;
                 }
+                if (ownedPageRef.current !== result.sessionId) void releaseEventLogPageSession(ownedPageRef.current);
+                ownedPageRef.current = result.sessionId;
 
                 // Live Event Log notifications refresh the current first page in place. Do not clear
                 // the existing window first: update start/success events can arrive seconds apart,
@@ -172,28 +185,49 @@ function EventLogPanel() {
                 setNewEventsAvailable(false);
                 if (hardReset) setLoadingInitial(false);
             }).catch(() => {
-                if (generation === requestGenerationRef.current && hardReset) setLoadingInitial(false);
+                if (!disposed && generation === requestGenerationRef.current && hardReset) setLoadingInitial(false);
             });
         }, hardReset ? 120 : 0);
 
-        return () => clearTimeout(timer);
+        return () => { disposed = true; clearTimeout(timer); };
     }, [query, source, accountScopeFilter, severityFilter, categoryFilter, sort, currentUserId, refreshNonce]);
 
-    useEffect(() => subscribeEventLog(() => {
-        void (getEventLogInfo() as Promise<EventLogStorageInfo>).then(setInfo).catch(() => undefined);
-        if (sort === "newest" && atHeadRef.current && !loadingMore) {
-            if (liveRefreshTimerRef.current) clearTimeout(liveRefreshTimerRef.current);
-            liveRefreshTimerRef.current = setTimeout(() => {
-                liveRefreshTimerRef.current = null;
-                setRefreshNonce(value => value + 1);
-            }, 150);
-        } else {
-            setNewEventsAvailable(true);
-        }
-    }), [sort, loadingMore]);
+    useEffect(() => {
+        let disposed = false;
+        let pendingInfo = false;
+        let infoRequested = false;
+        const refreshInfo = async () => {
+            if (disposed || pendingInfo) return;
+            pendingInfo = true;
+            try {
+                while (!disposed && infoRequested) {
+                    infoRequested = false;
+                    const next = await getEventLogInfo() as EventLogStorageInfo;
+                    if (!disposed) setInfo(next);
+                }
+            } catch { }
+            finally { pendingInfo = false; }
+        };
+        const unsubscribe = subscribeEventLog(() => {
+            if (disposed) return;
+            if (sort === "newest" && atHeadRef.current && !loadingMore) {
+                if (liveRefreshTimerRef.current) clearTimeout(liveRefreshTimerRef.current);
+                liveRefreshTimerRef.current = setTimeout(() => {
+                    liveRefreshTimerRef.current = null;
+                    if (!disposed) setRefreshNonce(value => value + 1);
+                }, 150);
+            } else {
+                infoRequested = true;
+                void refreshInfo();
+                setNewEventsAvailable(true);
+            }
+        });
+        return () => { disposed = true; infoRequested = false; unsubscribe(); };
+    }, [sort, loadingMore]);
 
     useEffect(() => {
         setSelected(null);
+        clearOperationRef.current = null;
         setClearSession(null);
         setClearCountdown(null);
         setClearing(false);
@@ -205,12 +239,18 @@ function EventLogPanel() {
         return () => clearTimeout(timer);
     }, [clearCountdown, clearing]);
 
-    useEffect(() => () => {
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+        mountedRef.current = false;
         requestGenerationRef.current++;
+        void releaseEventLogPageSession(ownedPageRef.current);
+        ownedPageRef.current = null;
         if (loadMoreTimerRef.current) clearTimeout(loadMoreTimerRef.current);
         if (liveRefreshTimerRef.current) clearTimeout(liveRefreshTimerRef.current);
         loadMoreTimerRef.current = null;
         liveRefreshTimerRef.current = null;
+        };
     }, []);
 
     const closeControlPopouts = () => {
@@ -499,19 +539,23 @@ function EventLogPanel() {
                                         title="Confirm clear"
                                         aria-label="Confirm clear Event Log"
                                         onClick={() => {
-                                            if (!isCurrentAccountSession(clearSession)) return;
+                                            if (!mountedRef.current || clearOperationRef.current || !isCurrentAccountSession(clearSession)) return;
+                                            const operation = {};
+                                            clearOperationRef.current = operation;
                                             setClearing(true);
                                             void clearEventLog(clearSession).then(() => {
-                                                if (!isCurrentAccountSession(clearSession)) return;
+                                                if (!mountedRef.current || !isCurrentAccountSession(clearSession)) return;
                                                 setClearCountdown(null);
                                                 showToast({ text: "Event Log cleared successfully.", variant: "success" });
                                                 setRefreshNonce(value => value + 1);
                                             }).catch(() => {
-                                                if (!isCurrentAccountSession(clearSession)) return;
+                                                if (!mountedRef.current || !isCurrentAccountSession(clearSession)) return;
                                                 setClearCountdown(null);
                                                 showToast({ text: "Could not clear Event Log.", variant: "critical" });
                                             }).finally(() => {
-                                                if (isCurrentAccountSession(clearSession)) setClearing(false);
+                                                if (clearOperationRef.current !== operation) return;
+                                                clearOperationRef.current = null;
+                                                if (mountedRef.current) setClearing(false);
                                             });
                                         }}
                                     >

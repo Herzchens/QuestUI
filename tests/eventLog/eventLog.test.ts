@@ -3,6 +3,7 @@ import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readLogText, replaceLogFile } from "../../src/eventLog/storage";
+import { createPageSessionStore } from "../../src/eventLog/sessionStore";
 
 import {
     collectEventAccountUsernames,
@@ -324,3 +325,19 @@ void testLogReplacement().then(() => console.log("Event Log logic and storage te
     console.error(error);
     process.exitCode = 1;
 });
+
+// Session capacity, explicit release and idle expiry are independent of paging.
+{
+    let now = 0;
+    const store = createPageSessionStore<string>(2, 1000, () => now);
+    store.set("a", "A"); store.set("b", "B");
+    assert.equal(store.get("a"), "A");
+    store.set("c", "C");
+    assert.equal(store.get("b"), undefined);
+    store.delete("a");
+    assert.equal(store.get("a"), undefined);
+    now = 1000;
+    assert.equal(store.get("c"), undefined);
+    store.set("d", "D"); store.clear();
+    assert.equal(store.get("d"), undefined);
+}

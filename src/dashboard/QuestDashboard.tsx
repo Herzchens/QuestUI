@@ -1,7 +1,7 @@
 import { preloadOrigamiArtworkColors } from "../themes/origami/useArtworkColor";
 import { useSettings } from "@api/Settings";
 import { findByCodeLazy } from "@webpack";
-import { ThemeStore, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { ThemeStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { effectiveOrbRewardAmount } from "../orbs/rewards";
@@ -133,12 +133,17 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
     const obsidian = dashboardThemeId === "obsidian";
     const origami = dashboardThemeId === "origami";
     const artworkTheme = useStateFromStores([ThemeStore], () => ThemeStore.theme === "light" ? "light" : "dark");
+    const artworkOwner = useRef({}).current;
+    useEffect(() => () => {
+        if (obsidian) preloadObsidianArtworkColors(artworkOwner, []);
+        if (origami) preloadOrigamiArtworkColors(artworkOwner, []);
+    }, [obsidian, origami, artworkOwner]);
     useEffect(() => {
         if (!obsidian && !origami) return;
         const urls = quests.map(quest => resolveQuestArtwork(quest, artworkTheme));
-        if (obsidian) preloadObsidianArtworkColors(urls);
-        if (origami) preloadOrigamiArtworkColors(urls);
-    }, [obsidian, origami, quests, artworkTheme]);
+        if (obsidian) preloadObsidianArtworkColors(artworkOwner, urls);
+        if (origami) preloadOrigamiArtworkColors(artworkOwner, urls);
+    }, [obsidian, origami, quests, artworkTheme, artworkOwner]);
     const orbMultiplier = useQuestOrbMultiplierState();
     const { ids: ignoredIds } = useIgnoredQuests();
     const partition = partitionIgnored(quests, ignoredIds);

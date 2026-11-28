@@ -1,4 +1,5 @@
-import { showToast, useEffect, useState } from "@webpack/common";
+import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
+import { showToast, useEffect, useRef, useState } from "@webpack/common";
 
 import { pushDashboardNotice } from "../dashboard/notifications";
 
@@ -44,11 +45,16 @@ export function OrionGlobalControls() {
     const quests = useQuestSnapshot();
     const [, setRevision] = useState(0);
     const [pending, setPending] = useState(false);
+    const mounted = useRef(true);
+    const pendingRef = useRef(false);
+    const session = captureAccountSession();
+    const ownsView = () => mounted.current && isCurrentAccountSession(session);
 
     useEffect(() => {
+        mounted.current = true;
         const refresh = () => setRevision(revision => revision + 1);
         const unsubscribe = subscribeOrionControlState(refresh);
-        return () => unsubscribe?.();
+        return () => { mounted.current = false; unsubscribe?.(); };
     }, []);
 
     // The subscription only schedules a render. Every render re-reads Orion itself, so QuestUI
@@ -60,7 +66,12 @@ export function OrionGlobalControls() {
     const smartTitle = smartLabel(control.action);
 
     const runSmart = async () => {
-        if (pending || control.smartDisabled) return;
+        if (pendingRef.current || !ownsView()) return;
+        const latest = getOrionControlSnapshot();
+        if (!latest) return;
+        const fresh = deriveGlobalOrionControl(latest, farmableQuestIds(quests));
+        if (fresh.smartDisabled || fresh.action !== control.action) return;
+        pendingRef.current = true;
         setPending(true);
         try {
             if (control.action === "start") {
@@ -68,24 +79,29 @@ export function OrionGlobalControls() {
             } else {
                 await invokeOrionGlobalTaskControl(control.action);
             }
-            showControlSuccess(control.action);
+            if (ownsView()) showControlSuccess(control.action);
         } catch (error) {
-            showControlFailure(error);
+            if (ownsView()) showControlFailure(error);
         } finally {
-            setPending(false);
+            pendingRef.current = false;
+            if (mounted.current) setPending(false);
         }
     };
 
     const runStop = async () => {
-        if (pending || control.stopDisabled) return;
+        if (pendingRef.current || !ownsView()) return;
+        const latest = getOrionControlSnapshot();
+        if (!latest || deriveGlobalOrionControl(latest, farmableQuestIds(quests)).stopDisabled) return;
+        pendingRef.current = true;
         setPending(true);
         try {
             await invokeOrionEngineControl("stop");
-            showControlSuccess("stop");
+            if (ownsView()) showControlSuccess("stop");
         } catch (error) {
-            showControlFailure(error);
+            if (ownsView()) showControlFailure(error);
         } finally {
-            setPending(false);
+            pendingRef.current = false;
+            if (mounted.current) setPending(false);
         }
     };
 

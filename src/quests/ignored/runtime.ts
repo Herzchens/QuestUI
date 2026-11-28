@@ -23,7 +23,9 @@ let lifecycleStarted = false;
 let lifecycleGeneration = 0;
 
 function notify(): void {
-    for (const listener of listeners) listener();
+    for (const listener of [...listeners]) {
+        try { listener(); } catch { /* Subscriber failure must not interrupt persistence. */ }
+    }
 }
 
 function currentAccountId(): string | null {

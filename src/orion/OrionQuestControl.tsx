@@ -1,4 +1,5 @@
-import { showToast, useEffect, useState } from "@webpack/common";
+import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
+import { showToast, useEffect, useRef, useState } from "@webpack/common";
 
 import { pushDashboardNotice } from "../dashboard/notifications";
 
@@ -22,11 +23,16 @@ function titleFor(action: "start" | "pause" | "resume", questName: string, disab
 export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
     const [, setRevision] = useState(0);
     const [pending, setPending] = useState(false);
+    const mounted = useRef(true);
+    const pendingRef = useRef(false);
+    const session = captureAccountSession();
+    const ownsView = () => mounted.current && isCurrentAccountSession(session);
 
     useEffect(() => {
+        mounted.current = true;
         const refresh = () => setRevision(revision => revision + 1);
         const unsubscribe = subscribeOrionControlState(refresh);
-        return () => unsubscribe?.();
+        return () => { mounted.current = false; unsubscribe?.(); };
     }, []);
 
     const snapshot = getOrionControlSnapshot();
@@ -36,7 +42,12 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
     const title = titleFor(control.action, quest.name, control.disabled);
 
     const run = async () => {
-        if (pending || control.disabled) return;
+        if (pendingRef.current || !ownsView()) return;
+        const latest = getOrionControlSnapshot();
+        if (!latest) return;
+        const fresh = deriveQuestOrionControl(latest, quest.id);
+        if (fresh.disabled || fresh.action !== control.action) return;
+        pendingRef.current = true;
         setPending(true);
         try {
             if (control.action === "start") {
@@ -44,7 +55,7 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
             } else {
                 await invokeOrionQuestTaskControl(quest.id, control.action);
             }
-            pushDashboardNotice({
+            if (ownsView()) pushDashboardNotice({
                 tone: "success",
                 text: control.action === "start"
                     ? "Quest farming started"
@@ -54,13 +65,14 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
                 duration: 2100
             });
         } catch (error) {
-            showToast({
+            if (ownsView()) showToast({
                 text: error instanceof Error ? error.message : "Orion rejected the requested Quest control action.",
                 variant: "critical",
                 duration: 6000
             });
         } finally {
-            setPending(false);
+            pendingRef.current = false;
+            if (mounted.current) setPending(false);
         }
     };
 

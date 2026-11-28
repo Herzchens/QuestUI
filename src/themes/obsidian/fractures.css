@@ -21,7 +21,7 @@
     background-repeat: no-repeat;
 }
 .quest-ui-theme-obsidian .quest-ui-card[data-obsidian-fracture]::after {
-    background: radial-gradient(ellipse 48% 130% at var(--quest-ui-obsidian-core-position), color-mix(in srgb, rgb(var(--obsidian-artwork-rgb)) 25%, white) 0%, color-mix(in srgb, rgb(var(--obsidian-artwork-rgb)) 45%, white) 12%, color-mix(in srgb, rgb(var(--obsidian-artwork-rgb)) 70%, white) 42%, color-mix(in srgb, rgb(var(--obsidian-artwork-rgb)) 85%, white) 100%);
+    background: radial-gradient(ellipse 48% 130% at var(--quest-ui-obsidian-core-position), color-mix(in srgb, rgb(var(--obsidian-artwork-rgb)) 55%, white) 0%, color-mix(in srgb, rgb(var(--obsidian-artwork-rgb)) 75%, white) 12%, color-mix(in srgb, rgb(var(--obsidian-artwork-rgb)) 90%, white) 42%, rgb(var(--obsidian-artwork-rgb)) 100%);
     /* Add the same alpha map to raise emission without lighting the stone surface. */
     mask-image: var(--quest-ui-obsidian-fracture-lines), var(--quest-ui-obsidian-fracture-lines), var(--quest-ui-obsidian-fracture-lines);
     mask-composite: add;

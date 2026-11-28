@@ -1,3 +1,5 @@
+import { startQuestSnapshotSources, stopQuestSnapshotSources } from "./src/quests/data";
+import { startOrionControlSubscriptions, stopOrionControlSubscriptions } from "./src/orion/integration";
 import definePlugin from "@utils/types";
 
 import { startEventLogCapture, stopEventLogCapture } from "./src/eventLog/runtime";
@@ -18,6 +20,8 @@ import { startUpdateChecks, stopUpdateChecks } from "./src/updates/runtime";
 
 const lifecycle = createServiceLifecycle([
     { start: startAccountSession, stop: stopAccountSession },
+    { start: startQuestSnapshotSources, stop: stopQuestSnapshotSources },
+    { start: startOrionControlSubscriptions, stop: stopOrionControlSubscriptions },
     { start: () => startDashboardThemes(settings.store.dashboardTheme), stop: stopDashboardThemes },
     { start: startDashboardNotices, stop: resetDashboardNotices },
     { start: startEventLogCapture, stop: stopEventLogCapture },

@@ -16,16 +16,17 @@ const tracker = createAccountSessionTracker(readAccountId);
 let unsubscribe: (() => void) | null = null;
 
 export function startAccountSession(): void {
-    if (unsubscribe) return;
+    if (unsubscribe) stopAccountSession();
     tracker.start();
     const store = UserStore;
     try {
-        store.addChangeListener(tracker.observe);
         unsubscribe = () => store.removeChangeListener(tracker.observe);
+        store.addChangeListener(tracker.observe);
         tracker.observe();
     } catch (error) {
         tracker.stop();
-        try { store?.removeChangeListener?.(tracker.observe); } catch { }
+        try { stopAccountSession(); }
+        catch (cleanupError) { throw new AggregateError([error, cleanupError], "Account session startup cleanup failed."); }
         throw error;
     }
 }

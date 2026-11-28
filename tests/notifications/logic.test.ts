@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createLatestTask } from "../../src/plugin/latestTask";
 
 import {
     completedQuestTransitions,
@@ -103,3 +104,33 @@ assert.equal(keyA, keyB);
 assert.notEqual(keyA, keyC);
 
 console.log("QuestUI notification logic tests - PASS");
+
+async function testBackpressure(): Promise<void> {
+    const queue = createLatestTask();
+    const seen: number[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    queue.request(async () => { seen.push(0); await gate; });
+    for (let i = 1; i <= 10_000; i++) queue.request(async () => { seen.push(i); });
+    assert.deepEqual(seen, [0]);
+    release();
+    await Promise.resolve();
+    await Promise.resolve();
+    assert.deepEqual(seen, [0, 10_000]);
+    let releaseNext!: () => void;
+    const nextGate = new Promise<void>(resolve => { releaseNext = resolve; });
+    queue.request(async () => { seen.push(10_001); await nextGate; });
+    await Promise.resolve();
+    await Promise.resolve();
+    queue.request(async () => { seen.push(10_002); });
+    queue.cancelPending();
+    releaseNext();
+    await Promise.resolve();
+    await Promise.resolve();
+    assert.deepEqual(seen, [0, 10_000, 10_001]);
+}
+
+void testBackpressure().then(() => console.log("Notification backpressure regression - PASS")).catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+});

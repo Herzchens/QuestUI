@@ -1,24 +1,29 @@
 import { useEffect, useState } from "@webpack/common";
+import { createArtworkColorPool } from "../artworkColorPool";
 
 import { dominantThumbnailColor, type OrigamiRgb } from "./thumbnailColor";
 
 const SAMPLE_LIMIT = 256;
 const CACHE_LIMIT = 256;
-type ColorEntry = { pending: Promise<OrigamiRgb | null>; color?: OrigamiRgb | null; };
-const cache = new Map<string, ColorEntry>();
-
-function readColor(url: string): Promise<OrigamiRgb | null> {
-    const previous = cache.get(url);
-    if (previous) return previous.pending;
-
-    const pending = new Promise<OrigamiRgb | null>(resolve => {
+function loadColor(url: string, signal: AbortSignal): Promise<OrigamiRgb | null> {
+    return new Promise(resolve => {
         const image = new Image();
-        const finish = (color: OrigamiRgb | null) => {
+        let settled = false;
+        const finish = (color: OrigamiRgb | null, cancel = false) => {
+            if (settled) return;
+            settled = true;
             clearTimeout(timeout);
+            signal.removeEventListener("abort", abort);
             image.onload = image.onerror = null;
+            if (cancel) {
+                try { image.removeAttribute("src"); } catch { }
+            }
             resolve(color);
         };
-        const timeout = setTimeout(() => finish(null), 5000);
+        const abort = () => finish(null, true);
+        const timeout = setTimeout(abort, 5000);
+        if (signal.aborted) return abort();
+        signal.addEventListener("abort", abort, { once: true });
         image.crossOrigin = "anonymous";
         image.onload = () => {
             try {
@@ -42,24 +47,12 @@ function readColor(url: string): Promise<OrigamiRgb | null> {
         image.onerror = () => finish(null);
         try { image.src = url; } catch { finish(null); }
     });
-
-    const entry: ColorEntry = { pending };
-    cache.set(url, entry);
-    while (cache.size > CACHE_LIMIT) {
-        const oldest = cache.keys().next().value;
-        if (oldest === undefined) break;
-        cache.delete(oldest);
-    }
-    void pending.then(color => { entry.color = color; });
-    return pending;
 }
 
-export function preloadOrigamiArtworkColors(urls: Iterable<string | null>): void {
-    const current = new Set(Array.from(urls).filter((url): url is string => Boolean(url)));
-    for (const url of cache.keys()) {
-        if (!current.has(url)) cache.delete(url);
-    }
-    for (const url of current) void readColor(url);
+const pool = createArtworkColorPool(loadColor, CACHE_LIMIT);
+
+export function preloadOrigamiArtworkColors(owner: object, urls: Iterable<string | null>): void {
+    pool.replaceCatalogue(owner, urls);
 }
 
 export function useOrigamiArtworkColor(active: boolean, url: string | null): OrigamiRgb | null {
@@ -67,14 +60,15 @@ export function useOrigamiArtworkColor(active: boolean, url: string | null): Ori
     useEffect(() => {
         if (!active || !url) return;
         let alive = true;
-        void readColor(url).then(color => {
+        const request = pool.acquire(url);
+        void request.promise.then(color => {
             if (alive) setSample({ url, color });
         });
-        return () => { alive = false; };
+        return () => { alive = false; request.release(); };
     }, [active, url]);
 
     if (!active || !url) return null;
-    const entry = cache.get(url);
-    if (entry?.color !== undefined) return entry.color;
+    const color = pool.peek(url);
+    if (color !== undefined) return color;
     return sample?.url === url ? sample.color : null;
 }

@@ -1,3 +1,5 @@
+import { createSnapshotSource } from "../../src/quests/snapshotSource";
+import { createControlSubscription } from "../../src/orion/controlSubscription";
 import assert from "node:assert/strict";
 
 import {
@@ -82,3 +84,100 @@ assert.equal(readCompatibleOrionSnapshot({ ...companion, getControlSnapshot: () 
 assert.equal(readCompatibleOrionSnapshot({ ...companion, getControlSnapshot: () => { throw new Error("boom"); } } as any), null);
 
 console.log("QuestUI Orion command/companion logic tests - PASS");
+
+{
+    let reads = 0;
+    let bound: (() => void) | undefined;
+    const store = { addChangeListener(cb: () => void) { bound = cb; }, removeChangeListener(cb: () => void) { if (bound === cb) bound = undefined; } };
+    const source = createSnapshotSource(() => ++reads, () => store, 60_000);
+    const values: number[] = [];
+    const release = source.subscribe(value => values.push(value));
+    assert.equal(reads, 0);
+    source.start();
+    const stale = bound!;
+    assert.equal(reads, 1);
+    source.stop();
+    stale();
+    assert.equal(reads, 1);
+    source.start();
+    stale();
+    assert.equal(reads, 2);
+    bound!();
+    assert.equal(reads, 3);
+    release();
+    assert.equal(bound, undefined);
+    source.stop();
+    assert.deepEqual(values, [1, 2, 3]);
+}
+{
+    const a = {}, b = {}, method = () => {};
+    let owner = a;
+    let callback: (() => void) | undefined;
+    let active = 0;
+    const hub = createControlSubscription(() => ({
+        identity: owner, methods: [method], subscribe(listener) {
+            active++;
+            callback = listener;
+            return () => { active--; };
+        }
+    }), 60_000);
+    let changes = 0;
+    const off = hub.subscribe(() => changes++);
+    hub.start();
+    const stale = callback!;
+    const before = changes;
+    owner = b;
+    stale();
+    assert.equal(changes, before);
+    hub.reconcile();
+    assert.equal(active, 1);
+    assert.equal(changes, before + 1);
+    stale();
+    assert.equal(changes, before + 1);
+    callback!();
+    assert.equal(changes, before + 2);
+    hub.stop();
+    assert.equal(active, 0);
+    hub.start();
+    assert.equal(active, 1);
+    off();
+    assert.equal(active, 0);
+    hub.stop();
+}
+
+{
+    const identity = {};
+    let attempts = 0, active = 0, failRelease = true;
+    const hub = createControlSubscription(() => ({
+        identity, methods: [], subscribe() {
+            if (++attempts === 1) throw new Error("temporary");
+            if (attempts === 2) return null;
+            active++;
+            return () => { if (failRelease) throw new Error("release"); active--; };
+        }
+    }), 60_000);
+    const off = hub.subscribe(() => {});
+    hub.start(); hub.reconcile(); hub.reconcile();
+    assert.equal(attempts, 3); assert.equal(active, 1);
+    assert.throws(hub.stop, /release/);
+    failRelease = false; hub.stop(); assert.equal(active, 0);
+    off();
+}
+{
+    let active = 0;
+    const hub = createControlSubscription(() => ({
+        identity: {}, methods: [], subscribe() {
+            active++; hub.stop(); return () => { active--; };
+        }
+    }), 60_000);
+    const off = hub.subscribe(() => {});
+    hub.start(); assert.equal(active, 0); off();
+}
+{
+    let active = 0, fail = true;
+    const store = { addChangeListener() { active++; }, removeChangeListener() { if (fail) throw new Error("detach"); active--; } };
+    const source = createSnapshotSource(() => 1, () => store, 60_000);
+    const off = source.subscribe(() => {});
+    source.start(); assert.throws(source.stop, /detach/);
+    fail = false; source.stop(); assert.equal(active, 0); off();
+}

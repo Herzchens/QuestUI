@@ -13,6 +13,7 @@ import {
 import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSort } from "./types";
 import { normalizePersistedEvent } from "./validation";
 import { readLogText, replaceLogFile } from "./storage";
+import { createPageSessionStore } from "./sessionStore";
 
 
 const MAX_LOG_BYTES = 10 * 1024 * 1024;
@@ -57,33 +58,17 @@ interface PageSession {
     signature: string;
     sort: EventLogSort;
     events: EventLogEvent[];
-    createdAt: number;
-    lastAccess: number;
 }
 
-const pageSessions = new Map<string, PageSession>();
+const pageSessions = createPageSessionStore<PageSession>(MAX_PAGE_SESSIONS, PAGE_SESSION_TTL_MS);
 
 function invalidatePageSessions(): void {
     storageGeneration++;
     pageSessions.clear();
 }
 
-function prunePageSessions(now = Date.now()): void {
-    for (const [id, session] of pageSessions) {
-        if (now - session.lastAccess > PAGE_SESSION_TTL_MS) pageSessions.delete(id);
-    }
-    while (pageSessions.size > MAX_PAGE_SESSIONS) {
-        let oldestId: string | null = null;
-        let oldestAccess = Number.POSITIVE_INFINITY;
-        for (const [id, session] of pageSessions) {
-            if (session.lastAccess < oldestAccess) {
-                oldestAccess = session.lastAccess;
-                oldestId = id;
-            }
-        }
-        if (!oldestId) break;
-        pageSessions.delete(oldestId);
-    }
+export async function releaseEventPageSession(_: IpcMainInvokeEvent, sessionId: string): Promise<void> {
+    if (typeof sessionId === "string") pageSessions.delete(sessionId);
 }
 
 async function ensureLogDir(): Promise<void> {
@@ -208,9 +193,8 @@ export async function queryEvents(_: IpcMainInvokeEvent, options: any = {}): Pro
 function newPageSession(signature: string, sort: EventLogSort, events: EventLogEvent[]): PageSession {
     const now = Date.now();
     const id = `page-${now.toString(36)}-${(++nextPageSessionId).toString(36)}`;
-    const session: PageSession = { id, signature, sort, events, createdAt: now, lastAccess: now };
+    const session: PageSession = { id, signature, sort, events };
     pageSessions.set(id, session);
-    prunePageSessions(now);
     return session;
 }
 
@@ -220,13 +204,11 @@ export async function queryEventPage(_: IpcMainInvokeEvent, rawOptions: EventLog
     const requestedSessionId = typeof rawOptions.sessionId === "string" && rawOptions.sessionId ? rawOptions.sessionId : null;
     let session: PageSession | undefined;
 
-    prunePageSessions();
     if (requestedSessionId) {
         session = pageSessions.get(requestedSessionId);
         if (!session || session.signature !== signature || session.sort !== normalized.sort) {
             return { events: [], total: 0, hasMore: false, nextCursor: null, sessionId: null, stale: true };
         }
-        session.lastAccess = Date.now();
     } else {
         const { events, generation } = await readPreparedEvents(normalized);
         if (generation !== storageGeneration) {

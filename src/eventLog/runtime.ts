@@ -33,6 +33,7 @@ import { readQuestByIdentity } from "../quests/data";
 import { captureQuestEventRef } from "../quests/presentation";
 import { normalizeQuestPresentationMetadata } from "../quests/presentationLogic";
 import { isCurrentAccountSession, type AccountSession } from "../plugin/accountSession";
+import { invalidateMemoryPageSessions } from "./memoryPageSessions";
 
 const Native = !IS_WEB
     ? VencordNative.pluginHelpers.QuestUI as PluginNative<typeof import("./native")>
@@ -54,9 +55,9 @@ type PendingOrionConsole = OrionConsoleShadowCandidate & {
     accountId: string | null;
     accountUsername: string | null;
     classified: ReturnType<typeof classifyConsoleEvent>;
-    timer: ReturnType<typeof setTimeout>;
 };
 const pendingOrionConsole = new Map<number, PendingOrionConsole>();
+let pendingConsoleTimer: ReturnType<typeof setTimeout> | null = null;
 let nextOrionConsoleId = 0;
 let orionEventIdentity: object | null = null;
 let orionEventMethod: Function | null = null;
@@ -241,6 +242,7 @@ export async function clearEventLog(session: AccountSession | null): Promise<voi
     clearPendingOrionConsole(true, accountId);
     const cleared = new Set(memoryEvents.filter(event => eventBelongsToAccount(event, accountId)));
     if (Native) await Native.clearEvents(accountId);
+    invalidateMemoryPageSessions();
     for (let index = memoryEvents.length - 1; index >= 0; index--) {
         if (cleared.has(memoryEvents[index])) memoryEvents.splice(index, 1);
     }
@@ -280,27 +282,40 @@ function recordClassifiedOrionConsole(candidate: PendingOrionConsole): void {
     });
 }
 
-function flushOrionConsoleCandidate(id: number): void {
-    const candidate = pendingOrionConsole.get(id);
-    if (!candidate) return;
-    pendingOrionConsole.delete(id);
-    recordClassifiedOrionConsole(candidate);
+function scheduleConsoleFlush(): void {
+    if (pendingConsoleTimer != null) clearTimeout(pendingConsoleTimer);
+    pendingConsoleTimer = null;
+    if (!captureStarted || !pendingOrionConsole.size) return;
+    const first = pendingOrionConsole.values().next().value;
+    if (!first) return;
+    const timer = setTimeout(() => {
+        if (pendingConsoleTimer !== timer) return;
+        pendingConsoleTimer = null;
+        if (!captureStarted) return;
+        const cutoff = Date.now() - ORION_SHADOW_DELAY_MS;
+        for (const [id, candidate] of pendingOrionConsole) {
+            if (candidate.capturedAt > cutoff) continue;
+            pendingOrionConsole.delete(id);
+            recordClassifiedOrionConsole(candidate);
+        }
+        scheduleConsoleFlush();
+    }, Math.max(1, first.capturedAt + ORION_SHADOW_DELAY_MS - Date.now()));
+    pendingConsoleTimer = timer;
 }
 
 function clearPendingOrionConsole(flush: boolean, accountId?: string): void {
     for (const [id, candidate] of pendingOrionConsole) {
         if (accountId != null && candidate.accountId !== accountId) continue;
-        clearTimeout(candidate.timer);
         pendingOrionConsole.delete(id);
         if (flush) recordClassifiedOrionConsole(candidate);
     }
+    scheduleConsoleFlush();
 }
 
 function queueOrionConsoleCandidate(level: ConsoleLevel, text: string): void {
     const classified = classifyConsoleEvent("orion", level, text);
     const id = ++nextOrionConsoleId;
     const capturedAt = Date.now();
-    const timer = setTimeout(() => flushOrionConsoleCandidate(id), ORION_SHADOW_DELAY_MS);
     pendingOrionConsole.set(id, {
         id,
         capturedAt,
@@ -311,17 +326,16 @@ function queueOrionConsoleCandidate(level: ConsoleLevel, text: string): void {
         category: classified.category,
         questName: classified.questName ?? null,
         rawConsole: text,
-        classified,
-        timer
+        classified
     });
+    if (pendingConsoleTimer == null) scheduleConsoleFlush();
 }
 
 function recordStructuredOrionEvent(event: NormalizedOrionEvent): void {
     const matched = findOrionConsoleShadowMatch(event, Array.from(pendingOrionConsole.values()), ORION_SHADOW_MATCH_WINDOW_MS);
     if (matched) {
-        const pending = pendingOrionConsole.get(matched.id);
-        if (pending) clearTimeout(pending.timer);
         pendingOrionConsole.delete(matched.id);
+        if (!pendingOrionConsole.size) scheduleConsoleFlush();
     }
 
     void recordQuestUIEvent({
@@ -524,6 +538,7 @@ export function startEventLogCapture(): void {
 export function stopEventLogCapture(): void {
     if (!captureStarted) return;
     captureStarted = false;
+    invalidateMemoryPageSessions();
     if (orionRebindTimer != null) clearInterval(orionRebindTimer);
     orionRebindTimer = null;
     disarmAccountWatcher();

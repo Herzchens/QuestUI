@@ -19,6 +19,8 @@ import {
 } from "./logic";
 import settings from "../plugin/settings";
 import { QuestsStore } from "../plugin/stores";
+import { createLatestTask } from "../plugin/latestTask";
+import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
 
 const PROBLEM_QUERY_LIMIT = 100;
 const PROBLEM_DEDUP_MS = 30_000;
@@ -31,14 +33,16 @@ const PROBLEM_RECHECK_DELAY_MS = 1_200;
 let previousAccountId: string | null = null;
 let previousQuests: QuestNotificationSnapshot[] | null = null;
 let knownQuestIds: Set<string> | null = null;
-let questStoreSubscribed = false;
-let userStoreSubscribed = false;
+let notificationsStarted = false;
+let lifecycleGeneration = 0;
+let questStoreListener: (() => void) | null = null;
+let userStoreListener: (() => void) | null = null;
 let ignoredUnsubscribe: (() => void) | null = null;
 let eventLogUnsubscribe: (() => void) | null = null;
 let problemAccountId: string | null = null;
 let problemBaselineReady = false;
 let problemScanGeneration = 0;
-let problemScanChain: Promise<void> = Promise.resolve();
+const problemScans = createLatestTask();
 let problemScanTimer: ReturnType<typeof setTimeout> | null = null;
 let problemRecheckTimer: ReturnType<typeof setTimeout> | null = null;
 let seenProblemEventIds = new Set<string>();
@@ -113,6 +117,7 @@ function openQuestNotificationTarget(): void {
 }
 
 function observeQuestState(): void {
+    if (!notificationsStarted) return;
     const accountId = currentAccountId();
     if (!accountId || !isIgnoredQuestStateReady()) {
         previousAccountId = accountId;
@@ -230,7 +235,8 @@ function showProblemNotification(event: EventLogEvent): void {
 
 async function scanProblemEvents(generation: number): Promise<void> {
     const accountId = currentAccountId();
-    if (!accountId || generation !== problemScanGeneration) return;
+    const session = captureAccountSession();
+    if (!notificationsStarted || !accountId || session?.accountId !== accountId || generation !== problemScanGeneration) return;
 
     if (problemAccountId !== accountId) resetProblemBaseline(accountId);
 
@@ -246,7 +252,7 @@ async function scanProblemEvents(generation: number): Promise<void> {
     } catch {
         return;
     }
-    if (generation !== problemScanGeneration || currentAccountId() !== accountId) return;
+    if (!notificationsStarted || generation !== problemScanGeneration || !isCurrentAccountSession(session)) return;
 
     if (!problemBaselineReady) {
         seenProblemEventIds = new Set(events.map(event => event.id));
@@ -264,9 +270,8 @@ async function scanProblemEvents(generation: number): Promise<void> {
 }
 
 function enqueueProblemScan(generation: number): void {
-    problemScanChain = problemScanChain
-        .catch(() => { })
-        .then(() => scanProblemEvents(generation));
+    if (!notificationsStarted || generation !== problemScanGeneration) return;
+    problemScans.request(() => scanProblemEvents(generation));
 }
 
 function clearProblemScanTimers(): void {
@@ -277,6 +282,7 @@ function clearProblemScanTimers(): void {
 }
 
 function scheduleProblemScan(): void {
+    if (!notificationsStarted) return;
     const generation = problemScanGeneration;
     clearProblemScanTimers();
 
@@ -292,6 +298,7 @@ function scheduleProblemScan(): void {
 }
 
 function onAccountChanged(): void {
+    if (!notificationsStarted) return;
     const accountId = currentAccountId();
     if (accountId === previousAccountId && accountId === problemAccountId) return;
 
@@ -299,6 +306,7 @@ function onAccountChanged(): void {
     previousQuests = null;
     knownQuestIds = null;
     problemScanGeneration++;
+    problemScans.cancelPending();
     clearProblemScanTimers();
     resetProblemBaseline(accountId);
     observeQuestState();
@@ -306,24 +314,31 @@ function onAccountChanged(): void {
 }
 
 export function startQuestNotifications(): void {
+    if (notificationsStarted) return;
+    notificationsStarted = true;
+    const generation = ++lifecycleGeneration;
+    const isCurrent = () => notificationsStarted && generation === lifecycleGeneration;
     preloadIgnoredQuests();
 
-    if (!questStoreSubscribed && typeof QuestsStore?.addChangeListener === "function") {
+    if (typeof QuestsStore?.addChangeListener === "function") {
+        const listener = () => { if (isCurrent()) observeQuestState(); };
         try {
-            QuestsStore.addChangeListener(observeQuestState);
-            questStoreSubscribed = true;
-        } catch { }
+            QuestsStore.addChangeListener(listener);
+            questStoreListener = listener;
+        } catch { try { QuestsStore?.removeChangeListener?.(listener); } catch { } }
     }
 
-    if (!userStoreSubscribed && typeof (UserStore as any)?.addChangeListener === "function") {
+    if (typeof (UserStore as any)?.addChangeListener === "function") {
+        const listener = () => { if (isCurrent()) onAccountChanged(); };
         try {
-            (UserStore as any).addChangeListener(onAccountChanged);
-            userStoreSubscribed = true;
-        } catch { }
+            (UserStore as any).addChangeListener(listener);
+            userStoreListener = listener;
+        } catch { try { (UserStore as any)?.removeChangeListener?.(listener); } catch { } }
     }
 
     if (!ignoredUnsubscribe) {
         ignoredUnsubscribe = subscribeIgnoredQuests(() => {
+            if (!isCurrent()) return;
             // Ignore/Unignore and first persistence hydration are presentation changes, not Quest
             // state transitions. Re-baseline completion state while preserving the session's
             // known Quest IDs so Unignore cannot synthesize a "new Quest" notification either.
@@ -333,7 +348,7 @@ export function startQuestNotifications(): void {
     }
 
     if (!eventLogUnsubscribe) {
-        eventLogUnsubscribe = subscribeEventLog(scheduleProblemScan);
+        eventLogUnsubscribe = subscribeEventLog(() => { if (isCurrent()) scheduleProblemScan(); });
     }
 
     problemScanGeneration++;
@@ -344,20 +359,23 @@ export function startQuestNotifications(): void {
 }
 
 export function stopQuestNotifications(): void {
-    if (questStoreSubscribed) {
-        try { QuestsStore?.removeChangeListener?.(observeQuestState); } catch { }
+    notificationsStarted = false;
+    lifecycleGeneration++;
+    if (questStoreListener) {
+        try { QuestsStore?.removeChangeListener?.(questStoreListener); } catch { }
     }
-    questStoreSubscribed = false;
+    questStoreListener = null;
 
-    if (userStoreSubscribed) {
-        try { (UserStore as any)?.removeChangeListener?.(onAccountChanged); } catch { }
+    if (userStoreListener) {
+        try { (UserStore as any)?.removeChangeListener?.(userStoreListener); } catch { }
     }
-    userStoreSubscribed = false;
+    userStoreListener = null;
 
-    ignoredUnsubscribe?.();
+    try { ignoredUnsubscribe?.(); } catch { }
     ignoredUnsubscribe = null;
-    eventLogUnsubscribe?.();
+    try { eventLogUnsubscribe?.(); } catch { }
     eventLogUnsubscribe = null;
+    problemScans.cancelPending();
 
     problemScanGeneration++;
     clearProblemScanTimers();

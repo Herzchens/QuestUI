@@ -1,3 +1,4 @@
+import { createSnapshotSource } from "./snapshotSource";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
 
@@ -171,14 +172,6 @@ function configuredRewardKinds(rewards: any[]): RewardKind[] {
 // through a new render four times per second when only progress changes.
 const REFRESH_FALLBACK_MS = 250;
 const SHORTCUT_REFRESH_FALLBACK_MS = 60_000;
-
-type SnapshotListener = (quests: NormalizedQuest[]) => void;
-
-const snapshotListeners = new Set<SnapshotListener>();
-let currentSnapshot: NormalizedQuest[] = [];
-let sourceStarted = false;
-let storeSubscribed = false;
-let fallbackTimer: ReturnType<typeof setInterval> | null = null;
 
 function finiteNumber(value: any, fallback = 0): number {
     const number = Number(value);
@@ -484,80 +477,30 @@ function readSnapshot(): NormalizedQuest[] {
     return rawQuests().map(quest => normalizeQuest(quest, now));
 }
 
-function ensureStoreSubscription(): void {
-    if (storeSubscribed) return;
-    try {
-        if (typeof QuestsStore?.addChangeListener === "function") {
-            QuestsStore.addChangeListener(refreshSnapshot);
-            storeSubscribed = true;
-        }
-    } catch { }
+const liveSource = createSnapshotSource(readSnapshot, () => QuestsStore, REFRESH_FALLBACK_MS);
+const shortcutSource = createSnapshotSource(readSnapshot, () => QuestsStore, SHORTCUT_REFRESH_FALLBACK_MS);
+
+export function startQuestSnapshotSources(): void {
+    liveSource.start();
+    shortcutSource.start();
 }
 
-function refreshSnapshot(): void {
-    ensureStoreSubscription();
-    currentSnapshot = readSnapshot();
-    for (const listener of snapshotListeners) listener(currentSnapshot);
-}
-
-function startSource(): void {
-    if (sourceStarted) return;
-    sourceStarted = true;
-    ensureStoreSubscription();
-    fallbackTimer = setInterval(refreshSnapshot, REFRESH_FALLBACK_MS);
-    refreshSnapshot();
-}
-
-function stopSource(): void {
-    if (!sourceStarted) return;
-    sourceStarted = false;
-
-    try {
-        if (storeSubscribed) QuestsStore?.removeChangeListener?.(refreshSnapshot);
-    } catch { }
-    storeSubscribed = false;
-
-    if (fallbackTimer != null) clearInterval(fallbackTimer);
-    fallbackTimer = null;
-}
-
-function subscribeSnapshot(listener: SnapshotListener): () => void {
-    snapshotListeners.add(listener);
-    startSource();
-    listener(currentSnapshot);
-
-    return () => {
-        snapshotListeners.delete(listener);
-        if (snapshotListeners.size === 0) stopSource();
-    };
+export function stopQuestSnapshotSources(): void {
+    const failures: unknown[] = [];
+    for (const source of [liveSource, shortcutSource]) {
+        try { source.stop(); } catch (error) { failures.push(error); }
+    }
+    if (failures.length) throw new AggregateError(failures, "Quest snapshot cleanup failed.");
 }
 
 export function useQuestSnapshot(mode: QuestSnapshotMode = "live"): NormalizedQuest[] {
     const [snapshot, setSnapshot] = useState<NormalizedQuest[]>(readSnapshot);
-
     useEffect(() => {
-        if (mode === "live") return subscribeSnapshot(setSnapshot);
-
-        const updateShortcutSnapshot = (force = false) => {
-            const next = readSnapshot();
-            setSnapshot(previous => !force && sameQuestShortcutSnapshot(previous, next) ? previous : next);
-        };
-
-        try {
-            QuestsStore?.addChangeListener?.(updateShortcutSnapshot);
-        } catch { }
-
-        const interval = setInterval(() => updateShortcutSnapshot(true), SHORTCUT_REFRESH_FALLBACK_MS);
-        updateShortcutSnapshot();
-
-        return () => {
-            clearInterval(interval);
-            try {
-                QuestsStore?.removeChangeListener?.(updateShortcutSnapshot);
-            } catch { }
-        };
+        const source = mode === "live" ? liveSource : shortcutSource;
+        return source.subscribe((next, force) => {
+            setSnapshot(previous => mode !== "live" && !force && sameQuestShortcutSnapshot(previous, next) ? previous : next);
+        });
     }, [mode]);
-
     return snapshot;
 }
 

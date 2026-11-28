@@ -1,3 +1,5 @@
+import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
+import { createControlSubscription, type ControlSource } from "./controlSubscription";
 import { ApplicationCommandOptionType, commands } from "@api/Commands";
 import { isPluginEnabled, plugins } from "@api/PluginManager";
 
@@ -90,32 +92,35 @@ export function getOrionControlSnapshot(): OrionControlSnapshot | null {
     return schedulerQuests === undefined ? snapshot : { ...snapshot, schedulerQuests };
 }
 
-export function subscribeOrionControlState(listener: () => void): (() => void) | null {
+function readControlSource(): ControlSource | null {
     const current = plugin();
-    if (!hasCompatibleCompanion(current)) return null;
-
-    try {
-        const controlUnsubscribe = current.subscribeControlState(listener);
-        if (typeof controlUnsubscribe !== "function") return null;
-
-        let schedulerUnsubscribe: (() => void) | null = null;
-        const schedulerSource = getOrionSchedulerCapabilitySource();
-        if (schedulerSource?.identity === current) {
-            try {
-                schedulerUnsubscribe = schedulerSource.subscribe(listener);
-            } catch {
-                schedulerUnsubscribe = null;
-            }
+    if (!hasCompatibleCompanion(current) || current.started !== true || !isOrionEnabled()) return null;
+    const method = current.subscribeControlState;
+    const candidate = getOrionSchedulerCapabilitySource();
+    const scheduler = candidate?.identity === current ? candidate : null;
+    return {
+        identity: current,
+        methods: [method, scheduler?.getMethod, scheduler?.subscribeMethod],
+        subscribe(listener) {
+            const releaseControl = method.call(current, listener);
+            if (typeof releaseControl !== "function") return null;
+            let releaseScheduler: (() => void) | null = null;
+            try { releaseScheduler = scheduler?.subscribe(listener) ?? null; } catch { }
+            let releasePrimary: (() => void) | null = releaseControl;
+            return () => {
+                const failures: unknown[] = [];
+                try { releasePrimary?.(); releasePrimary = null; } catch (error) { failures.push(error); }
+                try { releaseScheduler?.(); releaseScheduler = null; } catch (error) { failures.push(error); }
+                if (failures.length) throw new AggregateError(failures, "Orion subscription cleanup failed.");
+            };
         }
-
-        return () => {
-            try { controlUnsubscribe(); } catch { }
-            try { schedulerUnsubscribe?.(); } catch { }
-        };
-    } catch {
-        return null;
-    }
+    };
 }
+
+const controlSubscription = createControlSubscription(readControlSource);
+export const startOrionControlSubscriptions = controlSubscription.start;
+export const stopOrionControlSubscriptions = controlSubscription.stop;
+export const subscribeOrionControlState = controlSubscription.subscribe;
 
 export function getOrionIntegrationHealth(integrationEnabled: boolean): OrionIntegrationHealth {
     const current = plugin();
@@ -184,6 +189,8 @@ function assertControlStillCurrent(current: CompatibleOrionPlugin, command: any)
 
 async function withControlLock<T>(work: () => Promise<T>): Promise<T> {
     if (controlPending) throw new OrionIntegrationError("Another Orion control action is already in progress.");
+    const session = captureAccountSession();
+    if (!session) throw new OrionIntegrationError("No current Discord account session.");
     controlPending = true;
     try {
         return await work();
@@ -226,6 +233,7 @@ export async function invokeOrionEngineControl(action: OrionEngineAction): Promi
  * eligible without resetting Discord progress.
  */
 export async function invokeOrionGlobalTaskControl(action: OrionTaskAction): Promise<string> {
+    const session = captureAccountSession();
     return withControlLock(async () => {
         try {
             const { current, command } = requireCompatibleControl();
@@ -246,6 +254,7 @@ export async function invokeOrionGlobalTaskControl(action: OrionTaskAction): Pro
 
             if (!snapshot.running) {
                 await Promise.resolve(controlEngine.call(current, "start"));
+                if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed while Orion was starting.");
                 assertControlStillCurrent(current, command);
                 if (current.controlAll !== controlAll) {
                     throw new OrionIntegrationError("OrionQuests task control changed while the engine was starting.");
@@ -260,6 +269,7 @@ export async function invokeOrionGlobalTaskControl(action: OrionTaskAction): Pro
 
 /** Target a single Orion task generation by exact Discord Quest id. */
 export async function invokeOrionQuestTaskControl(questId: string, action: OrionTaskAction): Promise<string> {
+    const session = captureAccountSession();
     return withControlLock(async () => {
         try {
             const id = questId.trim();
@@ -283,6 +293,7 @@ export async function invokeOrionQuestTaskControl(questId: string, action: Orion
 
             if (!snapshot.running) {
                 await Promise.resolve(controlEngine.call(current, "start"));
+                if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed while Orion was starting.");
                 assertControlStillCurrent(current, command);
                 if (current.controlQuest !== controlQuest) {
                     throw new OrionIntegrationError("OrionQuests per-Quest control changed while the engine was starting.");

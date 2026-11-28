@@ -1,6 +1,8 @@
-import { showToast, ThemeStore, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { showToast, ThemeStore, UserStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { queryEventLog, subscribeEventLog } from "../eventLog/runtime";
+import { createLatestTask } from "../plugin/latestTask";
+import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
 import type { EventLogEvent } from "../eventLog/types";
 import { useQuestSnapshot, type NormalizedQuest, type QuestTaskType } from "../quests/data";
 import { resolveQuestArtwork, type QuestTheme } from "../quests/presentation";
@@ -46,6 +48,8 @@ function currentUser(): any | null {
 
 export function useNotificationCenterFeed(): NotificationCenterFeed {
     const user = useStateFromStores([UserStore], currentUser);
+    const session = useStateFromStores([UserStore], captureAccountSession);
+    const [refreshQueue] = useState(createLatestTask);
     const quests = useQuestSnapshot("live");
     const accountId = typeof user?.id === "string" && user.id ? user.id : null;
     const [events, setEvents] = useState<EventLogEvent[]>([]);
@@ -69,48 +73,57 @@ export function useNotificationCenterFeed(): NotificationCenterFeed {
             recheckTimer = null;
         };
 
-        const refresh = async () => {
-            const requestGeneration = ++generation;
+        const refresh = async (requestGeneration: number) => {
+            if (disposed || requestGeneration !== generation) return;
             if (!accountId) {
                 if (!disposed) setEvents([]);
                 return;
             }
 
+            if (session?.accountId !== accountId || !isCurrentAccountSession(session)) return;
             try {
                 await ensureNotificationCenterAccountState(accountId);
+                if (disposed || requestGeneration !== generation || !isCurrentAccountSession(session)) return;
                 const result = await queryEventLog({
                     accountId,
                     includeLegacy: false,
                     sort: "newest",
                     limit: CENTER_QUERY_LIMIT
                 });
-                if (!disposed && requestGeneration === generation) setEvents(result.events);
+                if (!disposed && requestGeneration === generation && isCurrentAccountSession(session)) setEvents(result.events);
             } catch {
-                if (!disposed && requestGeneration === generation) setEvents([]);
+                if (!disposed && requestGeneration === generation && isCurrentAccountSession(session)) setEvents([]);
             }
         };
 
+        const requestRefresh = () => {
+            if (disposed) return;
+            const requestGeneration = ++generation;
+            refreshQueue.request(() => refresh(requestGeneration));
+        };
         const scheduleRefresh = () => {
+            if (disposed) return;
             clearTimers();
             settleTimer = setTimeout(() => {
                 settleTimer = null;
-                void refresh();
+                requestRefresh();
             }, EVENT_SETTLE_DELAY_MS);
             recheckTimer = setTimeout(() => {
                 recheckTimer = null;
-                void refresh();
+                requestRefresh();
             }, EVENT_RECHECK_DELAY_MS);
         };
 
-        void refresh();
+        requestRefresh();
         const unsubscribe = subscribeEventLog(scheduleRefresh);
         return () => {
             disposed = true;
             generation++;
+            refreshQueue.cancelPending();
             clearTimers();
             unsubscribe();
         };
-    }, [accountId]);
+    }, [accountId, session, refreshQueue]);
 
     const accountState = getNotificationCenterAccountState(accountId);
     const items = accountId && accountState
@@ -296,6 +309,8 @@ export function NotificationCenterPanel({ feed }: { feed: NotificationCenterFeed
     const { receivesBoost } = useQuestOrbMultiplierState();
     const [now, setNow] = useState(Date.now());
     const [busy, setBusy] = useState(false);
+    const mounted = useRef(true);
+    const session = captureAccountSession();
     const accountId = feed.accountId;
     const user = feed.currentUser;
     const displayName = String(user?.globalName ?? user?.displayName ?? user?.username ?? "Current account");
@@ -303,23 +318,24 @@ export function NotificationCenterPanel({ feed }: { feed: NotificationCenterFeed
     const avatar = avatarUrl(user);
 
     useEffect(() => {
+        mounted.current = true;
         const timer = setInterval(() => setNow(Date.now()), 30_000);
-        return () => clearInterval(timer);
+        return () => { mounted.current = false; clearInterval(timer); };
     }, []);
 
     const runAction = async (action: () => Promise<void>, successText: string) => {
-        if (!accountId || busy) return;
+        if (!accountId || busy || !mounted.current || session?.accountId !== accountId || !isCurrentAccountSession(session)) return;
         setBusy(true);
         try {
             await action();
-            showToast({ text: successText, variant: "success" });
+            if (mounted.current && isCurrentAccountSession(session)) showToast({ text: successText, variant: "success" });
         } catch (error) {
-            showToast({
+            if (mounted.current && isCurrentAccountSession(session)) showToast({
                 text: error instanceof Error ? error.message : "Notification Center action failed.",
                 variant: "critical"
             });
         } finally {
-            setBusy(false);
+            if (mounted.current) setBusy(false);
         }
     };
 
