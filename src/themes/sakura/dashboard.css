@@ -2100,7 +2100,8 @@
     box-sizing: border-box;
 }
 .quest-ui-theme-sakura.quest-ui-filter-list,
-.quest-ui-theme-sakura.quest-ui-dashboard-choice-list {
+.quest-ui-theme-sakura.quest-ui-dashboard-choice-list,
+.quest-ui-theme-sakura.quest-ui-graphics-menu {
     background: transparent !important;
     border: 1px solid transparent !important;
     border-radius: 0 !important;
@@ -2110,6 +2111,11 @@
     border-image: var(--quest-ui-sakura-frame-opaque) 30 34 fill / 23px 25px stretch !important;
 
     filter: drop-shadow(0 5px 9px var(--quest-ui-theme-float-shadow));
+}
+/* The graphics popout uses the same scalloped stock as the dashboard cards.
+ * The opaque list frame is intentionally round and is not appropriate here. */
+.quest-ui-theme-sakura.quest-ui-graphics-menu {
+    border-image: var(--quest-ui-sakura-frame-card) 30 34 fill / 23px 25px stretch !important;
 }
 .quest-ui-theme.quest-ui-filter-list {
     display: flex;

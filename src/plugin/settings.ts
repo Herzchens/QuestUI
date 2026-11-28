@@ -148,6 +148,12 @@ export default definePluginSettings({
         description: "Choose the Dashboard theme from its palette menu.",
         options: DASHBOARD_THEME_OPTIONS
     },
+    dashboardGraphicsPreference: {
+        type: OptionType.STRING,
+        displayName: "Dashboard • Graphics Quality",
+        description: "Internal graphics selector preference; rendering policy is not yet applied.",
+        default: "3"
+    },
     dashboardSortMode: {
         type: OptionType.SELECT,
         displayName: "Dashboard • Sort",
@@ -342,6 +348,7 @@ export default definePluginSettings({
     updateCheckOrion: { disabled: () => !isOrionInstalled() },
 
     dashboardTheme: { hidden: true },
+    dashboardGraphicsPreference: { hidden: true },
     dashboardSortMode: { hidden: true },
     dashboardShowAvailable: { hidden: true },
     dashboardShowInProgress: { hidden: true },

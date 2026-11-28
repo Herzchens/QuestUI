@@ -1,0 +1,53 @@
+/* Graphics selector: this theme owns its complete visual contract. */
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger .quest-ui-graphics-gauge { display: block; flex: 0 0 20px; margin: 0; width: 20px; height: 20px; fill: none; stroke-width: 24; stroke-linecap: round; stroke-linejoin: round; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger .quest-ui-graphics-gauge circle { stroke: none; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger .quest-ui-graphics-gradient-start { stop-color: var(--graphics-gradient-start); }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger .quest-ui-graphics-gradient-end { stop-color: var(--graphics-gradient-end); }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger .quest-ui-graphics-needle { transform-origin: 128px 142px; transform: rotate(var(--graphics-needle-angle)); transition: transform 140ms ease-out; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-reduced="true"] .quest-ui-graphics-needle { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-theme-obsidian .quest-ui-graphics-trigger .quest-ui-graphics-needle { transition: none; }
+}
+.quest-ui-theme-obsidian.quest-ui-graphics-menu { box-sizing: border-box; width: min(296px, calc(100vw - 24px)); padding: 14px 16px 16px; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-heading { display: grid; grid-template-columns: 30px minmax(0,1fr) 30px; align-items: center; gap: 4px; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-label { text-align: center; min-width: 0; display: flex; flex-direction: column; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-label strong { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 18px; line-height: 24px; font-weight: 650; color: var(--graphics-accent);  }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-label span { font-size: 12px; line-height: 17px; color: var(--quest-ui-theme-text-muted); font-weight: 500; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-icon-button { border: 0; background: transparent; color: var(--quest-ui-theme-text-muted); width: 30px; height: 30px; display: grid; place-items: center; padding: 5px; cursor: pointer; border-radius: 2px; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-icon-button:hover { background: #88888820; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-icon-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-icon-button[aria-pressed="true"] { color: var(--graphics-accent);  }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .is-bolt[aria-pressed="true"] svg { fill: currentColor; filter: drop-shadow(0 0 4px #ffffff66); }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-slider { position: relative; height: 28px; margin-top: 14px; cursor: pointer; touch-action: none; user-select: none; --graphics-position: calc(14px + (100% - 28px) * var(--graphics-index) / 4); }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-track { position: absolute; inset: 2px 0; background: #08090f; border-radius: 2px; overflow: hidden; pointer-events: none; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-fill { display: block; height: 100%; width: calc(var(--graphics-position) + 1px); background-color: var(--graphics-accent); background-image: linear-gradient(135deg, var(--graphics-gradient-start), var(--graphics-gradient-end)); border-radius: 2px; transition: width 120ms ease, background-color 120ms ease; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-dots { position: absolute; inset: 0 12px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-dots i { width: 4px; height: 4px; background: #ffffff55; border-radius: 2px; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-thumb { position: absolute; top: 0; left: var(--graphics-position); transform: translateX(-50%); width: 28px; height: 28px; border-radius: 2px; background: #fafafa; box-shadow: 0 1px 4px #0005; pointer-events: none; transition: left 120ms ease; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu.is-reduced :is(.quest-ui-graphics-fill,.quest-ui-graphics-thumb), .quest-ui-theme-obsidian.quest-ui-graphics-menu .is-dragging :is(.quest-ui-graphics-fill,.quest-ui-graphics-thumb) { transition: none; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu :is(.quest-ui-graphics-icon-button,.quest-ui-graphics-slider):focus-visible { outline: 2px solid var(--quest-ui-theme-accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    .quest-ui-theme-obsidian.quest-ui-graphics-menu :is(.quest-ui-graphics-fill,.quest-ui-graphics-thumb) { transition: none; }
+}
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="0"], .quest-ui-theme-obsidian.quest-ui-graphics-menu[data-graphics-index="0"] { --graphics-accent: #39c77b; --graphics-gradient-start: #73e8a0; --graphics-gradient-end: #21af69; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="1"], .quest-ui-theme-obsidian.quest-ui-graphics-menu[data-graphics-index="1"] { --graphics-accent: #eabf45; --graphics-gradient-start: #ffe17a; --graphics-gradient-end: #e3a72d; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="2"], .quest-ui-theme-obsidian.quest-ui-graphics-menu[data-graphics-index="2"] { --graphics-accent: #4389ff; --graphics-gradient-start: #79baff; --graphics-gradient-end: #3976ed; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="3"], .quest-ui-theme-obsidian.quest-ui-graphics-menu[data-graphics-index="3"] { --graphics-accent: #ef5350; --graphics-gradient-start: #ff8980; --graphics-gradient-end: #e53b4b; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="4"], .quest-ui-theme-obsidian.quest-ui-graphics-menu[data-graphics-index="4"] { --graphics-accent: #b47aff; --graphics-gradient-start: #d4a5ff; --graphics-gradient-end: #9855ed; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="light"], .quest-ui-theme-obsidian.quest-ui-graphics-menu[data-graphics-index="light"] { --graphics-accent: #ffffff; --graphics-gradient-start: #ffffff; --graphics-gradient-end: #d5dce8; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu[data-graphics-index="4"] .quest-ui-graphics-fill { width: 100%; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="0"] { --graphics-needle-angle: -135deg; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="1"] { --graphics-needle-angle: -67.5deg; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="2"] { --graphics-needle-angle: 0deg; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="3"] { --graphics-needle-angle: 67.5deg; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="4"] { --graphics-needle-angle: 135deg; }
+.quest-ui-theme-obsidian .quest-ui-graphics-trigger[data-graphics-index="light"] { --graphics-needle-angle: -135deg; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-lock { width: 18px; height: 18px; flex: 0 0 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-lock circle { fill: currentColor; stroke: none; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-icon-button svg { display: block; margin: 0; }
+.quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-label .quest-ui-graphics-title-text { font: inherit; line-height: inherit; color: var(--graphics-accent); background-image: linear-gradient(135deg, var(--graphics-gradient-start), var(--graphics-gradient-end)); background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none; }
+@media (forced-colors: active) {
+    .quest-ui-theme-obsidian.quest-ui-graphics-menu .quest-ui-graphics-label .quest-ui-graphics-title-text { background: none; -webkit-text-fill-color: currentColor; }
+    .quest-ui-theme-obsidian .quest-ui-graphics-trigger .quest-ui-graphics-gauge path { stroke: currentColor; }
+    .quest-ui-theme-obsidian .quest-ui-graphics-trigger .quest-ui-graphics-gauge circle { fill: currentColor; }
+}

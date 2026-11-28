@@ -79,6 +79,12 @@ import origamiPolishStock from "./origami/polish-stock.css?managed";
 import origamiPaperArt from "./origami/paper-art.css?managed";
 import origamiCardArt from "./origami/card-art.css?managed";
 
+import graphics from "./default/graphics.css?managed";
+import glassGraphics from "./liquid-glass/graphics.css?managed";
+import obsidianGraphics from "./obsidian/graphics.css?managed";
+import sakuraGraphics from "./sakura/graphics.css?managed";
+import terminalGraphics from "./terminal/graphics.css?managed";
+import origamiGraphics from "./origami/graphics.css?managed";
 import type { DashboardTheme } from "./controller";
 
 export const DEFAULT_DASHBOARD_THEME_ID = "default";
@@ -99,6 +105,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             eventLog,
             orion,
             dashboard,
+            graphics,
         ]
     },
     {
@@ -115,6 +122,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             glassEventLog,
             glassOrion,
             glassDashboard,
+            glassGraphics,
         ]
     },
     {
@@ -133,6 +141,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             obsidianDashboard,
             obsidianFractureAssets,
             obsidianFractures,
+            obsidianGraphics,
         ]
     },
     {
@@ -152,6 +161,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             sakuraSceneAssets,
             sakuraOrnaments,
             sakuraArtDirection,
+            sakuraGraphics,
         ]
     },
     {
@@ -168,6 +178,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             terminalEventLog,
             terminalOrion,
             terminalDashboard,
+            terminalGraphics,
         ]
     },
     {
@@ -194,6 +205,7 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
             origamiPolishStock,
             origamiPaperArt,
             origamiCardArt,
+            origamiGraphics,
         ]
     }
 ];

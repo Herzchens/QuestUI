@@ -355,7 +355,7 @@
 }
 .quest-ui-theme-origami.quest-ui-theme .quest-ui-dashboard-content::after { content: ""; flex: 0 0 26px;
     background: var(--origami-art-footer) center / contain no-repeat; pointer-events: none; }
-.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-notification-center-panel,.quest-ui-event-log-panel,.quest-ui-event-detail,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu,.quest-ui-update-panel,.quest-ui-filter-list,.quest-ui-dashboard-choice-list) { background-color: #fff0de !important;
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-notification-center-panel,.quest-ui-event-log-panel,.quest-ui-event-detail,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu,.quest-ui-update-panel,.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-graphics-menu) { background-color: #fff0de !important;
     background-image: var(--origami-art-ivory) !important;
     background-size: cover;
     background-position: center;
@@ -609,7 +609,7 @@
 /* Origami portal material system. Portal roots must stay unclipped and must
  * never create a new stacking context; Discord owns placement and stacking.
  * Only decorative stock is cropped. Row dimensions and animation are native. */
-.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu),
+.quest-ui-theme-origami.quest-ui-theme:is(.quest-ui-filter-list,.quest-ui-dashboard-choice-list,.quest-ui-event-filter-menu,.quest-ui-event-sort-menu,.quest-ui-graphics-menu),
 .quest-ui-theme-origami.quest-ui-theme.quest-ui-event-log-panel,
 .quest-ui-theme-origami.quest-ui-theme.quest-ui-event-detail,
 .quest-ui-theme-origami.quest-ui-theme.quest-ui-notification-center-panel,

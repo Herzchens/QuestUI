@@ -9,6 +9,7 @@ import { isOrionCommandReady } from "../orion/integration";
 import { OrionGlobalControls } from "../orion/OrionControls";
 import { useQuestOrbMultiplierState } from "../orbs/multiplier";
 import { QuestDashboard } from "./QuestDashboard";
+import { DashboardGraphicsControl } from "./DashboardGraphicsControl";
 import { DashboardThemeControl } from "./DashboardThemeControl";
 import { QuestDashboardHomeControl, QuestDashboardMarketControl } from "./DashboardToolbar";
 import { QuestOrbBalance } from "../orbs/QuestOrbBalance";
@@ -144,6 +145,7 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
             <div className="quest-ui-dashboard-topbar">
                 <QuestDashboardDisplayTitle />
                 <div className="quest-ui-dashboard-header-tools">
+                    <DashboardGraphicsControl />
                     <DashboardThemeControl />
                     <QuestOrbBalance closePopout={closePopout} />
                 </div>

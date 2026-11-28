@@ -71,6 +71,10 @@ jobs:
         working-directory: questui
         run: node tests/themes/origamiVisual.test.mjs
 
+      - name: Verify Graphics selector across all themes
+        working-directory: questui
+        run: node tests/themes/graphicsVisual.test.mjs
+
       - name: Verify Event Log rows across all themes
         working-directory: questui
         run: node tests/themes/eventLogRows.test.mjs
@@ -144,6 +148,10 @@ jobs:
       - name: Test Orb balance logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/orbs/balance.test.ts
+
+      - name: Test Graphics selector state
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/graphics.test.ts
 
       - name: Test Dashboard sort logic
         working-directory: vencord

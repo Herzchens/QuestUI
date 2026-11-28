@@ -2541,7 +2541,8 @@
     box-sizing: border-box;
 }
 .quest-ui-theme-obsidian.quest-ui-filter-list,
-.quest-ui-theme-obsidian.quest-ui-dashboard-choice-list {
+.quest-ui-theme-obsidian.quest-ui-dashboard-choice-list,
+.quest-ui-theme-obsidian.quest-ui-graphics-menu {
     color: #dbdee1;
 }
 .quest-ui-theme.quest-ui-filter-list {
