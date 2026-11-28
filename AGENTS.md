@@ -101,7 +101,7 @@ Install QuestUI at:
 Vencord/src/userplugins/QuestUI
 ```
 
-Run from the Vencord root. `.github/workflows/compatibility.yml` is the authoritative full CI matrix (currently 48 test files across `tests/` plus contract, generated-asset, build, type-check, upstream Orion coexistence, and Stable/Canary reporter gates):
+Run from the Vencord root. `.github/workflows/compatibility.yml` is the authoritative full CI matrix (currently 49 test files across `tests/` plus contract, generated-asset, build, type-check, upstream Orion coexistence, and Stable/Canary reporter gates):
 
 ```bash
 pnpm install --frozen-lockfile
@@ -112,7 +112,7 @@ node src/userplugins/QuestUI/scripts/checkThemeContract.mjs --self-test
 node src/userplugins/QuestUI/scripts/checkThemeContract.mjs
 node src/userplugins/QuestUI/src/themes/obsidian/generateFractureAssets.mjs --check
 
-# Focused examples (see .github/workflows/compatibility.yml for all 48 test files):
+# Focused examples (see .github/workflows/compatibility.yml for all 49 test files):
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/batchToolbar.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignoredRuntime.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/orion/exclusionIntegration.test.ts
@@ -269,6 +269,7 @@ Feedback channel is purpose-specific, not toast-only. Short-lived successful act
 - Decorative WebGL layers use the owned rendering scope and bounded framebuffer in `src/graphics/shaderLayer.ts`. Keep CSS fallback on context failure, pause frames while hidden and render static output under Reduced Motion. Ultra remains locked until its actual theme implementations are accepted.
 - Ignore rules are account-scoped durable preferences. Rule evaluation uses a shared current-account snapshot, literal case-insensitive names or exact application IDs, and manual per-Quest exceptions. No new rule may enroll, resume or claim a Quest. Catalogue failures retain last-known exclusions and block QuestUI controls; never acknowledge an incomplete native exclusion snapshot.
 - `src/quests/model.ts` is the platform-neutral Quest read/normalization and filter layer. Vencord native lookups and React snapshot subscriptions stay in `src/quests/data.ts`. Other hosts must inject their read capabilities, use stored-state fallback if unavailable, and never fabricate Quest state.
+- BetterDiscord development preview lives in `src/platform/betterdiscord/`, bundled separately by `scripts/buildBetterDiscord.mjs`. It must remain read-only until the preview scope expands with explicit acceptance; no Vencord aliases in its runtime bundle and no duplicated Quest progress engine.
 - Graphics preference is shared across all six themes (`src/graphics/controller.ts`, `src/graphics/runtime.ts`), while individual themes may implement quality-specific rendering differently.
 - System `prefers-reduced-motion` remains authoritative (`effectiveReducedMotion`).
 - Expensive artwork processing, LRU caching (`src/themes/artworkColorPool.ts`), prewarming (`artworkPrewarmUrls`), and raster queues follow the active rendering policy and cancel/dispose on stop or owner change.

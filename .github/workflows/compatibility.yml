@@ -217,6 +217,21 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/quickOpen.test.ts
 
+      - name: Test BetterDiscord preview adapter
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/platform/betterDiscord.test.ts
+
+      - name: Build BetterDiscord preview package
+        working-directory: vencord
+        run: node src/userplugins/QuestUI/scripts/buildBetterDiscord.mjs dist/QuestUI.plugin.js
+
+      - name: Upload BetterDiscord development package
+        uses: actions/upload-artifact@v4
+        with:
+          name: questui-betterdiscord-development
+          path: vencord/dist/QuestUI.plugin.js
+          if-no-files-found: error
+
       - name: Test platform-neutral Quest model
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/model.test.ts

@@ -1,0 +1,25 @@
+import assert from "node:assert/strict";
+import { readBetterDiscordQuests } from "../../src/platform/betterdiscord/readHost";
+const fixture = { id:"quest", config:{messages:{questName:"Test"}, expiresAt:"2030-01-01",taskConfig:{tasks:{WATCH_VIDEO:{target:60}}}},userStatus:{enrolledAt:"2026-01-01",progress:{WATCH_VIDEO:{value:12}}}};
+let account: string | null = "A";
+let reads = 0, switchDuringRead = false;
+let available = true;
+const store = {quests:new Map([["quest",fixture]]),getQuest(){if(switchDuringRead)account="B";return fixture;}};
+const host = { Webpack:{ getStore(name:string){
+    if(name==="UserStore")return {getCurrentUser(){reads++;return account?{id:account}:null;}};
+    if(name==="QuestsStore"&&available)return store;
+    return undefined;
+}}};
+const snapshot=readBetterDiscordQuests(host);
+assert.equal(snapshot.kind,"ready");
+assert.equal(snapshot.quests[0].progress,20);
+assert.equal(snapshot.quests[0].rawQuest,null);
+assert.equal(reads,2);
+switchDuringRead=true;
+assert.equal(readBetterDiscordQuests(host).kind,"unavailable");
+switchDuringRead=false;account=null;
+assert.equal(readBetterDiscordQuests(host).kind,"unavailable");
+account="A";available=false;
+assert.equal(readBetterDiscordQuests(host).kind,"unavailable");
+assert.equal(readBetterDiscordQuests({Webpack:{getStore(){throw Error("host missing");}}}).kind,"unavailable");
+console.log("BetterDiscord read-only preview adapter PASS");
