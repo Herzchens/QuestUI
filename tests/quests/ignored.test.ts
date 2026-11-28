@@ -99,3 +99,32 @@ assert.deepEqual([...terminalIgnoredQuestIds([
     {id:"invalid",userStatus:{claimedAt:"bad"}},
     {id:"future",config:{expiresAt:"2030-01-01"}}
 ],Date.parse("2026-02-01"))],["claimed","expired"]);
+
+
+import { matchingIgnoredQuestIds, replaceAccountIgnoreRules, updateEffectiveIgnore, pruneIgnoreExceptions } from "../../src/quests/ignored/logic";
+{
+    const rules = [{kind:"name-contains",value:"  Dune  "},{kind:"application-id",value:"123"}] as const;
+    let state = replaceAccountIgnoreRules(null,"A",[],rules);
+    const saved = state.ruleAccounts!.A;
+    assert.deepEqual(saved,[{kind:"name-contains",value:"Dune"},{kind:"application-id",value:"123"}]);
+    const candidates = [
+        {id:"name",config:{messages:{questName:"DUNE: Awakening"}}},
+        {id:"app",config:{application:{id:"123"}}},
+        {id:"other",config:{application:{id:"1234"}}},
+        {id:"expired",config:{messages:{questName:"Dune"},expiresAt:"2000-01-01"}},
+        {id:"claimed",config:{application:{id:"123"}},userStatus:{claimedAt:"2026-01-01"}}
+    ];
+    assert.deepEqual([...matchingIgnoredQuestIds(saved,candidates)],["name","app"]);
+    assert.throws(()=>replaceAccountIgnoreRules(state,"A",[],[]),/changed/);
+    assert.throws(()=>replaceAccountIgnoreRules(state,"A",saved,[{kind:"name-contains",value:"Dune"},{kind:"name-contains",value:"dune"}]),/duplicate/);
+    state = updateEffectiveIgnore(state,"A","name",false,true);
+    assert.deepEqual(state.ruleExceptions?.A,["name"]);
+    state = updateEffectiveIgnore(state,"A","app",true,true);
+    assert.deepEqual(state.accounts.A,["app"]);
+    assert.deepEqual(state.ruleAccounts?.A,saved);
+    state = updateEffectiveIgnore(state,"A","name",true,true);
+    assert.equal(state.ruleExceptions,undefined);
+    state = updateEffectiveIgnore(state,"B","name",false,true);
+    state = pruneIgnoreExceptions(state,"B",["name"]);
+    assert.equal(state.ruleExceptions,undefined);
+}

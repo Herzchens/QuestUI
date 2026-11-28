@@ -95,6 +95,7 @@ Safeguards:
 ### 🙈 Ignore Quest
 
 - Account-scoped **Ignore / Unignore** for Available (unaccepted) and In Progress Quests.
+- **Ignore rules:** in QuestUI plugin settings, add, edit or delete literal case-insensitive Quest-name matches or exact application IDs. Any matching rule excludes that Quest. Manual Unignore creates a per-Quest exception; manually ignoring it again clears the exception. Rules are local to the current account and never automatically start or resume a Quest.
 - Ignored Quests leave the main list, attention dots, Detailed Status, Quest Home counters and QuestUI notifications. They stay in the Ignored catalogue until they are claimed or expire, then the entry is pruned.
 - Ignored Quests are skipped by QuestUI's batch actions and Resume. Unignore a Quest before you accept or resume it. Unignore never starts or resumes a Quest by itself.
 - Persistence is fail-closed: a failed storage read or write never drops existing exclusions.

@@ -17,6 +17,7 @@ import {
 } from "../quests/reload/autoLogic";
 import { DEFAULT_UPDATE_CHECK_STEP, UPDATE_CHECK_STEP_MARKERS, updateCheckMarkerLabel } from "../updates/logic";
 import { UpdateSettingsControl } from "../updates/UpdateCenter";
+import { IgnoreRuleSettingsControl } from "../quests/ignored/RuleSettings";
 import { notifyUpdateSettingsChanged } from "../updates/runtime";
 
 function noShortcutButtons(this: any): boolean {
@@ -138,6 +139,10 @@ export default definePluginSettings({
     updateStatus: {
         type: OptionType.COMPONENT,
         component: UpdateSettingsControl
+    },
+    ignoreRules: {
+        type: OptionType.COMPONENT,
+        component: IgnoreRuleSettingsControl
     },
 
     // Dashboard filter values live in settings so they persist, but they are configured
