@@ -29,6 +29,8 @@ export function mountShaderLayer(context: ThemeRenderContext, host: HTMLElement,
     let gl: WebGLRenderingContext | null = null;
     let frame: number | null = null;
     let closed = false;
+    let cleaning = false;
+    let cleanupTasks: Array<() => void> | undefined;
     let observer: ResizeObserver | undefined;
     let program: WebGLProgram | null = null;
     let buffer: WebGLBuffer | null = null;
@@ -42,28 +44,40 @@ export function mountShaderLayer(context: ThemeRenderContext, host: HTMLElement,
         lastTime = null;
     }
     function cleanup() {
-        if (closed) return;
+        if (cleaning) return;
         closed = true;
-        const errors: unknown[] = [];
-        const attempt = (fn: () => void) => { try { fn(); } catch (error) { errors.push(error); } };
-        attempt(stopFrame);
-        attempt(() => observer?.disconnect());
-        attempt(() => doc.removeEventListener("visibilitychange", visibility));
-        attempt(() => host.removeEventListener("pointermove", onPointer));
-        attempt(() => canvas.removeEventListener("webglcontextlost", lost));
-        attempt(() => canvas.remove());
-        if (gl) {
+        cleaning = true;
+        if (!cleanupTasks) {
             const owned = gl;
-            for (const shader of shaders) attempt(() => owned.deleteShader(shader));
-            if (buffer) attempt(() => owned.deleteBuffer(buffer));
-            if (program) attempt(() => owned.deleteProgram(program));
-            attempt(() => owned.getExtension("WEBGL_lose_context")?.loseContext());
+            const ownedProgram = program;
+            const ownedBuffer = buffer;
+            cleanupTasks = [
+                stopFrame,
+                () => observer?.disconnect(),
+                () => win!.removeEventListener("resize", schedule),
+                () => doc.removeEventListener("visibilitychange", visibility),
+                () => host.removeEventListener("pointermove", onPointer),
+                () => canvas.removeEventListener("webglcontextlost", lost),
+                () => canvas.remove(),
+                ...shaders.map(shader => () => owned?.deleteShader(shader)),
+                () => { if (ownedBuffer) owned?.deleteBuffer(ownedBuffer); },
+                () => { if (ownedProgram) owned?.deleteProgram(ownedProgram); },
+                () => { owned?.getExtension("WEBGL_lose_context")?.loseContext(); }
+            ];
+            shaders.length = 0;
+            gl = null;
+            buffer = null;
+            program = null;
         }
-        shaders.length = 0;
-        gl = null;
-        buffer = null;
-        program = null;
-        if (errors.length) throw new AggregateError(errors, "Shader layer cleanup failed.");
+        const failures: unknown[] = [];
+        const retry: Array<() => void> = [];
+        try {
+            for (const task of cleanupTasks) {
+                try { task(); } catch (error) { failures.push(error); retry.push(task); }
+            }
+            cleanupTasks = retry;
+        } finally { cleaning = false; }
+        if (failures.length) throw new AggregateError(failures, "Shader layer cleanup failed.");
     }
     function fail(error: unknown) {
         if (closed) return;
@@ -93,6 +107,7 @@ export function mountShaderLayer(context: ThemeRenderContext, host: HTMLElement,
         frame = null;
         if (closed || context.signal.aborted || doc.hidden || !gl) return;
         try {
+            if (!context.root.contains(host)) throw new Error("Shader host detached.");
             if (gl.isContextLost()) throw new Error("WebGL context lost.");
             const rect = host.getBoundingClientRect();
             const [width, height] = boundedFramebuffer(rect.width, rect.height, win!.devicePixelRatio, Number(gl.getParameter(gl.MAX_RENDERBUFFER_SIZE)));
@@ -150,11 +165,13 @@ export function mountShaderLayer(context: ThemeRenderContext, host: HTMLElement,
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
         canvas.addEventListener("webglcontextlost", lost);
         doc.addEventListener("visibilitychange", visibility);
+        win.addEventListener("resize", schedule);
         if (!context.reducedMotion) host.addEventListener("pointermove", onPointer, { passive: true });
         if (typeof ResizeObserver !== "undefined") {
             observer = new ResizeObserver(schedule);
             observer.observe(host);
         }
+        if (closed || context.signal.aborted) return;
         host.appendChild(canvas);
         schedule();
     } catch (error) { fail(error); }

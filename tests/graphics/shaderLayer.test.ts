@@ -21,7 +21,7 @@ function fixture() {
         remove() { host.children.delete(canvas); },
         getContext() { return available ? gl : null; }
     });
-    let available = true, compile = true, link = true;
+    let available = true, compile = true, link = true, failDelete = false;
     const gl = {
         VERTEX_SHADER:1, FRAGMENT_SHADER:2, COMPILE_STATUS:3, LINK_STATUS:4, ARRAY_BUFFER:5,
         STATIC_DRAW:6, FLOAT:7, TRIANGLES:8, MAX_RENDERBUFFER_SIZE:9,
@@ -30,12 +30,12 @@ function fixture() {
         getAttribLocation:()=>0, getUniformLocation:()=>null, createBuffer:()=>({}), bindBuffer(){}, bufferData(){},
         isContextLost:()=>false, getParameter:()=>4096, viewport(){}, useProgram(){}, enableVertexAttribArray(){},
         vertexAttribPointer(){}, uniform2f(){}, uniform1f(){}, drawArrays(){counts.draw++;},
-        deleteShader(){counts.deletedShader++;}, deleteProgram(){counts.deletedProgram++;},
+        deleteShader(){if(failDelete)throw Error("delete");counts.deletedShader++;}, deleteProgram(){counts.deletedProgram++;},
         deleteBuffer(){counts.deletedBuffer++;}, getExtension:()=>({loseContext(){counts.lost++;}})
     };
     const document = Object.assign(new EventTarget(), {
         hidden:false,
-        defaultView:{devicePixelRatio:2, requestAnimationFrame(cb:FrameRequestCallback){frames.set(++next,cb);return next;},cancelAnimationFrame(id:number){frames.delete(id);}},
+        defaultView:Object.assign(new EventTarget(),{devicePixelRatio:2, requestAnimationFrame(cb:FrameRequestCallback){frames.set(++next,cb);return next;},cancelAnimationFrame(id:number){frames.delete(id);}}),
         createElement:()=>canvas
     });
     const host = Object.assign(new EventTarget(), {
@@ -49,7 +49,7 @@ function fixture() {
     const context = { root:host as unknown as HTMLElement, surface:"dashboard" as const, graphics:graphicsQualityPolicy("3"), reducedMotion:false };
     const mount = (reducedMotion=false) => rendering.attach(ctx=>mountShaderLayer(ctx,context.root,{fragmentSource:"void main(){}",onFallback:error=>errors.push(error)}),{...context,reducedMotion});
     function tick(){const entries=[...frames];frames.clear();for(const [,cb] of entries)cb(100);}
-    return {counts,frames,canvas,host,document,errors,rendering,mount,tick,setAvailable(v:boolean){available=v;},setCompile(v:boolean){compile=v;},setLink(v:boolean){link=v;}};
+    return {counts,frames,canvas,host,document,errors,rendering,mount,tick,setAvailable(v:boolean){available=v;},setCompile(v:boolean){compile=v;},setLink(v:boolean){link=v;},setFailDelete(v:boolean){failDelete=v;}};
 }
 {
     const f=fixture();const dispose=f.mount();
@@ -76,3 +76,30 @@ for(const mode of ["unavailable","compile","link","context-lost"]){
     f.rendering.stop();assert.equal(f.errors.length,1,mode);
 }
 console.log("QuestUI shader layer: framebuffer budget, motion, visibility, fallback and cleanup PASS");
+
+{
+    const f=fixture();
+    f.mount();
+    f.setFailDelete(true);
+    assert.throws(f.rendering.stop,/cleanup incomplete/);
+    assert.equal(f.host.children.size,0);
+    assert.equal(f.frames.size,0);
+    assert.equal(f.counts.deletedBuffer,1);
+    assert.equal(f.counts.deletedProgram,1);
+    f.setFailDelete(false);
+    f.rendering.stop();
+    assert.equal(f.counts.deletedShader,2);
+    assert.equal(f.counts.deletedBuffer,1);
+    assert.equal(f.counts.deletedProgram,1);
+}
+{
+    const f=fixture();
+    f.mount(true);
+    f.tick();
+    f.document.defaultView.dispatchEvent(new Event("resize"));
+    assert.equal(f.frames.size,1);
+    f.tick();assert.equal(f.counts.draw,2);assert.equal(f.frames.size,0);
+    f.rendering.stop();
+    f.document.defaultView.dispatchEvent(new Event("resize"));
+    assert.equal(f.frames.size,0);
+}
