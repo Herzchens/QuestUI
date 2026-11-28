@@ -4,7 +4,7 @@ The v1 SDK is for **trusted, locally installed Vencord userplugins**. It accepts
 
 ## Register a theme
 
-Use the QuestUI plugin object's `themeSDK` member. Check `apiVersion === 1` before calling. A Vencord companion should declare QuestUI as a dependency and dispose its registration on stop.
+Use the QuestUI plugin object's `themeSDK` member. Check `apiVersion === 1` before calling. A Vencord companion should declare `dependencies: ["QuestUI"]` in its `definePlugin` metadata, invoke registration from `start()` and dispose it from `stop()`.
 
 ```ts
 import { plugins } from "@api/PluginManager";
@@ -38,7 +38,7 @@ This is a minimal registration example, not a complete usable dashboard theme. A
 
 The palette lists registered themes; the user chooses one. The saved theme ID can be restored on a later registration. Removing an active theme falls back to Default; the saved preference is retained until the user selects another theme. The returned disposer is idempotent and ownership-specific. If cleanup fails, retry the disposer; do not discard it on error.
 
-`getThemes()` returns a readonly snapshot of ID/label pairs; `getActiveTheme()` returns the current Dashboard theme ID (Default when inactive). No public selection or renderer callback API is exposed.
+`getThemes()` returns a readonly array of `{ value: string, label: string }` entries (`value` is the theme ID); `getActiveTheme()` returns the current Dashboard theme ID (Default when inactive). No public selection or renderer callback API is exposed.
 
 ## Constraints
 

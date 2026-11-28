@@ -479,3 +479,33 @@ void (async () => {
     unsub();
     rendering.stop();
 }
+
+{
+    const errors: unknown[] = [];
+    const rendering = createThemeRendering(error => errors.push(error));
+    const context = { root: {} as HTMLElement, surface: "dashboard" as const, graphics: graphicsQualityPolicy("3"), reducedMotion: false };
+    let fail = true, cleaned = 0;
+    rendering.start();
+    rendering.attach(({ defer }) => {
+        defer(() => { if (fail) throw new Error("dispose"); cleaned++; });
+        defer(() => { cleaned++; });
+    }, context);
+    assert.throws(rendering.stop, /cleanup incomplete/);
+    assert.equal(cleaned, 1);
+    assert.equal(rendering.isRunning(), false);
+    assert.equal(errors.length, 1);
+    fail = false;
+    rendering.stop();
+    assert.equal(cleaned, 2);
+    rendering.stop();
+    assert.equal(cleaned, 2);
+}
+{
+    const controller = createDashboardThemeController(themes, "default", { validate() {}, enable() {}, disable() {} });
+    assert.equal(controller.getSnapshot(), "default");
+    assert.equal(controller.getActiveThemeId(), null);
+    controller.select("default");
+    assert.equal(controller.getActiveThemeId(), "default");
+    controller.stop();
+    assert.equal(controller.getActiveThemeId(), null);
+}

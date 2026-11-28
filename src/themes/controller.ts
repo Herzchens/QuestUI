@@ -163,6 +163,7 @@ export function createDashboardThemeController(
         stop: () => mutate(stopInternal),
         subscribe,
         getSnapshot,
+        getActiveThemeId: () => active?.id ?? null,
         getCatalogue: () => catalogue,
         registerTheme
     };

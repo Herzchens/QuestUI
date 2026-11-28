@@ -33,6 +33,7 @@ export function createThemePluginLifecycle(
             lifecycle.start();
         },
         stop: lifecycle.stop,
+        isRunning: lifecycle.isRunning,
         select(value: unknown) {
             if (!lifecycle.isRunning()) throw new Error("Dashboard themes are not started.");
             return controller.select(value);

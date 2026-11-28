@@ -33,18 +33,20 @@ const rendering = createThemeRendering(error => console.warn("[QuestUI] Theme re
 
 export function startDashboardThemes(preference: unknown): void {
     lifecycle.start(preference);
-    rendering.start();
+    if (lifecycle.isRunning()) rendering.start();
 }
 
 export function stopDashboardThemes(): void {
-    rendering.stop();
-    lifecycle.stop();
+    const errors: unknown[] = [];
+    try { rendering.stop(); } catch (error) { errors.push(error); }
+    try { lifecycle.stop(); } catch (error) { errors.push(error); }
+    if (errors.length) throw new AggregateError(errors, "QuestUI theme shutdown failed.");
 }
 
 export function selectDashboardTheme(preference: unknown): string {
-    const previous = controller.getSnapshot();
+    const previous = controller.getActiveThemeId();
     try { return lifecycle.select(preference); }
-    finally { if (controller.getSnapshot() !== previous) rendering.clear(); }
+    finally { if (controller.getActiveThemeId() !== previous) rendering.clear(); }
 }
 
 export function useThemeRenderingSurface(surface: ThemeSurface) {
@@ -56,7 +58,7 @@ export function useThemeRenderingSurface(surface: ThemeSurface) {
     React.useEffect(() => {
         const element = root.current;
         const render = DASHBOARD_THEMES.find(theme => theme.id === id)?.render;
-        if (!element || !render || controller.getSnapshot() !== id) return;
+        if (!element || !render || controller.getActiveThemeId() !== id) return;
         return rendering.attach(render, { root: element, surface, graphics, reducedMotion });
     }, [id, surface, graphics, reducedMotion, epoch]);
     return root;

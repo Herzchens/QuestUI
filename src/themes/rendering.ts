@@ -101,7 +101,11 @@ export function createThemeRendering(onError: (error: unknown) => void) {
             enabled = true;
             clear();
         },
-        stop() { enabled = false; clear(); },
+        stop() {
+            enabled = false;
+            clear();
+            if (pending.size) throw new Error("Theme rendering cleanup incomplete.");
+        },
         isRunning: () => enabled,
         getEpoch: () => generation,
         subscribe(listener: () => void) {
