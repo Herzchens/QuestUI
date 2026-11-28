@@ -20,6 +20,8 @@ export type OrionCompanionSurface = {
     controlEngine: (action: OrionEngineAction) => Promise<string> | string;
     controlAll: (action: OrionTaskAction) => Promise<string> | string;
     controlQuest: (questId: string, action: OrionTaskAction) => Promise<string> | string;
+    /** Optional v1 exclusion contract. Must commit synchronously, account-scoped. */
+    setExcludedQuests?: (accountId: string, questIds: readonly string[]) => boolean;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

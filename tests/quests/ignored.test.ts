@@ -96,3 +96,13 @@ assert.deepEqual(
 );
 
 console.log("QuestUI ignored Quest logic tests - PASS");
+
+import { terminalIgnoredQuestIds } from "../../src/quests/ignored/logic";
+assert.deepEqual([...terminalIgnoredQuestIds([
+    {id:"claimed",userStatus:{claimedAt:"2026-01-01"}},
+    {id:"expired",config:{expiresAt:"2025-01-01"}},
+    {id:"ready",userStatus:{completedAt:"2026-01-01"}},
+    {id:"available",config:{}},
+    {id:"invalid",userStatus:{claimedAt:"bad"}},
+    {id:"future",config:{expiresAt:"2030-01-01"}}
+],Date.parse("2026-02-01"))],["claimed","expired"]);

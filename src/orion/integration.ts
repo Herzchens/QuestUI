@@ -1,3 +1,6 @@
+import { ignoredQuestIds, isIgnoredQuestStateReady } from "../quests/ignored/runtime";
+import settings from "../plugin/settings";
+import { resumableQuestIds } from "./ignorePolicy";
 import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
 import { createControlSubscription, type ControlSource } from "./controlSubscription";
 import { ApplicationCommandOptionType, commands } from "@api/Commands";
@@ -204,6 +207,30 @@ function wrapControlFailure(error: unknown): never {
     throw new OrionIntegrationError("OrionQuests rejected the requested control action.", error);
 }
 
+/** A native exclusion acknowledgment is optional; never assume a method name alone is enough. */
+let syncingExclusions = false;
+export function syncOrionExclusions(): boolean {
+    if (syncingExclusions || !settings.store.orionIntegration || !isIgnoredQuestStateReady()) return false;
+    const session = captureAccountSession();
+    if (!session || !isOrionCommandReady()) return false;
+    const current = plugin();
+    if (!current || typeof current.setExcludedQuests !== "function") return false;
+    syncingExclusions = true;
+    try {
+        const ids = [...ignoredQuestIds(session.accountId)].sort();
+        const method = current.setExcludedQuests;
+        if (!isCurrentAccountSession(session)) return false;
+        const accepted = method.call(current, session.accountId, ids) === true;
+        return accepted && isCurrentAccountSession(session) && plugin() === current
+            && current.started === true && isOrionEnabled() && current.setExcludedQuests === method;
+    } catch { return false; }
+    finally { syncingExclusions = false; }
+}
+
+function requireIgnoreReady(): void {
+    if (!isIgnoredQuestStateReady()) throw new OrionIntegrationError("Ignored Quests are still loading. Try again shortly.");
+}
+
 /** Invoke Orion's watcher-aware engine lifecycle without fabricating a slash-command channel. */
 export async function invokeOrionEngineControl(action: OrionEngineAction): Promise<string> {
     return withControlLock(async () => {
@@ -220,6 +247,14 @@ export async function invokeOrionEngineControl(action: OrionEngineAction): Promi
             if (current.controlEngine !== controlEngine) {
                 throw new OrionIntegrationError("OrionQuests engine control changed before invocation.");
             }
+            if (action === "start") {
+                requireIgnoreReady();
+                const session = captureAccountSession();
+                syncOrionExclusions();
+                if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed while Orion was starting.");
+                assertControlStillCurrent(current, command);
+                if (current.controlEngine !== controlEngine) throw new OrionIntegrationError("OrionQuests engine control changed.");
+            }
             return await Promise.resolve(controlEngine.call(current, action));
         } catch (error) {
             return wrapControlFailure(error);
@@ -229,8 +264,7 @@ export async function invokeOrionEngineControl(action: OrionEngineAction): Promi
 
 /**
  * Pause/resume Orion's current task set. Resume while the engine is stopped first starts the
- * engine, then clears Orion's persisted pause intent so the same unfinished quests become
- * eligible without resetting Discord progress.
+ * engine, then resumes only non-ignored paused tasks without resetting Discord progress.
  */
 export async function invokeOrionGlobalTaskControl(action: OrionTaskAction): Promise<string> {
     const session = captureAccountSession();
@@ -252,6 +286,11 @@ export async function invokeOrionGlobalTaskControl(action: OrionTaskAction): Pro
                 return await Promise.resolve(controlAll.call(current, "pause"));
             }
 
+            requireIgnoreReady();
+            syncOrionExclusions();
+            if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed before Orion control.");
+            assertControlStillCurrent(current, command);
+            if (current.controlEngine !== controlEngine) throw new OrionIntegrationError("OrionQuests engine control changed.");
             if (!snapshot.running) {
                 await Promise.resolve(controlEngine.call(current, "start"));
                 if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed while Orion was starting.");
@@ -260,7 +299,29 @@ export async function invokeOrionGlobalTaskControl(action: OrionTaskAction): Pro
                     throw new OrionIntegrationError("OrionQuests task control changed while the engine was starting.");
                 }
             }
-            return await Promise.resolve(controlAll.call(current, "resume"));
+            if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed while Orion was resuming.");
+            // Native Orion owns the exclusion invariant. Re-sync after any awaited Start,
+            // then use its normal global resume contract only on an acknowledged snapshot.
+            const nativeExclusion = syncOrionExclusions();
+            if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed before Resume.");
+            assertControlStillCurrent(current, command);
+            if (current.controlAll !== controlAll) throw new OrionIntegrationError("OrionQuests task control changed.");
+            if (nativeExclusion) return await Promise.resolve(controlAll.call(current, "resume"));
+
+            const ignored = ignoredQuestIds(session?.accountId);
+            const latest = readCompatibleOrionSnapshot(current);
+            if (!latest) throw new OrionIntegrationError("OrionQuests control state is unavailable.");
+            const resume = current.controlQuest;
+            let count = 0;
+            for (const id of resumableQuestIds(latest, ignored)) {
+                if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed while Orion was resuming.");
+                assertControlStillCurrent(current, command);
+                if (current.controlQuest !== resume) throw new OrionIntegrationError("OrionQuests task control changed.");
+                if (ignoredQuestIds(session?.accountId).has(id)) continue;
+                await Promise.resolve(resume.call(current, id, "resume"));
+                count++;
+            }
+            return `Resumed ${count} non-ignored Quest(s).`;
         } catch (error) {
             return wrapControlFailure(error);
         }
@@ -291,6 +352,12 @@ export async function invokeOrionQuestTaskControl(questId: string, action: Orion
                 return await Promise.resolve(controlQuest.call(current, id, "pause"));
             }
 
+            requireIgnoreReady();
+            if (ignoredQuestIds(session?.accountId).has(id)) throw new OrionIntegrationError("Unignore this Quest before resuming it.");
+            syncOrionExclusions();
+            if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed before Orion control.");
+            assertControlStillCurrent(current, command);
+            if (current.controlEngine !== controlEngine) throw new OrionIntegrationError("OrionQuests engine control changed.");
             if (!snapshot.running) {
                 await Promise.resolve(controlEngine.call(current, "start"));
                 if (!isCurrentAccountSession(session)) throw new OrionIntegrationError("Discord account changed while Orion was starting.");
@@ -299,6 +366,7 @@ export async function invokeOrionQuestTaskControl(questId: string, action: Orion
                     throw new OrionIntegrationError("OrionQuests per-Quest control changed while the engine was starting.");
                 }
             }
+            if (!isCurrentAccountSession(session) || ignoredQuestIds(session?.accountId).has(id)) throw new OrionIntegrationError("Quest Ignore or account state changed before Resume.");
             return await Promise.resolve(controlQuest.call(current, id, "resume"));
         } catch (error) {
             return wrapControlFailure(error);

@@ -2,6 +2,7 @@ import * as DataStore from "@api/DataStore";
 import { UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import {
+    terminalIgnoredQuestIds,
     ignoredQuestIdsForAccount,
     normalizeIgnoredQuestState,
     pruneIgnoredQuestState,
@@ -55,16 +56,8 @@ function rawQuestValues(): any[] {
     });
 }
 
-function expiredQuestIds(now = Date.now()): ReadonlySet<string> {
-    const expired = new Set<string>();
-    for (const quest of rawQuestValues()) {
-        const id = String(quest?.id ?? quest?.config?.id ?? "").trim();
-        if (!id) continue;
-
-        const expiresAt = new Date(quest?.config?.expiresAt ?? 0).getTime();
-        if (Number.isFinite(expiresAt) && expiresAt > 0 && expiresAt <= now) expired.add(id);
-    }
-    return expired;
+function terminalQuestIds(now = Date.now()): ReadonlySet<string> {
+    return terminalIgnoredQuestIds(rawQuestValues(), now);
 }
 
 async function loadState(): Promise<IgnoredQuestState> {
@@ -96,9 +89,9 @@ export function ignoredQuestIds(accountId = currentAccountId()): ReadonlySet<str
     if (!cachedState || !accountId) return new Set<string>();
 
     const ids = new Set(ignoredQuestIdsForAccount(cachedState, accountId));
-    // Expiry is Discord-owned state. As soon as Discord reports the Quest expired,
+    // Terminal state is Discord-owned. As soon as Discord reports a claim or expiry,
     // Ignore stops affecting presentation even if persistence cleanup has not run yet.
-    for (const questId of expiredQuestIds()) ids.delete(questId);
+    if (ids.size && accountId === currentAccountId()) for (const questId of terminalQuestIds()) ids.delete(questId);
     return ids;
 }
 
@@ -112,6 +105,7 @@ export async function setQuestIgnored(accountId: string, questId: string, ignore
     // A failed write must reject that caller without poisoning every later Ignore/Unignore action.
     // Recover the serialization chain first, then attempt the next independent mutation.
     writeChain = writeChain.catch(() => { }).then(async () => {
+        if (ignored && accountId === currentAccountId() && terminalQuestIds().has(questId)) throw new Error("This Quest has already been claimed or expired.");
         const optimistic = updateIgnoredQuestState(cachedState, accountId, questId, ignored);
         cachedState = optimistic;
         notify();
@@ -143,18 +137,23 @@ export async function pruneExpiredIgnoredQuests(
     await loadState();
     if (expectedGeneration != null && (!lifecycleStarted || expectedGeneration !== lifecycleGeneration)) return;
 
-    const expired = expiredQuestIds();
+    if (accountId !== currentAccountId()) return;
+    const expired = terminalQuestIds();
     const staleIds = ignoredQuestIdsForAccount(cachedState, accountId).filter(id => expired.has(id));
     if (staleIds.length === 0) return;
 
     writeChain = writeChain.catch(() => { }).then(async () => {
         if (expectedGeneration != null && (!lifecycleStarted || expectedGeneration !== lifecycleGeneration)) return;
-        cachedState = pruneIgnoredQuestState(cachedState, accountId, staleIds);
+        if (accountId !== currentAccountId()) return;
+        const terminal = terminalQuestIds();
+        const confirmedIds = staleIds.filter(id => terminal.has(id));
+        if (!confirmedIds.length) return;
+        cachedState = pruneIgnoredQuestState(cachedState, accountId, confirmedIds);
         notify();
 
         try {
             await DataStore.update<IgnoredQuestState>(DATA_STORE_KEY, stored =>
-                pruneIgnoredQuestState(stored, accountId, staleIds)
+                pruneIgnoredQuestState(stored, accountId, confirmedIds)
             );
             cachedState = normalizeIgnoredQuestState(await DataStore.get(DATA_STORE_KEY));
         } catch {
@@ -172,6 +171,7 @@ export async function pruneExpiredIgnoredQuests(
 function sweepExpiredIgnoredQuests(): void {
     if (!lifecycleStarted) return;
     const generation = lifecycleGeneration;
+    notify();
     void pruneExpiredIgnoredQuests(currentAccountId(), generation);
 }
 

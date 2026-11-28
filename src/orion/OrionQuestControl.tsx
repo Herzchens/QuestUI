@@ -11,6 +11,7 @@ import {
     invokeOrionQuestTaskControl,
     subscribeOrionControlState
 } from "./integration";
+import { ignoredQuestIds, useIgnoredQuests } from "../quests/ignored/runtime";
 import type { NormalizedQuest } from "../quests/data";
 
 function titleFor(action: "start" | "pause" | "resume", questName: string, disabled: boolean): string {
@@ -21,6 +22,8 @@ function titleFor(action: "start" | "pause" | "resume", questName: string, disab
 }
 
 export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
+    const { ids, ready } = useIgnoredQuests();
+    const blocked = !ready || ids.has(quest.id);
     const [, setRevision] = useState(0);
     const [pending, setPending] = useState(false);
     const mounted = useRef(true);
@@ -39,10 +42,10 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
     if (!snapshot) return null;
 
     const control = deriveQuestOrionControl(snapshot, quest.id);
-    const title = titleFor(control.action, quest.name, control.disabled);
+    const title = blocked ? "Unignore this Quest before starting or resuming it" : titleFor(control.action, quest.name, control.disabled);
 
     const run = async () => {
-        if (pendingRef.current || !ownsView()) return;
+        if (pendingRef.current || !ownsView() || blocked || ignoredQuestIds(session?.accountId).has(quest.id)) return;
         const latest = getOrionControlSnapshot();
         if (!latest) return;
         const fresh = deriveQuestOrionControl(latest, quest.id);
@@ -80,7 +83,7 @@ export function OrionQuestControl({ quest }: { quest: NormalizedQuest; }) {
         <button
             type="button"
             className={`quest-ui-card-orion-control is-${control.action}`}
-            disabled={pending || control.disabled}
+            disabled={pending || control.disabled || blocked}
             aria-busy={pending}
             aria-label={title}
             title={title}

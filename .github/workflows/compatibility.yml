@@ -177,6 +177,14 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/dashboard/notifications.test.ts
 
+      - name: Test Orion Ignore enforcement lifecycle
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/ignoreRuntime.test.ts
+
+      - name: Test Orion native exclusion integration
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/exclusionIntegration.test.ts
+
       - name: Test ignored Quest logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts

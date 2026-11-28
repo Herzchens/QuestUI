@@ -2,13 +2,14 @@ import { showToast, UserStore, useEffect, useRef, useState, useStateFromStores }
 
 import { recordQuestUIEvent } from "../../eventLog/runtime";
 import { pushDashboardNotice } from "../../dashboard/notifications";
-import { setQuestIgnored } from "../ignored/runtime";
+import { ignoredQuestIds, isIgnoredQuestStateReady, setQuestIgnored } from "../ignored/runtime";
 import { shouldPauseOrionQuestBeforeIgnore } from "../../orion/controls";
 import {
     getOrionControlSnapshot,
     invokeOrionEngineControl,
     invokeOrionQuestTaskControl,
-    isOrionCommandReady
+    isOrionCommandReady,
+    syncOrionExclusions
 } from "../../orion/integration";
 import { OrionQuestControl } from "../../orion/OrionQuestControl";
 import {
@@ -98,7 +99,8 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
 
     const run = async () => {
         const userIdAtClick = currentUserIdFromStore;
-        if (!action || !userIdAtClick || pending || !mounted.current || session?.accountId !== userIdAtClick || !isCurrentAccountSession(session)) return;
+        if (!action || !userIdAtClick || pending || ignorePending || !mounted.current || session?.accountId !== userIdAtClick || !isCurrentAccountSession(session)) return;
+        if (action === "enroll" && (!isIgnoredQuestStateReady() || ignoredQuestIds(userIdAtClick).has(quest.id))) return;
         if (submitted?.action === action && submitted.userId === userIdAtClick) return;
         // Disabled UI is not a synchronization primitive: a stale click event can still arrive
         // during the render that starts Claim all. Re-check the module-global batch lock here.
@@ -211,75 +213,59 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
         }
     };
 
-    const canToggleIgnored = ignored || quest.status === "in-progress";
+    const canToggleIgnored = quest.status !== "claimed" && quest.status !== "expired" && (ignored || quest.status === "in-progress" || quest.status === "available");
     const toggleIgnored = async () => {
         const userIdAtClick = currentUserIdFromStore;
-        if (!canToggleIgnored || !userIdAtClick || ignorePending || !mounted.current || session?.accountId !== userIdAtClick || !isCurrentAccountSession(session)) return;
+        if (!canToggleIgnored || !isIgnoredQuestStateReady() || !userIdAtClick || pending || ignorePending || !mounted.current || session?.accountId !== userIdAtClick || !isCurrentAccountSession(session)) return;
         setIgnorePending(true);
-        const nextIgnored = !ignored;
+        const nextIgnored = !ignoredQuestIds(userIdAtClick).has(quest.id);
         let orionPausedForIgnore = false;
+        let pausePending = false;
+        let nativeExclusion = false;
 
         try {
-            // Ignore is a user request to remove this Quest from QuestUI attention. If compatible
-            // Orion still owns the exact Quest as RUNNING/QUEUE (or scheduler RUNNING/WAITING),
-            // pause that Quest first so hiding it cannot leave farming running invisibly.
-            if (nextIgnored && orionIntegration && isOrionCommandReady()) {
-                const snapshot = getOrionControlSnapshot();
-                if (shouldPauseOrionQuestBeforeIgnore(snapshot, quest.id)) {
+            // Publish the preference first. Native exclusion synchronizes the complete set;
+            // legacy Pause is only a fallback, never a prerequisite for saving Ignore.
+            await setQuestIgnored(userIdAtClick, quest.id, nextIgnored);
+            if (isCurrentAccountSession(session) && orionIntegration && isOrionCommandReady()) {
+                nativeExclusion = syncOrionExclusions();
+                if (nextIgnored && !nativeExclusion && ignoredQuestIds(userIdAtClick).has(quest.id)
+                    && shouldPauseOrionQuestBeforeIgnore(getOrionControlSnapshot(), quest.id)) {
                     try {
                         await invokeOrionQuestTaskControl(quest.id, "pause");
-                        orionPausedForIgnore = true;
-                        void recordQuestUIEvent({
-                            severity: "info",
-                            eventCode: "ORION_QUEST_PAUSED_FOR_IGNORE",
-                            summary: "Orion Quest paused before Ignore",
-                            quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
-                            accountId: userIdAtClick
-                        });
+                        if (isCurrentAccountSession(session)) {
+                            orionPausedForIgnore = !shouldPauseOrionQuestBeforeIgnore(getOrionControlSnapshot(), quest.id);
+                            pausePending = !orionPausedForIgnore;
+                        }
                     } catch (error) {
-                        // A completion/rescan/plugin transition may settle while the pause request
-                        // is in flight. Re-read Orion before failing: if it no longer publishes the
-                        // Quest as active, there is no invisible work left to protect against.
-                        if (!isCurrentAccountSession(session)) return;
-                        const latestSnapshot = getOrionControlSnapshot();
-                        if (shouldPauseOrionQuestBeforeIgnore(latestSnapshot, quest.id)) {
-                            const reason = error instanceof Error ? error.message : String(error);
-                            const message = `Could not ignore ${quest.name} because Orion could not pause this Quest.`;
+                        if (isCurrentAccountSession(session) && shouldPauseOrionQuestBeforeIgnore(getOrionControlSnapshot(), quest.id)) {
+                            pausePending = true;
                             void recordQuestUIEvent({
-                                severity: "error",
+                                severity: "warning",
                                 eventCode: "QUEST_IGNORE_ORION_PAUSE_FAILED",
-                                summary: "Ignore blocked because Orion Quest pause failed",
+                                summary: "Orion pause pending; Ignore enforcement will reconcile",
                                 quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
-                                detail: { message: reason },
+                                detail: { message: error instanceof Error ? error.message : String(error) },
                                 accountId: userIdAtClick
                             });
-                            if (isCurrentAccountSession(session)) {
-                                showToast({ text: message, variant: "critical", duration: 6000 });
-                            }
-                            return;
                         }
                     }
                 }
             }
-
-            // Persistence belongs to the account that clicked even if Discord switches accounts
-            // while the async work is in flight. Unignore deliberately does not resume Orion: a
-            // presentation action must not unexpectedly start the engine or farming again.
-            await setQuestIgnored(userIdAtClick, quest.id, nextIgnored);
             void recordQuestUIEvent({
                 severity: "info",
                 eventCode: nextIgnored ? "QUEST_IGNORED" : "QUEST_UNIGNORED",
                 summary: nextIgnored ? "Quest ignored in QuestUI" : "Quest unignored in QuestUI",
                 quest: { id: quest.id, name: quest.name, taskType: quest.primaryTask?.key ?? null },
-                detail: nextIgnored ? { orionPaused: orionPausedForIgnore } : undefined,
+                detail: nextIgnored ? { orionPaused: orionPausedForIgnore, pausePending, nativeExclusion } : undefined,
                 accountId: userIdAtClick
             });
             if (isCurrentAccountSession(session)) {
                 showToast({
                     text: nextIgnored
-                        ? orionPausedForIgnore
+                        ? nativeExclusion ? `Ignored ${quest.name} in QuestUI and Orion` : orionPausedForIgnore
                             ? `Ignored ${quest.name} and paused it in Orion`
-                            : `Ignored ${quest.name}`
+                            : pausePending ? `Ignored ${quest.name}; Orion pause pending` : `Ignored ${quest.name}`
                         : `Unignored ${quest.name}`,
                     variant: "success"
                 });
@@ -320,7 +306,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 <button
                     type="button"
                     className={`quest-ui-card-action quest-ui-card-action-${action}`}
-                    disabled={pending || actionSubmitted || currentUserIdFromStore == null || (action === "claim" && claimBatchActive)}
+                    disabled={pending || ignorePending || actionSubmitted || currentUserIdFromStore == null || (action === "claim" && claimBatchActive) || (action === "enroll" && (ignored || !isIgnoredQuestStateReady()))}
                     aria-busy={pending}
                     onClick={run}
                     title={action === "claim" && claimBatchActive ? "Claim all is processing Ready rewards" : undefined}
@@ -348,7 +334,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 <button
                     type="button"
                     className={`quest-ui-card-action quest-ui-card-action-ignore${ignored ? " is-unignore" : ""}`}
-                    disabled={ignorePending || currentUserIdFromStore == null}
+                    disabled={ignorePending || pending || currentUserIdFromStore == null || !isIgnoredQuestStateReady()}
                     aria-busy={ignorePending}
                     aria-label={ignored ? "Unignore Quest" : "Ignore Quest"}
                     onClick={toggleIgnored}

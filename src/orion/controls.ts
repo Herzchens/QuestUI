@@ -16,9 +16,9 @@ export type QuestOrionControlState = {
     disabled: boolean;
 };
 
-export function farmableQuestIds(quests: readonly Pick<NormalizedQuest, "id" | "status">[]): string[] {
+export function farmableQuestIds(quests: readonly Pick<NormalizedQuest, "id" | "status">[], ignored: ReadonlySet<string> = new Set()): string[] {
     return quests
-        .filter(quest => quest.status === "available" || quest.status === "in-progress")
+        .filter(quest => !ignored.has(quest.id) && (quest.status === "available" || quest.status === "in-progress"))
         .map(quest => quest.id);
 }
 
@@ -148,8 +148,8 @@ export function deriveGlobalOrionControl(
     farmableIds: readonly string[]
 ): GlobalOrionControlState {
     if (farmableIds.length === 0) {
-        // Keep the visual affordance stable when everything is done, but make both actions inert.
-        return { action: "start", smartDisabled: true, stopDisabled: true };
+        // No eligible work remains; still allow Stop if Orion is active.
+        return { action: "start", smartDisabled: true, stopDisabled: !snapshot.running };
     }
 
     const states = statesFor(snapshot, farmableIds);

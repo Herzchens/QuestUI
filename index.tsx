@@ -1,4 +1,5 @@
 import { startQuestSnapshotSources, stopQuestSnapshotSources } from "./src/quests/data";
+import { startOrionIgnoreEnforcement, stopOrionIgnoreEnforcement } from "./src/orion/ignoreRuntime";
 import { startOrionControlSubscriptions, stopOrionControlSubscriptions } from "./src/orion/integration";
 import definePlugin from "@utils/types";
 
@@ -26,6 +27,7 @@ const lifecycle = createServiceLifecycle([
     { start: startDashboardNotices, stop: resetDashboardNotices },
     { start: startEventLogCapture, stop: stopEventLogCapture },
     { start: startIgnoredQuestLifecycle, stop: stopIgnoredQuestLifecycle },
+    { start: startOrionIgnoreEnforcement, stop: stopOrionIgnoreEnforcement },
     { start: startQuestNotifications, stop: stopQuestNotifications },
     {
         start: () => startQuestAutoReload(() => ({

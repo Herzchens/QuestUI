@@ -116,3 +116,18 @@ export function pruneIgnoredQuestState(
 
     return { version: 1, accounts };
 }
+
+/** Only positively known terminal quests retire an Ignore preference. Missing quests do not. */
+export function terminalIgnoredQuestIds(quests: Iterable<any>, now = Date.now()): ReadonlySet<string> {
+    const ids = new Set<string>();
+    for (const quest of quests) {
+        const id = normalizedId(quest?.id ?? quest?.config?.id);
+        if (!id) continue;
+        const claimed = quest?.userStatus?.claimedAt;
+        const expiry = quest?.config?.expiresAt;
+        const validDate = (value: unknown) => (typeof value === "string" || typeof value === "number" || value instanceof Date)
+            && Number.isFinite(new Date(value).getTime());
+        if (validDate(claimed) || (validDate(expiry) && new Date(expiry).getTime() <= now)) ids.add(id);
+    }
+    return ids;
+}

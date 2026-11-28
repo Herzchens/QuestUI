@@ -54,7 +54,7 @@ assert.deepEqual(
 );
 assert.deepEqual(
     deriveGlobalOrionControl(snapshot(true, { a: "running" }), []),
-    { action: "start", smartDisabled: true, stopDisabled: true }
+    { action: "start", smartDisabled: true, stopDisabled: false }
 );
 
 assert.deepEqual(deriveQuestOrionControl(snapshot(false), "a"), { action: "start", disabled: false });
@@ -121,3 +121,10 @@ assert.equal(storedQuestTaskProgress({ userStatus: { streamProgressSeconds: 77 }
 assert.equal(storedQuestTaskProgress({ userStatus: { completedAt: "now" } }, timedTask), 900);
 
 console.log("QuestUI Orion control state tests - PASS");
+
+import { ignoredActiveQuestIds, resumableQuestIds } from "../../src/orion/ignorePolicy";
+const ignoredFixture = { running:true, quests:{a:"paused",b:"paused",c:"running",d:"queued"} } as const;
+assert.deepEqual(resumableQuestIds(ignoredFixture,new Set(["a"])),["b"]);
+assert.deepEqual(ignoredActiveQuestIds(ignoredFixture,new Set(["a","c","d"])),["c","d"]);
+assert.deepEqual(farmableQuestIds([{id:"a",status:"available"},{id:"b",status:"in-progress"}],new Set(["a"])),["b"]);
+assert.equal(deriveGlobalOrionControl(ignoredFixture,[]).stopDisabled,false);

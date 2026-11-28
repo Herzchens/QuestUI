@@ -1,3 +1,4 @@
+import { ignoredQuestIds, isIgnoredQuestStateReady } from "../ignored/runtime";
 import { findByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 
@@ -388,6 +389,7 @@ function uncertainEnrollError(
 export async function enrollQuest(quest: NormalizedQuest): Promise<QuestActionResult> {
     const session = requireAccountSession();
     const userId = session.accountId;
+    if (!isIgnoredQuestStateReady() || ignoredQuestIds(userId).has(quest.id)) throw new QuestActionError("Unignore this Quest before accepting it.");
     const key = beginAction("enroll", userId, quest.id);
 
     try {

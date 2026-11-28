@@ -11,6 +11,7 @@ import {
     invokeOrionGlobalTaskControl,
     subscribeOrionControlState
 } from "./integration";
+import { ignoredQuestIds, isIgnoredQuestStateReady, useIgnoredQuests } from "../quests/ignored/runtime";
 import { useQuestSnapshot } from "../quests/data";
 
 function smartLabel(action: "start" | "pause" | "resume"): string {
@@ -43,6 +44,7 @@ function showControlFailure(error: unknown): void {
 
 export function OrionGlobalControls() {
     const quests = useQuestSnapshot();
+    const { ids, ready } = useIgnoredQuests();
     const [, setRevision] = useState(0);
     const [pending, setPending] = useState(false);
     const mounted = useRef(true);
@@ -62,14 +64,14 @@ export function OrionGlobalControls() {
     const snapshot = getOrionControlSnapshot();
     if (!snapshot) return null;
 
-    const control = deriveGlobalOrionControl(snapshot, farmableQuestIds(quests));
+    const control = deriveGlobalOrionControl(snapshot, farmableQuestIds(quests, ids));
     const smartTitle = smartLabel(control.action);
 
     const runSmart = async () => {
-        if (pendingRef.current || !ownsView()) return;
+        if (pendingRef.current || !ownsView() || !isIgnoredQuestStateReady()) return;
         const latest = getOrionControlSnapshot();
         if (!latest) return;
-        const fresh = deriveGlobalOrionControl(latest, farmableQuestIds(quests));
+        const fresh = deriveGlobalOrionControl(latest, farmableQuestIds(quests, ignoredQuestIds(session?.accountId)));
         if (fresh.smartDisabled || fresh.action !== control.action) return;
         pendingRef.current = true;
         setPending(true);
@@ -91,7 +93,7 @@ export function OrionGlobalControls() {
     const runStop = async () => {
         if (pendingRef.current || !ownsView()) return;
         const latest = getOrionControlSnapshot();
-        if (!latest || deriveGlobalOrionControl(latest, farmableQuestIds(quests)).stopDisabled) return;
+        if (!latest || deriveGlobalOrionControl(latest, farmableQuestIds(quests, ignoredQuestIds(session?.accountId))).stopDisabled) return;
         pendingRef.current = true;
         setPending(true);
         try {
@@ -110,7 +112,7 @@ export function OrionGlobalControls() {
             <button
                 type="button"
                 className={`quest-ui-orion-icon-button is-${control.action}`}
-                disabled={pending || control.smartDisabled}
+                disabled={pending || !ready || control.smartDisabled}
                 aria-busy={pending}
                 aria-label={smartTitle}
                 title={smartTitle}
