@@ -46,7 +46,8 @@ export class ClaimAllBatchStoppedError<T extends ClaimAllQuestLike = ClaimAllQue
         public readonly result: ClaimAllBatchResult,
         public readonly position: number,
         public readonly quest: T,
-        public readonly cause?: unknown
+        public readonly cause?: unknown,
+        public readonly code: string = "BATCH_STOPPED"
     ) {
         super(message);
         this.name = "ClaimAllBatchStoppedError";
@@ -197,7 +198,9 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
                 `Discord submitted the action but QuestStore did not confirm it yet. ${label} stopped to avoid an ambiguous next action.`,
                 result(),
                 position,
-                quest
+                quest,
+                undefined,
+                "STORE_CONFIRMATION_TIMEOUT"
             );
         }
 

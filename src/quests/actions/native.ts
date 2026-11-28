@@ -96,15 +96,29 @@ const inFlightActions = new Set<string>();
 const submittedActions = new Set<string>();
 const cooldowns = new Map<string, number>();
 const actionListeners = new Set<() => void>();
+let cooldownTimer: ReturnType<typeof setTimeout> | undefined;
 function notifyActions(): void { for (const fn of [...actionListeners]) { try { fn(); } catch { } } }
 function cooldownRemaining(userId: string): number {
-    const until = cooldowns.get(userId) ?? 0;
-    if (until <= Date.now()) { cooldowns.delete(userId); return 0; }
-    return until - Date.now();
+    return Math.max(0, (cooldowns.get(userId) ?? 0) - Date.now());
 }
 export function hasPendingQuestAction(userId = currentUserId()): boolean {
     if (!userId) return false;
     return cooldownRemaining(userId) > 0 || [...inFlightActions, ...submittedActions].some(key => key.startsWith(`claim:${userId}:`) || key.startsWith(`enroll:${userId}:`));
+}
+function scheduleCooldownExpiry(): void {
+    if (cooldownTimer !== undefined) clearTimeout(cooldownTimer);
+    cooldownTimer = undefined;
+    const now = Date.now();
+    let next = Infinity;
+    for (const [userId, until] of cooldowns) {
+        if (until <= now) cooldowns.delete(userId);
+        else next = Math.min(next, until);
+    }
+    if (Number.isFinite(next)) cooldownTimer = setTimeout(() => {
+        cooldownTimer = undefined;
+        scheduleCooldownExpiry();
+        notifyActions();
+    }, Math.min(2_147_483_647, Math.max(1, next - now)));
 }
 export function usePendingQuestAction(userId: string | null): boolean {
     const [, refresh] = useState(0);
@@ -112,8 +126,7 @@ export function usePendingQuestAction(userId: string | null): boolean {
         const fn = () => refresh(n => n + 1);
         actionListeners.add(fn);
         fn();
-        const timer = setInterval(() => { if (userId && cooldowns.has(userId) && !cooldownRemaining(userId)) notifyActions(); }, 1000);
-        return () => { actionListeners.delete(fn); clearInterval(timer); };
+        return () => { actionListeners.delete(fn); };
     }, [userId]);
     return hasPendingQuestAction(userId);
 }
@@ -185,6 +198,7 @@ function rateLimitError(userId: string, value: unknown): QuestActionError | null
     if (!rate) return null;
     const wait = Math.max(1000, rate.retryAfterMs ?? 30_000);
     cooldowns.set(userId, Math.max(cooldowns.get(userId) ?? 0, Date.now() + wait));
+    scheduleCooldownExpiry();
     notifyActions();
     return new QuestActionError("Discord rate limited this Quest action. Batch stopped; wait before trying again.", undefined, wait, "HTTP_RATE_LIMITED");
 }
@@ -381,7 +395,7 @@ function holdAfterPossiblySubmittedFailure(
     cause?: unknown
 ): QuestActionError {
     holdSubmittedAction(kind, userId, questId, predicate);
-    return new QuestActionError(message, cause, SUBMITTED_ACTION_HOLD_MS);
+    return new QuestActionError(message, cause, SUBMITTED_ACTION_HOLD_MS, "NATIVE_OUTCOME_UNCERTAIN");
 }
 
 function actionThrownError(
@@ -433,7 +447,7 @@ function uncertainEnrollError(
 export async function enrollQuest(quest: NormalizedQuest, batchGeneration?: number): Promise<QuestActionResult> {
     const session = requireAccountSession();
     const userId = session.accountId;
-    if (!isIgnoredQuestStateReady() || ignoredQuestIds(userId).has(quest.id)) throw new QuestActionError("Unignore this Quest before accepting it.");
+    if (!isIgnoredQuestStateReady() || ignoredQuestIds(userId).has(quest.id)) throw new QuestActionError("Unignore this Quest before accepting it.", undefined, null, "LOCAL_QUEST_IGNORED");
     const key = beginAction("enroll", userId, quest.id, batchGeneration);
 
     try {
@@ -469,7 +483,7 @@ export async function enrollQuest(quest: NormalizedQuest, batchGeneration?: numb
         if (rate) throw rate;
         const assessment = assessEnrollResponse(response);
         if (assessment === "verification") {
-            throw new QuestActionError("Discord verification was required or cancelled. Open Quest Home if you still need to accept the Quest.");
+            throw new QuestActionError("Discord verification was required or cancelled. Open Quest Home if you still need to accept the Quest.", undefined, null, "NATIVE_VERIFICATION_REQUIRED");
         }
 
         const storeResult = await waitForStoreState(rawQuest.id, session, predicate, batchGeneration === undefined ? STORE_CONFIRM_TIMEOUT_MS : 20_000);
@@ -531,6 +545,7 @@ export async function prepareQuestRewardCode(quest: NormalizedQuest): Promise<vo
 export async function claimQuestReward(quest: NormalizedQuest, batchGeneration?: number): Promise<QuestActionResult> {
     const session = requireAccountSession();
     const userId = session.accountId;
+    if (batchGeneration !== undefined && (!isIgnoredQuestStateReady() || ignoredQuestIds(userId).has(quest.id))) throw new QuestActionError("This Quest was excluded from the batch.", undefined, null, "LOCAL_QUEST_IGNORED");
     const key = beginAction("claim", userId, quest.id, batchGeneration);
 
     try {
@@ -581,7 +596,8 @@ export async function claimQuestReward(quest: NormalizedQuest, batchGeneration?:
             throw new QuestActionError(
                 "Discord did not return a recognizable claim result. Open Quest Home to verify the reward state.",
                 undefined,
-                SUBMITTED_ACTION_HOLD_MS
+                SUBMITTED_ACTION_HOLD_MS,
+                "NATIVE_RESPONSE_INVALID"
             );
         }
 

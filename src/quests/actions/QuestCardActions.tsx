@@ -298,7 +298,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
         }
     };
 
-    const actionSubmitted = currentUserIdFromStore != null
+    const actionSubmitted = nativeBlocked && currentUserIdFromStore != null
         && submitted?.action === action
         && submitted.userId === currentUserIdFromStore;
     const showOrionControl = quest.status === "in-progress" && orionIntegration && isOrionCommandReady();

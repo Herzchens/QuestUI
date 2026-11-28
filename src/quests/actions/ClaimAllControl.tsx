@@ -50,14 +50,18 @@ function currentClaimState(questId: string, mode: BatchActionMode, accountId: st
         return "claimable";
     }
     if (rawQuest?.userStatus?.claimedAt) return "claimed";
-    if (rawQuest?.userStatus?.completedAt) return "claimable";
+    if (rawQuest?.userStatus?.completedAt) {
+        const expiry = rawQuest.config?.rewardsConfig?.rewardsExpireAt;
+        if (expiry && new Date(expiry).getTime() <= Date.now()) return "skipped";
+        return "claimable";
+    }
     return "unavailable";
 }
 
 function verificationStop(error: unknown): boolean {
     const cause = error instanceof ClaimAllBatchStoppedError ? error.cause : error;
     if (cause instanceof QuestActionError) {
-        return isQuestVerificationError(cause.cause)
+        return cause.code === "NATIVE_VERIFICATION_REQUIRED" || isQuestVerificationError(cause.cause)
             || cause.message.toLowerCase().includes("verification was required");
     }
     return isQuestVerificationError(cause);
@@ -170,7 +174,7 @@ export function ClaimAllControl({ quests }: { quests: readonly NormalizedQuest[]
                 quest: stopped ? questRefs.get(stopped.quest.id) ?? { id: stopped.quest.id, name: stopped.quest.name } : undefined,
                 detail: {
                     message: reason,
-                    actionCode: actionError?.code ?? (isVerification ? "NATIVE_VERIFICATION_REQUIRED" : "BATCH_STOPPED"),
+                    actionCode: actionError?.code ?? stopped?.code ?? (isVerification ? "NATIVE_VERIFICATION_REQUIRED" : "BATCH_STOPPED"),
                     retryAfterMs: actionError?.resubmitAfterMs ?? null,
                     total,
                     position: at,
