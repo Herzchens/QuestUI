@@ -1,12 +1,14 @@
 import { ignoredQuestIds, isIgnoredQuestStateReady } from "../ignored/runtime";
 import { findByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { UserStore, useEffect, useState } from "@webpack/common";
+import { getClaimAllRuntimeGeneration } from "./claimAllState";
 
 import {
     assessClaimResponse,
     assessEnrollResponse,
     isExplicitRewardCodeConfig,
     isQuestVerificationError,
+    questRateLimit,
     selectClaimTarget
 } from "./responses";
 import {
@@ -92,6 +94,29 @@ const useNativeQuestRewardAction = findByCodeLazy(
 
 const inFlightActions = new Set<string>();
 const submittedActions = new Set<string>();
+const cooldowns = new Map<string, number>();
+const actionListeners = new Set<() => void>();
+function notifyActions(): void { for (const fn of [...actionListeners]) { try { fn(); } catch { } } }
+function cooldownRemaining(userId: string): number {
+    const until = cooldowns.get(userId) ?? 0;
+    if (until <= Date.now()) { cooldowns.delete(userId); return 0; }
+    return until - Date.now();
+}
+export function hasPendingQuestAction(userId = currentUserId()): boolean {
+    if (!userId) return false;
+    return cooldownRemaining(userId) > 0 || [...inFlightActions, ...submittedActions].some(key => key.startsWith(`claim:${userId}:`) || key.startsWith(`enroll:${userId}:`));
+}
+export function usePendingQuestAction(userId: string | null): boolean {
+    const [, refresh] = useState(0);
+    useEffect(() => {
+        const fn = () => refresh(n => n + 1);
+        actionListeners.add(fn);
+        fn();
+        const timer = setInterval(() => { if (userId && cooldowns.has(userId) && !cooldownRemaining(userId)) notifyActions(); }, 1000);
+        return () => { actionListeners.delete(fn); clearInterval(timer); };
+    }, [userId]);
+    return hasPendingQuestAction(userId);
+}
 
 export interface QuestActionResult {
     storeConfirmed: boolean;
@@ -102,7 +127,8 @@ export class QuestActionError extends Error {
     constructor(
         message: string,
         public readonly cause?: unknown,
-        public readonly resubmitAfterMs: number | null = null
+        public readonly resubmitAfterMs: number | null = null,
+        public readonly code: string = "NATIVE_ACTION_FAILED"
     ) {
         super(message);
         this.name = "QuestActionError";
@@ -140,14 +166,27 @@ export function hasPendingClaimAction(userId = currentUserId()): boolean {
     return false;
 }
 
-function beginAction(kind: QuestActionKind, userId: string, questId: string): string {
+function beginAction(kind: QuestActionKind, userId: string, questId: string, batchGeneration?: number): string {
     const key = actionKey(kind, userId, questId);
-    if (inFlightActions.has(key)) throw new QuestActionError("This Quest action is already in progress.");
-    if (submittedActions.has(key)) {
-        throw new QuestActionError("Discord is still refreshing this Quest after the previous action. Please wait a moment.");
-    }
+    const active = getClaimAllRuntimeGeneration();
+    if (active !== null ? batchGeneration !== active : batchGeneration !== undefined) throw new QuestActionError("A Quest batch is already processing actions.", undefined, null, "LOCAL_BATCH_ACTIVE");
+    const cooldown = cooldownRemaining(userId);
+    if (cooldown > 0) throw new QuestActionError("Discord rate limit cooldown is still active.", undefined, cooldown, "HTTP_RATE_LIMITED");
+    if (inFlightActions.has(key)) throw new QuestActionError("This Quest action is already in progress.", undefined, null, "LOCAL_ACTION_IN_FLIGHT");
+    if (submittedActions.has(key)) throw new QuestActionError("Discord is still refreshing this Quest after the previous action. Please wait a moment.", undefined, SUBMITTED_ACTION_HOLD_MS, "LOCAL_SUBMISSION_PENDING");
+    if (hasPendingQuestAction(userId)) throw new QuestActionError("Another Quest action is still waiting for Discord.", undefined, null, "LOCAL_ACTION_PENDING");
     inFlightActions.add(key);
+    notifyActions();
     return key;
+}
+
+function rateLimitError(userId: string, value: unknown): QuestActionError | null {
+    const rate = questRateLimit(value);
+    if (!rate) return null;
+    const wait = Math.max(1000, rate.retryAfterMs ?? 30_000);
+    cooldowns.set(userId, Math.max(cooldowns.get(userId) ?? 0, Date.now() + wait));
+    notifyActions();
+    return new QuestActionError("Discord rate limited this Quest action. Batch stopped; wait before trying again.", undefined, wait, "HTTP_RATE_LIMITED");
 }
 
 function currentQuest(questId: string): any | null {
@@ -245,7 +284,8 @@ function apiErrorMessage(error: any, fallback: string): string {
 async function waitForStoreState(
     questId: string,
     expectedSession: AccountSession,
-    predicate: (rawQuest: any) => boolean
+    predicate: (rawQuest: any) => boolean,
+    timeoutMs = STORE_CONFIRM_TIMEOUT_MS
 ): Promise<StoreWaitResult> {
     const store = QuestsStore;
     const sameAccount = () => isCurrentAccountSession(expectedSession);
@@ -281,7 +321,7 @@ async function waitForStoreState(
 
         timer = setTimeout(
             () => finish(sameAccount() ? "timeout" : "account-changed"),
-            STORE_CONFIRM_TIMEOUT_MS
+            timeoutMs
         );
         try {
             detach = attachChangeListenerSafely(store, check, () => finished);
@@ -301,6 +341,7 @@ function holdSubmittedAction(
 ): void {
     const key = actionKey(kind, userId, questId);
     submittedActions.add(key);
+    notifyActions();
 
     const store = QuestsStore;
     let finished = false;
@@ -311,6 +352,7 @@ function holdSubmittedAction(
         if (finished) return;
         finished = true;
         submittedActions.delete(key);
+        notifyActions();
         if (timer !== undefined) clearTimeout(timer);
         detach();
     };
@@ -350,10 +392,12 @@ function actionThrownError(
     error: unknown,
     fallback: string
 ): QuestActionError {
+    const rate = rateLimitError(userId, error);
+    if (rate) return rate;
     const message = apiErrorMessage(error, fallback);
     // A recognized verification/captcha cancellation is an explicit failure state, not an
     // ambiguous transport outcome. Do not display "Sent" or hold a duplicate guard for it.
-    if (isQuestVerificationError(error)) return new QuestActionError(message, error);
+    if (isQuestVerificationError(error)) return new QuestActionError(message, error, null, "NATIVE_VERIFICATION_REQUIRED");
     return holdAfterPossiblySubmittedFailure(kind, userId, questId, predicate, message, error);
 }
 
@@ -386,11 +430,11 @@ function uncertainEnrollError(
     return holdAfterPossiblySubmittedFailure("enroll", userId, questId, predicate, message);
 }
 
-export async function enrollQuest(quest: NormalizedQuest): Promise<QuestActionResult> {
+export async function enrollQuest(quest: NormalizedQuest, batchGeneration?: number): Promise<QuestActionResult> {
     const session = requireAccountSession();
     const userId = session.accountId;
     if (!isIgnoredQuestStateReady() || ignoredQuestIds(userId).has(quest.id)) throw new QuestActionError("Unignore this Quest before accepting it.");
-    const key = beginAction("enroll", userId, quest.id);
+    const key = beginAction("enroll", userId, quest.id, batchGeneration);
 
     try {
         const rawQuest = currentQuest(quest.id);
@@ -421,12 +465,14 @@ export async function enrollQuest(quest: NormalizedQuest): Promise<QuestActionRe
             );
         }
 
+        const rate = rateLimitError(userId, response);
+        if (rate) throw rate;
         const assessment = assessEnrollResponse(response);
         if (assessment === "verification") {
             throw new QuestActionError("Discord verification was required or cancelled. Open Quest Home if you still need to accept the Quest.");
         }
 
-        const storeResult = await waitForStoreState(rawQuest.id, session, predicate);
+        const storeResult = await waitForStoreState(rawQuest.id, session, predicate, batchGeneration === undefined ? STORE_CONFIRM_TIMEOUT_MS : 20_000);
         if (storeResult === "account-changed") {
             throw accountChangedError("enroll", userId, rawQuest.id, predicate);
         }
@@ -438,6 +484,7 @@ export async function enrollQuest(quest: NormalizedQuest): Promise<QuestActionRe
         return { storeConfirmed: false, resubmitAfterMs: SUBMITTED_ACTION_HOLD_MS };
     } finally {
         inFlightActions.delete(key);
+        notifyActions();
     }
 }
 
@@ -481,10 +528,10 @@ export async function prepareQuestRewardCode(quest: NormalizedQuest): Promise<vo
     }
 }
 
-export async function claimQuestReward(quest: NormalizedQuest): Promise<QuestActionResult> {
+export async function claimQuestReward(quest: NormalizedQuest, batchGeneration?: number): Promise<QuestActionResult> {
     const session = requireAccountSession();
     const userId = session.accountId;
-    const key = beginAction("claim", userId, quest.id);
+    const key = beginAction("claim", userId, quest.id, batchGeneration);
 
     try {
         const rawQuest = currentQuest(quest.id);
@@ -515,8 +562,11 @@ export async function claimQuestReward(quest: NormalizedQuest): Promise<QuestAct
             );
         }
 
+        const rate = rateLimitError(userId, response);
+        if (rate) throw rate;
+        if (isQuestVerificationError(response)) throw new QuestActionError("Discord verification was required or cancelled.", undefined, null, "NATIVE_VERIFICATION_REQUIRED");
         const assessment = assessClaimResponse(response);
-        const storeResult = await waitForStoreState(rawQuest.id, session, predicate);
+        const storeResult = await waitForStoreState(rawQuest.id, session, predicate, batchGeneration === undefined ? STORE_CONFIRM_TIMEOUT_MS : 20_000);
         if (storeResult === "account-changed") {
             throw accountChangedError("claim", userId, rawQuest.id, predicate);
         }
@@ -538,5 +588,6 @@ export async function claimQuestReward(quest: NormalizedQuest): Promise<QuestAct
         return { storeConfirmed: false, resubmitAfterMs: SUBMITTED_ACTION_HOLD_MS };
     } finally {
         inFlightActions.delete(key);
+        notifyActions();
     }
 }

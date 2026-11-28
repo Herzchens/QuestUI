@@ -1,14 +1,14 @@
 import { useSettings } from "@api/Settings";
 import { fetchUserProfile } from "@utils/discord";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { UserProfileStore, UserStore, useEffect, useStateFromStores } from "@webpack/common";
+import { UserProfileStore, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { ClaimAllControl } from "../quests/actions/ClaimAllControl";
 import { EventLogButton } from "../eventLog/EventLogViewer";
 import { isOrionCommandReady } from "../orion/integration";
 import { OrionGlobalControls } from "../orion/OrionControls";
 import { useQuestOrbMultiplierState } from "../orbs/multiplier";
-import { QuestDashboard } from "./QuestDashboard";
+import { QuestDashboard, useDashboardCatalogue } from "./QuestDashboard";
 import { DashboardGraphicsControl } from "./DashboardGraphicsControl";
 import { DashboardThemeControl } from "./DashboardThemeControl";
 import { QuestDashboardHomeControl, QuestDashboardMarketControl } from "./DashboardToolbar";
@@ -136,6 +136,8 @@ function QuestDashboardDisplayTitle() {
 }
 
 export function QuestDashboardShell({ closePopout }: { closePopout?: () => void; }) {
+    const catalogueState = useDashboardCatalogue();
+    const [showHiddenOnly, setShowHiddenOnly] = useState(false);
     const { orionIntegration } = settings.use(["orionIntegration"]);
     useSettings(["plugins.OrionQuests.enabled"]);
     const showOrionControls = orionIntegration === true && isOrionCommandReady();
@@ -154,7 +156,7 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
                 <div className="quest-ui-dashboard-actionbar-left">
                     <div className="quest-ui-dashboard-actionbar-primary">
                         {showOrionControls && <OrionGlobalControls />}
-                        <ClaimAllControl />
+                        <ClaimAllControl quests={showHiddenOnly ? [] : catalogueState.filteredNormal} />
                         <span className="quest-ui-dashboard-action-divider" aria-hidden="true" />
                         <QuestReloadControl />
                         <UpdateCenterIndicator />
@@ -169,7 +171,7 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
                     <QuestDashboardHomeControl closePopout={closePopout} />
                 </div>
             </div>
-            <QuestDashboard closePopout={closePopout} />
+            <QuestDashboard closePopout={closePopout} catalogueState={catalogueState} showHiddenOnly={showHiddenOnly} setShowHiddenOnly={setShowHiddenOnly} />
         </div>
     );
 }

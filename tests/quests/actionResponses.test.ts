@@ -54,3 +54,10 @@ assert.equal(isQuestVerificationError({ captchaFields: { captcha_sitekey: "site"
 assert.equal(isQuestVerificationError(new Error("ordinary")), false);
 
 console.log("QuestUI quest-action logic tests - PASS");
+
+import { questRateLimit } from "../../src/quests/actions/responses";
+assert.deepEqual(questRateLimit({status:429,body:{retry_after:2.5}}),{retryAfterMs:2500});
+assert.deepEqual(questRateLimit({response:{status:429,headers:{"Retry-After":"4"},data:{retry_after:2}}}),{retryAfterMs:4000});
+assert.deepEqual(questRateLimit({status:429,body:{retry_after:-1}}),{retryAfterMs:null});
+assert.equal(questRateLimit({message:"rate limited",status:400}),null);
+assert.equal(questRateLimit({body:{retry_after:2}}),null);

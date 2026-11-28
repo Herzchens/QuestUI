@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 
 import {
     buildClaimAllSnapshot,
+    selectBatchAction,
     claimAllDelayMs,
     ClaimAllBatchStoppedError,
     runClaimAllBatch
@@ -22,13 +23,13 @@ async function main() {
     endClaimAllRuntime();
     assert.equal(beginClaimAllRuntime(3), true);
     assert.equal(beginClaimAllRuntime(3), false);
-    assert.deepEqual(getClaimAllRuntimeState(), { active: true, position: 1, total: 3 });
+    assert.deepEqual(getClaimAllRuntimeState(), { active: true, mode: "claim", position: 1, total: 3 });
     updateClaimAllRuntimeProgress(2);
-    assert.deepEqual(getClaimAllRuntimeState(), { active: true, position: 2, total: 3 });
+    assert.deepEqual(getClaimAllRuntimeState(), { active: true, mode: "claim", position: 2, total: 3 });
     updateClaimAllRuntimeProgress(99);
-    assert.deepEqual(getClaimAllRuntimeState(), { active: true, position: 3, total: 3 });
+    assert.deepEqual(getClaimAllRuntimeState(), { active: true, mode: "claim", position: 3, total: 3 });
     endClaimAllRuntime();
-    assert.deepEqual(getClaimAllRuntimeState(), { active: false, position: 0, total: 0 });
+    assert.deepEqual(getClaimAllRuntimeState(), { active: false, mode: null, position: 0, total: 0 });
 
     assert.equal(beginClaimAllRuntime(2), true);
     const staleGeneration = getClaimAllRuntimeGeneration();
@@ -36,18 +37,18 @@ async function main() {
     assert.equal(isClaimAllRuntimeGenerationActive(staleGeneration), true);
     resetClaimAllRuntime();
     assert.equal(isClaimAllRuntimeGenerationActive(staleGeneration), false);
-    assert.deepEqual(getClaimAllRuntimeState(), { active: false, position: 0, total: 0 });
+    assert.deepEqual(getClaimAllRuntimeState(), { active: false, mode: null, position: 0, total: 0 });
 
     assert.equal(beginClaimAllRuntime(2), true);
     const currentGeneration = getClaimAllRuntimeGeneration();
     assert.ok(currentGeneration != null);
     assert.notEqual(currentGeneration, staleGeneration);
     updateClaimAllRuntimeProgress(2, staleGeneration);
-    assert.deepEqual(getClaimAllRuntimeState(), { active: true, position: 1, total: 2 });
+    assert.deepEqual(getClaimAllRuntimeState(), { active: true, mode: "claim", position: 1, total: 2 });
     endClaimAllRuntime(staleGeneration);
     assert.equal(isClaimAllRuntimeGenerationActive(currentGeneration), true);
     endClaimAllRuntime(currentGeneration);
-    assert.deepEqual(getClaimAllRuntimeState(), { active: false, position: 0, total: 0 });
+    assert.deepEqual(getClaimAllRuntimeState(), { active: false, mode: null, position: 0, total: 0 });
 
     assert.deepEqual(
         buildClaimAllSnapshot([
@@ -303,7 +304,20 @@ async function main() {
         assert.deepEqual(result, { total: 3, claimed: 2, skipped: 1 });
     }
 
-    console.log("QuestUI Claim all logic tests - PASS");
+    assert.deepEqual(selectBatchAction([quest("a","available"),quest("b")],new Set(["b"])), {mode:"enroll",candidates:[quest("a","available")]});
+    assert.deepEqual(selectBatchAction([quest("a","available"),quest("b")],new Set()), {mode:"claim",candidates:[quest("b")]});
+    assert.deepEqual(selectBatchAction([quest("a","available")],new Set(["a"])), {mode:"enroll",candidates:[]});
+    assert.equal(beginClaimAllRuntime(2,"enroll"),true);assert.equal(getClaimAllRuntimeState().mode,"enroll");endClaimAllRuntime();
+    for (const mode of ["claim","enroll"] as const) {
+        const trace:string[]=[];let ignored=false;
+        const result=await runClaimAllBatch(Array.from({length:20},(_,i)=>quest(String(i),mode==="claim"?"claimable":"available")),"user-a",{
+            mode,currentAccountId:()=>"user-a",currentState:id=>id==="8"&&ignored?"skipped":"claimable",
+            claim:async item=>{trace.push(item.id);return {storeConfirmed:true};},
+            waitBetweenClaims:async()=>{ignored=true;}
+        });
+        assert.equal(result.claimed,19);assert.equal(result.skipped,1);assert.ok(!trace.includes("8"));
+    }
+    console.log("QuestUI batch action logic tests - PASS");
 }
 
 void main().catch(error => {

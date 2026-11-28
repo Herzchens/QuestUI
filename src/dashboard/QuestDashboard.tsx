@@ -120,18 +120,29 @@ function EmptyStateIllustration() {
     );
 }
 
-export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
-    useEffect(() => {
-        ensureDashboardV16FilterDefaults();
-    }, []);
-
+export function useDashboardCatalogue() {
+    useEffect(() => { ensureDashboardV16FilterDefaults(); }, []);
     const dashboardSettings = settings.use([...DASHBOARD_SETTING_KEYS]);
+    const quests = useQuestSnapshot();
+    const { ids: ignoredIds } = useIgnoredQuests();
+    const partition = partitionIgnored(quests, ignoredIds);
+    const filteredNormal = filterQuests(partition.normal, dashboardScopeFromSettings(dashboardSettings));
+    const visibleNormalIds = new Set(filteredNormal.map(quest => quest.id));
+    const hiddenNormal = partition.normal.filter(quest => !visibleNormalIds.has(quest.id));
+    return { dashboardSettings, quests, ignoredIds, partition, filteredNormal, hiddenNormal };
+}
+
+export function QuestDashboard({ closePopout, catalogueState, showHiddenOnly, setShowHiddenOnly }: {
+    closePopout?: () => void;
+    catalogueState: ReturnType<typeof useDashboardCatalogue>;
+    showHiddenOnly: boolean;
+    setShowHiddenOnly: (value: boolean) => void;
+}) {
+    const { dashboardSettings, quests, ignoredIds, partition, filteredNormal, hiddenNormal } = catalogueState;
     const { orionIntegration } = settings.use(["orionIntegration"]);
     useSettings(["plugins.OrionQuests.enabled"]);
     const [, setOrionRevision] = useState(0);
-    const [showHiddenOnly, setShowHiddenOnly] = useState(false);
     const claimBatchActive = useClaimAllBatchActive();
-    const quests = useQuestSnapshot();
     const dashboardThemeId = useDashboardThemeId();
     const obsidian = dashboardThemeId === "obsidian";
     const origami = dashboardThemeId === "origami";
@@ -155,8 +166,6 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
         if (origami) preloadOrigamiArtworkColors(artworkOwner, urls);
     }, [obsidian, origami, quests, artworkTheme, artworkOwner, prewarmLimit]);
     const orbMultiplier = useQuestOrbMultiplierState();
-    const { ids: ignoredIds } = useIgnoredQuests();
-    const partition = partitionIgnored(quests, ignoredIds);
     const orionHealth = getOrionIntegrationHealth(orionIntegration === true);
     const orionSnapshot = orionHealth.kind === "connected" ? getOrionControlSnapshot() : null;
 
@@ -167,9 +176,6 @@ export function QuestDashboard({ closePopout }: { closePopout?: () => void; }) {
         return () => unsubscribe?.();
     }, [orionIntegration, orionHealth.kind]);
 
-    const filteredNormal = filterQuests(partition.normal, dashboardScopeFromSettings(dashboardSettings));
-    const visibleNormalIds = new Set(filteredNormal.map(quest => quest.id));
-    const hiddenNormal = partition.normal.filter(quest => !visibleNormalIds.has(quest.id));
     const catalogue = dashboardSettings.dashboardShowIgnored === true ? partition.ignored : [];
     const filtered = showHiddenOnly ? hiddenNormal : [...filteredNormal, ...catalogue];
     const sortMode = normalizeDashboardSortMode(dashboardSettings.dashboardSortMode);

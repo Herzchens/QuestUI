@@ -17,6 +17,8 @@ import {
     enrollQuest,
     prepareQuestRewardCode,
     QuestActionError,
+    usePendingQuestAction,
+    hasPendingQuestAction,
     useNativeQuestRewardOpener
 } from "./native";
 import { isExplicitRewardCodeConfig } from "./responses";
@@ -77,6 +79,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
         && isExplicitRewardCodeConfig(quest.rawQuest?.config?.rewardsConfig);
     const currentUserIdFromStore = useStateFromStores([UserStore], currentUserId);
     const session = captureAccountSession();
+    const nativeBlocked = usePendingQuestAction(currentUserIdFromStore);
     const mounted = useRef(true);
     useEffect(() => {
         mounted.current = true;
@@ -104,7 +107,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
         if (submitted?.action === action && submitted.userId === userIdAtClick) return;
         // Disabled UI is not a synchronization primitive: a stale click event can still arrive
         // during the render that starts Claim all. Re-check the module-global batch lock here.
-        if (action === "claim" && getClaimAllRuntimeState().active) return;
+        if (getClaimAllRuntimeState().active || hasPendingQuestAction(userIdAtClick)) return;
         const questRef = captureQuestEventRef(quest, userIdAtClick);
         setPending(true);
         void recordQuestUIEvent({
@@ -187,6 +190,8 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 accountId: userIdAtClick,
                 detail: {
                     message,
+                    actionCode: error instanceof QuestActionError ? error.code : "UNKNOWN_ACTION_ERROR",
+                    retryAfterMs: error instanceof QuestActionError ? error.resubmitAfterMs : null,
                     reason: error instanceof QuestActionError && error.cause instanceof Error ? error.cause.message : null,
                     stack: error instanceof Error ? error.stack ?? null : null
                 }
@@ -306,10 +311,10 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 <button
                     type="button"
                     className={`quest-ui-card-action quest-ui-card-action-${action}`}
-                    disabled={pending || ignorePending || actionSubmitted || currentUserIdFromStore == null || (action === "claim" && claimBatchActive) || (action === "enroll" && (ignored || !isIgnoredQuestStateReady()))}
+                    disabled={pending || ignorePending || actionSubmitted || currentUserIdFromStore == null || (claimBatchActive || nativeBlocked) || (action === "enroll" && (ignored || !isIgnoredQuestStateReady()))}
                     aria-busy={pending}
                     onClick={run}
-                    title={action === "claim" && claimBatchActive ? "Claim all is processing Ready rewards" : undefined}
+                    title={claimBatchActive ? "A Quest batch is processing actions" : nativeBlocked ? "Waiting for Discord to finish a previous Quest action" : undefined}
                 >
                     {pending ? "Processing…" : actionSubmitted ? "Sent" : actionLabel(action)}
                 </button>

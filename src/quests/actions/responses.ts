@@ -177,3 +177,30 @@ export function isQuestVerificationError(error: unknown): boolean {
             : null;
     return Boolean(fields && ("captcha_key" in fields || "captcha_sitekey" in fields));
 }
+
+/** Only an explicit HTTP 429 is a rate-limit response. Do not infer it from arbitrary text. */
+export function questRateLimit(value: unknown, now = Date.now()): { retryAfterMs: number | null; } | null {
+    if (responseStatus(value) !== 429) return null;
+    const body = responseBody(value);
+    const candidate = isRecord(value) ? (isRecord(value.response) ? value.response : value) : null;
+    const headers = candidate?.headers;
+    let header: unknown;
+    try {
+        if (isRecord(headers) && typeof headers.get === "function") header = headers.get("retry-after");
+        else if (isRecord(headers)) header = Object.entries(headers).find(([key]) => key.toLowerCase() === "retry-after")?.[1];
+    } catch { }
+    const seconds = (raw: unknown) => {
+        if (typeof raw !== "number" && (typeof raw !== "string" || !/^\d+(?:\.\d+)?$/.test(raw.trim()))) return null;
+        const n = Number(raw);
+        const ms = Math.ceil(n * 1000);
+        return Number.isSafeInteger(ms) && ms >= 0 ? ms : null;
+    };
+    const bodyMs = seconds(body?.retry_after);
+    let headerMs = seconds(header);
+    if (headerMs === null && typeof header === "string" && /[A-Za-z]/.test(header)) {
+        const date = Date.parse(header);
+        if (Number.isFinite(date)) headerMs = Math.max(0, date - now);
+    }
+    const values = [bodyMs, headerMs].filter((ms): ms is number => ms !== null);
+    return { retryAfterMs: values.length ? Math.max(...values) : null };
+}

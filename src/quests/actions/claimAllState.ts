@@ -1,11 +1,15 @@
+import type { BatchActionMode } from "./claimAll";
+
 export interface ClaimAllRuntimeState {
     active: boolean;
+    mode: BatchActionMode | null;
     position: number;
     total: number;
 }
 
 const IDLE_STATE: ClaimAllRuntimeState = {
     active: false,
+    mode: null,
     position: 0,
     total: 0
 };
@@ -31,12 +35,13 @@ export function subscribeClaimAllRuntimeState(listener: () => void): () => void 
     return () => listeners.delete(listener);
 }
 
-export function beginClaimAllRuntime(total: number): boolean {
+export function beginClaimAllRuntime(total: number, mode: BatchActionMode = "claim"): boolean {
     if (state.active || !Number.isSafeInteger(total) || total < 1) return false;
 
     activeGeneration = ++generation;
     publish({
         active: true,
+        mode,
         position: 1,
         total
     });

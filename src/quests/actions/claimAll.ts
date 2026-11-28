@@ -16,9 +16,11 @@ export interface ClaimAllBatchProgress extends ClaimAllBatchResult {
     questName: string;
 }
 
-export type ClaimAllCurrentState = "claimable" | "claimed" | "unavailable";
+export type BatchActionMode = "claim" | "enroll";
+export type ClaimAllCurrentState = "claimable" | "claimed" | "unavailable" | "skipped";
 
 export interface ClaimAllBatchRuntime<T extends ClaimAllQuestLike> {
+    mode?: BatchActionMode;
     currentAccountId(): string | null;
     currentState(questId: string): ClaimAllCurrentState;
     claim(quest: T): Promise<{ storeConfirmed: boolean; }>;
@@ -51,13 +53,13 @@ export class ClaimAllBatchStoppedError<T extends ClaimAllQuestLike = ClaimAllQue
     }
 }
 
-export function buildClaimAllSnapshot<T extends ClaimAllQuestLike>(quests: readonly T[]): T[] {
+export function buildClaimAllSnapshot<T extends ClaimAllQuestLike>(quests: readonly T[], mode: BatchActionMode = "claim"): T[] {
     const seen = new Set<string>();
     const result: T[] = [];
 
     for (const quest of quests) {
         const id = String(quest?.id ?? "").trim();
-        if (!id || quest.status !== "claimable" || seen.has(id)) continue;
+        if (!id || quest.status !== (mode === "claim" ? "claimable" : "available") || seen.has(id)) continue;
         seen.add(id);
         result.push(quest);
     }
@@ -72,6 +74,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
     onProgress?: (progress: ClaimAllBatchProgress) => void
 ): Promise<ClaimAllBatchResult> {
     const total = quests.length;
+    const label = runtime.mode === "enroll" ? "Accept all" : "Claim all";
     let claimed = 0;
     let skipped = 0;
     let needsPacing = false;
@@ -83,7 +86,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
 
         if (runtime.shouldContinue?.() === false) {
             throw new ClaimAllBatchStoppedError(
-                "Claim all was cancelled before the next reward claim.",
+                `${label} was cancelled before the next Quest action.`,
                 result(),
                 position,
                 quest
@@ -92,7 +95,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
 
         if (runtime.currentAccountId() !== expectedAccountId) {
             throw new ClaimAllBatchStoppedError(
-                "Discord account changed while Claim all was running.",
+                `Discord account changed while ${label} was running.`,
                 result(),
                 position,
                 quest
@@ -100,13 +103,13 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
         }
 
         let state = runtime.currentState(quest.id);
-        if (state === "claimed") {
+        if (state === "claimed" || state === "skipped") {
             skipped++;
             continue;
         }
         if (state !== "claimable") {
             throw new ClaimAllBatchStoppedError(
-                "This Quest is no longer ready to claim.",
+                `This Quest is no longer eligible for ${label}.`,
                 result(),
                 position,
                 quest
@@ -120,7 +123,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
             needsPacing = false;
             if (runtime.shouldContinue?.() === false) {
                 throw new ClaimAllBatchStoppedError(
-                    "Claim all was cancelled before the next reward claim.",
+                    `${label} was cancelled before the next Quest action.`,
                     result(),
                     position,
                     quest
@@ -128,20 +131,20 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
             }
             if (runtime.currentAccountId() !== expectedAccountId) {
                 throw new ClaimAllBatchStoppedError(
-                    "Discord account changed while Claim all was running.",
+                    `Discord account changed while ${label} was running.`,
                     result(),
                     position,
                     quest
                 );
             }
             state = runtime.currentState(quest.id);
-            if (state === "claimed") {
+            if (state === "claimed" || state === "skipped") {
                 skipped++;
                 continue;
             }
             if (state !== "claimable") {
                 throw new ClaimAllBatchStoppedError(
-                    "This Quest is no longer ready to claim.",
+                    `This Quest is no longer eligible for ${label}.`,
                     result(),
                     position,
                     quest
@@ -160,7 +163,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
 
         if (runtime.currentAccountId() !== expectedAccountId) {
             throw new ClaimAllBatchStoppedError(
-                "Discord account changed while Claim all was running.",
+                `Discord account changed while ${label} was running.`,
                 result(),
                 position,
                 quest
@@ -169,7 +172,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
 
         if (runtime.shouldContinue?.() === false) {
             throw new ClaimAllBatchStoppedError(
-                "Claim all was cancelled before the next reward claim.",
+                `${label} was cancelled before the next Quest action.`,
                 result(),
                 position,
                 quest
@@ -191,7 +194,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
 
         if (!claimResult.storeConfirmed) {
             throw new ClaimAllBatchStoppedError(
-                "Discord submitted the claim but QuestStore did not confirm it yet. Claim all stopped to avoid an ambiguous next claim.",
+                `Discord submitted the action but QuestStore did not confirm it yet. ${label} stopped to avoid an ambiguous next action.`,
                 result(),
                 position,
                 quest
@@ -202,7 +205,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
 
         if (runtime.shouldContinue?.() === false) {
             throw new ClaimAllBatchStoppedError(
-                "Claim all was cancelled after the current reward claim.",
+                `${label} was cancelled after the current Quest action.`,
                 result(),
                 position,
                 quest
@@ -210,7 +213,7 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
         }
         if (runtime.currentAccountId() !== expectedAccountId) {
             throw new ClaimAllBatchStoppedError(
-                "Discord account changed while Claim all was running.",
+                `Discord account changed while ${label} was running.`,
                 result(),
                 position,
                 quest
@@ -221,4 +224,10 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
     }
 
     return { total, claimed, skipped };
+}
+
+export function selectBatchAction<T extends ClaimAllQuestLike>(quests: readonly T[], ignored: ReadonlySet<string>): { mode: BatchActionMode; candidates: T[]; } {
+    const eligible = quests.filter(q => !ignored.has(q.id));
+    const claim = buildClaimAllSnapshot(eligible);
+    return claim.length ? { mode: "claim", candidates: claim } : { mode: "enroll", candidates: buildClaimAllSnapshot(eligible, "enroll") };
 }
