@@ -19,7 +19,7 @@ export function createPreviewSession(getHost: () => BetterDiscordReadHost, timer
     let generation = 0;
     let owner: string | null | undefined;
     let switched = false;
-    let snapshot = OFF;
+    let snapshot: PreviewSnapshot = OFF;
     let release: (() => void) | undefined;
     const listeners = new Set<() => void>();
 
@@ -80,10 +80,18 @@ export function createPreviewSession(getHost: () => BetterDiscordReadHost, timer
                 release = () => store.removeChangeListener!(observe);
                 store.addChangeListener(observe);
             }
-            handle = timer.start(() => { if (active && epoch === generation) read(); });
+            if (!active || epoch !== generation || !running || !listeners.size) return;
+            const nextHandle = timer.start(() => { if (active && epoch === generation) read(); });
+            if (!active || epoch !== generation || !running || !listeners.size) {
+                timer.stop(nextHandle);
+                return;
+            }
+            handle = nextHandle;
             read();
         } catch (error) {
-            try { deactivate(); } finally { publish(FAILED); }
+            try { deactivate(); }
+            catch (cleanupError) { console.warn("[QuestUI] BetterDiscord preview cleanup failed.", cleanupError); }
+            finally { publish(running ? FAILED : OFF); }
             console.warn("[QuestUI] BetterDiscord preview activation failed.", error);
         }
     }
@@ -109,6 +117,6 @@ export function createPreviewSession(getHost: () => BetterDiscordReadHost, timer
         },
         getSnapshot: () => snapshot,
         isRunning: () => running,
-        refresh: () => read(true)
+        refresh() { if (!active) activate(); read(true); }
     };
 }

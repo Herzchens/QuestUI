@@ -52,3 +52,20 @@ import { createPreviewSession } from "../../src/platform/betterdiscord/session";
     session.start();assert.equal(callbacks.size,1);again();session.stop();
     assert.equal(callbacks.size,0);
 }
+
+{
+    account="A";available=true;switchDuringRead=false;
+    let activeTimer: (()=>void) | undefined;
+    let releaseCalls=0;
+    const immediateHost={Webpack:{getStore(name:string){
+        if(name==="UserStore")return {getCurrentUser:()=>({id:"A"}),addChangeListener(fn:()=>void){fn();},removeChangeListener(){releaseCalls++;}};
+        return host.Webpack.getStore(name);
+    }}};
+    const session=createPreviewSession(()=>immediateHost,{start(fn){activeTimer=fn;return fn;},stop(){activeTimer=undefined;}});
+    session.start();
+    const unsub=session.subscribe(()=>{session.stop();});
+    assert.equal(activeTimer,undefined,"reentrant stop must not start a timer");
+    assert.equal(session.isRunning(),false);
+    assert.equal(releaseCalls,1);
+    unsub();
+}
