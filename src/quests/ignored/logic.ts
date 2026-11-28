@@ -6,6 +6,10 @@ export interface IgnoredQuestState {
 const MAX_ACCOUNTS = 32;
 const MAX_QUESTS_PER_ACCOUNT = 512;
 
+export class IgnoredQuestCapacityError extends Error {
+    constructor(message: string) { super(message); this.name = "IgnoredQuestCapacityError"; }
+}
+
 function normalizedId(value: unknown, maxLength = 128): string | null {
     if (typeof value !== "string") return null;
     const id = value.trim();
@@ -75,16 +79,16 @@ export function updateIgnoredQuestState(
         return { version: 1, accounts };
     }
 
-    // Keep a bounded defensive store without turning the bound into a false-success path.
-    // A newly ignored Quest must survive the update, so evict the oldest retained entry first.
+    // Never silently remove another exclusion to make room for a new one.
+    // Re-ignoring an existing Quest is allowed at capacity.
+    if (!existing.includes(normalizedQuestId) && existing.length >= MAX_QUESTS_PER_ACCOUNT) {
+        throw new IgnoredQuestCapacityError("Ignore limit reached (512 Quests). Unignore a Quest before adding another.");
+    }
+    if (!Object.hasOwn(accounts, normalizedAccountId) && Object.keys(accounts).length >= MAX_ACCOUNTS) {
+        throw new IgnoredQuestCapacityError("Ignore account limit reached (32 accounts). Clear unused account preferences before adding another.");
+    }
     const next = existing.filter(id => id !== normalizedQuestId);
     next.push(normalizedQuestId);
-    if (next.length > MAX_QUESTS_PER_ACCOUNT) next.splice(0, next.length - MAX_QUESTS_PER_ACCOUNT);
-
-    if (!(normalizedAccountId in accounts) && Object.keys(accounts).length >= MAX_ACCOUNTS) {
-        const oldestAccountId = Object.keys(accounts)[0];
-        if (oldestAccountId) delete accounts[oldestAccountId];
-    }
     accounts[normalizedAccountId] = next;
 
     return { version: 1, accounts };

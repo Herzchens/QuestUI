@@ -1,225 +1,273 @@
 import * as DataStore from "@api/DataStore";
-import { UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { React, UserStore, useStateFromStores } from "@webpack/common";
 
 import {
+    IgnoredQuestCapacityError,
     terminalIgnoredQuestIds,
-    ignoredQuestIdsForAccount,
     normalizeIgnoredQuestState,
     pruneIgnoredQuestState,
     updateIgnoredQuestState,
     type IgnoredQuestState
 } from "./logic";
 import { QuestsStore } from "../../plugin/stores";
+import { captureAccountSession, isCurrentAccountSession } from "../../plugin/accountSession";
 
 const DATA_STORE_KEY = "QuestUI:ignored-quests:v1";
-
+const RETRY_MS = 2000;
+const EMPTY_IDS: ReadonlySet<string> = new Set<string>();
 const listeners = new Set<() => void>();
 let cachedState: IgnoredQuestState | null = null;
-let loadPromise: Promise<IgnoredQuestState> | null = null;
+let ready = false;
+let loadPromise: Promise<void> | null = null;
 let writeChain: Promise<void> = Promise.resolve();
+let retryTimer: ReturnType<typeof setTimeout> | undefined;
+let retryAt = 0;
 let questStoreSubscribed = false;
 let userStoreSubscribed = false;
-let expirySweepTimer: ReturnType<typeof setInterval> | null = null;
+let expirySweepTimer: ReturnType<typeof setInterval> | undefined;
 let lifecycleStarted = false;
+let startupPending = false;
 let lifecycleGeneration = 0;
+let sweepQueued = false;
 
-function notify(): void {
-    for (const listener of [...listeners]) {
-        try { listener(); } catch { /* Subscriber failure must not interrupt persistence. */ }
-    }
-}
+// Only the active account needs terminal masking. Cache one shared snapshot rather
+// than scanning the entire catalogue from every card, action and Orion reconciliation.
+let snapshot: { accountId: string | null; ids: ReadonlySet<string>; ready: boolean; } =
+    { accountId: null, ids: EMPTY_IDS, ready: false };
 
 function currentAccountId(): string | null {
     try {
         const id = UserStore?.getCurrentUser?.()?.id;
         return typeof id === "string" && id.trim() ? id : null;
-    } catch {
-        return null;
+    } catch { return null; }
+}
+
+function persistedIds(accountId: string | null): readonly string[] {
+    return accountId && cachedState && Object.hasOwn(cachedState.accounts, accountId)
+        ? cachedState.accounts[accountId] : [];
+}
+
+function terminalIds(ids: Iterable<string>): ReadonlySet<string> {
+    const quests: unknown[] = [];
+    for (const id of ids) {
+        try {
+            const quest = QuestsStore?.getQuest?.(id);
+            if (quest && String(quest.id ?? quest.config?.id) === id) quests.push(quest);
+        } catch { /* Missing state must never retire an exclusion. */ }
+    }
+    return terminalIgnoredQuestIds(quests);
+}
+
+function refreshSnapshot(): void {
+    const accountId = currentAccountId();
+    const stored = persistedIds(accountId);
+    const terminal = terminalIds(stored);
+    const ids = stored.filter(id => !terminal.has(id));
+    if (snapshot.accountId === accountId && snapshot.ready === ready
+        && snapshot.ids.size === ids.length && ids.every(id => snapshot.ids.has(id))) return;
+    snapshot = { accountId, ready, ids: ids.length ? new Set(ids) : EMPTY_IDS };
+    for (const listener of [...listeners]) {
+        try { listener(); } catch { }
     }
 }
 
-function rawQuestValues(): any[] {
-    const quests = QuestsStore?.quests;
-    if (!quests) return [];
-
-    const values = typeof quests.values === "function"
-        ? Array.from(quests.values())
-        : Array.isArray(quests)
-            ? quests
-            : Object.values(quests);
-
-    return values.map((quest: any) => {
-        const id = quest?.id;
-        if (!id || typeof QuestsStore?.getQuest !== "function") return quest;
-        try { return QuestsStore.getQuest(id) ?? quest; }
-        catch { return quest; }
-    });
+function cancelRetry(): void {
+    if (retryTimer !== undefined) clearTimeout(retryTimer);
+    retryTimer = undefined;
 }
 
-function terminalQuestIds(now = Date.now()): ReadonlySet<string> {
-    return terminalIgnoredQuestIds(rawQuestValues(), now);
+function scheduleRetry(): void {
+    if (!lifecycleStarted || startupPending || retryTimer !== undefined) return;
+    retryTimer = setTimeout(() => {
+        retryTimer = undefined;
+        if (!lifecycleStarted) return;
+        void loadState();
+    }, Math.max(1, retryAt - Date.now()));
 }
 
-async function loadState(): Promise<IgnoredQuestState> {
-    if (cachedState) return cachedState;
+function unavailable(): void {
+    // Retain the last trustworthy set for presentation, but never acknowledge it
+    // as a current durable snapshot after an uncertain transaction.
+    ready = false;
+    retryAt = Date.now() + RETRY_MS;
+    refreshSnapshot();
+    scheduleRetry();
+}
+
+function loadState(): Promise<void> {
+    if (ready || startupPending) return Promise.resolve();
     if (loadPromise) return loadPromise;
-
-    loadPromise = DataStore.get(DATA_STORE_KEY)
-        .then(value => normalizeIgnoredQuestState(value))
-        .catch(() => normalizeIgnoredQuestState(null))
-        .then(state => {
-            cachedState = state;
+    if (!lifecycleStarted || Date.now() < retryAt) {
+        scheduleRetry();
+        return Promise.resolve();
+    }
+    const epoch = lifecycleGeneration;
+    loadPromise = Promise.resolve().then(() => DataStore.get(DATA_STORE_KEY))
+        .then(value => {
+            if (!lifecycleStarted || epoch !== lifecycleGeneration) return;
+            cachedState = normalizeIgnoredQuestState(value);
+            ready = true;
+            retryAt = 0;
+            cancelRetry();
+            refreshSnapshot();
+            queueSweep();
+        }, () => {
+            if (lifecycleStarted && epoch === lifecycleGeneration) unavailable();
+        }).finally(() => {
             loadPromise = null;
-            notify();
-            return state;
+            if (lifecycleStarted && epoch !== lifecycleGeneration) void loadState();
         });
     return loadPromise;
 }
 
-export function preloadIgnoredQuests(): void {
-    void loadState();
-}
+export function preloadIgnoredQuests(): void { void loadState(); }
 
 export function subscribeIgnoredQuests(listener: () => void): () => void {
     listeners.add(listener);
-    return () => listeners.delete(listener);
+    return () => { listeners.delete(listener); };
 }
 
 export function ignoredQuestIds(accountId = currentAccountId()): ReadonlySet<string> {
-    if (!cachedState || !accountId) return new Set<string>();
-
-    const ids = new Set(ignoredQuestIdsForAccount(cachedState, accountId));
-    // Terminal state is Discord-owned. As soon as Discord reports a claim or expiry,
-    // Ignore stops affecting presentation even if persistence cleanup has not run yet.
-    if (ids.size && accountId === currentAccountId()) for (const questId of terminalQuestIds()) ids.delete(questId);
-    return ids;
+    if (!accountId) return EMPTY_IDS;
+    if (accountId === snapshot.accountId && accountId === currentAccountId()) return snapshot.ids;
+    // Non-current accounts never use the current account's Discord terminal state.
+    return new Set(persistedIds(accountId));
 }
 
 export function isIgnoredQuestStateReady(): boolean {
-    return cachedState !== null;
+    return lifecycleStarted && ready && snapshot.accountId === currentAccountId();
+}
+
+async function persist(mutate: (stored: unknown) => IgnoredQuestState, ownsMutation: () => boolean): Promise<void> {
+    let committed: IgnoredQuestState | undefined;
+    let capacityError: IgnoredQuestCapacityError | undefined;
+    try {
+        // Vencord DataStore.update resolves only when the IndexedDB transaction
+        // completes. Capture the exact written value; a redundant read-back could
+        // fail after a successful commit and incorrectly erase an exclusion.
+        await DataStore.update<IgnoredQuestState>(DATA_STORE_KEY, stored => {
+            if (!ownsMutation()) throw new Error("Ignore transaction owner changed.");
+            try { committed = mutate(stored); }
+            catch (error) {
+                if (error instanceof IgnoredQuestCapacityError) capacityError = error;
+                throw error;
+            }
+            return committed;
+        });
+        if (!committed) throw new Error("Ignore transaction did not provide a committed value.");
+    } catch {
+        if (capacityError) throw capacityError;
+        unavailable();
+        throw new Error("QuestUI could not persist the ignored Quest preference.");
+    }
+    cachedState = committed;
+    if (lifecycleStarted) refreshSnapshot();
 }
 
 export async function setQuestIgnored(accountId: string, questId: string, ignored: boolean): Promise<void> {
+    const session = captureAccountSession();
+    if (!session || session.accountId !== accountId) throw new Error("Discord account changed before Ignore.");
+    const epoch = lifecycleGeneration;
     await loadState();
-
-    // A failed write must reject that caller without poisoning every later Ignore/Unignore action.
-    // Recover the serialization chain first, then attempt the next independent mutation.
-    writeChain = writeChain.catch(() => { }).then(async () => {
-        if (ignored && accountId === currentAccountId() && terminalQuestIds().has(questId)) throw new Error("This Quest has already been claimed or expired.");
-        const optimistic = updateIgnoredQuestState(cachedState, accountId, questId, ignored);
-        cachedState = optimistic;
-        notify();
-
-        try {
-            await DataStore.update<IgnoredQuestState>(DATA_STORE_KEY, stored =>
-                updateIgnoredQuestState(stored, accountId, questId, ignored)
-            );
-            const persisted = normalizeIgnoredQuestState(await DataStore.get(DATA_STORE_KEY));
-            cachedState = persisted;
-        } catch {
-            // Re-read the last persisted state so a failed write never leaves an in-memory lie.
-            try { cachedState = normalizeIgnoredQuestState(await DataStore.get(DATA_STORE_KEY)); }
-            catch { cachedState = normalizeIgnoredQuestState(null); }
-            notify();
-            throw new Error("QuestUI could not persist the ignored Quest preference.");
-        }
-        notify();
+    const work = writeChain.catch(() => {}).then(async () => {
+        if (!lifecycleStarted || epoch !== lifecycleGeneration || !isCurrentAccountSession(session)) throw new Error("Discord account changed before Ignore.");
+        if (!isIgnoredQuestStateReady()) throw new Error("Ignored Quests are still loading. Try again shortly.");
+        if (ignored && terminalIds([questId]).has(questId)) throw new Error("This Quest has already been claimed or expired.");
+        await persist(stored => updateIgnoredQuestState(stored, accountId, questId, ignored),
+            () => lifecycleStarted && epoch === lifecycleGeneration && isCurrentAccountSession(session));
+        queueSweep();
     });
-
-    return writeChain;
+    writeChain = work;
+    return work;
 }
 
 export async function pruneExpiredIgnoredQuests(
     accountId = currentAccountId(),
     expectedGeneration: number | null = null
 ): Promise<void> {
-    if (!accountId) return;
-    await loadState();
-    if (expectedGeneration != null && (!lifecycleStarted || expectedGeneration !== lifecycleGeneration)) return;
-
-    if (accountId !== currentAccountId()) return;
-    const expired = terminalQuestIds();
-    const staleIds = ignoredQuestIdsForAccount(cachedState, accountId).filter(id => expired.has(id));
-    if (staleIds.length === 0) return;
-
-    writeChain = writeChain.catch(() => { }).then(async () => {
-        if (expectedGeneration != null && (!lifecycleStarted || expectedGeneration !== lifecycleGeneration)) return;
-        if (accountId !== currentAccountId()) return;
-        const terminal = terminalQuestIds();
-        const confirmedIds = staleIds.filter(id => terminal.has(id));
-        if (!confirmedIds.length) return;
-        cachedState = pruneIgnoredQuestState(cachedState, accountId, confirmedIds);
-        notify();
-
-        try {
-            await DataStore.update<IgnoredQuestState>(DATA_STORE_KEY, stored =>
-                pruneIgnoredQuestState(stored, accountId, confirmedIds)
-            );
-            cachedState = normalizeIgnoredQuestState(await DataStore.get(DATA_STORE_KEY));
-        } catch {
-            // Expired IDs remain synchronously masked by ignoredQuestIds(). Preserve the
-            // last durable store and retry cleanup on a later Quest/account/timer sweep.
-            try { cachedState = normalizeIgnoredQuestState(await DataStore.get(DATA_STORE_KEY)); }
-            catch { cachedState = normalizeIgnoredQuestState(null); }
-        }
-        notify();
+    if (!accountId || !isIgnoredQuestStateReady() || accountId !== currentAccountId()) return;
+    const epoch = expectedGeneration ?? lifecycleGeneration;
+    if (!terminalIds(persistedIds(accountId)).size) return;
+    const work = writeChain.catch(() => {}).then(async () => {
+        if (!lifecycleStarted || epoch !== lifecycleGeneration || !isIgnoredQuestStateReady() || accountId !== currentAccountId()) return;
+        const terminal = terminalIds(persistedIds(accountId));
+        if (!terminal.size) return;
+        const session = captureAccountSession();
+        if (!session || session.accountId !== accountId) return;
+        await persist(stored => pruneIgnoredQuestState(stored, accountId, terminalIds(persistedIds(accountId))),
+            () => lifecycleStarted && epoch === lifecycleGeneration && isCurrentAccountSession(session));
     });
+    writeChain = work;
+    try { await work; } catch { /* The retry path will reload durable state. */ }
+}
 
-    await writeChain;
+function queueSweep(): void {
+    if (!lifecycleStarted || sweepQueued) return;
+    sweepQueued = true;
+    const epoch = lifecycleGeneration;
+    queueMicrotask(() => {
+        if (epoch !== lifecycleGeneration) return;
+        sweepQueued = false;
+        if (lifecycleStarted) void pruneExpiredIgnoredQuests(currentAccountId(), epoch);
+    });
 }
 
 function sweepExpiredIgnoredQuests(): void {
     if (!lifecycleStarted) return;
-    const generation = lifecycleGeneration;
-    notify();
-    void pruneExpiredIgnoredQuests(currentAccountId(), generation);
+    refreshSnapshot();
+    if (!ready) void loadState();
+    else queueSweep();
 }
 
 export function startIgnoredQuestLifecycle(): void {
     if (lifecycleStarted) return;
     lifecycleStarted = true;
-    const generation = ++lifecycleGeneration;
-    preloadIgnoredQuests();
+    startupPending = true;
+    lifecycleGeneration++;
+    ready = false;
+    retryAt = 0;
+    refreshSnapshot();
 
     if (!questStoreSubscribed && typeof QuestsStore?.addChangeListener === "function") {
-        try {
-            QuestsStore.addChangeListener(sweepExpiredIgnoredQuests);
-            questStoreSubscribed = true;
-        } catch { }
+        QuestsStore.addChangeListener(sweepExpiredIgnoredQuests);
+        questStoreSubscribed = true;
     }
-
-    if (!userStoreSubscribed && typeof (UserStore as any)?.addChangeListener === "function") {
-        try {
-            (UserStore as any).addChangeListener(sweepExpiredIgnoredQuests);
-            userStoreSubscribed = true;
-        } catch { }
+    if (!userStoreSubscribed && typeof UserStore?.addChangeListener === "function") {
+        UserStore.addChangeListener(sweepExpiredIgnoredQuests);
+        userStoreSubscribed = true;
     }
-
-    if (expirySweepTimer == null) {
-        expirySweepTimer = setInterval(sweepExpiredIgnoredQuests, 60_000);
-    }
-
-    void loadState().then(() => {
-        if (!lifecycleStarted || generation !== lifecycleGeneration) return;
-        sweepExpiredIgnoredQuests();
+    expirySweepTimer = setInterval(sweepExpiredIgnoredQuests, 60_000);
+    // A previous lifecycle may still own a write. Wait for its transaction before
+    // reading the authoritative state again.
+    const epoch = lifecycleGeneration;
+    void writeChain.catch(() => {}).then(() => {
+        if (lifecycleStarted && epoch === lifecycleGeneration) {
+            startupPending = false;
+            void loadState();
+        }
     });
 }
 
 export function stopIgnoredQuestLifecycle(): void {
     lifecycleStarted = false;
+    startupPending = false;
     lifecycleGeneration++;
+    sweepQueued = false;
+    ready = false;
+    cancelRetry();
+    if (expirySweepTimer !== undefined) clearInterval(expirySweepTimer);
+    expirySweepTimer = undefined;
+    refreshSnapshot();
+    const failures: unknown[] = [];
     if (questStoreSubscribed) {
-        try { QuestsStore?.removeChangeListener?.(sweepExpiredIgnoredQuests); } catch { }
+        try { QuestsStore.removeChangeListener(sweepExpiredIgnoredQuests); questStoreSubscribed = false; }
+        catch (error) { failures.push(error); }
     }
-    questStoreSubscribed = false;
-
     if (userStoreSubscribed) {
-        try { (UserStore as any)?.removeChangeListener?.(sweepExpiredIgnoredQuests); } catch { }
+        try { UserStore.removeChangeListener(sweepExpiredIgnoredQuests); userStoreSubscribed = false; }
+        catch (error) { failures.push(error); }
     }
-    userStoreSubscribed = false;
-
-    if (expirySweepTimer != null) clearInterval(expirySweepTimer);
-    expirySweepTimer = null;
+    if (failures.length) throw new AggregateError(failures, "Ignore lifecycle cleanup failed.");
 }
 
 export function useIgnoredQuests(): {
@@ -228,16 +276,7 @@ export function useIgnoredQuests(): {
     ids: ReadonlySet<string>;
 } {
     const accountId = useStateFromStores([UserStore], currentAccountId);
-    const [, setRevision] = useState(0);
-
-    useEffect(() => {
-        preloadIgnoredQuests();
-        return subscribeIgnoredQuests(() => setRevision(revision => revision + 1));
-    }, []);
-
-    return {
-        accountId,
-        ready: cachedState !== null,
-        ids: ignoredQuestIds(accountId)
-    };
+    const shared = React.useSyncExternalStore(subscribeIgnoredQuests, () => snapshot, () => snapshot);
+    if (shared.accountId === accountId) return shared;
+    return { accountId, ready: false, ids: EMPTY_IDS };
 }

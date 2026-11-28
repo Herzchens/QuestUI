@@ -197,6 +197,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/orion/exclusionIntegration.test.ts
 
+      - name: Test Ignore persistence and shared snapshots
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignoredRuntime.test.ts
+
       - name: Test ignored Quest logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignored.test.ts
