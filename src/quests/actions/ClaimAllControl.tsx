@@ -1,4 +1,4 @@
-import { showToast, UserStore, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { React, showToast, UserStore, useStateFromStores } from "@webpack/common";
 
 import {
     selectBatchAction,
@@ -20,7 +20,7 @@ import {
 } from "./claimAllState";
 import { recordQuestUIEvent } from "../../eventLog/runtime";
 import { pushDashboardNotice } from "../../dashboard/notifications";
-import { ignoredQuestIds, useIgnoredQuests } from "../ignored/runtime";
+import { ignoredQuestIds, isIgnoredQuestStateReady, useIgnoredQuests } from "../ignored/runtime";
 import { isQuestVerificationError } from "./responses";
 import { claimQuestReward, enrollQuest, hasPendingQuestAction, usePendingQuestAction, QuestActionError } from "./native";
 import type { NormalizedQuest } from "../data";
@@ -68,17 +68,12 @@ function verificationStop(error: unknown): boolean {
 }
 
 function useClaimAllRuntimeState(): ClaimAllRuntimeState {
-    const [state, setState] = useState(getClaimAllRuntimeState);
-
-    useEffect(() => subscribeClaimAllRuntimeState(() => {
-        setState(getClaimAllRuntimeState());
-    }), []);
-
-    return state;
+    return React.useSyncExternalStore(subscribeClaimAllRuntimeState, getClaimAllRuntimeState, getClaimAllRuntimeState);
 }
 
 export function useClaimAllBatchActive(): boolean {
-    return useClaimAllRuntimeState().active;
+    const read = () => getClaimAllRuntimeState().active;
+    return React.useSyncExternalStore(subscribeClaimAllRuntimeState, read, read);
 }
 
 export function ClaimAllControl({ quests }: { quests: readonly NormalizedQuest[]; }) {
@@ -92,7 +87,7 @@ export function ClaimAllControl({ quests }: { quests: readonly NormalizedQuest[]
     const activeLabel = runtimeState.mode === "claim" ? "Claiming" : "Accepting";
 
     const run = async () => {
-        if (!ready || !accountId || session?.accountId !== accountId || !isCurrentAccountSession(session)) return;
+        if (!ready || !isIgnoredQuestStateReady() || !accountId || session?.accountId !== accountId || !isCurrentAccountSession(session)) return;
         const { mode: batchMode, candidates: snapshot } = selectBatchAction(quests, ignoredQuestIds(accountId));
         if (batchMode !== mode || !snapshot.length || hasPendingQuestAction(accountId)) return;
         const isClaim = batchMode === "claim";
@@ -122,7 +117,7 @@ export function ClaimAllControl({ quests }: { quests: readonly NormalizedQuest[]
                     currentState: id => currentClaimState(id, batchMode, accountId),
                     claim: quest => isClaim ? claimQuestReward(quest, runtimeGeneration) : enrollQuest(quest, runtimeGeneration),
                     waitBetweenClaims: waitBetweenClaimAllRequests,
-                    shouldContinue: () => isClaimAllRuntimeGenerationActive(runtimeGeneration) && isCurrentAccountSession(session),
+                    shouldContinue: () => isClaimAllRuntimeGenerationActive(runtimeGeneration) && isCurrentAccountSession(session) && isIgnoredQuestStateReady(),
                     onConfirmed: quest => {
                         void recordQuestUIEvent({
                             severity: "success",
@@ -176,9 +171,11 @@ export function ClaimAllControl({ quests }: { quests: readonly NormalizedQuest[]
                     message: reason,
                     actionCode: actionError?.code ?? stopped?.code ?? (isVerification ? "NATIVE_VERIFICATION_REQUIRED" : "BATCH_STOPPED"),
                     retryAfterMs: actionError?.resubmitAfterMs ?? null,
+                    httpStatus: actionError?.code === "HTTP_RATE_LIMITED" ? 429 : null,
                     total,
                     position: at,
-                    claimed: stopped?.result.claimed ?? 0,
+                    confirmed: stopped?.result.claimed ?? 0,
+                    mode: batchMode,
                     skipped: stopped?.result.skipped ?? 0,
                     verificationRequired: isVerification,
                     terminal: !isVerification

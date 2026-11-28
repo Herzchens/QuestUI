@@ -69,7 +69,8 @@ async function main(){
     claimMode="rate";
     await assert.rejects(c(q4),(err:any)=>err.code==="HTTP_RATE_LIMITED"&&err.resubmitAfterMs===4000);
     assert.equal(blocked("a"),true);
-    await assert.rejects(e(q3),(err:any)=>err.code==="HTTP_RATE_LIMITED");
+    assert.equal(mod.exports.questActionStatus("claim","a","q4"),"cooldown");
+    await assert.rejects(e(q3),(err:any)=>err.code==="LOCAL_RATE_LIMIT_COOLDOWN");
     assert.deepEqual(calls,["claim:q1","claim:q2","claim:q4"]);
     advance(3999);assert.equal(blocked("a"),true);advance(1);assert.equal(blocked("a"),false);
     claimMode="thrown-rate";
@@ -81,9 +82,11 @@ async function main(){
     claimMode="pending";
     const uncertain=c(q4);await flush();advance(5000);await flush();
     assert.deepEqual(await uncertain,{storeConfirmed:false,resubmitAfterMs:15000});
+    assert.equal(mod.exports.questActionStatus("claim","b","q4"),"submitted");
     await assert.rejects(c(q4),(err:any)=>err.code==="LOCAL_SUBMISSION_PENDING");
     quests.get("q4").userStatus.claimedAt="2026-01-03";notify();
-    assert.equal(blocked("b"),false);assert.equal(listeners.size,0);assert.equal(timers.size,0);
+    assert.equal(blocked("b"),false);assert.equal(mod.exports.questActionStatus("claim","b","q4"),"idle");assert.equal(listeners.size,0);assert.equal(timers.size,0);
+    const q5=addQuest("q5",true);claimMode="pending";const late=c(q5);await flush();quests.get("q5").userStatus.claimedAt="2026-01-03";advance(5000);assert.deepEqual(await late,{storeConfirmed:true,resubmitAfterMs:null});assert.equal(listeners.size,0);
     console.log("Native mutation integration: batch lock, late confirmation, explicit 429, account cooldown and duplicate guard PASS");
 }
 void main().catch(error=>{console.error(error);process.exitCode=1;});

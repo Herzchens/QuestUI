@@ -353,6 +353,9 @@ export function EventDetail({ event, availableEvents, accountLabel, onBack }: { 
                 {event.quest?.id && <DetailMetaRow kind="detail" label="Quest ID"><code>{event.quest.id}</code></DetailMetaRow>}
                 {event.quest?.taskType && <DetailMetaRow kind="detail" label="Task type"><code>{event.quest.taskType}</code></DetailMetaRow>}
                 {event.detail?.httpStatus != null && <DetailMetaRow kind="detail" label="HTTP"><code>{String(event.detail.httpStatus)}</code></DetailMetaRow>}
+                {typeof event.detail?.actionCode === "string" && <DetailMetaRow kind="detail" label="Action code"><code>{event.detail.actionCode}</code></DetailMetaRow>}
+                {typeof event.detail?.retryAfterMs === "number" && Number.isFinite(event.detail.retryAfterMs) && event.detail.retryAfterMs >= 0 && <DetailMetaRow kind="detail" label="Wait (ms)"><code>{String(event.detail.retryAfterMs)}</code></DetailMetaRow>}
+                {typeof event.detail?.position === "number" && typeof event.detail?.total === "number" && <DetailMetaRow kind="detail" label="Batch progress"><code>{event.detail.position} / {event.detail.total}</code></DetailMetaRow>}
                 {event.detail?.upstreamCode != null && <DetailMetaRow kind="detail" label="Upstream code"><code>{String(event.detail.upstreamCode)}</code></DetailMetaRow>}
                 {event.detail?.status != null && <DetailMetaRow kind="detail" label="Update status"><code>{String(event.detail.status)}</code></DetailMetaRow>}
                 {event.detail?.phase != null && <DetailMetaRow kind="detail" label="Update phase"><code>{String(event.detail.phase)}</code></DetailMetaRow>}

@@ -1,6 +1,6 @@
 import { ignoredQuestIds, isIgnoredQuestStateReady } from "../ignored/runtime";
 import { findByCodeLazy, mapMangledModuleLazy } from "@webpack";
-import { UserStore, useEffect, useState } from "@webpack/common";
+import { React, UserStore } from "@webpack/common";
 import { getClaimAllRuntimeGeneration } from "./claimAllState";
 
 import {
@@ -120,15 +120,25 @@ function scheduleCooldownExpiry(): void {
         notifyActions();
     }, Math.min(2_147_483_647, Math.max(1, next - now)));
 }
+function subscribeActions(fn: () => void): () => void {
+    actionListeners.add(fn);
+    return () => { actionListeners.delete(fn); };
+}
 export function usePendingQuestAction(userId: string | null): boolean {
-    const [, refresh] = useState(0);
-    useEffect(() => {
-        const fn = () => refresh(n => n + 1);
-        actionListeners.add(fn);
-        fn();
-        return () => { actionListeners.delete(fn); };
-    }, [userId]);
-    return hasPendingQuestAction(userId);
+    const read = () => hasPendingQuestAction(userId);
+    return React.useSyncExternalStore(subscribeActions, read, read);
+}
+export function questActionStatus(kind: QuestActionKind | null, userId: string | null, questId: string): "idle" | "processing" | "submitted" | "cooldown" | "blocked" {
+    if (!userId || !kind) return "idle";
+    const key = actionKey(kind, userId, questId);
+    if (inFlightActions.has(key)) return "processing";
+    if (submittedActions.has(key)) return "submitted";
+    if (cooldownRemaining(userId) > 0) return "cooldown";
+    return hasPendingQuestAction(userId) ? "blocked" : "idle";
+}
+export function useQuestActionStatus(kind: QuestActionKind | null, userId: string | null, questId: string) {
+    const read = () => questActionStatus(kind, userId, questId);
+    return React.useSyncExternalStore(subscribeActions, read, read);
 }
 
 export interface QuestActionResult {
@@ -184,13 +194,22 @@ function beginAction(kind: QuestActionKind, userId: string, questId: string, bat
     const active = getClaimAllRuntimeGeneration();
     if (active !== null ? batchGeneration !== active : batchGeneration !== undefined) throw new QuestActionError("A Quest batch is already processing actions.", undefined, null, "LOCAL_BATCH_ACTIVE");
     const cooldown = cooldownRemaining(userId);
-    if (cooldown > 0) throw new QuestActionError("Discord rate limit cooldown is still active.", undefined, cooldown, "HTTP_RATE_LIMITED");
+    if (cooldown > 0) throw new QuestActionError("Discord rate limit cooldown is still active.", undefined, cooldown, "LOCAL_RATE_LIMIT_COOLDOWN");
     if (inFlightActions.has(key)) throw new QuestActionError("This Quest action is already in progress.", undefined, null, "LOCAL_ACTION_IN_FLIGHT");
     if (submittedActions.has(key)) throw new QuestActionError("Discord is still refreshing this Quest after the previous action. Please wait a moment.", undefined, SUBMITTED_ACTION_HOLD_MS, "LOCAL_SUBMISSION_PENDING");
     if (hasPendingQuestAction(userId)) throw new QuestActionError("Another Quest action is still waiting for Discord.", undefined, null, "LOCAL_ACTION_PENDING");
     inFlightActions.add(key);
     notifyActions();
     return key;
+}
+
+function ensureDispatchStillAllowed(session: AccountSession, kind: QuestActionKind, questId: string, batchGeneration?: number): void {
+    if (!isCurrentAccountSession(session)) throw new QuestActionError("Discord account changed before the Quest action.", undefined, null, "ACCOUNT_SESSION_CHANGED");
+    const active = getClaimAllRuntimeGeneration();
+    if (active !== null ? batchGeneration !== active : batchGeneration !== undefined) throw new QuestActionError("Quest batch changed before dispatch.", undefined, null, "LOCAL_BATCH_ACTIVE");
+    if ((kind === "enroll" || batchGeneration !== undefined) && (!isIgnoredQuestStateReady() || ignoredQuestIds(session.accountId).has(questId))) {
+        throw new QuestActionError("This Quest is ignored or Ignore state is unavailable.", undefined, null, "LOCAL_QUEST_IGNORED");
+    }
 }
 
 function rateLimitError(userId: string, value: unknown): QuestActionError | null {
@@ -334,7 +353,10 @@ async function waitForStoreState(
         };
 
         timer = setTimeout(
-            () => finish(sameAccount() ? "timeout" : "account-changed"),
+            () => {
+                check();
+                if (!finished) finish(sameAccount() ? "timeout" : "account-changed");
+            },
             timeoutMs
         );
         try {
@@ -465,6 +487,7 @@ export async function enrollQuest(quest: NormalizedQuest, batchGeneration?: numb
         if (blockMessage) throw new QuestActionError(blockMessage);
 
         const predicate = (current: any) => Boolean(current?.userStatus?.enrolledAt);
+        ensureDispatchStillAllowed(session, "enroll", quest.id, batchGeneration);
         let response: unknown;
         try {
             response = await nativeEnrollQuest(rawQuest.id, { questContent: QUEST_HOME_DESKTOP_LOCATION });
@@ -563,6 +586,7 @@ export async function claimQuestReward(quest: NormalizedQuest, batchGeneration?:
         }
 
         const predicate = (current: any) => Boolean(current?.userStatus?.claimedAt);
+        ensureDispatchStillAllowed(session, "claim", quest.id, batchGeneration);
         let response: unknown;
         try {
             response = await nativeClaimQuestReward(rawQuest.id, claimTarget.platform, claimTarget.location);

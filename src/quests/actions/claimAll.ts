@@ -180,6 +180,13 @@ export async function runClaimAllBatch<T extends ClaimAllQuestLike>(
             );
         }
 
+        // Progress subscribers may synchronously alter Ignore/eligibility.
+        state = runtime.currentState(quest.id);
+        if (state === "claimed" || state === "skipped") { skipped++; continue; }
+        if (state !== "claimable") throw new ClaimAllBatchStoppedError(
+            `This Quest is no longer eligible for ${label}.`, result(), position, quest
+        );
+
         let claimResult: { storeConfirmed: boolean; };
         try {
             claimResult = await runtime.claim(quest);

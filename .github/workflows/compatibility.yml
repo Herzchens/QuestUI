@@ -121,6 +121,14 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/nativeMutation.test.ts
 
+      - name: Test exported Quest action diagnostic fields
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/actionReport.test.ts
+
+      - name: Test dynamic batch toolbar handlers
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/batchToolbar.test.ts
+
       - name: Test Claim all logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/quests/claimAll.test.ts

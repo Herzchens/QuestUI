@@ -17,7 +17,7 @@ import {
     enrollQuest,
     prepareQuestRewardCode,
     QuestActionError,
-    usePendingQuestAction,
+    useQuestActionStatus,
     hasPendingQuestAction,
     useNativeQuestRewardOpener
 } from "./native";
@@ -29,14 +29,9 @@ import settings from "../../plugin/settings";
 import { captureAccountSession, isCurrentAccountSession } from "../../plugin/accountSession";
 
 type QuestAction = "enroll" | "claim";
-type SubmittedState = { action: QuestAction; userId: string; releaseAt: number; };
 
 function actionLabel(action: QuestAction): string {
     return action === "enroll" ? "Accept Quest" : "Claim Reward";
-}
-
-function submittedState(action: QuestAction, userId: string, delayMs: number): SubmittedState {
-    return { action, userId, releaseAt: Date.now() + delayMs };
 }
 
 function currentUserId(): string | null {
@@ -79,7 +74,8 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
         && isExplicitRewardCodeConfig(quest.rawQuest?.config?.rewardsConfig);
     const currentUserIdFromStore = useStateFromStores([UserStore], currentUserId);
     const session = captureAccountSession();
-    const nativeBlocked = usePendingQuestAction(currentUserIdFromStore);
+    const nativeStatus = useQuestActionStatus(action, currentUserIdFromStore, quest.id);
+    const nativeBlocked = nativeStatus !== "idle";
     const mounted = useRef(true);
     useEffect(() => {
         mounted.current = true;
@@ -89,22 +85,10 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
     const { orionIntegration } = settings.use(["orionIntegration"]);
     const [pending, setPending] = useState(false);
     const [ignorePending, setIgnorePending] = useState(false);
-    const [submitted, setSubmitted] = useState<SubmittedState | null>(null);
-
-    useEffect(() => {
-        if (!submitted) return;
-        const delay = Math.max(0, submitted.releaseAt - Date.now());
-        const timer = setTimeout(() => {
-            setSubmitted(current => current === submitted ? null : current);
-        }, delay);
-        return () => clearTimeout(timer);
-    }, [submitted]);
-
     const run = async () => {
         const userIdAtClick = currentUserIdFromStore;
         if (!action || !userIdAtClick || pending || ignorePending || !mounted.current || session?.accountId !== userIdAtClick || !isCurrentAccountSession(session)) return;
         if (action === "enroll" && (!isIgnoredQuestStateReady() || ignoredQuestIds(userIdAtClick).has(quest.id))) return;
-        if (submitted?.action === action && submitted.userId === userIdAtClick) return;
         // Disabled UI is not a synchronization primitive: a stale click event can still arrive
         // during the render that starts Claim all. Re-check the module-global batch lock here.
         if (getClaimAllRuntimeState().active || hasPendingQuestAction(userIdAtClick)) return;
@@ -123,12 +107,6 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 ? await enrollQuest(quest)
                 : await claimQuestReward(quest);
 
-            // A store-confirmed action is already protected by its new server/store state. Only
-            // keep local Sent state for a successful submission whose store transition is still
-            // pending, and bind it to the account that made the request.
-            if (mounted.current && isCurrentAccountSession(session)) setSubmitted(result.resubmitAfterMs == null
-                ? null
-                : submittedState(action, userIdAtClick, result.resubmitAfterMs));
             const confirmed = result.storeConfirmed;
             const outcome = action === "enroll"
                 ? confirmed ? "Quest accepted" : "Acceptance submitted"
@@ -173,12 +151,6 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                 }
             }
         } catch (error) {
-            if (mounted.current && isCurrentAccountSession(session) && error instanceof QuestActionError && error.resubmitAfterMs != null) {
-                // The request may have reached Discord even though confirmation failed. Mirror
-                // the module-level duplicate guard so the button does not look immediately
-                // reusable while the mutation outcome is intentionally uncertain.
-                setSubmitted(submittedState(action, userIdAtClick, error.resubmitAfterMs));
-            }
             const message = error instanceof QuestActionError
                 ? error.message
                 : "The Quest action failed unexpectedly.";
@@ -192,6 +164,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                     message,
                     actionCode: error instanceof QuestActionError ? error.code : "UNKNOWN_ACTION_ERROR",
                     retryAfterMs: error instanceof QuestActionError ? error.resubmitAfterMs : null,
+                    httpStatus: error instanceof QuestActionError && error.code === "HTTP_RATE_LIMITED" ? 429 : null,
                     reason: error instanceof QuestActionError && error.cause instanceof Error ? error.cause.message : null,
                     stack: error instanceof Error ? error.stack ?? null : null
                 }
@@ -298,9 +271,7 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
         }
     };
 
-    const actionSubmitted = nativeBlocked && currentUserIdFromStore != null
-        && submitted?.action === action
-        && submitted.userId === currentUserIdFromStore;
+    const actionSubmitted = nativeStatus === "submitted";
     const showOrionControl = quest.status === "in-progress" && orionIntegration && isOrionCommandReady();
 
     if (!action && !showViewCode && !showOrionControl && !canToggleIgnored) return null;
@@ -312,11 +283,11 @@ export function QuestCardActions({ quest, ignored = false, claimBatchActive = fa
                     type="button"
                     className={`quest-ui-card-action quest-ui-card-action-${action}`}
                     disabled={pending || ignorePending || actionSubmitted || currentUserIdFromStore == null || (claimBatchActive || nativeBlocked) || (action === "enroll" && (ignored || !isIgnoredQuestStateReady()))}
-                    aria-busy={pending}
+                    aria-busy={pending || nativeStatus === "processing"}
                     onClick={run}
-                    title={claimBatchActive ? "A Quest batch is processing actions" : nativeBlocked ? "Waiting for Discord to finish a previous Quest action" : undefined}
+                    title={claimBatchActive ? "A Quest batch is processing actions" : nativeStatus === "cooldown" ? "Discord rate limit cooldown is active" : nativeBlocked ? "Waiting for Discord to finish a previous Quest action" : undefined}
                 >
-                    {pending ? "Processing…" : actionSubmitted ? "Sent" : actionLabel(action)}
+                    {pending || nativeStatus === "processing" ? "Processing…" : actionSubmitted ? "Sent" : actionLabel(action)}
                 </button>
             )}
 

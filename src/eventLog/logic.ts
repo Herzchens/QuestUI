@@ -550,6 +550,8 @@ export function eventSearchText(event: EventLogEvent): string {
         detail.message,
         detail.reason,
         detail.httpStatus,
+        detail.actionCode,
+        detail.retryAfterMs,
         detail.upstreamCode,
         typeof detail.terminal === "boolean" ? `terminal:${detail.terminal}` : null,
         typeof detail.retryable === "boolean" ? `retryable:${detail.retryable}` : null,

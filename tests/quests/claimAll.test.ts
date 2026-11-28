@@ -317,6 +317,14 @@ async function main() {
         });
         assert.equal(result.claimed,19);assert.equal(result.skipped,1);assert.ok(!trace.includes("8"));
     }
+    {
+        let ignored=false;
+        const result=await runClaimAllBatch([quest("a")],"user-a",{
+            currentAccountId:()=>"user-a",currentState:()=>ignored?"skipped":"claimable",
+            claim:async()=>{throw Error("ignored quest dispatched");}
+        },()=>{ignored=true;});
+        assert.deepEqual(result,{total:1,claimed:0,skipped:1});
+    }
     console.log("QuestUI batch action logic tests - PASS");
 }
 

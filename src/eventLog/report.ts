@@ -49,6 +49,12 @@ function detailLines(event: EventLogEvent): string[] {
     const detail = event.detail ?? {};
     const lines: string[] = [];
     if (detail.httpStatus != null) lines.push(`HTTP Status:    ${String(detail.httpStatus)}`);
+    if (typeof detail.actionCode === "string") lines.push(`Action Code:    ${sanitizeEventText(detail.actionCode, 120)}`);
+    if (typeof detail.retryAfterMs === "number" && Number.isFinite(detail.retryAfterMs) && detail.retryAfterMs >= 0) lines.push(`Wait (ms):      ${detail.retryAfterMs}`);
+    if (typeof detail.position === "number" && typeof detail.total === "number") lines.push(`Batch Progress: ${detail.position} / ${detail.total}`);
+    if (typeof detail.confirmed === "number") lines.push(`Confirmed:      ${detail.confirmed}`);
+    else if (typeof detail.claimed === "number") lines.push(`Confirmed:      ${detail.claimed}`);
+    if (typeof detail.skipped === "number") lines.push(`Skipped:        ${detail.skipped}`);
     if (detail.upstreamCode != null) lines.push(`Upstream Code:  ${String(detail.upstreamCode)}`);
     if (detail.status != null) lines.push(`Update Status:  ${sanitizeEventText(detail.status)}`);
     if (detail.phase != null) lines.push(`Update Phase:   ${sanitizeEventText(detail.phase)}`);
