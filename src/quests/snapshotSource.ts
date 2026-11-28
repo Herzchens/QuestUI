@@ -10,6 +10,8 @@ export function createSnapshotSource<T>(read: () => T, getStore: () => Store | n
     let enabled = false;
     let generation = 0;
     let timer: ReturnType<typeof setInterval> | undefined;
+    let refreshInterval = intervalMs;
+    let poll: (() => void) | undefined;
     let binding: { store: Store; callback: () => void; active: boolean; } | null = null;
 
     function detach() {
@@ -24,6 +26,7 @@ export function createSnapshotSource<T>(read: () => T, getStore: () => Store | n
         generation++;
         if (timer !== undefined) clearInterval(timer);
         timer = undefined;
+        poll = undefined;
         detach();
     }
 
@@ -60,11 +63,20 @@ export function createSnapshotSource<T>(read: () => T, getStore: () => Store | n
                 try { listener(value, force); } catch { }
             }
         }
-        timer = setInterval(() => refresh(true), intervalMs);
+        poll = () => refresh(true);
+        timer = setInterval(poll, refreshInterval);
         refresh(true);
     }
 
     return {
+        setIntervalMs(ms: number) {
+            if (!Number.isFinite(ms) || ms <= 0 || ms === refreshInterval) return;
+            refreshInterval = ms;
+            if (timer !== undefined && poll) {
+                clearInterval(timer);
+                timer = setInterval(poll, refreshInterval);
+            }
+        },
         start() { enabled = true; activate(); },
         stop() { enabled = false; deactivate(); },
         subscribe(listener: Listener) {

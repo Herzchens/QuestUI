@@ -113,8 +113,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function optionalString(value: unknown, maxLength: number): string | undefined {
     if (value == null) return undefined;
     if (typeof value !== "string") return undefined;
-    const trimmed = value.trim();
-    return trimmed ? trimmed.slice(0, maxLength) : undefined;
+    const trimmed = sanitizeEventText(value, maxLength).trim();
+    return trimmed || undefined;
 }
 
 function nullablePositiveInteger(value: unknown): number | null {
@@ -137,7 +137,7 @@ function normalizedFailure(value: unknown): OrionCompanionEventFailure | null {
     if (attempt != null && maxAttempts != null && maxAttempts < attempt) maxAttempts = null;
 
     const upstreamCode = typeof value.upstreamCode === "string"
-        ? value.upstreamCode.slice(0, 160)
+        ? sanitizeEventText(value.upstreamCode, 160)
         : typeof value.upstreamCode === "number" && Number.isFinite(value.upstreamCode)
             ? value.upstreamCode
             : null;

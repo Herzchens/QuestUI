@@ -1,6 +1,6 @@
 import { createArtworkColorPool } from "../../src/themes/artworkColorPool";
 import { ORIGAMI_ANIMALS, origamiScene, normalizeOrigamiProgress } from "../../src/themes/origami/scene";
-import { dominantThumbnailColor } from "../../src/themes/origami/thumbnailColor";
+import { dominantThumbnailColor, dominantThumbnailColorAsync } from "../../src/themes/origami/thumbnailColor";
 import { ornamentVariantSequence, SAKURA_ORNAMENT_COUNT } from "../../src/themes/sakura/ornament";
 import assert from "node:assert/strict";
 import { createDashboardThemeController } from "../../src/themes/controller";
@@ -222,3 +222,44 @@ void testArtworkOwnership().catch(error => { console.error(error); process.exitC
     lifecycle.start();
     assert.deepEqual(calls, ["+a", "-a"]);
 }
+
+void (async () => {
+    const sample = new Uint8ClampedArray(64 * 64 * 4);
+    let seed = 0x45be;
+    for (let i = 0; i < sample.length; i++) {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        sample[i] = seed >>> 24;
+    }
+    assert.deepEqual(await dominantThumbnailColorAsync(sample, () => false), dominantThumbnailColor(sample));
+    assert.equal(await dominantThumbnailColorAsync(sample, () => true), null);
+    let checks = 0;
+    assert.equal(await dominantThumbnailColorAsync(sample, () => ++checks > 3), null);
+})().catch(error => { console.error(error); process.exitCode = 1; });
+
+void (async () => {
+    const started: string[] = [];
+    const resolvers = new Map<string, (color: string) => void>();
+    const pool = createArtworkColorPool<string>(url => new Promise(resolve => {
+        started.push(url);
+        resolvers.set(url, resolve);
+    }), 2, 1);
+    const owner = {};
+    pool.replaceCatalogue(owner, ["a", "b", "c", "d"]);
+    await Promise.resolve();
+    const visible = pool.acquire("d");
+    resolvers.get("a")!("a");
+    for (let i = 0; i < 12; i++) await Promise.resolve();
+    assert.deepEqual(started, ["a", "d"]);
+    resolvers.get("d")!("d");
+    assert.equal(await visible.promise, "d");
+    visible.release();
+    for (let i = 0; i < 12; i++) await Promise.resolve();
+    assert.deepEqual(started, ["a", "d", "b"]);
+    resolvers.get("b")!("b");
+    for (let i = 0; i < 12; i++) await Promise.resolve();
+    pool.replaceCatalogue(owner, ["a", "b", "c", "d"]);
+    assert.equal(pool.peek("c"), undefined);
+    assert.equal(pool.peek("d"), undefined);
+    assert.deepEqual(started, ["a", "d", "b"]);
+    pool.replaceCatalogue(owner, []);
+})().catch(error => { console.error(error); process.exitCode = 1; });

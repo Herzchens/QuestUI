@@ -7,14 +7,28 @@ const MAX_INPUT = 128 * 1024;
 const MAX_OUTPUT = 32 * 1024;
 const MAX_NODES = 256;
 const MAX_DEPTH = 6;
-const KEY = String.raw`(?:proxy[-_ ]?authorization|authorization|set[-_ ]?cookie|cookies?|(?:access|auth|refresh|session|discord|bot|bearer|oauth|id)[-_ ]?token|token|proxy[-_ ]?ticket|api[-_ ]?key|client[-_ ]?secret|password|passwd|credentials?|secret|private[-_ ]?key|(?:oauth|auth|gift|reward)[-_ ]?code)`;
+const KEY = String.raw`(?:x[-_ ]?)?(?:proxy[-_ ]?authorization|authorization(?:[-_ ]?header)?|set[-_ ]?cookie|cookies?|(?:access|auth|refresh|session|discord|bot|bearer|oauth|id)[-_ ]?token|token|proxy[-_ ]?ticket|api[-_ ]?key|client[-_ ]?secret|secret[-_ ]?key|personal[-_ ]?access[-_ ]?token|password|passwd|passphrase|credentials?|secret|private[-_ ]?key|(?:oauth|auth|gift|reward)[-_ ]?code)`;
 const jsonValue = new RegExp(String.raw`(["']${KEY}["']\s*:\s*)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,}\]]+)`, "gi");
-const header = /(^|[\s,;])((?:proxy[-_ ]?authorization|authorization|set[-_ ]?cookie|cookie)\s*[:=]\s*)[^\r\n]*/gi;
+const header = /(^|[\s,;])((?:proxy[-_ ]?authorization|authorization|set[-_ ]?cookie|cookie)\s*[:=]\s*)[^\r\n]*(?:\r?\n[\t ]+[^\r\n]*)*/gi;
 const assignment = new RegExp(String.raw`(^|[\s,;?&])(${KEY}\s*[:=]\s*)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;&]+)`, "gi");
 const query = /([?&](?:code|token|access_token|refresh_token|ticket|api_key|client_secret|password)=)[^&#\s"']+/gi;
 
+const ambiguousContainer = new RegExp(String.raw`(?:["\']${KEY}["\']|\b${KEY})\s*[:=]\s*[\[{]`, "i");
+const escapedKey = new RegExp(String.raw`\\["\']${KEY}\\["\']`, "i");
 function textOnly(text: string): string {
     if (text.length > MAX_INPUT) return OMITTED;
+    // Embedded malformed/escaped containers cannot be reliably redacted field by field.
+    if (ambiguousContainer.test(text) || escapedKey.test(text)) return OMITTED;
+    // Percent-encoded field names are common in URL/form diagnostics. Decode
+    // only for detection and omit the original if it reveals a credential.
+    if (/%[0-9a-f]{2}/i.test(text)) {
+        try {
+            const decoded = decodeURIComponent(text);
+            if (decoded !== text && (decoded.length > MAX_INPUT || ambiguousContainer.test(decoded) || escapedKey.test(decoded)
+                || new RegExp(query.source, "i").test(decoded) || new RegExp(assignment.source, "i").test(decoded)
+                || new RegExp(jsonValue.source, "i").test(decoded))) return OMITTED;
+        } catch { /* malformed URI remains subject to ordinary redaction */ }
+    }
     return text
         .replace(/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)/g, REDACTED)
         .replace(jsonValue, '$1"[REDACTED]"')
@@ -26,9 +40,9 @@ function textOnly(text: string): string {
         .replace(/(https?:\/\/)[^/\s@]+:[^/\s@]+@/gi, "$1" + REDACTED + "@");
 }
 
-function sensitiveKey(key: string): boolean {
-    const canonical = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-    return /^(?:proxyauthorization|authorization|setcookie|cookies?|(?:access|auth|refresh|session|discord|bot|bearer|oauth|id)?token|proxyticket|apikey|clientsecret|password|passwd|credentials?|secret|privatekey|(?:oauth|auth|gift|reward)code)$/.test(canonical);
+export function isSensitiveDiagnosticKey(key: string): boolean {
+    const canonical = key.toLowerCase().replace(/[^a-z0-9]/g, "").replace(/^x(?=auth|api|token|discord|access|session)/, "");
+    return /^(?:proxyauthorization|authorization(?:header)?|setcookie|cookies?|(?:access|auth|refresh|session|discord|bot|bearer|oauth|id)?token|proxyticket|apikey|clientsecret|secretkey|personalaccesstoken|password|passwd|passphrase|credentials?|secret|privatekey|(?:oauth|auth|gift|reward)code)$/.test(canonical);
 }
 
 function forbiddenKey(key: string): boolean {
@@ -64,6 +78,13 @@ function walk(value: unknown, budget: Budget, depth: number): SafeValue {
     budget.seen.add(value);
     try {
         if (Array.isArray(value)) {
+            // Headers may arrive as [name, value] tuples rather than objects.
+            if (value.length === 2) {
+                const first = Object.getOwnPropertyDescriptor(value, "0");
+                if (first && "value" in first && typeof first.value === "string" && isSensitiveDiagnosticKey(first.value)) {
+                    return [boundedString(first.value, budget, depth + 1), REDACTED];
+                }
+            }
             const result: SafeValue[] = [];
             for (let i = 0; i < Math.min(value.length, 64) && budget.nodes > 0; i++) {
                 const prop = Object.getOwnPropertyDescriptor(value, String(i));
@@ -80,7 +101,7 @@ function walk(value: unknown, budget: Budget, depth: number): SafeValue {
             if (forbiddenKey(key) || key.length > 256) continue;
             budget.chars -= key.length;
             const safeKey = textOnly(key);
-            if (sensitiveKey(key)) { result[safeKey] = REDACTED; continue; }
+            if (isSensitiveDiagnosticKey(key)) { result[safeKey] = REDACTED; continue; }
             const prop = Object.getOwnPropertyDescriptor(value, key);
             result[safeKey] = prop && "value" in prop ? walk(prop.value, budget, depth + 1) : OMITTED;
         }

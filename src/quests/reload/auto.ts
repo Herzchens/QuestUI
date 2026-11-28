@@ -1,3 +1,4 @@
+import { boundedTimerDelay, validSchedulerTimestamp } from "../../plugin/scheduling";
 import * as DataStore from "@api/DataStore";
 import { UserStore } from "@webpack/common";
 
@@ -31,18 +32,12 @@ let lastAutoAttemptAt: number | null = null;
 let currentAccountId: string | null = null;
 let userStoreSubscribed = false;
 
-function finiteTimestamp(value: unknown): number | null {
-    if (value == null || value === "") return null;
-    const numeric = Number(value);
-    return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
-}
-
 function normalizePersistedState(value: unknown): PersistedQuestAutoReloadState {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
         return { version: 1, lastSuccessfulReloadAt: null };
     }
     const raw = value as Record<string, unknown>;
-    return { version: 1, lastSuccessfulReloadAt: finiteTimestamp(raw.lastSuccessfulReloadAt) };
+    return { version: 1, lastSuccessfulReloadAt: validSchedulerTimestamp(raw.lastSuccessfulReloadAt, Date.now()) };
 }
 
 async function ensurePersistedState(): Promise<void> {
@@ -91,7 +86,7 @@ function scheduleAfter(delayMs: number): void {
     timer = setTimeout(() => {
         timer = null;
         void runScheduledReload();
-    }, Math.max(250, delayMs));
+    }, boundedTimerDelay(delayMs));
 }
 
 function scheduleNext(): void {
@@ -121,7 +116,7 @@ async function persistSuccessfulReload(timestamp: number): Promise<void> {
 }
 
 export async function markQuestReloadSuccessful(timestamp = Date.now(), session: AccountSession | null = captureAccountSession()): Promise<void> {
-    const normalized = finiteTimestamp(timestamp);
+    const normalized = validSchedulerTimestamp(timestamp, Date.now());
     if (normalized == null || !isCurrentAccountSession(session)) return;
 
     const generation = lifecycleGeneration;

@@ -1,3 +1,4 @@
+import { finiteStoredTimestamp } from "../plugin/scheduling";
 import type { EventLogEvent } from "../eventLog/types";
 
 export type NotificationCenterTone = "info" | "success" | "warning" | "error";
@@ -32,8 +33,13 @@ export interface NotificationCenterItem {
 const EMPTY_STATE: NotificationCenterState = { version: 1, accounts: {} };
 
 function safeTimestamp(value: unknown): number {
-    const timestamp = Number(value);
-    return Number.isFinite(timestamp) && timestamp >= 0 ? timestamp : 0;
+    return finiteStoredTimestamp(value) ?? 0;
+}
+
+function safeAccountId(value: unknown): string {
+    if (typeof value !== "string") return "";
+    const id = value.trim();
+    return id.length <= 128 && id !== "prototype" && !Object.prototype.hasOwnProperty.call(Object.prototype, id) ? id : "";
 }
 
 function normalizeAccountState(value: unknown): NotificationCenterAccountState | null {
@@ -54,7 +60,7 @@ export function normalizeNotificationCenterState(value: unknown): NotificationCe
 
     const accounts: Record<string, NotificationCenterAccountState> = {};
     for (const [accountId, raw] of Object.entries(rawAccounts as Record<string, unknown>)) {
-        const normalizedId = accountId.trim();
+        const normalizedId = safeAccountId(accountId);
         const normalized = normalizeAccountState(raw);
         if (normalizedId && normalized) accounts[normalizedId] = normalized;
     }
@@ -67,7 +73,7 @@ export function ensureNotificationCenterAccount(
     now = Date.now()
 ): NotificationCenterState {
     const state = normalizeNotificationCenterState(value);
-    const id = accountId.trim();
+    const id = safeAccountId(accountId);
     if (!id || state.accounts[id]) return state;
     const baseline = safeTimestamp(now);
     return {
@@ -88,7 +94,7 @@ export function updateNotificationCenterAccount(
     accountId: string,
     patch: Partial<Pick<NotificationCenterAccountState, "readThrough" | "clearedThrough">>
 ): NotificationCenterState {
-    const id = accountId.trim();
+    const id = safeAccountId(accountId);
     const state = ensureNotificationCenterAccount(value, id);
     if (!id) return state;
     const current = state.accounts[id];
@@ -109,8 +115,9 @@ export function notificationCenterAccountState(
     value: unknown,
     accountId: string | null | undefined
 ): NotificationCenterAccountState | null {
-    if (!accountId) return null;
-    return normalizeNotificationCenterState(value).accounts[accountId] ?? null;
+    const id = safeAccountId(accountId);
+    if (!id) return null;
+    return normalizeNotificationCenterState(value).accounts[id] ?? null;
 }
 
 function normalizedCode(value: unknown): string {
@@ -252,7 +259,7 @@ export function notificationCenterItems(
     accountState: NotificationCenterAccountState,
     limit = 80
 ): NotificationCenterItem[] {
-    const id = accountId.trim();
+    const id = safeAccountId(accountId);
     if (!id) return [];
 
     const items: NotificationCenterItem[] = [];

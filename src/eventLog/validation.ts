@@ -35,6 +35,8 @@ function normalize(value: unknown): EventLogEvent | null {
 
     if (!id
         || id.length > 240
+        || (raw.schemaVersion !== undefined && raw.schemaVersion !== 1)
+        || sanitizeEventText(id) !== id
         || !validDiagnosticTimestamp(timestamp)
         || !EVENT_SOURCES.has(source)
         || !EVENT_SEVERITIES.has(severity)
@@ -45,7 +47,7 @@ function normalize(value: unknown): EventLogEvent | null {
     }
 
     const hasAccountId = Object.prototype.hasOwnProperty.call(raw, "accountId");
-    if (hasAccountId && raw.accountId != null && typeof raw.accountId !== "string") return null;
+    if (hasAccountId && raw.accountId != null && (typeof raw.accountId !== "string" || raw.accountId.length > 128 || sanitizeEventText(raw.accountId) !== raw.accountId)) return null;
     const hasAccountUsername = Object.prototype.hasOwnProperty.call(raw, "accountUsername");
     if (hasAccountUsername && raw.accountUsername != null && typeof raw.accountUsername !== "string") return null;
 

@@ -175,3 +175,6 @@ void testTransactionalQueue().then(() => console.log("Update mutation queue regr
     console.error(error);
     process.exitCode = 1;
 });
+
+assert.equal(compareSemver("1.0.0-9007199254740992", "1.0.0-9007199254740993"), -1);
+assert.equal(shouldRunScheduledUpdateCheck(8e15, 1700000000000, 6), true);

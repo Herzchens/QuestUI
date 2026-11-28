@@ -1,6 +1,6 @@
 import type { EventLogCategory, EventLogEvent, EventLogSeverity, EventLogSource } from "./types";
 
-import { sanitizeEventText } from "./redaction";
+import { isSensitiveDiagnosticKey, sanitizeEventText } from "./redaction";
 export { sanitizeEventText } from "./redaction";
 
 const ORION_TAGS = [
@@ -25,7 +25,10 @@ function safeConsoleArg(value: unknown): string {
 
 export function consoleArgsToText(args: unknown[]): string {
     const parts = args.slice(0, 32)
-        .map(safeConsoleArg)
+        .map((value, index, values) => {
+            const previous = values[index - 1];
+            return typeof previous === "string" && isSensitiveDiagnosticKey(previous.trim()) ? "[REDACTED]" : safeConsoleArg(value);
+        })
         .filter(part => !/^background:\s|^color:\s|font-weight:|border-radius:/i.test(part));
     return sanitizeEventText(parts.join(" ")
         .replace(/%c/g, "")

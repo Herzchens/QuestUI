@@ -1,3 +1,4 @@
+import { boundedTimerDelay, validSchedulerTimestamp } from "../plugin/scheduling";
 import * as DataStore from "@api/DataStore";
 import { plugins } from "@api/PluginManager";
 
@@ -386,17 +387,18 @@ function nextScheduledDelay(now = Date.now()): number | null {
     if (hours === 0) return null;
 
     const interval = hours * 60 * 60 * 1000;
-    const lastSuccessful = updateScheduleBaseline({
+    const lastSuccessful = validSchedulerTimestamp(updateScheduleBaseline({
         questUI: persisted.questUILastSuccessfulCheckAt,
         orion: persisted.orionLastSuccessfulCheckAt
-    }, preferences.checkOrion && orionInstalled());
+    }, preferences.checkOrion && orionInstalled()), now);
     const dueAt = lastSuccessful == null ? now : lastSuccessful + interval;
     let delay = Math.max(0, dueAt - now);
 
-    if (lastAttemptFailed && lastAttemptAt > 0) {
-        delay = Math.max(delay, lastAttemptAt + FAILED_RETRY_MS - now);
+    const attempt = validSchedulerTimestamp(lastAttemptAt, now);
+    if (lastAttemptFailed && attempt !== null && attempt > 0) {
+        delay = Math.max(delay, attempt + FAILED_RETRY_MS - now);
     }
-    return Math.max(250, delay);
+    return boundedTimerDelay(delay);
 }
 
 function scheduleNextCheck(): void {

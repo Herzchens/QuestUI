@@ -21,6 +21,7 @@ import {
 import {
     classifyConsoleEvent,
     consoleEventSource,
+    consoleArgsToText,
     inferEventCategory,
     sanitizeEventText
 } from "../../src/eventLog/logic";
@@ -412,4 +413,19 @@ void testOwnedReadQueue().catch(error => { console.error(error); process.exitCod
     const second = pageSortedEventLogEvents(duplicateRows, "newest", 1, first.nextCursor);
     assert.equal(second.events.length, 1);
     assert.equal(second.events[0].summary, "second");
+}
+
+{
+    const secret = "SYNTHETIC_ONLY_NOT_A_REAL_SECRET";
+    const inputs: unknown[] = [
+        [["Authorization", secret], ["Accept", "application/json"]],
+        { headers: [["x-api-key", secret]] },
+        "response: {\"authorization\": {\"value\": \"" + secret + "\"}}",
+        "Authorization: Basic example\r\n " + secret,
+        "https://example.invalid/?access%5ftoken=" + secret,
+        { xAuthToken: secret, passphrase: secret },
+    ];
+    for (const input of inputs) assert.ok(!sanitizeEventText(input).includes(secret), "Synthetic secret was not redacted");
+    assert.ok(!consoleArgsToText(["[QuestUI]", "access_token", secret]).includes(secret));
+    assert.ok(sanitizeEventText("Normal quest update succeeded").includes("Normal quest update succeeded"));
 }

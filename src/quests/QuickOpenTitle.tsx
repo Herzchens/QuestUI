@@ -1,7 +1,8 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { findByCodeLazy } from "@webpack";
-import { showToast, UserStore, useRef, useStateFromStores } from "@webpack/common";
+import { showToast, UserStore, useEffect, useRef, useStateFromStores } from "@webpack/common";
 
+import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
 import { QuestsStore } from "../plugin/stores";
 import { readQuestByIdentity, type NormalizedQuest } from "./data";
 import { canLaunchQuestQuickOpen, questQuickOpenTarget, type QuestQuickOpenKind } from "./quickOpen";
@@ -45,13 +46,15 @@ function NativeOpenButton({ quest, kind, closePopout, launch }: TitleProps & {
 }) {
     const accountId = useStateFromStores([UserStore], currentAccountId);
     const pending = useRef(false);
+    const mounted = useRef(true);
+    const session = captureAccountSession();
+    useEffect(() => {
+        mounted.current = true;
+        return () => { mounted.current = false; };
+    }, []);
 
     const open = async () => {
-        if (pending.current) return;
-        if (!accountId || currentAccountId() !== accountId) {
-            unavailable("Discord account changed. Reopen Quest Dashboard and try again.");
-            return;
-        }
+        if (pending.current || !mounted.current || !accountId || session?.accountId !== accountId || !isCurrentAccountSession(session)) return;
 
         pending.current = true;
         try {
@@ -73,10 +76,11 @@ function NativeOpenButton({ quest, kind, closePopout, launch }: TitleProps & {
 
             // The native CTA owns playback, launch checks, session and tracking.
             // Do not auto-enroll, fabricate progress or open an external URL.
+            if (!mounted.current || !isCurrentAccountSession(session)) return;
             await launch(current);
-            if (currentAccountId() === accountId) closePopout?.();
+            if (mounted.current && isCurrentAccountSession(session)) closePopout?.();
         } catch {
-            if (currentAccountId() === accountId) unavailable("Discord could not open this Quest. Try opening it from Quest Home.");
+            if (mounted.current && isCurrentAccountSession(session)) unavailable("Discord could not open this Quest. Try opening it from Quest Home.");
         } finally {
             pending.current = false;
         }

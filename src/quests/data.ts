@@ -477,29 +477,37 @@ function readSnapshot(): NormalizedQuest[] {
     return rawQuests().map(quest => normalizeQuest(quest, now));
 }
 
-const liveSource = createSnapshotSource(readSnapshot, () => QuestsStore, REFRESH_FALLBACK_MS);
-const shortcutSource = createSnapshotSource(readSnapshot, () => QuestsStore, SHORTCUT_REFRESH_FALLBACK_MS);
+// A single store binding normalizes each event once, even when the dashboard
+// and a shortcut are both mounted. The live fallback remains 250 ms.
+const snapshotSource = createSnapshotSource(readSnapshot, () => QuestsStore, SHORTCUT_REFRESH_FALLBACK_MS);
+let liveConsumers = 0;
 
 export function startQuestSnapshotSources(): void {
-    liveSource.start();
-    shortcutSource.start();
+    snapshotSource.start();
 }
 
 export function stopQuestSnapshotSources(): void {
-    const failures: unknown[] = [];
-    for (const source of [liveSource, shortcutSource]) {
-        try { source.stop(); } catch (error) { failures.push(error); }
-    }
-    if (failures.length) throw new AggregateError(failures, "Quest snapshot cleanup failed.");
+    snapshotSource.stop();
 }
 
 export function useQuestSnapshot(mode: QuestSnapshotMode = "live"): NormalizedQuest[] {
     const [snapshot, setSnapshot] = useState<NormalizedQuest[]>(readSnapshot);
     useEffect(() => {
-        const source = mode === "live" ? liveSource : shortcutSource;
-        return source.subscribe((next, force) => {
-            setSnapshot(previous => mode !== "live" && !force && sameQuestShortcutSnapshot(previous, next) ? previous : next);
+        if (mode === "live") {
+            liveConsumers++;
+            snapshotSource.setIntervalMs(REFRESH_FALLBACK_MS);
+        }
+        let lastForcedAt = Date.now();
+        const unsubscribe = snapshotSource.subscribe((next, force) => {
+            const now = Date.now();
+            const forceShortcut = force && (now < lastForcedAt || now - lastForcedAt >= SHORTCUT_REFRESH_FALLBACK_MS);
+            if (forceShortcut) lastForcedAt = now;
+            setSnapshot(previous => mode !== "live" && !forceShortcut && sameQuestShortcutSnapshot(previous, next) ? previous : next);
         });
+        return () => {
+            unsubscribe();
+            if (mode === "live" && --liveConsumers === 0) snapshotSource.setIntervalMs(SHORTCUT_REFRESH_FALLBACK_MS);
+        };
     }, [mode]);
     return snapshot;
 }

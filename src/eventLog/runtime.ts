@@ -58,6 +58,7 @@ type PendingOrionConsole = OrionConsoleShadowCandidate & {
     classified: ReturnType<typeof classifyConsoleEvent>;
 };
 const pendingOrionConsole = new Map<number, PendingOrionConsole>();
+const MAX_PENDING_CONSOLE_SHADOWS = 256;
 let pendingConsoleTimer: ReturnType<typeof setTimeout> | null = null;
 let nextOrionConsoleId = 0;
 let orionEventIdentity: object | null = null;
@@ -310,6 +311,12 @@ function queueOrionConsoleCandidate(level: ConsoleLevel, text: string): void {
     const classified = classifyConsoleEvent("orion", level, text);
     const id = ++nextOrionConsoleId;
     const capturedAt = Date.now();
+    while (pendingOrionConsole.size >= MAX_PENDING_CONSOLE_SHADOWS) {
+        const oldest = pendingOrionConsole.values().next().value;
+        if (!oldest) break;
+        pendingOrionConsole.delete(oldest.id);
+        recordClassifiedOrionConsole(oldest);
+    }
     pendingOrionConsole.set(id, {
         id,
         capturedAt,
@@ -326,7 +333,10 @@ function queueOrionConsoleCandidate(level: ConsoleLevel, text: string): void {
 }
 
 function recordStructuredOrionEvent(event: NormalizedOrionEvent): void {
-    const matched = findOrionConsoleShadowMatch(event, Array.from(pendingOrionConsole.values()), ORION_SHADOW_MATCH_WINDOW_MS);
+    const account = currentEventLogAccountId();
+    const candidates = Array.from(pendingOrionConsole.values()).filter(candidate => candidate.accountId === account
+        && Math.abs(candidate.capturedAt - event.timestamp) <= ORION_SHADOW_MATCH_WINDOW_MS);
+    const matched = findOrionConsoleShadowMatch(event, candidates, ORION_SHADOW_MATCH_WINDOW_MS);
     if (matched) {
         pendingOrionConsole.delete(matched.id);
         if (!pendingOrionConsole.size) scheduleConsoleFlush();

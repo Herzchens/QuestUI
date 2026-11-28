@@ -1,7 +1,7 @@
 import { useEffect, useState } from "@webpack/common";
 import { createArtworkColorPool } from "../artworkColorPool";
 
-import { dominantThumbnailColor, type OrigamiRgb } from "./thumbnailColor";
+import { dominantThumbnailColorAsync, type OrigamiRgb } from "./thumbnailColor";
 
 const SAMPLE_LIMIT = 256;
 const CACHE_LIMIT = 256;
@@ -38,7 +38,8 @@ function loadColor(url: string, signal: AbortSignal): Promise<OrigamiRgb | null>
                 // Do not introduce new interpolated colors into the area vote.
                 context.imageSmoothingEnabled = false;
                 context.drawImage(image, 0, 0, canvas.width, canvas.height);
-                finish(dominantThumbnailColor(context.getImageData(0, 0, canvas.width, canvas.height).data));
+                void dominantThumbnailColorAsync(context.getImageData(0, 0, canvas.width, canvas.height).data, () => settled || signal.aborted)
+                    .then(color => finish(color), () => finish(null));
             } catch {
                 // Tainted canvas, failed decoding and other client errors are cosmetic.
                 finish(null);

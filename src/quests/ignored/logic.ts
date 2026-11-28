@@ -9,7 +9,7 @@ const MAX_QUESTS_PER_ACCOUNT = 512;
 function normalizedId(value: unknown, maxLength = 128): string | null {
     if (typeof value !== "string") return null;
     const id = value.trim();
-    return id.length > 0 && id.length <= maxLength ? id : null;
+    return id.length > 0 && id.length <= maxLength && id !== "prototype" && !Object.prototype.hasOwnProperty.call(Object.prototype, id) ? id : null;
 }
 
 function normalizedQuestIds(value: unknown): string[] {

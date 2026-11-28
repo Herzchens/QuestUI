@@ -121,7 +121,7 @@ export async function appendEvent(_: IpcMainInvokeEvent, serialized: string): Pr
         throw new Error("Invalid Event Log record.");
     }
     // One IPC request represents exactly one validated, canonical JSONL event.
-    const event = safeParse(serialized);
+    const event = safeParse(serialized, true);
     if (!event) {
         rejectedAppends++;
         throw new Error("Invalid Event Log record.");
@@ -159,9 +159,12 @@ export async function appendEvent(_: IpcMainInvokeEvent, serialized: string): Pr
     finally { pendingWrites--; pendingWriteBytes -= bytes; }
 }
 
-function safeParse(line: string): EventLogEvent | null {
+function safeParse(line: string, requireSchema = false): EventLogEvent | null {
     try {
-        return normalizePersistedEvent(JSON.parse(line));
+        if (Buffer.byteLength(line, "utf8") > MAX_EVENT_BYTES) return null;
+        const parsed = JSON.parse(line);
+        if (requireSchema && parsed?.schemaVersion !== 1) return null;
+        return normalizePersistedEvent(parsed);
     } catch {
         return null;
     }
@@ -185,8 +188,8 @@ function normalizeQueryOptions(options: any = {}): NormalizedQueryOptions {
         category: normalizeSelection<EventLogCategory>(options.category, ["quest", "runtime", "network", "diagnostic"]),
         sort: options.sort === "oldest" || options.sort === "severity" ? options.sort : "newest",
         accountScope: normalizeSelection<EventLogAccountScope>(options.accountScope, ["current", "other"]),
-        currentAccountId: typeof options.currentAccountId === "string" && options.currentAccountId.length > 0 ? options.currentAccountId : null,
-        accountId: typeof options.accountId === "string" && options.accountId.length > 0 ? options.accountId : null,
+        currentAccountId: typeof options.currentAccountId === "string" && options.currentAccountId.length > 0 && options.currentAccountId.length <= 128 ? options.currentAccountId : null,
+        accountId: typeof options.accountId === "string" && options.accountId.length > 0 && options.accountId.length <= 128 ? options.accountId : null,
         includeLegacy: options.includeLegacy !== false
     };
 }

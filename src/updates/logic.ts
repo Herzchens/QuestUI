@@ -1,3 +1,5 @@
+import { finiteStoredTimestamp, validSchedulerTimestamp } from "../plugin/scheduling";
+
 export const UPDATE_CHECK_HOURS = [0, 3, 6, 12, 24, 72, 168] as const;
 export const UPDATE_CHECK_STEP_MARKERS = [0, 1, 2, 3, 4, 5, 6] as const;
 export const DEFAULT_UPDATE_CHECK_HOURS = 6;
@@ -25,7 +27,7 @@ const SEMVER_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-
 
 function parsePrerelease(value: string | undefined): readonly (string | number)[] {
     if (!value) return [];
-    return value.split(".").map(part => /^\d+$/.test(part) ? Number(part) : part);
+    return value.split(".").map(part => /^\d+$/.test(part) && Number.isSafeInteger(Number(part)) ? Number(part) : part);
 }
 
 export function parseSemver(value: unknown): ParsedSemver | null {
@@ -68,12 +70,17 @@ function compareParsedSemver(left: ParsedSemver, right: ParsedSemver): number {
         if (rightPart === undefined) return 1;
         if (leftPart === rightPart) continue;
 
-        const leftNumeric = typeof leftPart === "number";
-        const rightNumeric = typeof rightPart === "number";
-        if (leftNumeric && rightNumeric) return leftPart < rightPart ? -1 : 1;
+        const leftNumeric = /^\d+$/.test(String(leftPart));
+        const rightNumeric = /^\d+$/.test(String(rightPart));
+        if (leftNumeric && rightNumeric) {
+            const a = String(leftPart).replace(/^0+(?=\d)/, ""), b = String(rightPart).replace(/^0+(?=\d)/, "");
+            if (a.length !== b.length) return a.length < b.length ? -1 : 1;
+            if (a === b) continue;
+            return a < b ? -1 : 1;
+        }
         if (leftNumeric !== rightNumeric) return leftNumeric ? -1 : 1;
 
-        return String(leftPart).localeCompare(String(rightPart)) < 0 ? -1 : 1;
+        return String(leftPart) < String(rightPart) ? -1 : 1;
     }
 
     return 0;
@@ -135,10 +142,11 @@ export function shouldRunScheduledUpdateCheck(
 ): boolean {
     const hours = normalizeUpdateCheckHours(configuredHours);
     if (hours === 0) return false;
-    if (!Number.isFinite(lastSuccessfulCheckAt)) return true;
     if (!Number.isFinite(now)) return false;
+    const baseline = validSchedulerTimestamp(lastSuccessfulCheckAt, now);
+    if (baseline === null) return true;
 
-    const elapsed = now - Number(lastSuccessfulCheckAt);
+    const elapsed = now - baseline;
     return elapsed >= hours * 60 * 60 * 1000;
 }
 
@@ -148,9 +156,7 @@ export interface UpdateHealthTimestamps {
 }
 
 function normalizeStoredTimestamp(value: unknown): number | null {
-    if (value == null || value === "") return null;
-    const numeric = Number(value);
-    return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
+    return finiteStoredTimestamp(value);
 }
 
 export function normalizeUpdateHealthTimestamps(value: unknown): UpdateHealthTimestamps {
