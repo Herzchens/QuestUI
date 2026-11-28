@@ -13,9 +13,8 @@ import {
 function GraphicsIcon() {
     const gradientId = "quest-ui-gauge-" + React.useId();
     const paint = "url(#" + gradientId + ")";
-    // Lucide Gauge geometry on its native 24x24 grid. Keeping the authored
-    // geometry intact avoids per-theme optical scaling/translation hacks.
-    // The 10-unit needle reaches the arc endpoints exactly at +/-120deg.
+    // Keep the 24x24 gauge arc and its original rotation pivot. A shorter
+    // needle leaves a visible gap from the arc throughout the entire sweep.
     return <svg className="quest-ui-graphics-gauge" viewBox="0 0 24 24" aria-hidden="true">
         <defs>
             <linearGradient id={gradientId} gradientUnits="userSpaceOnUse" x1="2" y1="12" x2="22" y2="12">
@@ -25,8 +24,8 @@ function GraphicsIcon() {
             </linearGradient>
         </defs>
         <path d="M3.34 19a10 10 0 1 1 17.32 0" stroke={paint} strokeWidth="2" vectorEffect="non-scaling-stroke" />
-        <path className="quest-ui-graphics-needle" d="M12 14V4" stroke={paint} strokeWidth="2" vectorEffect="non-scaling-stroke" />
-        <circle cx="12" cy="14" r="2" fill={paint} />
+        <path className="quest-ui-graphics-needle" d="M12 14V8" stroke={paint} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+        <circle cx="12" cy="14" r="1.4" fill={paint} />
     </svg>;
 }
 

@@ -114,14 +114,23 @@ for (const pair of document.querySelectorAll(".graphics-header-fixture")) {
     const matrix = new DOMMatrixReadOnly(needle.transform);
     const angle = Math.atan2(matrix.b, matrix.a) * 180 / Math.PI;
     check(Math.abs(angle - (n === 5 ? -120 : -120 + 60*n)) < .1, "gauge angle mismatch " + n);
-    if (n === 0 || n === 4 || n === 5) {
-        const end = glyph.querySelector(".quest-ui-graphics-needle");
-        const arc = glyph.querySelector("path");
-        const tip = new DOMPoint(12,4).matrixTransform(end.getCTM());
-        const endpoint = arc.getPointAtLength(n === 4 ? arc.getTotalLength() : 0).matrixTransform(arc.getCTM());
-        check(Math.hypot(tip.x-endpoint.x, tip.y-endpoint.y) < .1, "needle does not meet arc endpoint");
-    }
+    checkNeedleClearance(glyph, "detent " + n);
     check(needle.transitionDuration === (reduced || matchMedia("(prefers-reduced-motion: reduce)").matches ? "0s" : "0.14s"), "gauge motion mismatch " + n);
+}
+// Measure the actual path tip and arc in rendered CSS pixels. Round caps
+// occupy half the non-scaling stroke width on either side of the centerline.
+function checkNeedleClearance(glyph, context) {
+    const end = glyph.querySelector(".quest-ui-graphics-needle");
+    const arc = glyph.querySelector("path");
+    const tip = end.getPointAtLength(end.getTotalLength()).matrixTransform(end.getCTM());
+    const length = arc.getTotalLength();
+    let nearest = Infinity;
+    for (let i = 0; i <= 240; i++) {
+        const point = arc.getPointAtLength(length * i / 240).matrixTransform(arc.getCTM());
+        nearest = Math.min(nearest, Math.hypot(tip.x - point.x, tip.y - point.y));
+    }
+    const capWidth = (parseFloat(getComputedStyle(end).strokeWidth) + parseFloat(getComputedStyle(arc).strokeWidth)) / 2;
+    check(nearest - capWidth >= 1, "gauge needle touches or approaches arc: " + context);
 }
 // Exercise a real CSS transition, not just the static endpoint styles.
 const animated = document.querySelector('.graphics-header-fixture[data-mode="0"][data-reduced="false"] button');
@@ -139,6 +148,7 @@ if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
         const mid = new DOMMatrixReadOnly(getComputedStyle(animatedNeedle).transform);
         const angle = Math.atan2(mid.b, mid.a) * 180 / Math.PI;
         check(angle > -119 && angle < 119, "gauge did not interpolate");
+        checkNeedleClearance(animatedNeedle.ownerSVGElement, "mid-transition");
         transition.finish();
     }
 } else check(animations.length === 0, "system reduced motion animated the needle");
