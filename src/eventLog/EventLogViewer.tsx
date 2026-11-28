@@ -1,3 +1,4 @@
+import { createOwnedTaskQueue } from "../plugin/latestTask";
 import { Popout, showToast, UserStore, useEffect, useMemo, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { collectEventAccountUsernames, isLegacyUnscopedEvent } from "./account";
@@ -66,6 +67,10 @@ function toggleOrderedSelection<T extends string>(current: readonly T[], value: 
     return order.filter(item => next.has(item));
 }
 
+// First-page requests across reopened viewers share one native IPC slot.
+const firstPageReads = createOwnedTaskQueue<object>();
+const storageInfoReads = createOwnedTaskQueue<object>();
+
 function EventLogPanel() {
     // Keep the theme subscription unconditional when switching list/detail views.
     const themeClassName = useDashboardThemeClassName("quest-ui-event-log-panel", "quest-ui-event-surface");
@@ -90,6 +95,7 @@ function EventLogPanel() {
     const [clearing, setClearing] = useState(false);
     const clearOperationRef = useRef<object | null>(null);
     const [loadingInitial, setLoadingInitial] = useState(true);
+    const [loadFailed, setLoadFailed] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [newEventsAvailable, setNewEventsAvailable] = useState(false);
     const [refreshNonce, setRefreshNonce] = useState(0);
@@ -99,6 +105,10 @@ function EventLogPanel() {
     const filterButtonRef = useRef<HTMLButtonElement | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
     const requestGenerationRef = useRef(0);
+    const firstPagePendingRef = useRef(false);
+    const nextPageOperationRef = useRef<object | null>(null);
+    const infoOwner = useRef({}).current;
+    const liveDirtyRef = useRef(false);
     const ownedPageRef = useRef<string | null>(null);
     const mountedRef = useRef(true);
     const queryIdentityRef = useRef<string | null>(null);
@@ -127,6 +137,17 @@ function EventLogPanel() {
     const severityFilter: "all" | EventLogSeverity[] = severities.length === ALL_EVENT_LOG_SEVERITIES.length ? "all" : severities;
     const categoryFilter: "all" | EventLogCategory[] = categories.length === ALL_EVENT_LOG_CATEGORIES.length ? "all" : categories;
 
+    function requestStorageInfo(): void {
+        if (!mountedRef.current) return;
+        storageInfoReads.request(infoOwner, async () => {
+            if (!mountedRef.current) return;
+            try {
+                const next = await getEventLogInfo() as EventLogStorageInfo;
+                if (mountedRef.current) setInfo(next);
+            } catch { }
+        });
+    }
+
     useEffect(() => {
         const generation = ++requestGenerationRef.current;
         const queryIdentity = JSON.stringify([query, source, accountScopeFilter, severityFilter, categoryFilter, sort, currentUserId]);
@@ -137,9 +158,14 @@ function EventLogPanel() {
         if (liveRefreshTimerRef.current) clearTimeout(liveRefreshTimerRef.current);
         loadMoreTimerRef.current = null;
         liveRefreshTimerRef.current = null;
+        // A first-page replacement invalidates every older pagination operation,
+        // including a soft refresh that retains the previously rendered rows.
+        nextPageOperationRef.current = null;
+        setLoadingMore(false);
+        loadMoreArmedRef.current = true;
+        setLoadFailed(false);
 
         if (hardReset) {
-            loadMoreArmedRef.current = true;
             atHeadRef.current = true;
             setEvents([]);
             setTotal(0);
@@ -148,82 +174,80 @@ function EventLogPanel() {
             void releaseEventLogPageSession(ownedPageRef.current);
             ownedPageRef.current = null;
             setSessionId(null);
-            setLoadingMore(false);
-            setLoadingInitial(true);
             setNewEventsAvailable(false);
             if (listRef.current) listRef.current.scrollTop = 0;
         }
+        if (!ownedPageRef.current) setLoadingInitial(true);
 
         let disposed = false;
+        const owner = {};
+        firstPagePendingRef.current = true;
+        liveDirtyRef.current = false;
+        const ownsRequest = () => !disposed && generation === requestGenerationRef.current;
         const timer = setTimeout(() => {
-            if (disposed) return;
-            void Promise.all([
-                queryEventLogPage({ query, source, accountScope: accountScopeFilter, currentAccountId: currentUserId, severity: severityFilter, category: categoryFilter, sort, pageSize: EVENT_LOG_PAGE_SIZE, includeLegacy: true }),
-                getEventLogInfo() as Promise<EventLogStorageInfo>
-            ]).then(([result, nextInfo]) => {
-                if (disposed || generation !== requestGenerationRef.current) {
-                    void releaseEventLogPageSession(result.sessionId);
-                    return;
-                }
-                if (result.stale) {
-                    void releaseEventLogPageSession(result.sessionId);
-                    if (hardReset) setLoadingInitial(false);
-                    return;
-                }
-                if (ownedPageRef.current !== result.sessionId) void releaseEventLogPageSession(ownedPageRef.current);
-                ownedPageRef.current = result.sessionId;
+            if (!ownsRequest()) return;
+            firstPageReads.request(owner, async () => {
+                if (!ownsRequest()) return;
+                try {
+                    const result = await queryEventLogPage({ query, source, accountScope: accountScopeFilter, currentAccountId: currentUserId, severity: severityFilter, category: categoryFilter, sort, pageSize: EVENT_LOG_PAGE_SIZE, includeLegacy: true });
+                    if (!ownsRequest() || result.stale) {
+                        void releaseEventLogPageSession(result.sessionId);
+                        if (ownsRequest()) setLoadFailed(true);
+                        return;
+                    }
+                    if (ownedPageRef.current !== result.sessionId) void releaseEventLogPageSession(ownedPageRef.current);
+                    ownedPageRef.current = result.sessionId;
 
-                // Live Event Log notifications refresh the current first page in place. Do not clear
-                // the existing window first: update start/success events can arrive seconds apart,
-                // and blanking the list on every notification makes the panel visibly flash.
-                setEvents(result.events);
-                setTotal(result.total);
-                setHasMore(result.hasMore);
-                setNextCursor(result.nextCursor);
-                setSessionId(result.sessionId);
-                setInfo(nextInfo);
-                setNewEventsAvailable(false);
-                if (hardReset) setLoadingInitial(false);
-            }).catch(() => {
-                if (!disposed && generation === requestGenerationRef.current && hardReset) setLoadingInitial(false);
+                    // Publish the valid page independently of storage-info IPC.
+                    setEvents(result.events);
+                    setTotal(result.total);
+                    setHasMore(result.hasMore);
+                    setNextCursor(result.nextCursor);
+                    setSessionId(result.sessionId);
+                    setNewEventsAvailable(false);
+                    requestStorageInfo();
+                } catch {
+                    if (ownsRequest()) setLoadFailed(true);
+                } finally {
+                    if (ownsRequest()) {
+                        setLoadingInitial(false);
+                        firstPagePendingRef.current = false;
+                        if (liveDirtyRef.current) {
+                            liveDirtyRef.current = false;
+                            if (atHeadRef.current) setRefreshNonce(value => value + 1);
+                            else setNewEventsAvailable(true);
+                        }
+                    }
+                }
             });
         }, hardReset ? 120 : 0);
 
-        return () => { disposed = true; clearTimeout(timer); };
+        return () => { disposed = true; clearTimeout(timer); firstPageReads.cancel(owner); };
     }, [query, source, accountScopeFilter, severityFilter, categoryFilter, sort, currentUserId, refreshNonce]);
 
     useEffect(() => {
         let disposed = false;
-        let pendingInfo = false;
-        let infoRequested = false;
-        const refreshInfo = async () => {
-            if (disposed || pendingInfo) return;
-            pendingInfo = true;
-            try {
-                while (!disposed && infoRequested) {
-                    infoRequested = false;
-                    const next = await getEventLogInfo() as EventLogStorageInfo;
-                    if (!disposed) setInfo(next);
-                }
-            } catch { }
-            finally { pendingInfo = false; }
-        };
         const unsubscribe = subscribeEventLog(() => {
             if (disposed) return;
-            if (sort === "newest" && atHeadRef.current && !loadingMore) {
-                if (liveRefreshTimerRef.current) clearTimeout(liveRefreshTimerRef.current);
+            if (sort === "newest" && atHeadRef.current && !nextPageOperationRef.current) {
+                if (firstPagePendingRef.current) { liveDirtyRef.current = true; return; }
+                if (liveRefreshTimerRef.current) return;
                 liveRefreshTimerRef.current = setTimeout(() => {
                     liveRefreshTimerRef.current = null;
                     if (!disposed) setRefreshNonce(value => value + 1);
                 }, 150);
             } else {
-                infoRequested = true;
-                void refreshInfo();
+                requestStorageInfo();
                 setNewEventsAvailable(true);
             }
         });
-        return () => { disposed = true; infoRequested = false; unsubscribe(); };
-    }, [sort, loadingMore]);
+        return () => {
+            disposed = true;
+            if (liveRefreshTimerRef.current) clearTimeout(liveRefreshTimerRef.current);
+            liveRefreshTimerRef.current = null;
+            unsubscribe();
+        };
+    }, [sort]);
 
     useEffect(() => {
         setSelected(null);
@@ -243,6 +267,8 @@ function EventLogPanel() {
         mountedRef.current = true;
         return () => {
         mountedRef.current = false;
+        nextPageOperationRef.current = null;
+        storageInfoReads.cancel(infoOwner);
         requestGenerationRef.current++;
         void releaseEventLogPageSession(ownedPageRef.current);
         ownedPageRef.current = null;
@@ -272,10 +298,15 @@ function EventLogPanel() {
     };
 
     const loadNextPage = async () => {
-        if (!hasMore || !nextCursor || !sessionId || loadingMore) return;
+        if (!hasMore || !nextCursor || !sessionId || !mountedRef.current || firstPagePendingRef.current
+            || nextPageOperationRef.current || ownedPageRef.current !== sessionId) return;
         const generation = requestGenerationRef.current;
         const cursor = nextCursor;
         const activeSession = sessionId;
+        const operation = {};
+        nextPageOperationRef.current = operation;
+        const ownsPage = () => mountedRef.current && generation === requestGenerationRef.current
+            && nextPageOperationRef.current === operation && ownedPageRef.current === activeSession;
         setLoadingMore(true);
         try {
             const result = await queryEventLogPage({
@@ -291,7 +322,7 @@ function EventLogPanel() {
                 sessionId: activeSession,
                 includeLegacy: true
             });
-            if (generation !== requestGenerationRef.current) return;
+            if (!ownsPage()) return;
             if (result.stale || result.sessionId !== activeSession) {
                 setRefreshNonce(value => value + 1);
                 return;
@@ -306,12 +337,16 @@ function EventLogPanel() {
             setHasMore(result.hasMore);
             setNextCursor(result.nextCursor);
         } finally {
-            if (generation === requestGenerationRef.current) setLoadingMore(false);
+            if (ownsPage()) {
+                nextPageOperationRef.current = null;
+                setLoadingMore(false);
+            }
         }
     };
 
     const scheduleNextPage = () => {
-        if (!hasMore || !nextCursor || !sessionId || loadingMore || loadMoreTimerRef.current) return;
+        if (!hasMore || !nextCursor || !sessionId || firstPagePendingRef.current
+            || nextPageOperationRef.current || loadMoreTimerRef.current || ownedPageRef.current !== sessionId) return;
         loadMoreTimerRef.current = setTimeout(() => {
             loadMoreTimerRef.current = null;
             void loadNextPage();
@@ -330,7 +365,7 @@ function EventLogPanel() {
             loadMoreArmedRef.current = true;
             return;
         }
-        if (!loadMoreArmedRef.current) return;
+        if (!loadMoreArmedRef.current || firstPagePendingRef.current || nextPageOperationRef.current) return;
         loadMoreArmedRef.current = false;
         scheduleNextPage();
     };
@@ -419,7 +454,7 @@ function EventLogPanel() {
                     <strong>Event Log</strong>
                 </div>
                 <div className="quest-ui-event-log-header-meta">
-                    {newEventsAvailable && <button type="button" className="quest-ui-event-new-events" onClick={() => setRefreshNonce(value => value + 1)}>New events</button>}
+                    {(loadFailed || newEventsAvailable) && <button type="button" className="quest-ui-event-new-events" onClick={() => setRefreshNonce(value => value + 1)}>{loadFailed ? "Retry" : "New events"}</button>}
                     <span className={`quest-ui-event-storage is-${storageState}`} title={storageTitle} aria-label={storageTitle}>
                         <DatabaseIcon />
                         <span className="quest-ui-event-storage-used">{storageUsedLabel}</span>
@@ -580,7 +615,7 @@ function EventLogPanel() {
             {loadingInitial ? (
                 <div className="quest-ui-event-empty">Loading Event Log…</div>
             ) : events.length === 0 ? (
-                <div className="quest-ui-event-empty">No matching Orion or QuestUI events yet.</div>
+                <div className="quest-ui-event-empty">{loadFailed ? "Event Log temporarily unavailable. Select Retry to refresh." : "No matching Orion or QuestUI events yet."}</div>
             ) : (
                 <EventLogWindowedScroller
                     containerRef={listRef}

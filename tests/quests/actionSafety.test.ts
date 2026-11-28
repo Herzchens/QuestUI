@@ -1,3 +1,4 @@
+import { createLatestNativeRequest } from "../../src/plugin/latestNativeRequest";
 import assert from "node:assert/strict";
 import { createAccountSessionTracker } from "../../src/plugin/accountSessionState";
 
@@ -108,3 +109,42 @@ console.log("QuestUI quest-action runtime logic tests - PASS");
     tracker.stop();
     assert.equal(tracker.capture(), null);
 }
+
+async function testLatestNativeRequest() {
+    let current = {};
+    const calls: object[] = [];
+    const gates: Array<() => void> = [];
+    const request = createLatestNativeRequest<object>(key => {
+        calls.push(key);
+        return new Promise<void>(resolve => gates.push(resolve));
+    }, key => key === current, () => new Error("stale"));
+    const first = request(current);
+    assert.equal(request(current), first);
+    await Promise.resolve();
+    assert.equal(calls.length, 1);
+    const results: Array<Promise<boolean>> = [];
+    for (let i = 0; i < 1000; i++) {
+        current = {};
+        results.push(request(current).then(() => true, () => false));
+    }
+    assert.deepEqual(await Promise.all(results.slice(0, -1)), Array(999).fill(false));
+    assert.equal(calls.length, 1);
+    gates.shift()!();
+    await first;
+    for (let i = 0; i < 8; i++) await Promise.resolve();
+    assert.equal(calls.length, 2);
+    assert.equal(calls[1], current);
+    gates.shift()!();
+    assert.equal(await results[999], true);
+}
+void testLatestNativeRequest().catch(error => { console.error(error); process.exitCode = 1; });
+
+async function testNativeRequestCompletionBoundary() {
+    const key = {};
+    let calls = 0;
+    const request = createLatestNativeRequest<object>(async () => { calls++; }, () => true, () => new Error("stale"));
+    await request(key);
+    await request(key);
+    assert.equal(calls, 2);
+}
+void testNativeRequestCompletionBoundary().catch(error => { console.error(error); process.exitCode = 1; });

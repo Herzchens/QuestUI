@@ -1,3 +1,4 @@
+import { createSharedRefresh } from "../../src/notifications/sharedRefresh";
 import assert from "node:assert/strict";
 import { createLatestTask } from "../../src/plugin/latestTask";
 
@@ -134,3 +135,45 @@ void testBackpressure().then(() => console.log("Notification backpressure regres
     console.error(error);
     process.exitCode = 1;
 });
+
+async function testSharedRefresh() {
+    const key = {};
+    let calls = 0;
+    const gates: Array<(value: number) => void> = [];
+    const hub = createSharedRefresh(() => {
+        calls++;
+        return new Promise<number>(resolve => gates.push(resolve));
+    }, candidate => candidate === key);
+    const values: number[] = [];
+    let off = hub.subscribe(key, v => values.push(v));
+    for (let i = 0; i < 50; i++) { off(); off = hub.subscribe(key, v => values.push(v)); }
+    assert.equal(calls, 1);
+    for (let i = 0; i < 500; i++) hub.request(key);
+    gates.shift()!(1);
+    await Promise.resolve(); await Promise.resolve();
+    assert.deepEqual(values, [1]);
+    assert.equal(calls, 2);
+    off(); gates.shift()!(2);
+    await Promise.resolve(); await Promise.resolve();
+    assert.deepEqual(values, [1]);
+    assert.equal(calls, 2);
+}
+void testSharedRefresh().catch(error => { console.error(error); process.exitCode = 1; });
+
+async function testDisposedSharedInitialization() {
+    const key = {};
+    let release!: () => void, queries = 0;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const hub = createSharedRefresh<object, number>(async (_, hasConsumers) => {
+        await gate;
+        if (!hasConsumers()) throw new Error("disposed");
+        queries++;
+        return 1;
+    }, () => true);
+    const off = hub.subscribe(key, () => { throw new Error("unexpected publication"); });
+    off();
+    release();
+    for (let i = 0; i < 5; i++) await Promise.resolve();
+    assert.equal(queries, 0);
+}
+void testDisposedSharedInitialization().catch(error => { console.error(error); process.exitCode = 1; });

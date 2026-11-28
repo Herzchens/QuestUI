@@ -229,7 +229,10 @@ export async function queryEventLog(options: EventLogQuery): Promise<EventLogQue
     };
     if (!Native) return memoryQuery(globalOptions);
     try { return await Native.queryEvents(globalOptions) as EventLogQueryResult; }
-    catch { return memoryQuery(globalOptions); }
+    catch (error) {
+        if (String(error).includes("Event Log read capacity exceeded")) throw error;
+        return memoryQuery(globalOptions);
+    }
 }
 
 export async function clearEventLog(session: AccountSession | null): Promise<void> {

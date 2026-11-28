@@ -16,6 +16,7 @@ import { QUESTUI_VERSION } from "../plugin/version";
 import { recordAvailableUpdate } from "./notificationEvents";
 import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
 import { createSerialTaskQueue } from "./serialTaskQueue";
+import { createLatestTask } from "../plugin/latestTask";
 
 export type UpdateProduct = "questui" | "orion";
 export type UpdateSuppression = "skipped" | "snoozed" | null;
@@ -93,6 +94,7 @@ let persisted: PersistedUpdateState = defaultPersistedState();
 let persistedReady = false;
 let loadPromise: Promise<void> | null = null;
 const enqueuePersistedMutation = createSerialTaskQueue();
+const noticeTasks = { questui: createLatestTask(), orion: createLatestTask() };
 let preferenceReader: (() => UpdatePreferences) | null = null;
 let lastPreferences: UpdatePreferences | null = null;
 let timer: ReturnType<typeof setTimeout> | null = null;
@@ -399,7 +401,7 @@ function nextScheduledDelay(now = Date.now()): number | null {
 
 function scheduleNextCheck(): void {
     clearTimer();
-    if (!started || !preferenceReader) return;
+    if (!started || !preferenceReader || activeCheck) return;
     const delay = nextScheduledDelay();
     if (delay == null) return;
     timer = setTimeout(() => { void checkForUpdates(false); }, delay);
@@ -574,7 +576,6 @@ async function runUpdateCheck(
         checkedAt
     };
     notify();
-    scheduleNextCheck();
 
     // Only successful fresh checks may introduce availability notifications.
     // Do not emit from cache hydration, failed feeds or stale account transitions.
@@ -587,10 +588,12 @@ async function runUpdateCheck(
                 return isCurrent() && current.kind === "available" && current.suppression === null
                     && state.kind === "available" && current.release.tagName === state.release.tagName;
             };
-            return recordAvailableUpdate(product, state, accountId, stillEligible);
+            noticeTasks[product].request(async () => {
+                if (stillEligible()) await recordAvailableUpdate(product, state, accountId, stillEligible);
+            });
         };
-        if (questResult.ok) await publish("questui", snapshot.questUI);
-        if (orionResult?.ok) await publish("orion", snapshot.orion);
+        if (questResult.ok) publish("questui", snapshot.questUI);
+        if (orionResult?.ok) publish("orion", snapshot.orion);
     }
     return snapshot;
 }
@@ -617,8 +620,11 @@ export async function checkForUpdates(manual = true): Promise<UpdateSnapshot> {
         controller: new AbortController(),
         promise: Promise.resolve(snapshot)
     };
-    entry.promise = runUpdateCheck(preferences, now, generation, entry.controller.signal).finally(() => {
-        if (activeCheck === entry) activeCheck = null;
+    // Publish ownership before entering user/host callbacks in runUpdateCheck.
+    entry.promise = Promise.resolve().then(() => runUpdateCheck(preferences, now, generation, entry.controller.signal)).finally(() => {
+        if (activeCheck !== entry) return;
+        activeCheck = null;
+        if (isCurrentUpdateCheckRun(started, generation, lifecycleGeneration)) scheduleNextCheck();
     });
     activeCheck = entry;
     return entry.promise;
@@ -685,6 +691,8 @@ export function stopUpdateChecks(): void {
     const previous = activeCheck;
     activeCheck = null;
     previous?.controller.abort();
+    noticeTasks.questui.cancelPending();
+    noticeTasks.orion.cancelPending();
     clearTimer();
     preferenceReader = null;
     lastPreferences = null;

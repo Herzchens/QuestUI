@@ -1,3 +1,5 @@
+import { createOwnedTaskQueue } from "../../src/plugin/latestTask";
+import { createOrderedReadBatch } from "../../src/eventLog/orderedReadBatch";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -341,3 +343,41 @@ void testLogReplacement().then(() => console.log("Event Log logic and storage te
     store.set("d", "D"); store.clear();
     assert.equal(store.get("d"), undefined);
 }
+
+async function testOrderedReadBatch() {
+    let tail = Promise.resolve();
+    let reads = 0, revision = 0;
+    const enqueue = <T>(work: () => Promise<T>) => {
+        const result = tail.then(work);
+        tail = result.then(() => {}, () => {});
+        return result;
+    };
+    const batch = createOrderedReadBatch(enqueue, async () => { reads++; return revision; });
+    const before = Array.from({ length: 200 }, () => batch.read());
+    batch.invalidate();
+    const mutation = enqueue(async () => { revision++; });
+    const after = batch.read();
+    assert.deepEqual(await Promise.all(before), Array(200).fill(0));
+    await mutation;
+    assert.equal(await after, 1);
+    assert.equal(reads, 2);
+    assert.equal(await batch.read(), 1);
+    assert.equal(reads, 3);
+}
+void testOrderedReadBatch().catch(error => { console.error(error); process.exitCode = 1; });
+
+async function testOwnedReadQueue() {
+    const q = createOwnedTaskQueue<object>(), a = {}, b = {}, c = {};
+    const seen: string[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    q.request(a, async () => { seen.push("a"); await gate; });
+    q.request(b, async () => { seen.push("old b"); });
+    q.request(b, async () => { seen.push("b"); });
+    q.request(c, async () => { seen.push("c"); });
+    q.cancel(c);
+    release();
+    for (let i = 0; i < 8; i++) await Promise.resolve();
+    assert.deepEqual(seen, ["a", "b"]);
+}
+void testOwnedReadQueue().catch(error => { console.error(error); process.exitCode = 1; });

@@ -14,8 +14,10 @@ function readAccountId(): string | null {
 
 const tracker = createAccountSessionTracker(readAccountId);
 let unsubscribe: (() => void) | null = null;
+let active = false;
 
 export function startAccountSession(): void {
+    if (active) return;
     if (unsubscribe) stopAccountSession();
     tracker.start();
     const store = UserStore;
@@ -23,6 +25,7 @@ export function startAccountSession(): void {
         unsubscribe = () => store.removeChangeListener(tracker.observe);
         store.addChangeListener(tracker.observe);
         tracker.observe();
+        active = true;
     } catch (error) {
         tracker.stop();
         try { stopAccountSession(); }
@@ -32,6 +35,7 @@ export function startAccountSession(): void {
 }
 
 export function invalidateAccountSession(): void {
+    active = false;
     tracker.stop();
 }
 

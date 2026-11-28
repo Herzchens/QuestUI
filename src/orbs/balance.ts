@@ -1,4 +1,5 @@
 import { findByCodeLazy } from "@webpack";
+import { createLatestNativeRequest } from "../plugin/latestNativeRequest";
 import { captureAccountSession, isCurrentAccountSession, type AccountSession } from "../plugin/accountSession";
 
 // Discord's native Virtual Currency balance action. It owns the request, Flux dispatches,
@@ -9,9 +10,6 @@ const fetchDiscordVirtualCurrencyBalance = findByCodeLazy(
     "VIRTUAL_CURRENCY_USER_BALANCE"
 ) as () => Promise<unknown> | unknown;
 
-type BalanceFetch = { session: AccountSession; promise: Promise<void>; };
-let balanceFetchInFlight: BalanceFetch | null = null;
-
 function runNativeBalanceFetch(): Promise<void> {
     try {
         return Promise.resolve(fetchDiscordVirtualCurrencyBalance()).then(() => undefined);
@@ -20,29 +18,11 @@ function runNativeBalanceFetch(): Promise<void> {
     }
 }
 
-/**
- * Coalesce duplicate Dashboard requests for one account. If Discord switches accounts while a
- * request is in flight, serialize the new account's fetch after the old one so an older response
- * cannot be the final balance write after the newer request completes.
- */
+const requestBalance = createLatestNativeRequest<AccountSession>(runNativeBalanceFetch,
+    isCurrentAccountSession, () => new Error("Discord account changed before Orb balance refresh."));
+
 export function fetchOrbBalance(accountId: string): Promise<void> {
     const session = captureAccountSession();
     if (!session || session.accountId !== accountId) return Promise.reject(new Error("Discord account changed before Orb balance refresh."));
-    if (balanceFetchInFlight?.session === session) return balanceFetchInFlight.promise;
-
-    const previous = balanceFetchInFlight?.promise;
-    const work = (previous ? previous.catch(() => undefined) : Promise.resolve())
-        .then(() => {
-            if (!isCurrentAccountSession(session)) throw new Error("Discord account changed before Orb balance refresh.");
-            return runNativeBalanceFetch();
-        });
-
-    const record: BalanceFetch = {
-        session,
-        promise: work.finally(() => {
-            if (balanceFetchInFlight === record) balanceFetchInFlight = null;
-        })
-    };
-    balanceFetchInFlight = record;
-    return record.promise;
+    return requestBalance(session);
 }

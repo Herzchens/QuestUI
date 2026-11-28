@@ -14,6 +14,7 @@ import type { EventLogAccountScope, EventLogCategory, EventLogEvent, EventLogSev
 import { normalizePersistedEvent } from "./validation";
 import { readLogText, replaceLogFile } from "./storage";
 import { createPageSessionStore } from "./sessionStore";
+import { createOrderedReadBatch } from "./orderedReadBatch";
 
 
 const MAX_LOG_BYTES = 10 * 1024 * 1024;
@@ -39,6 +40,13 @@ function enqueueStorage<T>(work: () => Promise<T>): Promise<T> {
     writeChain = result.then(() => undefined, () => undefined);
     return result;
 }
+const readBatch = createOrderedReadBatch(enqueueStorage, async () => ({
+    text: await readLogText(LOG_FILE),
+    generation: storageGeneration
+}));
+const pendingPrepared = new Map<Promise<{ text: string; generation: number; }>, Map<string, Promise<{ events: EventLogEvent[]; generation: number; }>>>();
+const MAX_PENDING_READ_IDENTITIES = 16;
+let pendingReadIdentities = 0;
 let nextPageSessionId = 0;
 
 interface NormalizedQueryOptions {
@@ -98,6 +106,7 @@ export async function appendEvent(_: IpcMainInvokeEvent, serialized: string): Pr
     if (typeof serialized !== "string" || !serialized.trim()) return;
     if (Buffer.byteLength(serialized, "utf8") > MAX_EVENT_BYTES) return;
 
+    readBatch.invalidate();
     await enqueueStorage(async () => {
         await ensureLogDir();
         await appendFile(LOG_FILE, serialized.endsWith("\n") ? serialized : `${serialized}\n`, "utf8");
@@ -177,10 +186,31 @@ function filterAndSortEvents(text: string, options: NormalizedQueryOptions): Eve
 }
 
 async function readPreparedEvents(options: NormalizedQueryOptions): Promise<{ events: EventLogEvent[]; generation: number; }> {
-    return enqueueStorage(async () => ({
-        events: filterAndSortEvents(await readLogText(LOG_FILE), options),
-        generation: storageGeneration
+    const signature = querySignature(options);
+    const active = readBatch.peek();
+    const existing = active && pendingPrepared.get(active)?.get(signature);
+    if (existing) return existing;
+    // Refuse excess distinct work before creating a new storage read.
+    if (pendingReadIdentities >= MAX_PENDING_READ_IDENTITIES) {
+        throw new Error("Event Log read capacity exceeded; retry the query.");
+    }
+    const snapshot = readBatch.read();
+    let group = pendingPrepared.get(snapshot);
+    if (!group) pendingPrepared.set(snapshot, group = new Map());
+    const ownedGroup = group;
+    pendingReadIdentities++;
+    const work = snapshot.then(({ text, generation }) => ({
+        events: filterAndSortEvents(text, options),
+        generation
     }));
+    ownedGroup.set(signature, work);
+    const release = () => {
+        pendingReadIdentities--;
+        ownedGroup.delete(signature);
+        if (!ownedGroup.size) pendingPrepared.delete(snapshot);
+    };
+    void work.then(release, release);
+    return work;
 }
 
 export async function queryEvents(_: IpcMainInvokeEvent, options: any = {}): Promise<{ events: EventLogEvent[]; total: number; hasMore: boolean; }> {
@@ -242,6 +272,7 @@ export async function queryEventPage(_: IpcMainInvokeEvent, rawOptions: EventLog
 export async function clearEvents(_: IpcMainInvokeEvent, accountId?: string): Promise<void> {
     if (typeof accountId !== "string" || accountId.length === 0) return;
 
+    readBatch.invalidate();
     await enqueueStorage(async () => {
         await ensureLogDir();
         const text = await readLogText(LOG_FILE);

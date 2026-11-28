@@ -1,8 +1,8 @@
 import { showToast, ThemeStore, UserStore, useEffect, useRef, useState, useStateFromStores } from "@webpack/common";
 
 import { queryEventLog, subscribeEventLog } from "../eventLog/runtime";
-import { createLatestTask } from "../plugin/latestTask";
-import { captureAccountSession, isCurrentAccountSession } from "../plugin/accountSession";
+import { createSharedRefresh } from "./sharedRefresh";
+import { captureAccountSession, isCurrentAccountSession, type AccountSession } from "../plugin/accountSession";
 import type { EventLogEvent } from "../eventLog/types";
 import { useQuestSnapshot, type NormalizedQuest, type QuestTaskType } from "../quests/data";
 import { resolveQuestArtwork, type QuestTheme } from "../quests/presentation";
@@ -32,6 +32,18 @@ const CENTER_QUERY_LIMIT = 300;
 const EVENT_SETTLE_DELAY_MS = 160;
 const EVENT_RECHECK_DELAY_MS = 1_050;
 
+const centerRefresh = createSharedRefresh<AccountSession, EventLogEvent[]>(async (session, hasConsumers) => {
+    await ensureNotificationCenterAccountState(session.accountId);
+    if (!hasConsumers()) throw new Error("Notification refresh has no current consumer.");
+    const result = await queryEventLog({
+        accountId: session.accountId,
+        includeLegacy: false,
+        sort: "newest",
+        limit: CENTER_QUERY_LIMIT
+    });
+    return result.events;
+}, isCurrentAccountSession);
+
 export interface NotificationCenterFeed {
     accountId: string | null;
     currentUser: any | null;
@@ -49,10 +61,10 @@ function currentUser(): any | null {
 export function useNotificationCenterFeed(): NotificationCenterFeed {
     const user = useStateFromStores([UserStore], currentUser);
     const session = useStateFromStores([UserStore], captureAccountSession);
-    const [refreshQueue] = useState(createLatestTask);
     const quests = useQuestSnapshot("live");
     const accountId = typeof user?.id === "string" && user.id ? user.id : null;
-    const [events, setEvents] = useState<EventLogEvent[]>([]);
+    const [eventSnapshot, setEventSnapshot] = useState<{ session: AccountSession; events: EventLogEvent[]; } | null>(null);
+    const events = eventSnapshot?.session === session ? eventSnapshot?.events ?? [] : [];
     const [, setStateRevision] = useState(0);
 
     useEffect(() => {
@@ -61,69 +73,36 @@ export function useNotificationCenterFeed(): NotificationCenterFeed {
     }, []);
 
     useEffect(() => {
+        if (!session || session.accountId !== accountId || !isCurrentAccountSession(session)) return;
         let disposed = false;
         let settleTimer: ReturnType<typeof setTimeout> | null = null;
         let recheckTimer: ReturnType<typeof setTimeout> | null = null;
-        let generation = 0;
-
-        const clearTimers = () => {
-            if (settleTimer != null) clearTimeout(settleTimer);
-            if (recheckTimer != null) clearTimeout(recheckTimer);
-            settleTimer = null;
-            recheckTimer = null;
-        };
-
-        const refresh = async (requestGeneration: number) => {
-            if (disposed || requestGeneration !== generation) return;
-            if (!accountId) {
-                if (!disposed) setEvents([]);
-                return;
-            }
-
-            if (session?.accountId !== accountId || !isCurrentAccountSession(session)) return;
-            try {
-                await ensureNotificationCenterAccountState(accountId);
-                if (disposed || requestGeneration !== generation || !isCurrentAccountSession(session)) return;
-                const result = await queryEventLog({
-                    accountId,
-                    includeLegacy: false,
-                    sort: "newest",
-                    limit: CENTER_QUERY_LIMIT
-                });
-                if (!disposed && requestGeneration === generation && isCurrentAccountSession(session)) setEvents(result.events);
-            } catch {
-                if (!disposed && requestGeneration === generation && isCurrentAccountSession(session)) setEvents([]);
-            }
-        };
-
-        const requestRefresh = () => {
+        const request = () => { if (!disposed) centerRefresh.request(session); };
+        const release = centerRefresh.subscribe(session, events => {
+            if (!disposed) setEventSnapshot({ session, events });
+        });
+        const unsubscribe = subscribeEventLog(() => {
             if (disposed) return;
-            const requestGeneration = ++generation;
-            refreshQueue.request(() => refresh(requestGeneration));
-        };
-        const scheduleRefresh = () => {
-            if (disposed) return;
-            clearTimers();
-            settleTimer = setTimeout(() => {
+            // Throttle the first read, debounce the final recheck. A continuous
+            // stream cannot indefinitely postpone the first read.
+            if (settleTimer == null) settleTimer = setTimeout(() => {
                 settleTimer = null;
-                requestRefresh();
+                request();
             }, EVENT_SETTLE_DELAY_MS);
+            if (recheckTimer != null) clearTimeout(recheckTimer);
             recheckTimer = setTimeout(() => {
                 recheckTimer = null;
-                requestRefresh();
+                request();
             }, EVENT_RECHECK_DELAY_MS);
-        };
-
-        requestRefresh();
-        const unsubscribe = subscribeEventLog(scheduleRefresh);
+        });
         return () => {
             disposed = true;
-            generation++;
-            refreshQueue.cancelPending();
-            clearTimers();
+            release();
+            if (settleTimer != null) clearTimeout(settleTimer);
+            if (recheckTimer != null) clearTimeout(recheckTimer);
             unsubscribe();
         };
-    }, [accountId, session, refreshQueue]);
+    }, [accountId, session]);
 
     const accountState = getNotificationCenterAccountState(accountId);
     const items = accountId && accountState
