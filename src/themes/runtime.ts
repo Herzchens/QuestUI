@@ -26,6 +26,12 @@ export const startDashboardThemes = lifecycle.start;
 export const stopDashboardThemes = lifecycle.stop;
 export const selectDashboardTheme = lifecycle.select;
 
+export const registerDashboardTheme = controller.registerTheme;
+
+export function useDashboardThemeOptions() {
+    return React.useSyncExternalStore(controller.subscribe, controller.getCatalogue, controller.getCatalogue);
+}
+
 export function useDashboardThemeId(): string {
     return React.useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
 }

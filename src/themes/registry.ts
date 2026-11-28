@@ -220,8 +220,3 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
     }
 ];
 
-export const DASHBOARD_THEME_OPTIONS = DASHBOARD_THEMES.map(theme => ({
-    label: theme.label,
-    value: theme.id,
-    default: theme.id === DEFAULT_DASHBOARD_THEME_ID
-}));

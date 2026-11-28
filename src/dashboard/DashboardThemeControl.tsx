@@ -1,8 +1,7 @@
 import { Popout, showToast, useRef, useState } from "@webpack/common";
 
 import settings from "../plugin/settings";
-import { DASHBOARD_THEMES, DASHBOARD_THEME_OPTIONS } from "../themes/registry";
-import { selectDashboardTheme, useDashboardThemeId } from "../themes/runtime";
+import { selectDashboardTheme, useDashboardThemeId, useDashboardThemeOptions } from "../themes/runtime";
 import { DashboardChoiceMenu } from "./DashboardChoiceMenu";
 
 // Phosphor Icons Palette Bold (MIT; see THIRD_PARTY_NOTICES.md).
@@ -16,7 +15,8 @@ function PaletteIcon() {
 
 export function DashboardThemeControl() {
     const activeId = useDashboardThemeId();
-    const activeLabel = DASHBOARD_THEMES.find(theme => theme.id === activeId)?.label ?? "Default";
+    const options = useDashboardThemeOptions();
+    const activeLabel = options.find(theme => theme.value === activeId)?.label ?? "Default";
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const [open, setOpen] = useState(false);
 
@@ -43,7 +43,7 @@ export function DashboardThemeControl() {
                 <DashboardChoiceMenu
                     title="Dashboard theme"
                     ariaLabel="Choose Dashboard theme"
-                    options={DASHBOARD_THEME_OPTIONS}
+                    options={options}
                     selectedValue={activeId}
                     onSelect={select}
                 />

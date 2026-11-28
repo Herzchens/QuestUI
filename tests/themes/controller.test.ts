@@ -309,3 +309,55 @@ void (async () => {
     session.stop();
     assert.equal(calls.at(-1), "-b");
 }
+
+{
+    const enabled = new Set<string>();
+    const controller = createDashboardThemeController(themes, "default", {
+        validate(style) { if (style === "invalid") throw new Error("invalid style"); },
+        enable(style) { enabled.add(style); },
+        disable(style) { enabled.delete(style); }
+    });
+    const initial = controller.getCatalogue();
+    assert.equal(initial, controller.getCatalogue());
+    controller.select("default");
+    assert.equal(initial, controller.getCatalogue());
+    const styles = ["custom/a"];
+    const remove = controller.registerTheme({ id: "custom-fixture", label: "Custom", styles });
+    styles[0] = "tampered";
+    assert.notEqual(initial, controller.getCatalogue());
+    assert.equal(controller.getCatalogue().at(-1)?.value, "custom-fixture");
+    assert.throws(() => controller.registerTheme({ id: "default", label: "Duplicate", styles: ["custom/b"] }), /Invalid or duplicate/);
+    assert.throws(() => controller.registerTheme({ id: "custom-other", label: "Duplicate style", styles: ["custom/a"] }), /multiple owners/);
+    const beforeInvalid = controller.getCatalogue();
+    assert.throws(() => controller.registerTheme({ id: "custom-bad", label: "Bad", styles: ["custom/b", "invalid"] }), /invalid style/);
+    assert.equal(controller.getCatalogue(), beforeInvalid);
+    controller.select("custom-fixture");
+    assert.deepEqual([...enabled], ["custom/a"]);
+    remove();
+    assert.equal(controller.getSnapshot(), "default");
+    assert.deepEqual([...enabled], ["default/a", "default/b"]);
+    const removeAgain = controller.registerTheme({ id: "custom-fixture", label: "Replacement", styles: ["custom/a"] });
+    remove();
+    assert.equal(controller.getCatalogue().at(-1)?.label, "Replacement");
+    removeAgain();
+    assert.deepEqual(controller.getCatalogue(), initial);
+    controller.stop();
+}
+{
+    let fail = false;
+    const controller = createDashboardThemeController(themes, "default", {
+        validate() {}, enable() {},
+        disable(style) { if (fail && style === "custom/a") throw new Error("cleanup"); }
+    });
+    const remove = controller.registerTheme({ id: "custom-fixture", label: "Custom", styles: ["custom/a"] });
+    controller.select("custom-fixture");
+    fail = true;
+    assert.throws(remove, /transition and recovery failed/);
+    assert.equal(controller.getCatalogue().at(-1)?.value, "custom-fixture");
+    assert.throws(() => controller.registerTheme({ id: "custom-other", label: "Other", styles: ["custom/a"] }), /multiple owners/);
+    fail = false;
+    controller.select("default");
+    remove();
+    assert.equal(controller.getCatalogue().length, themes.length);
+    controller.stop();
+}

@@ -6,6 +6,9 @@ export interface DashboardTheme {
     services?: readonly { start(): void; stop(): void; }[];
 }
 
+export type DashboardThemeOption = Readonly<{ value: string; label: string; }>;
+export type CustomDashboardTheme = Pick<DashboardTheme, "id" | "label" | "styles">;
+
 export interface ThemeStyleAdapter {
     validate: (style: string) => void;
     enable: (style: string) => void;
@@ -19,20 +22,43 @@ export function createDashboardThemeController(
 ) {
     const byId = new Map<string, DashboardTheme>();
     const ownedStyles = new Set<string>();
-    for (const theme of themes) {
-        if (!/^[a-z][a-z0-9-]*$/.test(theme.id) || byId.has(theme.id) || !theme.styles.length) {
-            throw new Error("Invalid or duplicate Dashboard theme: " + theme.id);
+    function addTheme(input: CustomDashboardTheme, custom = false): DashboardTheme {
+        const { id, label } = input;
+        const styles = [...input.styles];
+        if (typeof id !== "string" || !/^[a-z][a-z0-9-]*$/.test(id) || id.length > 64
+            || byId.has(id) || (custom && !id.startsWith("custom-"))
+            || typeof label !== "string" || !label.trim() || label.length > 80
+            || !styles.length || styles.length > 64) {
+            throw new Error("Invalid or duplicate Dashboard theme: " + id);
         }
-        byId.set(theme.id, theme);
-        for (const style of theme.styles) {
-            if (ownedStyles.has(style)) throw new Error("Dashboard stylesheet has multiple owners: " + style);
-            ownedStyles.add(style);
+        const seen = new Set<string>();
+        for (const style of styles) {
+            if (typeof style !== "string" || !style.trim()) throw new Error("Invalid Dashboard stylesheet.");
+            if (ownedStyles.has(style) || seen.has(style)) throw new Error("Dashboard stylesheet has multiple owners: " + style);
+            seen.add(style);
+            if (custom) adapter.validate(style);
         }
+        const theme = Object.freeze({ id, label: label.trim(), styles: Object.freeze(styles) });
+        byId.set(id, theme);
+        for (const style of styles) ownedStyles.add(style);
+        return theme;
     }
+    for (const theme of themes) addTheme(theme);
     const fallback = byId.get(defaultId);
     if (!fallback) throw new Error("Default Dashboard theme is missing.");
 
     let active: DashboardTheme | null = null;
+    const buildCatalogue = (): readonly DashboardThemeOption[] => Object.freeze(
+        [...byId.values()].map(theme => Object.freeze({ value: theme.id, label: theme.label }))
+    );
+    let catalogue = buildCatalogue();
+    let mutating = false;
+    function mutate<T>(operation: () => T): T {
+        if (mutating) throw new Error("Dashboard theme mutation already in progress.");
+        mutating = true;
+        try { return operation(); }
+        finally { mutating = false; }
+    }
     const possiblyEnabled = new Set<string>();
     const listeners = new Set<() => void>();
     const notify = () => {
@@ -66,7 +92,7 @@ export function createDashboardThemeController(
         }
     };
 
-    function select(id: unknown): string {
+    function selectInternal(id: unknown): string {
         const target = resolve(id);
         if (active === target) return target.id;
         for (const style of target.styles) adapter.validate(style);
@@ -99,12 +125,41 @@ export function createDashboardThemeController(
         return target.id;
     }
 
-    function stop(): void {
+    function stopInternal(): void {
         if (!active && possiblyEnabled.size === 0) return;
         active = null;
         try { disableOwned(); }
         finally { notify(); }
     }
 
-    return { select, stop, subscribe, getSnapshot };
+    function registerTheme(input: CustomDashboardTheme): () => void {
+        return mutate(() => {
+            if (byId.size - themes.length >= 64) throw new Error("Too many custom Dashboard themes.");
+            const theme = addTheme(input, true);
+            catalogue = buildCatalogue();
+            notify();
+            return () => mutate(() => {
+                // An old disposer must never remove a later registration with the same ID.
+                if (byId.get(theme.id) !== theme) return;
+                if (active === theme) selectInternal(defaultId);
+                // Failed cleanup keeps ownership reserved; allow the caller to retry.
+                if (theme.styles.some(style => possiblyEnabled.has(style))) {
+                    throw new Error("Custom Dashboard theme still owns enabled styles.");
+                }
+                byId.delete(theme.id);
+                for (const style of theme.styles) ownedStyles.delete(style);
+                catalogue = buildCatalogue();
+                notify();
+            });
+        });
+    }
+
+    return {
+        select: (id: unknown) => mutate(() => selectInternal(id)),
+        stop: () => mutate(stopInternal),
+        subscribe,
+        getSnapshot,
+        getCatalogue: () => catalogue,
+        registerTheme
+    };
 }

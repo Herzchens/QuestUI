@@ -9,7 +9,7 @@ import {
     REWARD_FILTER_OPTIONS
 } from "../quests/rewardFilters";
 import { DASHBOARD_SORT_OPTIONS } from "../dashboard/sort";
-import { DASHBOARD_THEME_OPTIONS } from "../themes/registry";
+import { DEFAULT_DASHBOARD_THEME_ID } from "../themes/registry";
 import {
     DEFAULT_QUEST_AUTO_RELOAD_STEP,
     QUEST_AUTO_RELOAD_STEP_MARKERS,
@@ -143,10 +143,10 @@ export default definePluginSettings({
     // Dashboard filter values live in settings so they persist, but they are configured
     // from the Dashboard's dedicated filter popout instead of flooding this settings page.
     dashboardTheme: {
-        type: OptionType.SELECT,
+        type: OptionType.STRING,
         displayName: "Dashboard • Theme",
         description: "Choose the Dashboard theme from its palette menu.",
-        options: DASHBOARD_THEME_OPTIONS
+        default: DEFAULT_DASHBOARD_THEME_ID
     },
     dashboardGraphicsPreference: {
         type: OptionType.STRING,
