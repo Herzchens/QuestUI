@@ -23,3 +23,32 @@ account="A";available=false;
 assert.equal(readBetterDiscordQuests(host).kind,"unavailable");
 assert.equal(readBetterDiscordQuests({Webpack:{getStore(){throw Error("host missing");}}}).kind,"unavailable");
 console.log("BetterDiscord read-only preview adapter PASS");
+
+import { createPreviewSession } from "../../src/platform/betterdiscord/session";
+{
+    account="A";available=true;switchDuringRead=false;
+    const callbacks = new Set<() => void>();
+    const accountListeners = new Set<() => void>();
+    const monitoredHost = {Webpack:{getStore(name:string){
+        if(name==="UserStore") return {getCurrentUser:()=>account?{id:account}:null,addChangeListener:(fn:()=>void)=>accountListeners.add(fn),removeChangeListener:(fn:()=>void)=>accountListeners.delete(fn)};
+        return host.Webpack.getStore(name);
+    }}};
+    const session=createPreviewSession(()=>monitoredHost,{start(fn){callbacks.add(fn);return fn;},stop(handle){callbacks.delete(handle as ()=>void);}});
+    session.start();assert.equal(callbacks.size,0);
+    const unsub=session.subscribe(()=>{});
+    assert.equal(callbacks.size,1);assert.equal(accountListeners.size,1);assert.equal(session.getSnapshot().kind,"ready");
+    account="B";for(const fn of accountListeners)fn();
+    assert.equal(session.getSnapshot().kind,"unavailable");
+    for(const fn of callbacks)fn();
+    assert.equal(session.getSnapshot().kind,"unavailable","poll cannot re-expose stale catalogue after account switch");
+    session.refresh();assert.equal(session.getSnapshot().kind,"ready");
+    const stale=[...callbacks][0];
+    unsub();assert.equal(callbacks.size,0);assert.equal(accountListeners.size,0);
+    stale();assert.equal(session.getSnapshot().kind,"unavailable");
+    const again=session.subscribe(()=>{});
+    assert.equal(callbacks.size,1);
+    session.stop();assert.equal(callbacks.size,0);assert.equal(accountListeners.size,0);
+    stale();assert.equal(session.getSnapshot().kind,"unavailable");
+    session.start();assert.equal(callbacks.size,1);again();session.stop();
+    assert.equal(callbacks.size,0);
+}

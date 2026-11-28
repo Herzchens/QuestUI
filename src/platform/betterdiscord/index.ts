@@ -1,4 +1,5 @@
-import { readBetterDiscordQuests, type BetterDiscordReadHost, type PreviewSnapshot } from "./readHost";
+import { type BetterDiscordReadHost } from "./readHost";
+import { createPreviewSession } from "./session";
 import { filterQuests, dashboardScopeFromSettings, formatExpiry, formatQuestProgress } from "../../quests/model";
 import { DASHBOARD_SORT_OPTIONS, normalizeDashboardSortMode, sortDashboardQuests } from "../../dashboard/sort";
 
@@ -11,60 +12,13 @@ function host(): BetterDiscordAPI {
     }
     return api;
 }
-const OFF: PreviewSnapshot = { kind: "unavailable", reason: "Enable QuestUI Preview to view Quests.", quests: [] };
-
 export default class QuestUIPreview {
-    private running = false;
-    private listeners = new Set<() => void>();
-    private snapshot: PreviewSnapshot = OFF;
-    private timer: ReturnType<typeof setInterval> | undefined;
-
-    private refresh = () => {
-        if (!this.running || !this.listeners.size) return;
-        this.snapshot = readBetterDiscordQuests(host());
-        this.publish();
-    };
-    private publish() {
-        for (const listener of [...this.listeners]) {
-            try { listener(); } catch { /* A view cannot prevent cleanup. */ }
-        }
-    }
-    private getSnapshot = () => this.snapshot;
-    private clearTimer() {
-        if (this.timer !== undefined) clearInterval(this.timer);
-        this.timer = undefined;
-    }
-    private activate() {
-        if (!this.running || !this.listeners.size || this.timer !== undefined) return;
-        this.timer = setInterval(this.refresh, 2000);
-        this.refresh();
-    }
-    private subscribe = (listener: () => void) => {
-        this.listeners.add(listener);
-        this.activate();
-        return () => {
-            this.listeners.delete(listener);
-            if (!this.listeners.size) {
-                this.clearTimer();
-                this.snapshot = OFF;
-            }
-        };
-    };
-    start() {
-        if (this.running) return;
-        host();
-        this.running = true;
-        this.activate();
-    }
-    stop() {
-        this.running = false;
-        this.clearTimer();
-        this.snapshot = OFF;
-        this.publish();
-    }
+    private session = createPreviewSession(host);
+    start() { host(); this.session.start(); }
+    stop() { this.session.stop(); }
     private Panel = () => {
         const React = host().React;
-        const snapshot = React.useSyncExternalStore(this.subscribe, this.getSnapshot, this.getSnapshot);
+        const snapshot = React.useSyncExternalStore(this.session.subscribe, this.session.getSnapshot, this.session.getSnapshot);
         const [history, setHistory] = React.useState(false);
         const [sort, setSort] = React.useState("expiring");
         const [query, setQuery] = React.useState("");
@@ -82,7 +36,7 @@ export default class QuestUIPreview {
                 e("select", { "aria-label": "Sort Quests", value: sort, style: control, onChange: (event: import("react").ChangeEvent<HTMLSelectElement>) => setSort(event.currentTarget.value) },
                     ...DASHBOARD_SORT_OPTIONS.map(option => e("option", { key: option.value, value: option.value }, option.label))),
                 e("label", null, e("input", { type: "checkbox", checked: history, onChange: (event: import("react").ChangeEvent<HTMLInputElement>) => setHistory(event.currentTarget.checked) }), " Show history"),
-                e("button", { type: "button", style: control, onClick: this.refresh, disabled: !this.running }, "Refresh")
+                e("button", { type: "button", style: control, onClick: this.session.refresh, disabled: !this.session.isRunning() }, "Refresh")
             ),
             snapshot.kind !== "ready"
                 ? e("p", { role: "status" }, snapshot.reason)

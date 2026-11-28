@@ -655,7 +655,7 @@ jobs:
           fs.writeFileSync(path, source.replace(needle, replacement));
           NODE
 
-      - name: Discover native Quest Home candidates (diagnostics only)
+      - name: Discover native Quest Home render anchors (diagnostics only)
         working-directory: vencord
         shell: bash
         run: |
@@ -669,14 +669,12 @@ jobs:
             "const questHomeProbeSeen = new Set<string>();",
             needle,
             "    const code = String(factory);",
-            "    const route = /[\\\"']\\/quest-home(?:[\\\"'/?]|$)/i.test(code);",
-            "    const markers = [...new Set(code.match(/(?:QUEST_HOME|QUESTS_HOME|QUEST_DISCOVERY)[A-Z0-9_]{0,80}/g) ?? [])].slice(0, 16);",
             "    const identity = String(moduleId);",
-            "    if ((route || markers.length) && questHomeProbeSeen.size < 80 && !questHomeProbeSeen.has(identity)) {",
+            "    if (code.includes(\"QUEST_HOME_FEATURED_SECTION\") && code.includes(\"QUEST_HOME_HERO_STICKY_HEADER\") && questHomeProbeSeen.size < 4 && !questHomeProbeSeen.has(identity)) {",
             "        questHomeProbeSeen.add(identity);",
-            "        const anchors = [\"/quest-home\", ...markers].filter(marker => code.includes(marker)).slice(0, 4);",
-            "        const snippets = anchors.map(marker => { const i = code.indexOf(marker); return code.slice(Math.max(0, i - 180), i + marker.length + 220); });",
-            "        console.log(\"[PUP_DEBUG]\", \"QUESTUI_HOME_CANDIDATE\", JSON.stringify({ moduleId: identity, route, markers, snippets }));",
+            "        const anchors = [\"QUEST_HOME_FEATURED_SECTION\", \"QUEST_HOME_IN_PROGRESS_SECTION\", \"QUEST_HOME_DISCOVERED_SECTION\", \"QUEST_HOME_TILE_V2_FOOTER\", \"QUEST_HOME_MOBILE_DEEP_LINK_MISSING_QUEST\"];",
+            "        const snippets = anchors.filter(marker => code.includes(marker)).map(marker => { const i = code.lastIndexOf(marker); return code.slice(Math.max(0, i - 650), i + marker.length + 950); });",
+            "        console.log(\"[PUP_DEBUG]\", \"QUESTUI_HOME_CANDIDATE\", JSON.stringify({ moduleId: identity, snippets, tail: code.slice(-2400) }));",
             "    }"
           ].join("\n");
           fs.writeFileSync(path, source.replace(needle, probe));
