@@ -1,3 +1,5 @@
+import { createThemeRendering } from "../../src/themes/rendering";
+import { graphicsQualityPolicy } from "../../src/graphics/policy";
 import { createArtworkColorPool } from "../../src/themes/artworkColorPool";
 import { ORIGAMI_ANIMALS, origamiScene, normalizeOrigamiProgress } from "../../src/themes/origami/scene";
 import { dominantThumbnailColor, dominantThumbnailColorAsync } from "../../src/themes/origami/thumbnailColor";
@@ -360,4 +362,47 @@ void (async () => {
     remove();
     assert.equal(controller.getCatalogue().length, themes.length);
     controller.stop();
+}
+
+{
+    const failures: unknown[] = [];
+    const calls: string[] = [];
+    const renderer = createThemeRendering(error => failures.push(error));
+    const root = {} as HTMLElement;
+    const context = { root, surface: "dashboard" as const, graphics: graphicsQualityPolicy("3"), reducedMotion: false };
+    renderer.attach(() => calls.push("disabled"), context);
+    renderer.start();
+    const stale = renderer.attach(({ defer, signal }) => {
+        defer(() => calls.push("a:" + signal.aborted));
+        defer(() => calls.push("b"));
+    }, context);
+    const next = renderer.attach(({ defer }) => defer(() => calls.push("c")), context);
+    stale();
+    assert.deepEqual(calls, ["b", "a:true"]);
+    next();
+    next();
+    assert.deepEqual(calls, ["b", "a:true", "c"]);
+    renderer.attach(({ defer }) => { defer(() => calls.push("rollback")); throw new Error("mount"); }, context);
+    assert.equal(calls.at(-1), "rollback");
+    assert.equal(failures.length, 1);
+    renderer.attach(({ defer, signal }) => {
+        renderer.stop();
+        assert.equal(signal.aborted, true);
+        defer(() => calls.push("late"));
+    }, context);
+    assert.equal(calls.at(-1), "late");
+    renderer.start();
+    let fail = true;
+    renderer.attach(({ defer }) => {
+        defer(() => calls.push("other"));
+        defer(() => { if (fail) throw new Error("dispose"); calls.push("retry"); });
+    }, context);
+    renderer.clear();
+    assert.equal(calls.at(-1), "other");
+    renderer.attach(() => calls.push("unsafe"), context);
+    assert.ok(!calls.includes("unsafe"));
+    fail = false;
+    renderer.clear();
+    assert.equal(calls.at(-1), "retry");
+    renderer.stop();
 }

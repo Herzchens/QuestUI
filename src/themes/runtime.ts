@@ -3,7 +3,8 @@ import { React } from "@webpack/common";
 
 import { createThemePluginLifecycle } from "./lifecycle";
 import { createDashboardThemeController } from "./controller";
-import { useGraphicsRootClasses } from "../graphics/runtime";
+import { useEffectiveReducedMotion, useGraphicsQualityPolicy, useGraphicsRootClasses } from "../graphics/runtime";
+import { createThemeRendering, type ThemeSurface } from "./rendering";
 import { DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID } from "./registry";
 
 const controller = createDashboardThemeController(DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID, {
@@ -22,9 +23,38 @@ const lifecycle = createThemePluginLifecycle(controller, DASHBOARD_THEMES, DEFAU
     console.warn("[QuestUI] Could not load preferred Dashboard theme; using Default.", error);
 });
 
-export const startDashboardThemes = lifecycle.start;
-export const stopDashboardThemes = lifecycle.stop;
-export const selectDashboardTheme = lifecycle.select;
+const rendering = createThemeRendering(error => console.warn("[QuestUI] Theme renderer failed.", error));
+
+export function startDashboardThemes(preference: unknown): void {
+    lifecycle.start(preference);
+    rendering.start();
+}
+
+export function stopDashboardThemes(): void {
+    rendering.stop();
+    lifecycle.stop();
+}
+
+export function selectDashboardTheme(preference: unknown): string {
+    const previous = controller.getSnapshot();
+    const selected = lifecycle.select(preference);
+    if (selected !== previous) rendering.clear();
+    return selected;
+}
+
+export function useThemeRenderingSurface(surface: ThemeSurface) {
+    const root = React.useRef<HTMLDivElement>(null);
+    const id = useDashboardThemeId();
+    const graphics = useGraphicsQualityPolicy();
+    const reducedMotion = useEffectiveReducedMotion();
+    React.useEffect(() => {
+        const element = root.current;
+        const render = DASHBOARD_THEMES.find(theme => theme.id === id)?.render;
+        if (!element || !render || controller.getSnapshot() !== id) return;
+        return rendering.attach(render, { root: element, surface, graphics, reducedMotion });
+    }, [id, surface, graphics, reducedMotion]);
+    return root;
+}
 
 export const registerDashboardTheme = controller.registerTheme;
 

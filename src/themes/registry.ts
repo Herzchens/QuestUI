@@ -89,7 +89,7 @@ import type { DashboardTheme } from "./controller";
 import { startObsidianArtwork, stopObsidianArtwork } from "./obsidian/useArtworkColor";
 import { startOrigamiArtwork, stopOrigamiArtwork } from "./origami/useArtworkColor";
 import { startTerminalArtwork, stopTerminalArtwork } from "./terminal/useArtwork";
-import { startTerminalPanoramas, stopTerminalPanoramas } from "./terminal/TerminalPanorama";
+import { setTerminalPanoramaCacheActive, startTerminalPanoramas, stopTerminalPanoramas } from "./terminal/TerminalPanorama";
 
 export const DEFAULT_DASHBOARD_THEME_ID = "default";
 
@@ -172,6 +172,11 @@ export const DASHBOARD_THEMES: readonly DashboardTheme[] = [
     {
         id: "terminal",
         label: "Terminal",
+        render({ root, surface, graphics, defer }) {
+            if (surface !== "dashboard" || !graphics.terminalPanorama) return;
+            defer(() => setTerminalPanoramaCacheActive(root, false));
+            setTerminalPanoramaCacheActive(root, true);
+        },
         services: [
             { start: startTerminalArtwork, stop: stopTerminalArtwork },
             { start: startTerminalPanoramas, stop: stopTerminalPanoramas }

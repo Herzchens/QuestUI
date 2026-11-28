@@ -16,7 +16,7 @@ import { QuestOrbBalance } from "../orbs/QuestOrbBalance";
 import { DashboardNoticeLane } from "./DashboardNoticeLane";
 import { QuestReloadControl } from "../quests/reload/QuestReloadControl";
 import settings from "../plugin/settings";
-import { useDashboardThemeClassName } from "../themes/runtime";
+import { useDashboardThemeClassName, useThemeRenderingSurface } from "../themes/runtime";
 import { UpdateCenterIndicator } from "../updates/UpdateCenter";
 
 const NativeQuestIcon = findByCodeLazy("\"M7.5 21.7a8.95");
@@ -136,6 +136,7 @@ function QuestDashboardDisplayTitle() {
 }
 
 export function QuestDashboardShell({ closePopout }: { closePopout?: () => void; }) {
+    const root = useThemeRenderingSurface("dashboard");
     const catalogueState = useDashboardCatalogue();
     const [showHiddenOnly, setShowHiddenOnly] = useState(false);
     const { orionIntegration } = settings.use(["orionIntegration"]);
@@ -143,7 +144,7 @@ export function QuestDashboardShell({ closePopout }: { closePopout?: () => void;
     const showOrionControls = orionIntegration === true && isOrionCommandReady();
 
     return (
-        <div className={useDashboardThemeClassName("quest-ui-dashboard-shell", showOrionControls && "has-orion-control")}>
+        <div ref={root} className={useDashboardThemeClassName("quest-ui-dashboard-shell", showOrionControls && "has-orion-control")}>
             <div className="quest-ui-dashboard-topbar">
                 <QuestDashboardDisplayTitle />
                 <div className="quest-ui-dashboard-header-tools">

@@ -1,9 +1,12 @@
+import type { ThemeRenderer } from "./rendering";
+
 export interface DashboardTheme {
     id: string;
     label: string;
     styles: readonly string[];
     /** Trusted built-in services, owned for the plugin session, not each selection. */
     services?: readonly { start(): void; stop(): void; }[];
+    render?: ThemeRenderer;
 }
 
 export type DashboardThemeOption = Readonly<{ value: string; label: string; }>;

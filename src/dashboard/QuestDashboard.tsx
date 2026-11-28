@@ -19,7 +19,6 @@ import { ornamentVariantSequence } from "../themes/sakura/ornament";
 import { origamiSceneSequence } from "../themes/origami/scene";
 import { preloadObsidianArtworkColors } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
-import { setTerminalPanoramaCacheActive } from "../themes/terminal/TerminalPanorama";
 import { useGraphicsQualityPolicy } from "../graphics/runtime";
 import { artworkPrewarmUrls } from "../graphics/policy";
 import { DashboardProductUpdateNotice } from "../updates/UpdateCenter";
@@ -150,11 +149,6 @@ export function QuestDashboard({ closePopout, catalogueState, showHiddenOnly, se
     const graphics = useGraphicsQualityPolicy();
     const prewarmLimit = graphics.prewarmLimit;
     const artworkOwner = useRef({}).current;
-    useEffect(() => {
-        if (dashboardThemeId !== "terminal" || !graphics.terminalPanorama) return;
-        setTerminalPanoramaCacheActive(artworkOwner, true);
-        return () => setTerminalPanoramaCacheActive(artworkOwner, false);
-    }, [dashboardThemeId, graphics.terminalPanorama, artworkOwner]);
     useEffect(() => () => {
         if (obsidian) preloadObsidianArtworkColors(artworkOwner, []);
         if (origami) preloadOrigamiArtworkColors(artworkOwner, []);
