@@ -1,6 +1,10 @@
 import { disableStyle, enableStyle, requireStyle } from "@api/Styles";
 import { React } from "@webpack/common";
 
+import { startObsidianArtwork, stopObsidianArtwork } from "./obsidian/useArtworkColor";
+import { startOrigamiArtwork, stopOrigamiArtwork } from "./origami/useArtworkColor";
+import { startTerminalArtwork, stopTerminalArtwork } from "./terminal/useArtwork";
+import { startTerminalPanoramas, stopTerminalPanoramas } from "./terminal/TerminalPanorama";
 import { createDashboardThemeController } from "./controller";
 import { useGraphicsRootClasses } from "../graphics/runtime";
 import { DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID } from "./registry";
@@ -27,11 +31,19 @@ export function startDashboardThemes(preference: unknown): void {
         controller.select(DEFAULT_DASHBOARD_THEME_ID);
         console.warn("[QuestUI] Could not load preferred Dashboard theme; using Default.", error);
     }
+    startObsidianArtwork();
+    startOrigamiArtwork();
+    startTerminalArtwork();
+    startTerminalPanoramas();
     started = true;
 }
 
 export function stopDashboardThemes(): void {
     started = false;
+    stopObsidianArtwork();
+    stopOrigamiArtwork();
+    stopTerminalArtwork();
+    stopTerminalPanoramas();
     // A partially started or failed stop may still own managed styles.
     controller.stop();
 }

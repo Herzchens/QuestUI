@@ -15,7 +15,7 @@ import type { NormalizedQuest, QuestTaskType } from "../quests/data";
 import { useObsidianArtworkColor } from "../themes/obsidian/useArtworkColor";
 import { useDashboardThemeId } from "../themes/runtime";
 import type { GraphicsQualityPolicy } from "../graphics/policy";
-import { terminalArtworkGrid, useTerminalArtwork } from "../themes/terminal/useArtwork";
+import { terminalArtworkGrid, useTerminalArtwork, type TerminalArtwork } from "../themes/terminal/useArtwork";
 import { TerminalPanorama } from "../themes/terminal/TerminalPanorama";
 import { origamiScene, type OrigamiAnimal } from "../themes/origami/scene";
 import { useOrigamiArtworkColor } from "../themes/origami/useArtworkColor";
@@ -199,10 +199,11 @@ function TaskTypeGlyph({ type }: { type: QuestTaskType; }) {
     );
 }
 
-function QuestArtwork({ imageUrl, type, eager = false, pixelUrl = null }: { imageUrl: string | null; type: QuestTaskType; eager?: boolean; pixelUrl?: string | null; }) {
+function QuestArtwork({ imageUrl, type, eager = false, pixel = null }: { imageUrl: string | null; type: QuestTaskType; eager?: boolean; pixel?: TerminalArtwork | null; }) {
+    const pixelUrl = pixel?.png;
     const displayUrl = pixelUrl ?? imageUrl;
     return (
-        <div className="quest-ui-artwork" aria-hidden="true" style={terminalArtworkGrid(pixelUrl, "dashboard")}>
+        <div className="quest-ui-artwork" aria-hidden="true" style={terminalArtworkGrid(pixel, "dashboard")}>
             <div className="quest-ui-artwork-fallback"><TaskTypeGlyph type={type} /></div>
             {displayUrl && (
                 <img
@@ -350,7 +351,7 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
     const dashboardThemeId = useDashboardThemeId();
     const terminal = dashboardThemeId === "terminal";
     const origami = dashboardThemeId === "origami";
-    const terminalPixelUrl = useTerminalArtwork(terminal, artworkUrl, "dashboard");
+    const terminalPixel = useTerminalArtwork(terminal, artworkUrl, "dashboard");
     const obsidian = dashboardThemeId === "obsidian";
     const artworkColor = useObsidianArtworkColor(obsidian && graphics.artworkColor, artworkUrl);
     const origamiColor = useOrigamiArtworkColor(origami && graphics.artworkColor, artworkUrl);
@@ -408,12 +409,12 @@ export function QuestCard({ quest, orionSnapshot, ignored, receivesOrbBoost, cla
             {graphics.sakuraOrnaments && dashboardThemeId === "sakura" && sakuraOrnamentVariant != null && (
                 <span className="quest-ui-sakura-card-art" aria-hidden="true" />
             )}
-            {terminal && graphics.terminalPanorama && <TerminalPanorama source={terminalPixelUrl} />}
+            {terminal && graphics.terminalPanorama && <TerminalPanorama source={terminalPixel?.png ?? null} />}
             {origami && <>
                 <span className="quest-ui-origami-card-paper" aria-hidden="true" />
                 <span className="quest-ui-origami-card-animal" aria-hidden="true" />
             </>}
-            <QuestArtwork imageUrl={artworkUrl} type={taskType} eager={obsidian} pixelUrl={terminalPixelUrl} />
+            <QuestArtwork imageUrl={artworkUrl} type={taskType} eager={obsidian} pixel={terminalPixel} />
 
             <div className="quest-ui-card-main">
                 <div className="quest-ui-card-title-cluster">

@@ -105,7 +105,7 @@ assert.throws(() => rasterTerminalPanorama(new Uint8ClampedArray(4)), RangeError
 async function testQueue() {
     const pending = new Map<string, { finish: (value: string | null) => void; signal: AbortSignal; }>();
     let clock = 0, calls = 0;
-    const queue = createArtworkQueue((url, signal) => {
+    const queue = createArtworkQueue<string>((url, signal) => {
         calls++;
         return new Promise(resolve => {
             pending.set(url, { finish: resolve, signal });

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "@webpack/common";
 
-import { createArtworkQueue } from "./artworkQueue";
+import { ARTWORK_CACHE_BYTES, createArtworkQueue } from "./artworkQueue";
 import { rasterTerminalPanorama, TERMINAL_PANORAMA } from "./panoramaRaster";
 import { TERMINAL_ARTWORK_SIZES } from "./pixelArtwork";
 
@@ -55,7 +55,21 @@ function loadPanorama(source: string, signal: AbortSignal): Promise<string | nul
 }
 
 // Only local, previously processed PNGs enter this bounded queue.
-const panoramas = createArtworkQueue(loadPanorama, 2, 64);
+const panoramas = createArtworkQueue(loadPanorama, 2, 64, Date.now, ARTWORK_CACHE_BYTES.panorama);
+const panoramaOwners = new Set<object>();
+export function startTerminalPanoramas(): void {
+    panoramas.setCacheBudget(ARTWORK_CACHE_BYTES.inactivePanorama);
+    panoramas.start();
+}
+export function stopTerminalPanoramas(): void {
+    panoramaOwners.clear();
+    panoramas.stop();
+}
+export function setTerminalPanoramaCacheActive(owner: object, active: boolean): void {
+    if (active) panoramaOwners.add(owner);
+    else panoramaOwners.delete(owner);
+    panoramas.setCacheBudget(panoramaOwners.size ? ARTWORK_CACHE_BYTES.panorama : ARTWORK_CACHE_BYTES.inactivePanorama);
+}
 
 export function TerminalPanorama({ source }: { source: string | null; }) {
     const element = useRef<HTMLSpanElement>(null);
@@ -66,14 +80,16 @@ export function TerminalPanorama({ source }: { source: string | null; }) {
         if (!node || typeof IntersectionObserver === "undefined") return;
         const root = node.closest(".quest-ui-dashboard-content");
         if (!root) return;
+        let alive = true;
         const observer = new IntersectionObserver(entries => {
+            if (!alive) return;
             setNear(entries.some(entry => entry.isIntersecting && entry.boundingClientRect.width > 0));
         }, { root, rootMargin: "120px 0px" });
         observer.observe(node);
-        return () => observer.disconnect();
+        return () => { alive = false; observer.disconnect(); };
     }, []);
     useEffect(() => {
-        if (!source || !near) return;
+        if (!source || !near) { setSample(null); return; }
         let alive = true;
         const request = panoramas.acquire(source);
         void request.promise.then(value => {

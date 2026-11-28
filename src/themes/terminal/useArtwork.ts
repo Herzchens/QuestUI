@@ -1,28 +1,24 @@
 import { useEffect, useState } from "@webpack/common";
 
 import { safeQuestArtworkUrl } from "../../quests/presentationLogic";
-import { createArtworkQueue } from "./artworkQueue";
+import { ARTWORK_CACHE_BYTES, artworkStringBytes, createArtworkQueue } from "./artworkQueue";
 import type { CSSProperties } from "react";
 
 import { parseTerminalArtworkKey, pixelateTerminalArtwork, terminalArtworkAccent, terminalArtworkKey, TERMINAL_ARTWORK_SIZES, type TerminalArtworkContext } from "./pixelArtwork";
 
 const TIMEOUT_MS = 5000;
-// Bounded sidecar keyed by the actual processed PNG, shared across active views.
-const artworkFrames = new Map<string, string>();
-const FRAME_CAPACITY = 256;
-
-function rememberFrame(png: string, color: string | null) {
-    if (!color) return;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" shape-rendering="crispEdges"><path fill="${color}" fill-rule="evenodd" d="M4 0H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5 1H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z"/></svg>`;
-    artworkFrames.delete(png);
-    artworkFrames.set(png, color === "neutral" ? "var(--terminal-frame-silver)" : `url("data:image/svg+xml,${encodeURIComponent(svg)}")`);
-    if (artworkFrames.size > FRAME_CAPACITY) {
-        const oldest = artworkFrames.keys().next();
-        if (!oldest.done) artworkFrames.delete(oldest.value);
-    }
+export interface TerminalArtwork {
+    readonly png: string;
+    readonly frame: string | undefined;
 }
 
-function loadPixelArtwork(key: string, signal: AbortSignal): Promise<string | null> {
+function artworkFrame(color: string | null): string | undefined {
+    if (!color) return undefined;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" shape-rendering="crispEdges"><path fill="${color}" fill-rule="evenodd" d="M4 0H12V2H14V4H16V12H14V14H12V16H4V14H2V12H0V4H2V2H4ZM5 1H11V3H13V5H15V11H13V13H11V15H5V13H3V11H1V5H3V3H5Z"/></svg>`;
+    return color === "neutral" ? "var(--terminal-frame-silver)" : `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+function loadPixelArtwork(key: string, signal: AbortSignal): Promise<TerminalArtwork | null> {
     const parsed = parseTerminalArtworkKey(key);
     const url = parsed && safeQuestArtworkUrl(parsed.url);
     if (!parsed || !url) return Promise.resolve(null);
@@ -31,7 +27,7 @@ function loadPixelArtwork(key: string, signal: AbortSignal): Promise<string | nu
         if (signal.aborted) return resolve(null);
         const image = new Image();
         let finished = false;
-        const finish = (value: string | null) => {
+        const finish = (value: TerminalArtwork | null) => {
             if (finished) return;
             finished = true;
             clearTimeout(timeout);
@@ -60,8 +56,7 @@ function loadPixelArtwork(key: string, signal: AbortSignal): Promise<string | nu
                 ctx.putImageData(frame, 0, 0);
                 const result = canvas.toDataURL("image/png");
                 if (!result.startsWith("data:image/png;base64,")) return finish(null);
-                rememberFrame(result, terminalArtworkAccent(frame.data));
-                finish(result);
+                finish({ png: result, frame: artworkFrame(terminalArtworkAccent(frame.data)) });
             } catch {
                 finish(null);
             }
@@ -75,15 +70,18 @@ function loadPixelArtwork(key: string, signal: AbortSignal): Promise<string | nu
     });
 }
 
-const artwork = createArtworkQueue(loadPixelArtwork);
+const artwork = createArtworkQueue(loadPixelArtwork, 4, 128, Date.now, ARTWORK_CACHE_BYTES.pixel,
+    value => artworkStringBytes(value.png) + artworkStringBytes(value.frame ?? ""));
+export const startTerminalArtwork = artwork.start;
+export const stopTerminalArtwork = artwork.stop;
 
 /** Only active Terminal views subscribe. A stale result never crosses URLs, sizes or themes. */
-export function useTerminalArtwork(active: boolean, source: string | null, context: TerminalArtworkContext): string | null {
+export function useTerminalArtwork(active: boolean, source: string | null, context: TerminalArtworkContext): TerminalArtwork | null {
     const url = active ? safeQuestArtworkUrl(source) : null;
     const key = url ? terminalArtworkKey(url, TERMINAL_ARTWORK_SIZES[context]) : null;
-    const [sample, setSample] = useState<{ key: string; value: string | null; } | null>(null);
+    const [sample, setSample] = useState<{ key: string; value: TerminalArtwork | null; } | null>(null);
     useEffect(() => {
-        if (!key) return;
+        if (!key) { setSample(null); return; }
         let alive = true;
         const request = artwork.acquire(key);
         void request.promise.then(value => {
@@ -101,10 +99,10 @@ export function useTerminalArtwork(active: boolean, source: string | null, conte
 }
 
 /** Sync the phosphor texture with the actual raster without duplicating sizes in CSS. */
-export function terminalArtworkGrid(pixelUrl: string | null, context: TerminalArtworkContext): CSSProperties | undefined {
-    if (!pixelUrl) return undefined;
+export function terminalArtworkGrid(pixel: TerminalArtwork | null, context: TerminalArtworkContext): CSSProperties | undefined {
+    if (!pixel) return undefined;
     return {
         "--terminal-artwork-cell": `${100 / TERMINAL_ARTWORK_SIZES[context]}%`,
-        "--terminal-artwork-frame": artworkFrames.get(pixelUrl)
+        "--terminal-artwork-frame": pixel.frame
     } as CSSProperties;
 }

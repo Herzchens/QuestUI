@@ -201,6 +201,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/themes/terminalPixelArtwork.test.ts
 
+      - name: Test artwork cache ownership and memory budgets
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/themes/artworkCache.test.ts
+
       - name: Test Event Log logic
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/eventLog/eventLog.test.ts

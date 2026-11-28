@@ -1,4 +1,5 @@
 import { useEffect, useState } from "@webpack/common";
+import { safeQuestArtworkUrl } from "../../quests/presentationLogic";
 import { createArtworkColorPool } from "../artworkColorPool";
 
 import { dominantThumbnailColorAsync, type OrigamiRgb } from "./thumbnailColor";
@@ -9,18 +10,16 @@ function loadColor(url: string, signal: AbortSignal): Promise<OrigamiRgb | null>
     return new Promise(resolve => {
         const image = new Image();
         let settled = false;
-        const finish = (color: OrigamiRgb | null, cancel = false) => {
+        const finish = (color: OrigamiRgb | null) => {
             if (settled) return;
             settled = true;
             clearTimeout(timeout);
             signal.removeEventListener("abort", abort);
             image.onload = image.onerror = null;
-            if (cancel) {
-                try { image.removeAttribute("src"); } catch { }
-            }
+            try { image.removeAttribute("src"); } catch { }
             resolve(color);
         };
-        const abort = () => finish(null, true);
+        const abort = () => finish(null);
         const timeout = setTimeout(abort, 5000);
         if (signal.aborted) return abort();
         signal.addEventListener("abort", abort, { once: true });
@@ -50,16 +49,20 @@ function loadColor(url: string, signal: AbortSignal): Promise<OrigamiRgb | null>
     });
 }
 
-const pool = createArtworkColorPool(loadColor, CACHE_LIMIT);
+const pool = createArtworkColorPool(loadColor, CACHE_LIMIT, 4, 64);
 
 export function preloadOrigamiArtworkColors(owner: object, urls: Iterable<string | null>): void {
-    pool.replaceCatalogue(owner, urls);
+    pool.replaceCatalogue(owner, (function* () { for (const url of urls) yield safeQuestArtworkUrl(url) ? url : null; })());
 }
 
-export function useOrigamiArtworkColor(active: boolean, url: string | null): OrigamiRgb | null {
+export const startOrigamiArtwork = pool.start;
+export const stopOrigamiArtwork = pool.stop;
+
+export function useOrigamiArtworkColor(active: boolean, source: string | null): OrigamiRgb | null {
+    const url = active && safeQuestArtworkUrl(source) ? source : null;
     const [sample, setSample] = useState<{ url: string; color: OrigamiRgb | null; } | null>(null);
     useEffect(() => {
-        if (!active || !url) return;
+        if (!active || !url) { setSample(null); return; }
         let alive = true;
         const request = pool.acquire(url);
         void request.promise.then(color => {

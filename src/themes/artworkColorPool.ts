@@ -15,7 +15,7 @@ const FAILED_RETRY_MS = 30_000;
 
 /** Demand takes precedence over a bounded prewarm catalogue. Mounted consumers
  * own their entries even when the idle cache is full. */
-export function createArtworkColorPool<T>(load: Loader<T>, cacheLimit = 256, concurrency = 4) {
+export function createArtworkColorPool<T>(load: Loader<T>, cacheLimit = 256, concurrency = 4, idleLimit = 0) {
     const limit = Number.isFinite(cacheLimit) ? Math.max(0, Math.floor(cacheLimit)) : 256;
     const workers = Number.isFinite(concurrency) ? Math.max(1, Math.floor(concurrency)) : 4;
     const entries = new Map<string, Entry<T>>();
@@ -24,10 +24,14 @@ export function createArtworkColorPool<T>(load: Loader<T>, cacheLimit = 256, con
     const prewarm = new Set<Entry<T>>();
     let selected = new Set<string>();
     let running = 0;
+    let enabled = true;
+    const idleCapacity = Number.isSafeInteger(idleLimit) ? Math.max(0, idleLimit) : 0;
+    const idle = new Map<string, Entry<T>>();
 
     function discard(entry: Entry<T>): void {
         if (entries.get(entry.url) !== entry) return;
         entries.delete(entry.url);
+        idle.delete(entry.url);
         demand.delete(entry);
         prewarm.delete(entry);
         if (entry.state !== "done") {
@@ -36,8 +40,19 @@ export function createArtworkColorPool<T>(load: Loader<T>, cacheLimit = 256, con
         }
     }
 
+    function retire(entry: Entry<T>): void {
+        if (!idleCapacity || entry.state !== "done" || entry.color == null) return discard(entry);
+        idle.delete(entry.url);
+        idle.set(entry.url, entry);
+        while (idle.size > idleCapacity) {
+            const oldest = idle.values().next().value;
+            if (!oldest) break;
+            discard(oldest);
+        }
+    }
+
     function pump(): void {
-        while (running < workers && (demand.size || prewarm.size)) {
+        while (enabled && running < workers && (demand.size || prewarm.size)) {
             const entry = (demand.size ? demand : prewarm).values().next().value!;
             demand.delete(entry);
             prewarm.delete(entry);
@@ -48,10 +63,12 @@ export function createArtworkColorPool<T>(load: Loader<T>, cacheLimit = 256, con
                 .then(() => entry.controller.signal.aborted ? null : load(entry.url, entry.controller.signal))
                 .catch(() => null)
                 .then(color => {
-                    entry.state = "done";
-                    entry.color = color;
-                    entry.retryAt = color === null ? Date.now() + FAILED_RETRY_MS : 0;
-                    entry.resolve(color);
+                    if (entries.get(entry.url) === entry && !entry.controller.signal.aborted) {
+                        entry.state = "done";
+                        entry.color = color;
+                        entry.retryAt = color === null ? Date.now() + FAILED_RETRY_MS : 0;
+                        entry.resolve(color);
+                    } else entry.resolve(null);
                     running--;
                     pump();
                 });
@@ -74,6 +91,7 @@ export function createArtworkColorPool<T>(load: Loader<T>, cacheLimit = 256, con
 
     return {
         replaceCatalogue(owner: object, urls: Iterable<string | null>) {
+            if (!enabled) return;
             // A catalogue may be much larger than the prewarm budget; keep only
             // the first unique URLs, and never evict mounted consumers.
             const next = new Set<string>();
@@ -94,13 +112,16 @@ export function createArtworkColorPool<T>(load: Loader<T>, cacheLimit = 256, con
                 if (selected.size >= limit) break;
             }
             for (const entry of entries.values()) {
-                if (!entry.users && !selected.has(entry.url)) discard(entry);
+                if (selected.has(entry.url)) idle.delete(entry.url);
+                else if (!entry.users && !idle.has(entry.url)) retire(entry);
             }
             for (const url of selected) ensure(url);
             pump();
         },
         acquire(url: string) {
+            if (!enabled) return { promise: Promise.resolve(null), release() {} };
             const entry = ensure(url);
+            idle.delete(url);
             entry.users++;
             if (entry.state === "queued") {
                 prewarm.delete(entry);
@@ -114,8 +135,9 @@ export function createArtworkColorPool<T>(load: Loader<T>, cacheLimit = 256, con
                     if (released) return;
                     released = true;
                     entry.users--;
+                    if (entries.get(url) !== entry) return;
                     if (!entry.users) {
-                        if (!selected.has(url)) discard(entry);
+                        if (!selected.has(url)) retire(entry);
                         else if (entry.state === "queued") {
                             demand.delete(entry);
                             prewarm.add(entry);
@@ -125,7 +147,18 @@ export function createArtworkColorPool<T>(load: Loader<T>, cacheLimit = 256, con
             };
         },
         peek(url: string): T | null | undefined {
+            const entry = idle.get(url);
+            if (entry) { idle.delete(url); idle.set(url, entry); }
             return entries.get(url)?.color;
-        }
+        },
+        start() { enabled = true; pump(); },
+        stop() {
+            enabled = false;
+            selected.clear();
+            catalogues.clear();
+            for (const entry of entries.values()) discard(entry);
+            idle.clear();
+        },
+        stats() { return { entries: entries.size, idle: idle.size, selected: selected.size, running, queued: demand.size + prewarm.size }; }
     };
 }

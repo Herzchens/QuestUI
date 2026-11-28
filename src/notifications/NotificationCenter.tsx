@@ -227,13 +227,14 @@ function NotificationQuestArtwork({ item, quest }: {
         ?? safeQuestArtworkUrl(theme === "light" ? item.event.quest?.artworkDark : item.event.quest?.artworkLight);
     const imageUrl = resolveQuestArtwork(quest, theme) ?? savedArtwork;
     const dashboardThemeId = useDashboardThemeId();
-    const pixelUrl = useTerminalArtwork(dashboardThemeId === "terminal", imageUrl, "notification");
+    const pixel = useTerminalArtwork(dashboardThemeId === "terminal", imageUrl, "notification");
+    const pixelUrl = pixel?.png;
     const displayUrl = pixelUrl ?? imageUrl;
     const savedTask = item.event.quest?.taskType;
     const taskType = quest?.primaryTask?.type ?? quest?.tasks[0]?.type ?? taskTypeForKey(savedTask ?? "");
 
     return (
-        <span className="quest-ui-notification-center-row-artwork" aria-hidden="true" style={terminalArtworkGrid(pixelUrl, "notification")}>
+        <span className="quest-ui-notification-center-row-artwork" aria-hidden="true" style={terminalArtworkGrid(pixel, "notification")}>
             <span className="quest-ui-notification-center-row-artwork-fallback">
                 <NotificationFallbackIcon item={item} />
             </span>
