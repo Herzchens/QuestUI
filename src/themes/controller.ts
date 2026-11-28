@@ -47,6 +47,7 @@ export function createDashboardThemeController(
         return theme;
     }
     for (const theme of themes) addTheme(theme);
+    const builtInCount = byId.size;
     const fallback = byId.get(defaultId);
     if (!fallback) throw new Error("Default Dashboard theme is missing.");
 
@@ -137,7 +138,7 @@ export function createDashboardThemeController(
 
     function registerTheme(input: CustomDashboardTheme): () => void {
         return mutate(() => {
-            if (byId.size - themes.length >= 64) throw new Error("Too many custom Dashboard themes.");
+            if (byId.size - builtInCount >= 64) throw new Error("Too many custom Dashboard themes.");
             const theme = addTheme(input, true);
             catalogue = buildCatalogue();
             notify();

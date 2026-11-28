@@ -1,3 +1,4 @@
+import { createThemeSDK } from "../../src/themes/sdk";
 import { createThemeRendering } from "../../src/themes/rendering";
 import { graphicsQualityPolicy } from "../../src/graphics/policy";
 import { createArtworkColorPool } from "../../src/themes/artworkColorPool";
@@ -405,4 +406,36 @@ void (async () => {
     renderer.clear();
     assert.equal(calls.at(-1), "retry");
     renderer.stop();
+}
+
+{
+    const enabled = new Set<string>();
+    const controller = createDashboardThemeController(themes, "default", {
+        validate(style) { if (style.startsWith("questui-custom-css:")) sdk.styles.validate(style); },
+        enable(style) { enabled.add(style); },
+        disable(style) { enabled.delete(style); }
+    });
+    const sdk = createThemeSDK({
+        register: controller.registerTheme, catalogue: controller.getCatalogue,
+        active: controller.getSnapshot, restore() {}
+    }, (_, css) => css);
+    const input = { apiVersion: 1 as const, id: "custom-test", label: "Test", css: ":scope { color: red; }" };
+    for (const invalid of [
+        null, { ...input, apiVersion: 2 }, { ...input, id: "default" },
+        { ...input, id: "custom-" }, { ...input, id: "custom-foo bar" },
+        { ...input, label: " " }, { ...input, css: "" }, { ...input, css: "x".repeat(262145) }
+    ]) assert.throws(() => sdk.api.register(invalid as typeof input), /Invalid|unsupported/);
+    const dispose = sdk.api.register(input);
+    assert.throws(() => sdk.api.register(input), /already registered/);
+    controller.select(input.id);
+    assert.equal(sdk.api.getActiveTheme(), input.id);
+    assert.deepEqual([...enabled], ["questui-custom-css:custom-test"]);
+    dispose();
+    assert.equal(sdk.api.getActiveTheme(), "default");
+    assert.throws(() => sdk.styles.validate("questui-custom-css:custom-test"), /Unknown/);
+    const dispose2 = sdk.api.register(input);
+    dispose();
+    assert.equal(sdk.api.getThemes().at(-1)?.value, input.id);
+    dispose2();
+    assert.equal(sdk.api.getThemes().length, themes.length);
 }

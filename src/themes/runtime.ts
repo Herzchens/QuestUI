@@ -1,23 +1,28 @@
-import { disableStyle, enableStyle, requireStyle } from "@api/Styles";
+import { disableStyle, enableStyle, managedStyleRootNode, requireStyle } from "@api/Styles";
 import { React } from "@webpack/common";
 
 import { createThemePluginLifecycle } from "./lifecycle";
 import { createDashboardThemeController } from "./controller";
 import { useEffectiveReducedMotion, useGraphicsQualityPolicy, useGraphicsRootClasses } from "../graphics/runtime";
 import { createThemeRendering, type ThemeSurface } from "./rendering";
+import { createThemeSDK } from "./sdk";
+import type { ThemeStyleAdapter } from "./controller";
+import settings from "../plugin/settings";
 import { DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID } from "./registry";
 
-const controller = createDashboardThemeController(DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID, {
-    validate: name => { requireStyle(name); },
-    enable: name => { enableStyle(name); },
+const styleAdapter: ThemeStyleAdapter = {
+    validate: name => { if (custom.styles.owns(name)) custom.styles.validate(name); else requireStyle(name); },
+    enable: name => { if (custom.styles.owns(name)) custom.styles.enable(name, managedStyleRootNode); else enableStyle(name); },
     disable: name => {
+        if (custom.styles.owns(name)) return custom.styles.disable(name);
         if (disableStyle(name)) return;
         // Also clean up an owned node appended before Vencord's root is connected.
         const style = requireStyle(name);
         style.dom?.remove();
         style.dom = null;
     }
-});
+};
+const controller = createDashboardThemeController(DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID, styleAdapter);
 
 const lifecycle = createThemePluginLifecycle(controller, DASHBOARD_THEMES, DEFAULT_DASHBOARD_THEME_ID, error => {
     console.warn("[QuestUI] Could not load preferred Dashboard theme; using Default.", error);
@@ -56,7 +61,35 @@ export function useThemeRenderingSurface(surface: ThemeSurface) {
     return root;
 }
 
-export const registerDashboardTheme = controller.registerTheme;
+const custom = createThemeSDK({
+    register: theme => controller.registerTheme(theme),
+    catalogue: () => controller.getCatalogue(),
+    active: () => controller.getSnapshot(),
+    restore(id) {
+        if (settings.store.dashboardTheme !== id || controller.getSnapshot() !== DEFAULT_DASHBOARD_THEME_ID) return;
+        try { selectDashboardTheme(id); }
+        catch (error) { console.warn("[QuestUI] Could not restore registered theme.", error); }
+    }
+}, prepareScopedThemeCSS);
+
+export const themeSDK = custom.api;
+
+/** Browser-parsed @scope prevents accidental global selector application.
+ * CSS is trusted local code, not untrusted input; network URLs and CSS side
+ * channels are not sandboxed. Reject top-level rule escapes and unsupported hosts. */
+export function prepareScopedThemeCSS(id: string, css: string): string {
+    if (!/^custom-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) throw new TypeError("Invalid theme ID.");
+    const selector = ".quest-ui-theme-" + id;
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync("@scope (" + selector + ") {\n" + css + "\n}");
+    const rule = sheet.cssRules[0];
+    if (sheet.cssRules.length !== 1 || !rule || !rule.cssText.startsWith("@scope (" + selector + ")")
+        || !("cssRules" in rule) || !(rule as CSSGroupingRule).cssRules.length) {
+        throw new Error("Invalid custom theme CSS or unsupported CSS scope.");
+    }
+    return rule.cssText;
+}
+
 
 export function useDashboardThemeOptions() {
     return React.useSyncExternalStore(controller.subscribe, controller.getCatalogue, controller.getCatalogue);

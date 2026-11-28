@@ -14,7 +14,7 @@ import { resetClaimAllRuntime } from "./src/quests/actions/claimAllState";
 import { QUESTUI_VERSION } from "./src/plugin/version";
 import { invalidateAccountSession, startAccountSession, stopAccountSession } from "./src/plugin/accountSession";
 import { createServiceLifecycle } from "./src/plugin/lifecycle";
-import { startDashboardThemes, stopDashboardThemes } from "./src/themes/runtime";
+import { startDashboardThemes, stopDashboardThemes, themeSDK } from "./src/themes/runtime";
 import settings from "./src/plugin/settings";
 import { updateCheckHoursFromStep } from "./src/updates/logic";
 import { startUpdateChecks, stopUpdateChecks } from "./src/updates/runtime";
@@ -59,6 +59,7 @@ export default definePlugin({
         }
     ],
     settings,
+    themeSDK,
 
     start() {
         lifecycle.start();

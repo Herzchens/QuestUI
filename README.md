@@ -331,7 +331,7 @@ No. Clearing the inbox only affects that account's unread, read and clear state.
 <details>
 <summary><b>Can I create custom themes?</b></summary>
 <br>
-Not yet. A public theme API is planned for v1.6.0 Stable.
+The v1.6.0 development branch includes a versioned Theme SDK for trusted local Vencord userplugins. See [Theme SDK](docs/THEME_SDK.md) for usage, lifecycle and limitations.
 </details>
 
 ## 🙏 Credits
