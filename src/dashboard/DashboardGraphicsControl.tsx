@@ -11,18 +11,20 @@ import {
 function GraphicsIcon() {
     const gradientId = "quest-ui-gauge-" + React.useId();
     const paint = "url(#" + gradientId + ")";
-    // Same 256-unit icon grid as Palette Bold. The painted arc is 216 units
-    // wide, with its vertical bounds centered on the viewport.
-    return <svg className="quest-ui-graphics-gauge" viewBox="0 0 256 256" aria-hidden="true">
+    // Lucide Gauge geometry on its native 24x24 grid. Keeping the authored
+    // geometry intact avoids per-theme optical scaling/translation hacks.
+    // The 10-unit needle reaches the arc endpoints exactly at +/-120deg.
+    return <svg className="quest-ui-graphics-gauge" viewBox="0 0 24 24" aria-hidden="true">
         <defs>
-            <linearGradient id={gradientId} gradientUnits="userSpaceOnUse" x1="32" y1="32" x2="224" y2="224">
-                <stop offset="0" className="quest-ui-graphics-gradient-start" />
+            <linearGradient id={gradientId} gradientUnits="userSpaceOnUse" x1="2" y1="12" x2="22" y2="12">
+                <stop offset="0" className="quest-ui-graphics-gradient-end" />
+                <stop offset=".5" className="quest-ui-graphics-gradient-start" />
                 <stop offset="1" className="quest-ui-graphics-gradient-end" />
             </linearGradient>
         </defs>
-        <path d="M60.117749 209.882251A96 96 0 1 1 195.882251 209.882251" stroke={paint} />
-        <path className="quest-ui-graphics-needle" d="M128 142V46" stroke={paint} />
-        <circle cx="128" cy="142" r="24" fill={paint} />
+        <path d="M3.34 19a10 10 0 1 1 17.32 0" stroke={paint} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+        <path className="quest-ui-graphics-needle" d="M12 14V4" stroke={paint} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+        <circle cx="12" cy="14" r="2" fill={paint} />
     </svg>;
 }
 

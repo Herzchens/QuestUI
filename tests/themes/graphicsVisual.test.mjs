@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
+import { inflateSync } from "node:zlib";
 
 const read = p => readFileSync(new URL(p, import.meta.url), "utf8");
 const registry = read("../../src/themes/registry.ts");
@@ -14,13 +15,31 @@ const paletteSvg = paletteSource.match(/<svg className="quest-ui-dashboard-palet
 const gaugeTemplate = graphicsSource.match(/<svg className="quest-ui-graphics-gauge"[\s\S]*?<\/svg>/)?.[0];
 assert.ok(paletteSvg && gaugeTemplate, "Production icon markup missing");
 function gaugeSvg(id) {
-    return gaugeTemplate.replaceAll("className=", "class=").replace("id={gradientId}", 'id="' + id + '"').replaceAll("{paint}", '"url(#' + id + ')"');
+    return gaugeTemplate
+        .replaceAll("className=", "class=")
+        .replaceAll("strokeWidth=", "stroke-width=")
+        .replaceAll("vectorEffect=", "vector-effect=")
+        .replace("id={gradientId}", 'id="' + id + '"')
+        .replaceAll("{paint}", '"url(#' + id + ')"');
 }
 const stops = [["#73e8a0","#21af69"],["#ffe17a","#e3a72d"],["#79baff","#3976ed"],["#ff8980","#e53b4b"],["#d4a5ff","#9855ed"],["#ffffff","#d5dce8"]];
 assert.match(graphicsSource, /quest-ui-dashboard-palette-button quest-ui-graphics-trigger/, "Graphics must reuse the Palette shell");
 assert.match(graphicsSource, /className="quest-ui-graphics-gauge"/, "Gauge glyph missing");
+assert.match(graphicsSource, /viewBox="0 0 24 24"/, "Gauge must use Lucide native grid");
+assert.match(graphicsSource, /M3\.34 19a10 10 0 1 1 17\.32 0/, "Lucide Gauge arc geometry missing");
+assert.match(graphicsSource, /x1="2" y1="12" x2="22" y2="12"/, "Gauge gradient must remain horizontally symmetric");
 assert.doesNotMatch(graphicsSource, /particle|lastBurst|function burst/i, "Particle implementation must be removed");
 assert.match(graphicsSource, /preview && <LockIcon \/>/, "Ultra lock missing");
+for (const theme of ["default","terminal","origami"]) {
+    assert.match(read("../../src/themes/" + theme + "/graphics.css"), /quest-ui-graphics-gauge\s*\{[^}]*position:\s*relative;\s*left:\s*\.5px;/, theme + " runtime-measured +0.5px optical correction missing");
+}
+for (const theme of ["default","liquid-glass","obsidian","sakura","terminal","origami"]) {
+    const css = read("../../src/themes/" + theme + "/graphics.css");
+    assert.doesNotMatch(css, /scale[XY]\(/, theme + " must not distort the gauge");
+    assert.doesNotMatch(css, /quest-ui-graphics-gauge\s*\{[^}]*transform:/, theme + " must not scale/transform the gauge SVG");
+    if (!["default","terminal","origami"].includes(theme)) assert.doesNotMatch(css, /quest-ui-graphics-gauge\s*\{[^}]*\bleft:/, theme + " must not carry runtime optical correction");
+}
+assert.doesNotMatch(read("../../src/themes/origami/graphics.css"), /quest-ui-graphics-gauge[^\n]*filter:/, "Origami gauge must not use raster-expanding drop shadow");
 const imports = new Map([...registry.matchAll(/import\s+(\w+)\s+from\s+"\.\/([^"]+)\?managed";/g)].map(m => [m[1], m[2]]));
 const chrome = process.env.CHROME_BIN || ["google-chrome", "chromium", "chromium-browser"].find(n => spawnSync(n, ["--version"], { encoding: "utf8" }).status === 0);
 assert.ok(chrome, "Chrome/Chromium not found");
@@ -60,37 +79,45 @@ for (const pair of document.querySelectorAll(".graphics-header-fixture")) {
     const reduced = pair.dataset.reduced === "true";
     const glyph = graphics.querySelector("svg");
     const glyphBox = glyph.getBoundingClientRect();
-    check(glyphBox.width === 20 && glyphBox.height === 20, "gauge icon size mismatch");
-    check(Math.abs(glyphBox.left + glyphBox.width/2 - (a.left+a.width/2)) < 1 && Math.abs(glyphBox.top + glyphBox.height/2 - (a.top+a.height/2)) < 1, "gauge not centered in trigger");
-    check(getComputedStyle(glyph).strokeWidth === "24px", "gauge stroke mismatch");
+    check(Math.abs(glyphBox.width - 20) < .02 && Math.abs(glyphBox.height - 20) < .02, "gauge icon size mismatch");
+    const themeName = ["default","terminal","origami"].find(name => pair.closest(".quest-ui-theme-" + name));
+    const expectedSvgX = themeName ? .5 : 0;
+    check(Math.abs((glyphBox.left + glyphBox.width/2 - (a.left+a.width/2)) - expectedSvgX) < .08 && Math.abs(glyphBox.top + glyphBox.height/2 - (a.top+a.height/2)) < .08, "gauge optical position mismatch");
+    for (const path of glyph.querySelectorAll("path")) {
+        check(getComputedStyle(path).strokeWidth === "2px", "gauge stroke mismatch");
+        check(getComputedStyle(path).vectorEffect === "non-scaling-stroke", "gauge stroke must be phase-stable");
+    }
     check(getComputedStyle(glyph).shapeRendering !== "crispEdges", "gauge antialiasing disabled");
     const arcShape = glyph.querySelector("path");
     const box = arcShape.getBBox();
     const center = new DOMPoint(box.x + box.width/2, box.y + box.height/2).matrixTransform(arcShape.getScreenCTM());
-    check(Math.abs(center.x - (a.left+a.width/2)) < .25, "gauge ink not horizontally centered");
-    check(Math.abs(center.y - (a.top+a.height/2)) < .5, "gauge ink not vertically centered");
+    const themeRoot = pair.closest(".quest-ui-theme");
+    check(!getComputedStyle(glyph).transform || getComputedStyle(glyph).transform === "none", "theme must not scale gauge SVG");
+    if (themeName) check(getComputedStyle(glyph).left === "0.5px", themeName + " +0.5px runtime optical correction missing");
+    check(Math.abs((glyphBox.left + glyphBox.width/2 - (a.left+a.width/2)) - expectedSvgX) < .08, "gauge SVG X optical offset drifted");
+    check(Math.abs(glyphBox.top + glyphBox.height/2 - (a.top+a.height/2)) < .02, "gauge SVG Y center drifted");
     const hub = glyph.querySelector("circle");
     const hubPoint = new DOMPoint(Number(hub.getAttribute("cx")), Number(hub.getAttribute("cy"))).matrixTransform(hub.getCTM());
-    const needlePivot = new DOMPoint(128,142).matrixTransform(glyph.querySelector(".quest-ui-graphics-needle").getCTM());
+    const needlePivot = new DOMPoint(12,14).matrixTransform(glyph.querySelector(".quest-ui-graphics-needle").getCTM());
     check(Math.hypot(hubPoint.x-needlePivot.x,hubPoint.y-needlePivot.y) < .01, "gauge pivot off center");
     const gradient = glyph.querySelector("linearGradient");
     check(gradient.getAttribute("gradientUnits") === "userSpaceOnUse", "degenerate needle gradient");
-    check(getComputedStyle(gradient.children[0]).stopColor === rgb(stops[n][0]), "gauge gradient start mismatch " + n);
-    check(getComputedStyle(gradient.children[1]).stopColor === rgb(stops[n][1]), "gauge gradient end mismatch " + n);
+    check(gradient.children.length === 3, "gauge gradient must use symmetric three-stop lighting");
+    check(getComputedStyle(gradient.children[0]).stopColor === rgb(stops[n][1]), "gauge left edge mismatch " + n);
+    check(getComputedStyle(gradient.children[1]).stopColor === rgb(stops[n][0]), "gauge center highlight mismatch " + n);
+    check(getComputedStyle(gradient.children[2]).stopColor === rgb(stops[n][1]), "gauge right edge mismatch " + n);
     for (const path of glyph.querySelectorAll("path")) check(getComputedStyle(path).stroke.includes("#" + gradient.id), "gauge paint reference mismatch");
     check(getComputedStyle(hub).fill.includes("#" + gradient.id), "gauge hub paint mismatch");
-    const paletteGlyph = palette.querySelector("svg"), paletteBox = paletteGlyph.querySelector("path").getBBox();
-    const paletteCenter = new DOMPoint(paletteBox.x + paletteBox.width/2, paletteBox.y + paletteBox.height/2).matrixTransform(paletteGlyph.getScreenCTM());
-    check(Math.abs(center.y - paletteCenter.y) < .6, "gauge and Palette ink centers differ");
-    check(Math.abs((box.width + 24) - paletteBox.width) < 1, "gauge and Palette painted widths differ");
+    const paletteGlyph = palette.querySelector("svg");
+    check(box.width > 19.9 && box.width < 20.1, "Lucide gauge arc width drifted");
     const needle = getComputedStyle(glyph.querySelector(".quest-ui-graphics-needle"));
     const matrix = new DOMMatrixReadOnly(needle.transform);
     const angle = Math.atan2(matrix.b, matrix.a) * 180 / Math.PI;
-    check(Math.abs(angle - (n === 5 ? -135 : -135 + 67.5*n)) < .1, "gauge angle mismatch " + n);
+    check(Math.abs(angle - (n === 5 ? -120 : -120 + 60*n)) < .1, "gauge angle mismatch " + n);
     if (n === 0 || n === 4 || n === 5) {
         const end = glyph.querySelector(".quest-ui-graphics-needle");
         const arc = glyph.querySelector("path");
-        const tip = new DOMPoint(128,46).matrixTransform(end.getCTM());
+        const tip = new DOMPoint(12,4).matrixTransform(end.getCTM());
         const endpoint = arc.getPointAtLength(n === 4 ? arc.getTotalLength() : 0).matrixTransform(arc.getCTM());
         check(Math.hypot(tip.x-endpoint.x, tip.y-endpoint.y) < .1, "needle does not meet arc endpoint");
     }
@@ -111,14 +138,14 @@ if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
         transition.currentTime = 70;
         const mid = new DOMMatrixReadOnly(getComputedStyle(animatedNeedle).transform);
         const angle = Math.atan2(mid.b, mid.a) * 180 / Math.PI;
-        check(angle > -134 && angle < 134, "gauge did not interpolate");
+        check(angle > -119 && angle < 119, "gauge did not interpolate");
         transition.finish();
     }
 } else check(animations.length === 0, "system reduced motion animated the needle");
 animated.dataset.graphicsReduced = "true";
 animated.dataset.graphicsIndex = "0";
 const reset = new DOMMatrixReadOnly(getComputedStyle(animatedNeedle).transform);
-check(Math.abs(Math.atan2(reset.b, reset.a) * 180 / Math.PI + 135) < .1, "reduced motion did not snap");
+check(Math.abs(Math.atan2(reset.b, reset.a) * 180 / Math.PI + 120) < .1, "reduced motion did not snap");
 check(animatedNeedle.getAnimations().length === 0, "reduced motion left an animation active");
 for (const menu of document.querySelectorAll(".quest-ui-graphics-menu")) {
     const n = Number(menu.dataset.case);
@@ -157,6 +184,43 @@ document.body.dataset.result = errors.length ? "fail" : "pass";
 document.querySelector("#result").textContent = JSON.stringify(errors);
 `;
 const dir = mkdtempSync(join(tmpdir(), "questui-graphics-"));
+const rasterSamples = [];
+// Chromium emits non-interlaced 8-bit RGB/RGBA PNGs. Decode synchronously;
+// --dump-dom can exit before an asynchronous Image.decode() completes.
+function decodeScreenshot(png) {
+    assert.equal(png.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+    let width, height, channels;
+    const chunks = [];
+    for (let offset=8; offset+12<=png.length;) {
+        const size=png.readUInt32BE(offset), type=png.toString("ascii",offset+4,offset+8);
+        const bytes=png.subarray(offset+8,offset+8+size);
+        if (type==="IHDR") {
+            width=bytes.readUInt32BE(0); height=bytes.readUInt32BE(4);
+            assert.equal(bytes[8],8,"PNG depth"); assert.equal(bytes[12],0,"PNG interlace");
+            channels=bytes[9]===2?3:bytes[9]===6?4:0;
+            assert.ok(channels,"unsupported PNG color type "+bytes[9]);
+        } else if(type==="IDAT") chunks.push(bytes);
+        else if(type==="IEND") break;
+        offset+=size+12;
+    }
+    assert.ok(width && height && channels && width*height<4_000_000);
+    const raw=inflateSync(Buffer.concat(chunks)), stride=width*channels, data=Buffer.alloc(stride*height);
+    assert.equal(raw.length,(stride+1)*height);
+    function paeth(a,b,c) {
+        const p=a+b-c, pa=Math.abs(p-a),pb=Math.abs(p-b),pc=Math.abs(p-c);
+        return pa<=pb&&pa<=pc?a:pb<=pc?b:c;
+    }
+    for(let y=0;y<height;y++) {
+        const filter=raw[y*(stride+1)];
+        assert.ok(filter<=4);
+        for(let x=0;x<stride;x++){
+            const i=y*stride+x, a=x>=channels?data[i-channels]:0, b=y?data[i-stride]:0, c=y&&x>=channels?data[i-stride-channels]:0;
+            const predictor=[0,a,b,Math.floor((a+b)/2),paeth(a,b,c)][filter];
+            data[i]=(raw[y*(stride+1)+1+x]+predictor)&255;
+        }
+    }
+    return {width,height,channels,data};
+}
 try {
     for (const theme of ["default", "liquid-glass", "obsidian", "sakura", "terminal", "origami"]) {
         const id = theme === "default" ? "DEFAULT_DASHBOARD_THEME_ID" : '"' + theme + '"';
@@ -177,6 +241,49 @@ try {
         assert.equal(proc.status, 0, proc.error?.message || proc.stderr);
         assert.ok(proc.stdout.includes('data-result="pass"'), theme + ": " + proc.stdout.match(/<pre id="result">([\s\S]*?)<\/pre>/)?.[1]);
         }
-        console.log(theme + ": 6 graphics states, slider geometry, colors and motion contract PASS (normal + system reduced motion)");
+        // Capture production glyphs and actual theme frames. A second identical
+        // row with glyphs hidden provides a background-only control, including
+        // theme-specific masks and shadows. This measures ink, not SVG boxes.
+        const rasterRow = (hidden, top, phase) => '<div class="quest-ui-dashboard-header-tools graphics-raster-row' + (hidden ? ' hide-glyph' : '') + '" style="top:' + top + 'px;left:' + phase + 'px"><button class="quest-ui-dashboard-palette-button quest-ui-graphics-trigger" data-graphics-index="2" data-graphics-reduced="true">' + gaugeSvg('raster-' + top + '-' + phase) + '</button><button class="quest-ui-dashboard-palette-button">' + paletteSvg + '</button></div>';
+        const rasterStyle = '<style>html,body{margin:0;background:#555}#raster-stage{position:absolute;left:0;top:0;width:128px;height:128px;background:#555}#raster-stage .graphics-raster-row{position:absolute;left:0;display:grid!important;grid-template-columns:64px 64px;justify-items:center;align-items:center;gap:0;margin:0;width:128px;height:64px}#raster-stage *,#raster-stage *::before,#raster-stage *::after{animation:none!important;transition:none!important}#raster-stage .hide-glyph svg{visibility:hidden!important}</style>';
+        for (const phase of [0, .5]) {
+        writeFileSync(join(dir, "raster.html"), '<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="theme.css">' + rasterStyle + '<div id="raster-stage" class="quest-ui-theme quest-ui-theme-' + theme + '">' + rasterRow(false,0,phase) + rasterRow(true,64,phase) + '</div>');
+        for (const dpr of [1, 1.25, 2]) {
+            const png = join(dir, "raster.png");
+            const shot = spawnSync(chrome, ["--headless", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--hide-scrollbars", "--window-size=256,256", "--force-device-scale-factor=" + dpr, "--virtual-time-budget=1000", "--screenshot=" + png, pathToFileURL(join(dir, "raster.html")).href], { encoding: "utf8", timeout: 45000 });
+            assert.equal(shot.status, 0, shot.error?.message || shot.stderr);
+            rasterSamples.push({ theme, dpr, phase, png: readFileSync(png) });
+            rmSync(png);
+        }
+        }
+        console.log(theme + ": 6 graphics states, slider geometry, colors and motion contract PASS (normal + system reduced motion; DPR 1/1.25/2; phase 0/.5)");
     }
+    const errors=[], results=[];
+    for(const sample of rasterSamples) {
+        const {width,height,channels,data}=decodeScreenshot(sample.png);
+        const cell=Math.round(64*sample.dpr), bounds=[];
+        assert.ok(width>=2*cell&&height>=2*cell,"screenshot viewport too small");
+        for(let k=0;k<2;k++) {
+            let x0=cell,y0=cell,x1=-1,y1=-1,count=0,sumX=0,sumY=0,lumaWeight=0,lumaX=0;
+            for(let y=0;y<cell;y++) for(let x=0;x<cell;x++) {
+                const a=channels*(y*width+k*cell+x), b=a+channels*cell*width;
+                if(Math.max(Math.abs(data[a]-data[b]),Math.abs(data[a+1]-data[b+1]),Math.abs(data[a+2]-data[b+2]))<28) continue;
+                x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);sumX+=x;sumY+=y;count++;
+                const fg=.2126*data[a]+.7152*data[a+1]+.0722*data[a+2], bg=.2126*data[b]+.7152*data[b+1]+.0722*data[b+2];
+                const lw=Math.abs(fg-bg); lumaWeight+=lw; lumaX+=(x+.5)*lw;
+            }
+            const d=sample.dpr,cx=(x0+x1+1)/(2*d),cy=(y0+y1+1)/(2*d),mx=(sumX/count+.5)/d,my=(sumY/count+.5)/d,lx=(lumaX/Math.max(1,lumaWeight))/d,w=(x1-x0+1)/d,h=(y1-y0+1)/d;
+            if(count<12*d*d||w<12||w>25||h<10||h>25||Math.abs(cx-32)>1.6||Math.abs(cy-32)>1.6) errors.push(sample.theme+" DPR "+d+" icon "+k+" bounds "+JSON.stringify({cx,cy,w,h,count}));
+            bounds.push({cx,cy,mx,my,lx,w,h});
+        }
+        const [g,p]=bounds;
+        const expectedRasterX = 32 + sample.phase + (["default","terminal","origami"].includes(sample.theme) ? .5 : 0);
+        if(Math.abs(g.cx-expectedRasterX)>.65) errors.push(sample.theme+" DPR "+sample.dpr+" phase "+sample.phase+" gauge painted X bounds drift "+JSON.stringify(bounds));
+        if(Math.abs(g.mx-expectedRasterX)>.6) errors.push(sample.theme+" DPR "+sample.dpr+" phase "+sample.phase+" gauge optical X center "+JSON.stringify(bounds));
+        if(Math.abs(g.lx-g.cx)>.35) errors.push(sample.theme+" DPR "+sample.dpr+" phase "+sample.phase+" gauge luminance X center "+JSON.stringify(bounds));
+        results.push({theme:sample.theme,dpr:sample.dpr,bounds});
+    }
+    console.log("Rendered pixel bounds: "+JSON.stringify(results));
+    assert.deepEqual(errors,[],"Screenshot regression");
+    console.log("Actual Chromium screenshot raster bounds: "+rasterSamples.length+" theme/DPR cases PASS");
 } finally { rmSync(dir, { recursive: true, force: true }); }
