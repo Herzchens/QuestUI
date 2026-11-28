@@ -859,8 +859,7 @@
     background: color-mix(in srgb, var(--status-danger,#ff626d) 13%, #05120a);
     border-color: color-mix(in srgb, var(--status-danger,#ff626d) 55%, rgba(115,255,175,.12));
 }
-.quest-ui-theme-terminal .quest-ui-toolbar-button,
-.quest-ui-theme-terminal .quest-ui-reload-icon-button {
+.quest-ui-theme-terminal .quest-ui-toolbar-button {
     border-radius: 2px;
 }
 .quest-ui-theme .quest-ui-toolbar-button.quest-ui-claim-all-button {
@@ -1673,38 +1672,6 @@
     color: currentColor;
 
 }
-.quest-ui-theme-terminal .quest-ui-summary-all {
-    --quest-ui-summary-color: #d5f7e4;
-    --quest-ui-summary-tint: rgba(115,255,175,.055);
-}
-.quest-ui-theme-terminal .quest-ui-summary-available {
-    --quest-ui-summary-color: #ff626d;
-    --quest-ui-summary-tint: rgba(242,63,66,.075);
-}
-.quest-ui-theme-terminal .quest-ui-summary-claimable {
-    --quest-ui-summary-color: #31ef91;
-    --quest-ui-summary-tint: rgba(61,220,132,.075);
-}
-.quest-ui-theme-terminal .quest-ui-summary-in-progress {
-    --quest-ui-summary-color: #ffe052;
-    --quest-ui-summary-tint: rgba(240,178,50,.075);
-}
-.quest-ui-theme-terminal .quest-ui-summary-claimed {
-    --quest-ui-summary-color: #72caff;
-    --quest-ui-summary-tint: rgba(73,169,248,.075);
-}
-.quest-ui-theme-terminal .quest-ui-summary-expired {
-    --quest-ui-summary-color: #9ecbb1;
-    --quest-ui-summary-tint: rgba(169,171,180,.07);
-}
-.quest-ui-theme-terminal .quest-ui-summary-ignored {
-    --quest-ui-summary-color: #df9cff;
-    --quest-ui-summary-tint: rgba(199,125,255,.075);
-}
-.quest-ui-theme-terminal .quest-ui-summary-hidden {
-    --quest-ui-summary-color: #df9cff;
-    --quest-ui-summary-tint: rgba(199,125,255,.075);
-}
 
 @media (max-width: 760px) {
     .quest-ui-theme .quest-ui-dashboard-summary {
@@ -1954,16 +1921,14 @@
 
 /* Utility actions read as circular icon pills. */
 .quest-ui-theme .quest-ui-reload-icon-button,
-.quest-ui-theme .quest-ui-update-center-button,
-.quest-ui-theme .quest-ui-home-button {
+.quest-ui-theme .quest-ui-update-center-button {
     flex-basis: 34px;
     height: 34px;
     min-height: 34px;
     width: 34px;
 }
 .quest-ui-theme-terminal .quest-ui-reload-icon-button,
-.quest-ui-theme-terminal .quest-ui-update-center-button,
-.quest-ui-theme-terminal .quest-ui-home-button {
+.quest-ui-theme-terminal .quest-ui-update-center-button {
     border-radius: 2px;
 }
 
@@ -2362,8 +2327,7 @@
 
 
 /* Dropdown reset: intentionally plain, Discord-like checklist/menu surfaces. */
-.quest-ui-theme.quest-ui-filter-list,
-.quest-ui-theme.quest-ui-dashboard-choice-list {
+.quest-ui-theme.quest-ui-filter-list {
     box-sizing: border-box;
 }
 .quest-ui-theme-terminal.quest-ui-filter-list,

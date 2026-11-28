@@ -514,15 +514,8 @@
     font: inherit;
     font-size: 11.5px;
 }
-.quest-ui-event-log-panel
-
 /* Event Log controls: Sort and Filter stay flat; only file actions form
  * a compact interaction island. Query/pagination behavior is unchanged. */
-.quest-ui-event-log-panel.quest-ui-event-log-panel {
-    width: min(720px, calc(100vw - 28px));
-    height: min(620px, calc(100vh - 88px));
-    max-height: min(620px, calc(100vh - 88px));
-}
 .quest-ui-event-log-panel .quest-ui-event-search-shell {
     flex: 0 0 auto;
     margin: 9px 0 7px;

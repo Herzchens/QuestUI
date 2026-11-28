@@ -466,7 +466,6 @@
 :where(.quest-ui-theme-liquid-glass) .quest-ui-home-button:hover {
     background: var(--quest-ui-glass-control-hover);
     border-color: rgba(233,241,255,.43);
-    box-shadow: var(--quest-ui-glass-control-rim);
 }
 :where(.quest-ui-theme-liquid-glass) .quest-ui-sort-icon,
 :where(.quest-ui-theme-liquid-glass) .quest-ui-filter-icon,
@@ -1700,30 +1699,6 @@
     border-radius: 999px;
     color: currentColor;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
-}
-.quest-ui-theme-liquid-glass .quest-ui-summary-all {
-    --quest-ui-summary-color: #f4f5f7;
-}
-.quest-ui-theme-liquid-glass .quest-ui-summary-available {
-    --quest-ui-summary-color: #ff8296;
-}
-.quest-ui-theme-liquid-glass .quest-ui-summary-claimable {
-    --quest-ui-summary-color: #72f4ae;
-}
-.quest-ui-theme-liquid-glass .quest-ui-summary-in-progress {
-    --quest-ui-summary-color: #ffd06b;
-}
-.quest-ui-theme-liquid-glass .quest-ui-summary-claimed {
-    --quest-ui-summary-color: #79c6ff;
-}
-.quest-ui-theme-liquid-glass .quest-ui-summary-expired {
-    --quest-ui-summary-color: #c8cedd;
-}
-.quest-ui-theme-liquid-glass .quest-ui-summary-ignored {
-    --quest-ui-summary-color: #cba2ff;
-}
-.quest-ui-theme-liquid-glass .quest-ui-summary-hidden {
-    --quest-ui-summary-color: #cba2ff;
 }
 
 @media (max-width: 760px) {

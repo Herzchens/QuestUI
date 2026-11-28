@@ -1715,38 +1715,6 @@
         0 0 5px color-mix(in srgb, var(--quest-ui-summary-color) 16%, transparent);
     color: var(--quest-ui-summary-color);
 }
-.quest-ui-theme-obsidian .quest-ui-summary-all {
-    --quest-ui-summary-color: #f4f5f7;
-    --quest-ui-summary-tint: rgba(255,255,255,.055);
-}
-.quest-ui-theme-obsidian .quest-ui-summary-available {
-    --quest-ui-summary-color: #f23f42;
-    --quest-ui-summary-tint: rgba(242,63,66,.075);
-}
-.quest-ui-theme-obsidian .quest-ui-summary-claimable {
-    --quest-ui-summary-color: #3ddc84;
-    --quest-ui-summary-tint: rgba(61,220,132,.075);
-}
-.quest-ui-theme-obsidian .quest-ui-summary-in-progress {
-    --quest-ui-summary-color: #f0b232;
-    --quest-ui-summary-tint: rgba(240,178,50,.075);
-}
-.quest-ui-theme-obsidian .quest-ui-summary-claimed {
-    --quest-ui-summary-color: #49a9f8;
-    --quest-ui-summary-tint: rgba(73,169,248,.075);
-}
-.quest-ui-theme-obsidian .quest-ui-summary-expired {
-    --quest-ui-summary-color: #a9abb4;
-    --quest-ui-summary-tint: rgba(169,171,180,.07);
-}
-.quest-ui-theme-obsidian .quest-ui-summary-ignored {
-    --quest-ui-summary-color: #c77dff;
-    --quest-ui-summary-tint: rgba(199,125,255,.075);
-}
-.quest-ui-theme-obsidian .quest-ui-summary-hidden {
-    --quest-ui-summary-color: #c77dff;
-    --quest-ui-summary-tint: rgba(199,125,255,.075);
-}
 
 @media (max-width: 760px) {
     .quest-ui-theme .quest-ui-dashboard-summary {

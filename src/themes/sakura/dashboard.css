@@ -1516,30 +1516,6 @@
     color: currentColor;
     box-shadow: none;
 }
-.quest-ui-theme-sakura .quest-ui-summary-all {
-    --quest-ui-summary-color: #f4f5f7;
-}
-.quest-ui-theme-sakura .quest-ui-summary-available {
-    --quest-ui-summary-color: #f5a0a8;
-}
-.quest-ui-theme-sakura .quest-ui-summary-claimable {
-    --quest-ui-summary-color: #bdd8a6;
-}
-.quest-ui-theme-sakura .quest-ui-summary-in-progress {
-    --quest-ui-summary-color: #f1d28e;
-}
-.quest-ui-theme-sakura .quest-ui-summary-claimed {
-    --quest-ui-summary-color: #d2b9e7;
-}
-.quest-ui-theme-sakura .quest-ui-summary-expired {
-    --quest-ui-summary-color: #cbb4bd;
-}
-.quest-ui-theme-sakura .quest-ui-summary-ignored {
-    --quest-ui-summary-color: #dcb6e1;
-}
-.quest-ui-theme-sakura .quest-ui-summary-hidden {
-    --quest-ui-summary-color: #dcb6e1;
-}
 
 @media (max-width: 760px) {
     .quest-ui-theme .quest-ui-dashboard-summary {
