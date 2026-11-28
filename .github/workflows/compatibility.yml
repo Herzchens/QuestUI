@@ -221,6 +221,10 @@ jobs:
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/themes/controller.test.ts
 
+      - name: Test shader layer resource ownership
+        working-directory: vencord
+        run: pnpm exec tsx src/userplugins/QuestUI/tests/graphics/shaderLayer.test.ts
+
       - name: Test Theme SDK browser registration and scoping
         working-directory: vencord
         run: pnpm exec tsx src/userplugins/QuestUI/tests/themes/sdkBrowser.test.ts

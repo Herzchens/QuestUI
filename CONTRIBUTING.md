@@ -18,7 +18,7 @@ Place the repository at:
 Vencord/src/userplugins/QuestUI
 ```
 
-`.github/workflows/compatibility.yml` is the authoritative full CI matrix (currently 46 test files across `tests/`, plus theme-contract, generated-asset, Vencord build/type-check, upstream Orion coexistence, and Stable/Canary reporter gates).
+`.github/workflows/compatibility.yml` is the authoritative full CI matrix (currently 47 test files across `tests/`, plus theme-contract, generated-asset, Vencord build/type-check, upstream Orion coexistence, and Stable/Canary reporter gates).
 
 Run baseline and focused checks from the Vencord root:
 
@@ -31,7 +31,7 @@ node src/userplugins/QuestUI/scripts/checkThemeContract.mjs --self-test
 node src/userplugins/QuestUI/scripts/checkThemeContract.mjs
 node src/userplugins/QuestUI/src/themes/obsidian/generateFractureAssets.mjs --check
 
-# Focused examples (see .github/workflows/compatibility.yml for all 46 test files):
+# Focused examples (see .github/workflows/compatibility.yml for all 47 test files):
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/batchToolbar.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/quests/ignoredRuntime.test.ts
 pnpm exec tsx src/userplugins/QuestUI/tests/orion/exclusionIntegration.test.ts
